@@ -291,8 +291,9 @@ ModuleBase {
         // Current color (opens the picker), then the favorites.
         Row {
             visible: detail.colorRow
+            x: 3
             height: detail.colorH
-            spacing: Math.max(6, detail.m.gap * 0.6)
+            spacing: Math.max(10, detail.m.gap * 0.8)
 
             HueParts.Swatch {
                 anchors.verticalCenter: parent.verticalCenter
@@ -310,7 +311,7 @@ ModuleBase {
 
             Repeater {
                 // As many favorites as the width holds.
-                model: HueBridge.favorites.slice(0, Math.max(0, Math.floor((detail.width - detail.colorH) / (Math.min(detail.row * 0.62, 40) + Math.max(6, detail.m.gap * 0.6)))))
+                model: HueBridge.favorites.slice(0, Math.max(0, Math.floor((detail.width - detail.colorH - 6) / (Math.min(detail.row * 0.62, 40) + Math.max(10, detail.m.gap * 0.8)))))
 
                 HueParts.Swatch {
                     required property var modelData
@@ -708,9 +709,13 @@ ModuleBase {
                 text: I18n.tr("hue.color")
             }
 
+            // Room for the halos (3 px around each swatch).
             Flow {
-                width: parent.width
-                spacing: 12
+                width: parent.width - 6
+                x: 3
+                topPadding: 3
+                bottomPadding: 3
+                spacing: 14
 
                 HueParts.Swatch {
                     size: 44
@@ -731,7 +736,6 @@ ModuleBase {
                     HueParts.Swatch {
                         required property var modelData
                         size: 36
-                        y: 4
                         swatchColor: modelData.color
                         onTapped: HueBridge.setRoomColor(sections.room.id, modelData.color)
                     }

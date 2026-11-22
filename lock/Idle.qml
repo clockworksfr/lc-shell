@@ -29,7 +29,10 @@ Singleton {
     readonly property bool playing: Players.list.some(p => p.isPlaying)
     readonly property bool onPower: Power.hasBattery ? !Power.onBattery : false
     // Why idle actions are held right now ("" = they aren't).
-    readonly property string inhibitedBy: inhibitWhenAudio && playing ? "audio" : inhibitWhenCharging && onPower ? "charging" : ""
+    // Caffeine (quick settings): stay awake until turned off (not kept
+    // across restarts).
+    property bool caffeine: false
+    readonly property string inhibitedBy: caffeine ? "caffeine" : inhibitWhenAudio && playing ? "audio" : inhibitWhenCharging && onPower ? "charging" : ""
     readonly property bool active: enabled && !inhibitedBy
 
     function screens(on: bool): void {

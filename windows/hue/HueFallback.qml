@@ -18,6 +18,20 @@ Scope {
 
     property ShellScreen target: null
     readonly property ShellScreen pickerScreen: HueBridge.picker ? (Quickshell.screens.find(s => s.name === HueBridge.picker.screen) ?? Quickshell.screens[0]) : null
+    // Panels are hidden rather than destroyed (the grab off first): the
+    // keyboard goes back to the window it came from. Last screens kept.
+    property ShellScreen panelScreen: null
+    property ShellScreen colorScreen: null
+    onTargetChanged: if (target) panelScreen = target
+    onPickerScreenChanged: if (pickerScreen) colorScreen = pickerScreen
+    property var lastPicker: null
+    Connections {
+        target: HueBridge
+        function onPickerChanged(): void {
+            if (HueBridge.picker)
+                root.lastPicker = HueBridge.picker;
+        }
+    }
 
     function themeOf(screen: ShellScreen): var {
         const profile = Config.forScreen(screen);
@@ -48,25 +62,26 @@ Scope {
     }
 
     LazyLoader {
-        active: !!root.target
+        active: !!root.panelScreen
 
         PanelWindow {
             id: panel
 
-            readonly property var theme: root.themeOf(root.target)
+            readonly property var theme: root.themeOf(root.panelScreen)
 
-            screen: root.target
+            visible: !!root.target
+            screen: root.panelScreen
             implicitWidth: Math.min((screen?.width ?? 1200) - 80, 1100)
             implicitHeight: Math.min((screen?.height ?? 700) - 40, 640)
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.namespace: "lc-hue"
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+            WlrLayershell.keyboardFocus: panel.visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             // Off while the color panel is up (it takes the focus).
             HyprlandFocusGrab {
-                active: !Showcase.huePanel && !HueBridge.picker
+                active: panel.visible && !Showcase.huePanel && !HueBridge.picker
                 windows: [panel]
                 onCleared: root.target = null
             }
@@ -96,25 +111,26 @@ Scope {
 
     // The color of a room or a light.
     LazyLoader {
-        active: !!HueBridge.picker
+        active: !!root.colorScreen
 
         PanelWindow {
             id: pickerWindow
 
-            readonly property var theme: root.themeOf(root.pickerScreen)
-            readonly property var target: HueBridge.picker
+            readonly property var theme: root.themeOf(root.colorScreen)
+            readonly property var target: HueBridge.picker ?? root.lastPicker
 
-            screen: root.pickerScreen
+            visible: !!HueBridge.picker
+            screen: root.colorScreen
             implicitWidth: Math.min((screen?.width ?? 1600) - 80, 1100)
             implicitHeight: Math.min((screen?.height ?? 700) - 40, 520)
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.namespace: "lc-hue-color"
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+            WlrLayershell.keyboardFocus: pickerWindow.visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             HyprlandFocusGrab {
-                active: true
+                active: pickerWindow.visible
                 windows: [pickerWindow]
                 onCleared: HueBridge.picker = null
             }

@@ -25,15 +25,15 @@ QtObject {
         border.width: selected ? 3 : 1
         border.color: selected ? (theme.color.signal ?? theme.color.ink) : Qt.alpha("black", 0.35)
 
-        // Glow of the color (the light it gives).
+        // A thin halo of the color, inside its own room (no overlap).
         Rectangle {
             z: -1
             anchors.centerIn: parent
-            width: parent.width * 1.6
+            width: parent.width + 6
             height: width
-            radius: width / 2
-            color: Qt.alpha(swatch.swatchColor, 0.18)
-            visible: swatch.look !== "facade" && swatch.look !== "modulaire"
+            radius: swatch.look === "facade" ? 6 : width / 2
+            color: Qt.alpha(swatch.swatchColor, 0.22)
+            visible: swatch.look !== "modulaire"
         }
 
         MouseArea {

@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import qs.components
 import qs.components.dashboard
 import qs.dashboard
+import qs.lock
 import qs.i18n
 import qs.services
 import qs.theme
@@ -73,6 +74,13 @@ ModuleBase {
             on: Themes.variant === "dark"
         },
         {
+            id: "caffeine",
+            icon: "coffee",
+            label: I18n.tr("toggles.caffeine"),
+            sub: Idle.caffeine ? I18n.tr("toggles.awake") : "",
+            on: Idle.caffeine
+        },
+        {
             id: "record",
             icon: "screen_record",
             label: I18n.tr("toggles.record"),
@@ -100,6 +108,9 @@ ModuleBase {
         case "dark":
             Themes.toggleVariant();
             break;
+        case "caffeine":
+            Idle.caffeine = !Idle.caffeine;
+            break;
         case "more":
             panelOpen = true;
             break;
@@ -107,7 +118,7 @@ ModuleBase {
     }
 
     // Fixed counts (the labels depend on the columns, which depend on them).
-    readonly property int total: 6
+    readonly property int total: 7
     readonly property int levels: 2
     // Strips, wide and narrow cells: compact rows (52 px, a comfortable
     // touch target), so even a one-unit-high cell holds two rows of buttons.
@@ -130,7 +141,10 @@ ModuleBase {
     // Sliders under the tiles: always in the panel; in the cell when the
     // tiles still get their minimum rows above them.
     readonly property bool sliders: sideSliders || full || ((shape === "box" || shape === "tall") && ch - sliderBlock >= Math.ceil(total / cols) * (minRow + gap) - gap)
-    readonly property real tilesHeight: sliders && !sideSliders ? ch - sliderBlock : ch
+    // In the panel: rows of a fixed height, the sliders right under them.
+    readonly property real fullRow: Math.max(64, theme.hit)
+    readonly property real tilesHeight: full ? Math.ceil(total / cols) * (fullRow + gap) - gap
+        : sliders && !sideSliders ? ch - sliderBlock : ch
     readonly property int rows: shape === "tiny" ? 1
         : full ? Math.ceil(total / cols)
         : compact ? Math.max(1, Math.min(rowsFit, Math.ceil(total / cols)))
@@ -175,7 +189,7 @@ ModuleBase {
     Column {
         visible: root.sliders
         x: root.sideSliders ? parent.width - width : 0
-        y: root.sideSliders ? (parent.height - height) / 2 : parent.height - height
+        y: root.sideSliders ? (parent.height - height) / 2 : root.full ? root.tilesHeight + root.gap * 1.5 : parent.height - height
         width: root.sideSliders ? root.sideWidth : parent.width
         spacing: root.gap
 
@@ -247,26 +261,34 @@ ModuleBase {
         }
     }
 
-    // Everything, in a panel over the screen (More tile).
+    // Everything, in a panel over the screen (More tile), sized to its
+    // content. Hidden rather than destroyed on close, the grab off first:
+    // the keyboard goes back to the window it came from.
+    property bool panelLoaded: false
+    onPanelOpenChanged: if (panelOpen) panelLoaded = true
+    readonly property real panelHit: Math.max(64, theme.hit)
+
     LazyLoader {
-        active: root.panelOpen && !root.full
+        active: root.panelLoaded && !root.full
 
         PanelWindow {
             id: panel
 
             readonly property var theme: root.theme
 
+            visible: root.panelOpen
             screen: root.QsWindow.window?.screen ?? null
-            implicitWidth: Math.min((screen?.width ?? 1200) - 80, 1100)
-            implicitHeight: Math.min((screen?.height ?? 700) - 40, 640)
+            implicitWidth: Math.min((screen?.width ?? 1200) - 80, 760)
+            // Title, 3 rows of 3 tiles, the two sliders, paddings.
+            implicitHeight: Math.min((screen?.height ?? 700) - 40, 40 + 48 + 3 * root.panelHit + 2 * 14 + 21 + 2 * (Math.max(48, root.theme.hit * 0.75) + 14))
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.namespace: "lc-quicksettings"
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+            WlrLayershell.keyboardFocus: panel.visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             HyprlandFocusGrab {
-                active: !Showcase.togglesPanel
+                active: panel.visible && !Showcase.togglesPanel
                 windows: [panel]
                 onCleared: root.panelOpen = false
             }

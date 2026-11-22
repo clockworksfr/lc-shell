@@ -33,6 +33,7 @@ circle
 close
 cloud
 code
+coffee
 content_copy
 content_paste
 counter_1

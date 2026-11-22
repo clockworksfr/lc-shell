@@ -711,5 +711,7 @@
   "hue.color": "Couleur",
   "hue.scenesCount": "Scènes · {n}",
   "hue.lampCount.one": "{n} lampe",
-  "hue.lampCount.other": "{n} lampes"
+  "hue.lampCount.other": "{n} lampes",
+  "toggles.caffeine": "Caféine",
+  "toggles.awake": "Reste éveillé"
 }
