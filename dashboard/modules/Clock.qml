@@ -65,7 +65,8 @@ ModuleBase {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: modelData
                 inDisplay: true
-                pixelSize: Math.min(root.ch * 0.3, root.cw * root.perChar(2)) * root.hk
+                // A display window adds its frame: smaller figures there.
+                pixelSize: Math.min(root.ch * 0.3, root.cw * root.perChar(2) * ((root.theme.style.display ?? "none") === "none" ? 1 : 0.7)) * root.hk
             }
         }
 
