@@ -11,15 +11,19 @@ TextWidget {
     // Themes whose bar clock is a figure (Matrix: Doto, the time alone).
     // Extended there: the date in the theme's mono capitals before it.
     readonly property bool figure: theme.style.barClock === "display" && !vertical
+    // The date part of the chosen format (shown before the figure).
+    readonly property string userFormat: size === "extended" ? `${I18n.tr("format.dateLong")}  HH:mm` : (options.format ?? I18n.tr("format.clockNormal"))
+    readonly property string datePart: userFormat.replace(/\s*HH:mm(:ss)?\s*/, " ").trim()
     readonly property string format: vertical ? (options.verticalFormat ?? "HH\nmm")
-        : figure ? (options.format ?? "HH:mm")
+        : figure ? (userFormat.includes(":ss") ? "HH:mm:ss" : "HH:mm")
         : size === "compact" ? "HH:mm"
         : size === "extended" ? `${I18n.tr("format.dateLong")}  HH:mm`
         : (options.format ?? I18n.tr("format.clockNormal"))
 
     // Month and day names follow the shell language (I18n.locale).
     fullText: I18n.locale.toString(clock.date, format)
-    readonly property int figureSize: Math.round(Math.max(18, (crossSize || theme.bar.height) * 0.68))
+    // ~2/3 of the bar's thickness (27 px in a 40 px bar, the mockup).
+    readonly property int figureSize: Math.round(Math.max(18, theme.bar.height * 0.68))
 
     font.family: figure ? theme.font.display : theme.font.family
     font.pixelSize: figure ? figureSize : theme.font.sizeM
@@ -27,13 +31,13 @@ TextWidget {
     font.letterSpacing: figure ? figureSize * 0.02 : 0
     font.features: ({ "tnum": 1 })
 
-    leftPadding: figure && size === "extended" ? dateLabel.implicitWidth + figureSize * 0.5 : 0
+    leftPadding: dateLabel.visible ? dateLabel.implicitWidth + figureSize * 0.5 : 0
 
     ThemedText {
         id: dateLabel
-        visible: root.figure && root.size === "extended"
+        visible: root.figure && !!root.datePart
         anchors.verticalCenter: parent.verticalCenter
-        text: I18n.locale.toString(clock.date, I18n.tr("format.dateLong"))
+        text: I18n.locale.toString(clock.date, root.datePart)
         font.family: root.theme.font.mono
         font.capitalization: Font.AllUppercase
         font.letterSpacing: 0.6
