@@ -193,7 +193,7 @@ Singleton {
             temp: d.temperature,
             feels: d.windchill ?? d.humidex ?? d.temperature,
             wind: d.wind_speed ?? null,
-            windDir: d.wind_direction_label ?? "",
+            windDir: d.wind_direction && I18n.has(`weather.dir.${d.wind_direction}`) ? I18n.tr(`weather.dir.${d.wind_direction}`) : (d.wind_direction_label ?? ""),
             gusts: d.gust ?? null,
             pressure: d.pressure ?? null,
             humidity: d.humidity ?? null,

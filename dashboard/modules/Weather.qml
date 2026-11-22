@@ -342,7 +342,8 @@ ModuleBase {
             // Slanted figures (facade) lean past their box.
             anchors.leftMargin: root.gap + (root.theme.font.displayItalic ? wideCurrent.height * 0.25 : 0)
             anchors.verticalCenter: parent.verticalCenter
-            width: Math.min(root.cw * 0.22, 260)
+            // Room for the wind and rain lines.
+            width: Math.min(root.cw * (extended ? 0.3 : 0.22), extended ? 340 : 260)
         }
 
         Hours {
