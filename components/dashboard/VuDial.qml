@@ -126,6 +126,8 @@ Item {
             rotation: root.angle(root.db)
 
             Behavior on rotation {
+                enabled: root.visible
+
                 SmoothedAnimation {
                     velocity: 240
                 }

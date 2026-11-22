@@ -32,7 +32,10 @@ Item {
             height: parent.height
             radius: parent.radius
             color: root.color
+            // Only in Classic (hidden elsewhere, it still animated).
             Behavior on width {
+                enabled: root.look === "classic"
+
                 NumberAnimation {
                     duration: 300
                 }

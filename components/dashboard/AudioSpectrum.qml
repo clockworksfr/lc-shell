@@ -83,7 +83,11 @@ Item {
                     color: root.color
                     opacity: root.look === "constellation" ? 0.85 : 1
 
+                    // Only where the bars show (hidden, they still ran 32
+                    // animations a frame).
                     Behavior on height {
+                        enabled: root.look === "classic" || root.look === "constellation"
+
                         NumberAnimation {
                             duration: 60
                         }
