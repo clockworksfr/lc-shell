@@ -81,7 +81,8 @@ ModuleBase {
         }
     }
 
-    readonly property int total: toggles.length
+    // Fixed count (the labels depend on the columns, which depend on it).
+    readonly property int total: 5
     readonly property int cols: shape === "tiny" || shape === "narrow" ? 1
         : shape === "strip" ? Math.max(1, Math.min(total, 6, Math.floor((cw + gap) / (220 + gap))))
         : shape === "wide" ? Math.ceil(total / (ch > 250 ? 2 : 1))

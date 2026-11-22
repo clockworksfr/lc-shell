@@ -104,9 +104,9 @@ Item {
             width: Math.min(parent.width * 0.5, root.iconSize * 1.6)
             height: width * 0.48
             radius: height / 2
-            color: Qt.darker(root.theme.color.surface3, 1.5)
+            color: root.on ? Qt.alpha(root.theme.color.ok, 0.35) : Qt.alpha("black", 0.45)
             border.width: 1
-            border.color: Qt.alpha("black", 0.6)
+            border.color: Qt.alpha("white", 0.18)
 
             Rectangle {
                 width: parent.height - 6
