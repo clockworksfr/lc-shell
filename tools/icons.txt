@@ -78,3 +78,16 @@ wifi
 wifi_1_bar
 wifi_2_bar
 wifi_off
+sunny
+partly_cloudy_day
+partly_cloudy_night
+cloud
+foggy
+rainy
+rainy_light
+weather_snowy
+thunderstorm
+clear_night
+air
+water_drop
+location_on

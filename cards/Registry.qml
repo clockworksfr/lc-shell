@@ -15,6 +15,7 @@ Singleton {
             notifications: "NotificationsCard.qml",
             tray: "TrayCard.qml",
             volume: "VolumeCard.qml",
+            weather: "WeatherCard.qml",
             window: "WindowCard.qml",
             workspaces: "WorkspacesCard.qml"
         })

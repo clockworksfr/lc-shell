@@ -11,6 +11,7 @@ Singleton {
             media: "Media.qml",
             system: "System.qml",
             vu: "Vu.qml",
+            weather: "Weather.qml",
             window: "Window.qml",
             workspaces: "Workspaces.qml"
         })

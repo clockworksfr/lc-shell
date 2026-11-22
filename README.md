@@ -117,7 +117,8 @@ Interface en anglais et en français. `"language"` dans `settings.json` : `auto`
 ```
 
 - Chaque espace de travail Hyprland de l'écran est une **page** : `pages["<nom de l'espace de travail>"]`, sinon `pages.default`.
-- Modules : `clock` (`format`), `media`, `system` (CPU, RAM, GPU, températures), `workspaces`, `window`, `lyrics` (paroles synchronisées via lrclib.net — seuls artiste, titre et durée sont envoyés ; cache local), `vu` (VU-mètre de la sortie par défaut, échelle en dB, crête retenue ; barres dans le sens long de le module).
+- Modules : `clock` (`format`), `media`, `system` (CPU, RAM, GPU, températures), `workspaces`, `window`, `lyrics` (paroles synchronisées via lrclib.net — seuls artiste, titre et durée sont envoyés ; cache local), `vu` (VU-mètre de la sortie par défaut, échelle en dB, crête retenue ; barres dans le sens long du module), `weather` (météo).
+- Météo (widget `weather`, carte, module `weather`) : open-meteo.com, sans clé. Désactivée tant qu'aucun lieu n'est choisi dans Paramètres › Général › Météo ; seules les coordonnées du lieu choisi sont envoyées (et le nom tapé lors de la recherche). Relevé toutes les 15 min, dernier relevé en cache, daté hors ligne.
 - **Cases fenêtre** (`"type": "window"`) : toute fenêtre arrivant sur un espace de travail de cet écran est rendue flottante et placée dans la première case libre (les suivantes s'empilent dans la dernière). Repartie vers un écran normal, elle redevient tuilée. Les fenêtres plein écran ne sont pas touchées. `windows.ignore` / `only` filtrent par classe.
 - Le tableau de bord est sur la couche `bottom`, sous les fenêtres.
 

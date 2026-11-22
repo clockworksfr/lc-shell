@@ -17,6 +17,7 @@ Singleton {
             tray: "Tray.qml",
             window: "Window.qml",
             volume: "Volume.qml",
+            weather: "Weather.qml",
             workspaces: "Workspaces.qml"
         })
 
