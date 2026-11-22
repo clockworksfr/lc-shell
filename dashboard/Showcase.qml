@@ -12,6 +12,9 @@ Singleton {
 
     // Module type shown, "" = off (the normal pages).
     property string type: ""
+    // Reviews: the quick-settings panel opened without a click (and without
+    // grabbing the keyboard).
+    property bool togglesPanel: false
     readonly property var types: ["clock", "media", "weather", "system", "lyrics", "vu", "workspaces", "toggles"]
 
     function next(): void {

@@ -4,6 +4,7 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.components
 import qs.components.dashboard
+import qs.dashboard
 import qs.i18n
 import qs.services
 import qs.theme
@@ -28,7 +29,7 @@ ModuleBase {
     property bool panelOpen: false
 
     readonly property string look: theme.style.module ?? "classic"
-    readonly property bool narrowLabels: cw / Math.max(1, cols) < (look === "matrix" || look === "facade" || look === "modulaire" ? 300 : 200)
+    readonly property bool narrowLabels: tilesWidth / Math.max(1, cols) < (look === "matrix" || look === "facade" || look === "modulaire" ? 300 : 200)
     // The focused screen's brightness, else the first screen that has one.
     readonly property var brightness: {
         const focused = Brightness.forScreen(Hyprland.focusedMonitor?.name ?? "");
@@ -109,17 +110,22 @@ ModuleBase {
     readonly property int total: 6
     readonly property int levels: 2
     readonly property int cols: shape === "tiny" || shape === "narrow" ? 1
-        : shape === "strip" ? Math.max(1, Math.min(total, Math.floor((cw + gap) / (220 + gap))))
+        : shape === "strip" ? Math.max(1, Math.min(total, Math.floor((cw + gap) / (150 + gap))))
         : shape === "wide" ? Math.ceil(total / (ch > 250 ? 2 : 1))
         : shape === "tall" ? 2
         : cw / 3 >= 160 ? 3 : 2
-    readonly property real minRow: look === "matrix" ? 56 : shape === "narrow" ? 72 : 110
+    // Rows never under the touch target size (72 px on the modules screen).
+    readonly property real minRow: Math.max(theme.hit, look === "matrix" ? 60 : shape === "narrow" ? 80 : 110)
     readonly property real sliderRow: Math.max(48, theme.hit * 0.75)
     readonly property real sliderBlock: levels * sliderRow + levels * gap
-    // Sliders: always in the panel; in the cell when the tiles still get
-    // their minimum rows above them.
-    readonly property bool sliders: full || ((shape === "box" || shape === "tall" || shape === "wide") && ch - sliderBlock >= Math.ceil(total / cols) * (minRow + gap) - gap)
-    readonly property real tilesHeight: sliders ? ch - sliderBlock : ch
+    // Wide cells: the sliders in a column on the right of the tiles.
+    readonly property bool sideSliders: !full && shape === "wide" && cw >= 620 && ch >= sliderBlock - gap
+    readonly property real sideWidth: Math.min(cw * 0.36, 420)
+    readonly property real tilesWidth: sideSliders ? cw - sideWidth - gap * 1.5 : cw
+    // Sliders under the tiles: always in the panel; in the cell when the
+    // tiles still get their minimum rows above them.
+    readonly property bool sliders: sideSliders || full || ((shape === "box" || shape === "tall") && ch - sliderBlock >= Math.ceil(total / cols) * (minRow + gap) - gap)
+    readonly property real tilesHeight: sliders && !sideSliders ? ch - sliderBlock : ch
     readonly property int rows: shape === "tiny" || shape === "strip" ? 1
         : full ? Math.ceil(total / cols)
         : shape === "wide" ? (ch > 250 ? 2 : 1)
@@ -136,7 +142,7 @@ ModuleBase {
         readonly property real cellW: (width - (columns - 1) * spacing) / columns
         readonly property real cellH: (height - (lines - 1) * spacing) / lines
 
-        width: parent.width
+        width: root.tilesWidth
         height: root.tilesHeight
         columns: Math.min(root.cols, root.shown.length)
         spacing: root.gap
@@ -162,9 +168,9 @@ ModuleBase {
     // Volume (the icon mutes) and brightness, under the tiles.
     Column {
         visible: root.sliders
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        x: root.sideSliders ? parent.width - width : 0
+        y: root.sideSliders ? (parent.height - height) / 2 : parent.height - height
+        width: root.sideSliders ? root.sideWidth : parent.width
         spacing: root.gap
 
         Repeater {
@@ -225,6 +231,16 @@ ModuleBase {
         }
     }
 
+    // Reviews: the panel without a click.
+    Connections {
+        target: Showcase
+
+        function onTogglesPanelChanged(): void {
+            if (!root.full)
+                root.panelOpen = Showcase.togglesPanel;
+        }
+    }
+
     // Everything, in a panel over the screen (More tile).
     LazyLoader {
         active: root.panelOpen && !root.full
@@ -244,7 +260,7 @@ ModuleBase {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
             HyprlandFocusGrab {
-                active: true
+                active: !Showcase.togglesPanel
                 windows: [panel]
                 onCleared: root.panelOpen = false
             }

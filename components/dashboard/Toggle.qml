@@ -151,7 +151,7 @@ Item {
                 text: root.label
                 font.family: root.look === "modulaire" ? root.theme.font.mono : root.theme.font.family
                 font.capitalization: root.look === "facade" || root.look === "modulaire" ? Font.AllUppercase : Font.MixedCase
-                font.pixelSize: root.look === "modulaire" ? root.labelSize * 0.8 : root.labelSize
+                font.pixelSize: root.look === "modulaire" ? Math.max(14, root.labelSize * 0.85) : root.labelSize
                 font.weight: Font.DemiBold
                 color: root.on ? root.onInk : root.theme.color.ink
             }
@@ -202,7 +202,7 @@ Item {
                 text: root.label
                 font.family: root.theme.font.mono
                 font.capitalization: Font.AllUppercase
-                font.pixelSize: root.labelSize * 0.85
+                font.pixelSize: Math.max(15, root.labelSize * 0.85)
                 color: root.on ? root.theme.color.bg : root.theme.color.ink
             }
         }

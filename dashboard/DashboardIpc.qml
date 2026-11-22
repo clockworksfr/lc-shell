@@ -20,6 +20,10 @@ IpcHandler {
     function snapshot(path: string): void {
         Showcase.snapshotRequested(path);
     }
+    // Quick-settings panel of the dashboard's Toggles module (reviews).
+    function quickSettings(open: bool): void {
+        Showcase.togglesPanel = open;
+    }
     function showcase(type: string): void {
         Showcase.type = Showcase.types.includes(type) ? type : "";
     }
