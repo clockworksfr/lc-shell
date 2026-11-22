@@ -101,27 +101,70 @@ Item {
                     }
                 }
 
-                // facade / matrix: stacked cells or dots.
-                Column {
+                // facade / matrix: stacked cells or dots. The unlit ones
+                // are fixed; the lit ones are the same cells clipped to the
+                // level from the bottom, so a new frame changes one height
+                // per band instead of every cell's color.
+                Item {
+                    id: stack
+
+                    readonly property int cells: root.look === "facade" ? Math.max(4, Math.min(12, Math.floor(band.height / 6))) : Math.max(4, Math.floor(band.height / 8))
+                    readonly property real gap: root.look === "matrix" ? 3 : 2
+                    readonly property real cellW: root.look === "matrix" ? Math.min(5, band.width) : band.width
+                    readonly property real cellH: root.look === "matrix" ? cellW : Math.max(3, (band.height - (cells - 1) * 2) / cells)
+                    // Lit cells: those whose top is under the level.
+                    readonly property int lit: band.level > 0.02 ? Math.min(cells, Math.floor(band.level * cells + 0.001 * cells)) : 0
+                    readonly property real pitch: cellH + gap
+
                     visible: root.look === "facade" || root.look === "matrix"
                     anchors.bottom: parent.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: root.look === "matrix" ? 3 : 2
+                    width: cellW
+                    height: cells * pitch - gap
 
-                    Repeater {
-                        id: cells
-                        model: root.look === "facade" ? Math.max(4, Math.min(12, Math.floor(band.height / 6))) : Math.max(4, Math.floor(band.height / 8))
+                    component Cells: Column {
+                        property color cellColor
+                        spacing: stack.gap
 
-                        Rectangle {
-                            required property int index
-                            readonly property real at: (cells.count - index) / cells.count
-                            readonly property bool lit: at <= band.level + 0.001 && band.level > 0.02
-                            readonly property bool isCrest: root.look === "facade" && band.crest > 0.04 && Math.abs(at - Math.ceil(band.crest * cells.count) / cells.count) < 0.001
-                            width: root.look === "matrix" ? Math.min(5, band.width) : band.width
-                            height: root.look === "matrix" ? width : Math.max(3, (band.height - (cells.count - 1) * 2) / cells.count)
-                            radius: root.look === "matrix" ? width / 2 : 1
-                            color: isCrest ? "#FFB547" : lit ? root.color : (root.look === "facade" ? root.theme.color.ghost : Qt.alpha(root.theme.color.ink, 0.1))
+                        Repeater {
+                            model: stack.cells
+
+                            Rectangle {
+                                width: stack.cellW
+                                height: stack.cellH
+                                radius: root.look === "matrix" ? width / 2 : 1
+                                color: parent.cellColor
+                            }
                         }
+                    }
+
+                    Cells {
+                        anchors.bottom: parent.bottom
+                        cellColor: root.look === "facade" ? root.theme.color.ghost : Qt.alpha(root.theme.color.ink, 0.1)
+                    }
+
+                    Item {
+                        anchors.bottom: parent.bottom
+                        width: parent.width
+                        height: stack.lit > 0 ? stack.lit * stack.pitch - stack.gap : 0
+                        clip: true
+
+                        Cells {
+                            anchors.bottom: parent.bottom
+                            cellColor: root.color
+                        }
+                    }
+
+                    // Facade: the crest cell, amber, held then falling.
+                    Rectangle {
+                        readonly property int at: Math.ceil(band.crest * stack.cells)
+                        visible: root.look === "facade" && band.crest > 0.04 && at >= 1
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: (at - 1) * stack.pitch
+                        width: stack.cellW
+                        height: stack.cellH
+                        radius: 1
+                        color: "#FFB547"
                     }
                 }
             }

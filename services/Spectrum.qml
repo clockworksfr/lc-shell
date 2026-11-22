@@ -13,6 +13,7 @@ Singleton {
     property int refCount: 0
     readonly property int bands: 32
     property var values: []
+    property string lastLine
     readonly property bool active: refCount > 0
 
     readonly property string configPath: Quickshell.cachePath("cava.conf")
@@ -49,6 +50,10 @@ Singleton {
         command: ["cava", "-p", root.configPath]
         stdout: SplitParser {
             onRead: line => {
+                // Identical frames (silence) change nothing: skipped.
+                if (line === root.lastLine)
+                    return;
+                root.lastLine = line;
                 const parts = line.split(";");
                 const out = [];
                 for (let i = 0; i < parts.length; i++)
@@ -58,6 +63,9 @@ Singleton {
                     root.values = out;
             }
         }
-        onRunningChanged: if (!running) root.values = []
+        onRunningChanged: if (!running) {
+            root.values = [];
+            root.lastLine = "";
+        }
     }
 }
