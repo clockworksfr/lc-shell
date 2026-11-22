@@ -143,6 +143,22 @@ PanelWindow {
     readonly property bool cardSuppressed: card.slot?.item?.panelOpen ?? false
     onCardSuppressedChanged: if (cardSuppressed) card.hide()
 
+    Connections {
+        target: ShellState
+
+        function onCardRequested(type: string, screenName: string): void {
+            if (screenName && screenName !== bar.screen.name)
+                return;
+            if (!type) {
+                card.hide();
+                return;
+            }
+            const slot = ShellState.slots.find(s => s.host === bar && s.type === type && s.visible);
+            if (slot)
+                bar.showCardFor(slot);
+        }
+    }
+
     HoverCard {
         id: card
         host: bar

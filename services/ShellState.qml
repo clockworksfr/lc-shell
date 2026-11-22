@@ -16,6 +16,10 @@ Singleton {
     // Hover card state: { visible, type, screen }.
     property var card: ({ visible: false })
 
+    // Show (type) or hide ("") the hover card of a block without hovering:
+    // reviews, screenshots. On `screenName`, or the focused screen.
+    signal cardRequested(string type, string screenName)
+
     function addSlot(slot: var): void {
         slots = [...slots, slot];
     }

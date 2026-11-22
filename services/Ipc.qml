@@ -40,6 +40,17 @@ Scope {
                 return `${scr.name} ${s.type} ${Math.round(scr.x + ox + p.x)} ${Math.round(scr.y + oy + p.y)} ${Math.round(s.width)} ${Math.round(s.height)}`;
             }).join("\n");
         }
+        // Show a block's hover card without hovering (screenshots, reviews);
+        // "" hides it. On every screen with a bar (or `showCardOn`).
+        function showCard(type: string): void {
+            ShellState.cardRequested(type, "");
+        }
+        function showCardOn(type: string, screen: string): void {
+            ShellState.cardRequested(type, screen);
+        }
+        function hideCard(): void {
+            ShellState.cardRequested("", "");
+        }
         // Hover card: "visible type screen" or "hidden".
         function card(): string {
             const c = ShellState.card;
