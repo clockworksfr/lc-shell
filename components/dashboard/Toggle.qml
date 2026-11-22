@@ -26,7 +26,8 @@ Item {
     signal tapped
 
     readonly property real m: Math.min(width, look === "matrix" ? pill.height : height)
-    readonly property real labelSize: Math.max(15, Math.min(m * 0.17, 24))
+    // Matrix pills: from their height (a tall pill gets bigger text).
+    readonly property real labelSize: Math.max(15, Math.min(look === "matrix" ? pill.height * 0.22 : m * 0.17, 24))
     readonly property real iconSize: Math.max(22, Math.min(m * 0.3, 46))
     readonly property bool showSub: !!sub && width >= 150 && height >= 110 && look !== "matrix"
     readonly property color onInk: look === "classic" || look === "constellation" ? theme.color.bg : theme.color.ink
@@ -207,7 +208,7 @@ Item {
                 text: root.label
                 font.family: root.theme.font.mono
                 font.capitalization: Font.AllUppercase
-                font.pixelSize: Math.max(15, root.labelSize * 0.85)
+                font.pixelSize: root.labelSize
                 color: root.on ? root.theme.color.bg : root.theme.color.ink
             }
         }
