@@ -140,7 +140,7 @@ ModuleBase {
 
             Icon {
                 id: rainIcon
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.top: parent.top
                 name: "water_drop"
                 filled: Weather.rainSoon !== "dry"
                 size: details.m.t4 * 1.3
@@ -149,8 +149,10 @@ ModuleBase {
 
             ThemedText {
                 id: rainText
-                anchors.verticalCenter: parent.verticalCenter
                 width: parent.width - rainIcon.width - parent.spacing
+                // The whole sentence (intensity, start, end), on two lines.
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
                 elide: Text.ElideRight
                 text: Weather.rainText()
                 font.family: details.m.screenText ? details.m.screenFont : details.m.theme.font.family
