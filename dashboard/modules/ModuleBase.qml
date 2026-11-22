@@ -50,24 +50,22 @@ Item {
     }
 
     // Columns × rows showing as many of `nMax` square items as fit at
-    // `minSize` or more, as big as possible (score size × n, ties go to
-    // more items): { n, columns, rows, size }.
+    // `minSize` or more (all of them whenever they fit: the same count at
+    // any nearby cell size, editor or not), as big as possible for that
+    // count: { n, columns, rows, size }.
     function bestGrid(nMax: int, minSize: real): var {
-        let best = { n: 1, columns: 1, rows: 1, size: Math.min(cw, ch) };
-        let score = 0;
-        for (let n = 1; n <= nMax; n++)
+        for (let n = nMax; n >= 1; n--) {
+            let best = null;
             for (let c = 1; c <= n; c++) {
                 const r = Math.ceil(n / c);
                 const size = Math.min((cw - (c - 1) * gap) / c, (ch - (r - 1) * gap) / r);
-                if (size < minSize)
-                    continue;
-                const s = size * n;
-                if (s >= score) {
-                    score = s;
+                if (size >= minSize && (!best || size > best.size))
                     best = { n: n, columns: c, rows: r, size: size };
-                }
             }
-        return best;
+            if (best)
+                return best;
+        }
+        return { n: 1, columns: 1, rows: 1, size: Math.min(cw, ch) };
     }
 
     default property alias content: inner.data
