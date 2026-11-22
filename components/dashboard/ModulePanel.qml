@@ -80,7 +80,7 @@ Item {
         anchors.fill: parent
         anchors.margins: 14
         // Visible without competing with the content.
-        readonly property color dot: Qt.alpha(root.theme.color.ink, root.theme.variant === "light" ? 0.2 : 0.17)
+        readonly property color dot: Qt.alpha(root.theme.color.ink, root.theme.variant === "light" ? 0.14 : 0.12)
 
         visible: root.look === "matrix"
         onWidthChanged: requestPaint()
@@ -93,7 +93,7 @@ Item {
             for (let y = 0; y <= height; y += 16)
                 for (let x = 0; x <= width; x += 16) {
                     ctx.beginPath();
-                    ctx.arc(x, y, 1.4, 0, Math.PI * 2);
+                    ctx.arc(x, y, 1.2, 0, Math.PI * 2);
                     ctx.fill();
                 }
         }
