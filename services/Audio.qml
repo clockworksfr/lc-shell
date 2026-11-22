@@ -16,8 +16,11 @@ Singleton {
     readonly property list<PwNode> sources: Pipewire.nodes.values.filter(n => n.audio && !n.isSink && !n.isStream)
 
     // Playback streams of applications (bound below, so their audio and
-    // properties are populated).
-    readonly property list<PwNode> streams: Pipewire.nodes.values.filter(n => n.isStream && n.audio && n.isSink === false && (n.properties?.["media.class"] ?? "Stream/Output/Audio").startsWith("Stream/Output"))
+    // properties are populated). Filter only on properties that don't change
+    // when a node gets bound: reading `properties` here made a binding loop
+    // (bind → properties change → list changes → rebind…) that crashed
+    // Quickshell's PipeWire module.
+    readonly property list<PwNode> streams: Pipewire.nodes.values.filter(n => n.isStream && !n.isSink && !!n.audio)
 
     readonly property real volume: sink?.audio?.volume ?? 0
     readonly property bool muted: sink?.audio?.muted ?? false
