@@ -126,7 +126,8 @@ ModuleBase {
                 m: root
                 visible: root.shape === "wide" && root.ch >= 240 && wideDate.width >= 230
                 width: parent.width
-                height: Math.min(root.ch * 0.4, 90)
+                // Day cells about as tall as wide (design study).
+                height: Math.min(root.ch * 0.4, (width - 6 * spacing) / 7 * 1.3)
             }
         }
     }
@@ -134,7 +135,12 @@ ModuleBase {
     // box / tall: time, date, the week (or the month when roomy).
     Column {
         visible: root.shape === "box" || root.shape === "tall"
-        anchors.fill: parent
+        // Centered when its content is shorter than the cell (no empty
+        // band on top); the month fills the rest when roomy.
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: root.roomy ? parent.top : undefined
+        anchors.verticalCenter: root.roomy ? undefined : parent.verticalCenter
         spacing: root.gap
 
         Figure {
@@ -167,7 +173,8 @@ ModuleBase {
             m: root
             visible: !root.roomy
             width: parent.width
-            height: Math.max(60, root.inner.height - y)
+            // Day cells about as tall as wide (design study).
+            height: Math.max(48, Math.min(root.inner.height * 0.45, (width - 6 * spacing) / 7 * 1.3))
         }
 
         MonthGrid {
