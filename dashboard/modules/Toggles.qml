@@ -265,7 +265,12 @@ ModuleBase {
     // content. Hidden rather than destroyed on close, the grab off first:
     // the keyboard goes back to the window it came from.
     property bool panelLoaded: false
-    onPanelOpenChanged: if (panelOpen) panelLoaded = true
+    onPanelOpenChanged: {
+        if (panelOpen)
+            panelLoaded = true;
+        else
+            Qt.callLater(ShellState.restoreFocus);
+    }
     readonly property real panelHit: Math.max(64, theme.hit)
 
     LazyLoader {

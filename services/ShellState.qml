@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 
 // Runtime state shared across screens (not persisted).
 Singleton {
@@ -34,5 +35,19 @@ Singleton {
 
     function removeSlot(slot: var): void {
         slots = slots.filter(s => s !== slot);
+    }
+
+    // After a panel that took the keyboard closes (quick settings, lights,
+    // color): give the keyboard back to Hyprland's active window. Touching
+    // the dashboard (a layer surface) leaves no window focused otherwise,
+    // and typing went nowhere until a workspace switch.
+    function restoreFocus(): void {
+        refocus.running = false;
+        refocus.running = true;
+    }
+
+    Process {
+        id: refocus
+        command: ["sh", "-c", "a=$(hyprctl activewindow -j | jq -r '.address // empty'); [ -n \"$a\" ] && hyprctl dispatch \"hl.dsp.focus({ window = 'address:$a' })\" >/dev/null"]
     }
 }

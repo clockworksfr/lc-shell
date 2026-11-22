@@ -22,7 +22,12 @@ Scope {
     // keyboard goes back to the window it came from. Last screens kept.
     property ShellScreen panelScreen: null
     property ShellScreen colorScreen: null
-    onTargetChanged: if (target) panelScreen = target
+    onTargetChanged: {
+        if (target)
+            panelScreen = target;
+        else
+            Qt.callLater(ShellState.restoreFocus);
+    }
     onPickerScreenChanged: if (pickerScreen) colorScreen = pickerScreen
     property var lastPicker: null
     Connections {
@@ -30,6 +35,8 @@ Scope {
         function onPickerChanged(): void {
             if (HueBridge.picker)
                 root.lastPicker = HueBridge.picker;
+            else if (!root.target)
+                Qt.callLater(ShellState.restoreFocus);
         }
     }
 

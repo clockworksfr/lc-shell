@@ -4,6 +4,7 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import Quickshell.Widgets
 import qs.i18n
+import qs.services
 import qs.theme
 
 // A menu in the theme's look, attached to a bar (or any window): either
@@ -51,6 +52,7 @@ PanelWindow {
     function close(): void {
         visible = false;
         stack = [];
+        Qt.callLater(ShellState.restoreFocus);
     }
 
     function activate(entry: var): void {
