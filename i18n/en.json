@@ -360,5 +360,7 @@
   "island.sharing": "Screen shared",
   "island.mic": "Mic · {app}",
   "format.clockNormal": "ddd d  HH:mm",
-  "card.historyWaiting": "Collecting the history (a point every few minutes)…"
+  "card.historyWaiting": "Collecting the history (a point every few minutes)…",
+  "module.themeSwitch": "Theme",
+  "themeSwitch.hint": "tap: next"
 }

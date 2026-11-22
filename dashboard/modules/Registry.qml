@@ -10,6 +10,7 @@ Singleton {
             lyrics: "Lyrics.qml",
             media: "Media.qml",
             system: "System.qml",
+            themeSwitch: "ThemeSwitch.qml",
             vu: "Vu.qml",
             weather: "Weather.qml",
             window: "Window.qml",
