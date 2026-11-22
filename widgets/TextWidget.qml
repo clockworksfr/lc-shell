@@ -31,7 +31,8 @@ ThemedText {
     // Themes with micro labels (Matrix, style.statusStack): statuses as a
     // small soft label over the value, mono capitals ("VOL / 64"); a
     // leading "●" is the signal dot. Extended keeps its full line.
-    readonly property bool microStack: theme.style.statusStack === true && !useIcon && !!icon && !vertical && size !== "extended"
+    readonly property bool microStatus: theme.style.statusStack === true && !useIcon && !!icon
+    readonly property bool microStack: microStatus && !vertical && size !== "extended"
 
     function micro(value: string): string {
         const esc = t => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
@@ -53,8 +54,9 @@ ThemedText {
     leftPadding: useIcon && !vertical ? iconItem.width + (iconText ? 6 : 0) : 0
     topPadding: useIcon && vertical ? iconItem.height + (iconText ? 2 : 0) : 0
     font.pixelSize: microStack ? 12 : vertical || stacked ? theme.font.sizeS : theme.font.sizeM
-    font.family: microStack ? theme.font.mono : theme.font.family
-    font.capitalization: microStack ? Font.AllUppercase : Font.MixedCase
+    // (Every size: extended keeps one line, in the same mono capitals.)
+    font.family: microStatus ? theme.font.mono : theme.font.family
+    font.capitalization: microStatus ? Font.AllUppercase : Font.MixedCase
     lineHeight: stacked || microStack ? 0.9 : 1
     horizontalAlignment: Text.AlignHCenter
     width: vertical && crossSize > 0 ? crossSize : implicitWidth
