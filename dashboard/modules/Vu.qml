@@ -8,7 +8,8 @@ import qs.theme
 // VU meter of the default output: one bar per channel (dB scale, -48..0,
 // ticks every 12 dB; warn above -6 dB, red above -2 dB),
 // with a falling peak marker. Bars run along the tile's longer side.
-// Options: channels ("all" default, or "stereo" to keep only 2).
+// Options: channels ("all" default, or "stereo" to keep only 2),
+// preVolume (false: the level after the output volume, as heard).
 ModuleBase {
     id: root
 
@@ -20,7 +21,13 @@ ModuleBase {
     readonly property bool silent: now - lastPeakAt > 250
     property real now: 0
 
+    // The sink's peaks are taken before its volume: apply it (PipeWire's
+    // volume is cubic: gain = volume³; muted = silence), so the meter shows
+    // what is heard. Option `preVolume: true` shows the raw signal.
+    readonly property real gain: options.preVolume ? 1 : Audio.muted ? 0 : Math.pow(Audio.volume, 3)
+
     function toMeter(peak: real): real {
+        peak *= root.gain;
         if (peak <= 0)
             return 0;
         return Math.max(0, Math.min(1, (20 * Math.log10(peak) + 48) / 48));
