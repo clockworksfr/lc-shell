@@ -14,9 +14,10 @@ WlSessionLock {
     WlSessionLockSurface {
         id: surface
 
-        property var theme: Themes.resolve(Config.forScreen(screen).theme ?? Themes.themeFor(Config.forScreen(screen).mode), false, "normal")
-
-        color: theme.color.bg
+        // Lock surfaces aren't Quickshell windows: QsWindow.window is null in
+        // them, so everything inside takes Themes.fallback, the normal
+        // screens' theme (same here, for the surface's own color).
+        color: Themes.fallback.color.bg
 
         LockContent {
             anchors.fill: parent

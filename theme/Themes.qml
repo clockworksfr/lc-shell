@@ -28,7 +28,10 @@ Singleton {
     property string scheduledVariant: "dark"
     readonly property string variant: variantMode === "auto" ? scheduledVariant : variantMode
 
-    readonly property var fallback: resolve("classic", false, "normal")
+    // Theme of surfaces that aren't Quickshell windows (QsWindow.window is
+    // null there: the session lock's surfaces) and of windows before their
+    // screen's theme is set: the normal screens' theme.
+    readonly property var fallback: resolve(themeFor("normal"), false, "normal")
 
     function themeFor(mode: string): string {
         const id = (Config.appearance.themes ?? {})[mode] ?? "classic";

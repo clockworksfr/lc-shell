@@ -49,6 +49,9 @@ Singleton {
     property bool capsLock: false
 
     readonly property string user: Quickshell.env("USER") ?? ""
+    // Test harnesses (LC_LOCK_BIND=0): no Hyprland bind, no sleep inhibitor,
+    // no relock after a crash.
+    readonly property bool harness: Quickshell.env("LC_LOCK_BIND") === "0"
     // "First Last" from the passwd entry, else the login.
     property string fullName: user
 
@@ -74,7 +77,7 @@ Singleton {
         running: true
         command: ["test", "-e", root.marker]
         onExited: code => {
-            if (code === 0 && !root.locked && Quickshell.env("LC_LOCK_BIND") !== "0") {
+            if (code === 0 && !root.locked && !root.harness) {
                 console.warn("lock: the shell stopped while locked; locking again");
                 root.lockQuiet();
             }
@@ -218,21 +221,22 @@ Singleton {
     }
 
     // --- The lock shortcut, applied to Hyprland ---
-    // hl.unbind drops every bind on the keys (the config's own one too, which
-    // stays as the fallback when the shell is down), then the shell's bind.
+    // hl.unbind drops every bind on the keys (the config's own one too), then
+    // the shell's bind: the shell's lock over IPC, or hyprlock when the shell
+    // doesn't answer (stopped, crashed), so the keys always lock.
     // Applied at start, when the setting changes, after config reloads.
+    readonly property string fallbackCommand: "qs -c lc ipc call lock lock || pidof hyprlock || hyprlock"
     property string appliedShortcut
 
     function applyShortcut(): void {
-        // Test harnesses: LC_LOCK_BIND=0 leaves Hyprland's binds alone.
-        if (Quickshell.env("LC_LOCK_BIND") === "0")
+        if (harness)
             return;
         const keys = shortcut.trim().replace(/"/g, "");
         const lua = [];
         if (appliedShortcut && appliedShortcut !== keys)
             lua.push(`hl.unbind("${appliedShortcut}")`);
         if (keys)
-            lua.push(`hl.unbind("${keys}")`, `hl.bind("${keys}", hl.dsp.global("lc:lock"), { desc = "Verrouiller (lc-shell)" })`);
+            lua.push(`hl.unbind("${keys}")`, `hl.bind("${keys}", hl.dsp.exec_cmd("${fallbackCommand}"), { desc = "Verrouiller (lc-shell, sinon hyprlock)" })`);
         appliedShortcut = keys;
         if (!lua.length)
             return;
@@ -291,10 +295,21 @@ Singleton {
 
     // Holds a "delay" inhibitor so suspend waits until the lock is shown;
     // released (process stopped) once locked, taken again after resume.
+    // The inhibitor (and its sleep) die with the shell (pdeathsig): a shell
+    // killed or restarted leaves none behind. Stale ones (older shells) are
+    // stopped at start, before ours.
     Process {
         id: sleepDelay
-        running: root.beforeSleep
-        command: ["systemd-inhibit", "--what=sleep", "--mode=delay", "--who=lc-shell", "--why=Lock the screen before sleep", "sleep", "infinity"]
+        running: root.beforeSleep && root.swept
+        command: ["setpriv", "--pdeathsig", "TERM", "systemd-inhibit", "--what=sleep", "--mode=delay", "--who=lc-shell", "--why=Lock the screen before sleep", "setpriv", "--pdeathsig", "TERM", "sleep", "infinity"]
+    }
+
+    property bool swept: false
+
+    Process {
+        running: !root.harness
+        command: ["sh", "-c", "for p in $(pgrep -f '^[^ ]*systemd-inhibit --what=sleep --mode=delay --who=lc-shell '); do pkill -P \"$p\"; kill \"$p\"; done; true"]
+        onExited: root.swept = true
     }
 
     function surfacesShown(): void {

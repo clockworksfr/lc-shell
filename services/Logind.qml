@@ -26,8 +26,10 @@ Singleton {
         command: ["gdbus", "monitor", "--system", "--dest", "org.freedesktop.login1"]
         stdout: SplitParser {
             onRead: line => {
-                const forUs = !root.sessionPath || line.startsWith(root.sessionPath + ":");
-                if (line.includes("org.freedesktop.login1.Session.Lock") && forUs)
+                // Unknown session: take Lock (safe), never Unlock (it could be
+                // another session's).
+                const forUs = !!root.sessionPath && line.startsWith(root.sessionPath + ":");
+                if (line.includes("org.freedesktop.login1.Session.Lock") && (forUs || !root.sessionPath))
                     root.lockRequested();
                 else if (line.includes("org.freedesktop.login1.Session.Unlock") && forUs)
                     root.unlockRequested();
