@@ -90,11 +90,20 @@ PanelWindow {
         }
     }
 
-    // Right click on the bar (outside blocks): edit mode.
+    // Right click on the bar (or a widget that doesn't use it): menu
+    // (edit the bar, bar settings, settings).
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.RightButton
-        onClicked: ShellState.editing = true
+        onClicked: mouse => {
+            if (!ShellState.editing)
+                barMenu.openAt(mouse.x, mouse.y);
+        }
+    }
+
+    BarMenu {
+        id: barMenu
+        host: bar
     }
 
     // Start / center / end zones, along the bar.

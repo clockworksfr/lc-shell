@@ -15,11 +15,11 @@ Spécification issue de l'étude de design (artifact « lc-shell rendus », ongl
 
 ## Mode édition
 
-- **Entrée** : clic droit sur la barre → « Modifier la barre » ; appui long 600 ms sur un widget (tactile) ; raccourci (proposé : `Super + Alt + E`) ; Paramètres › Barre ; IPC `bar edit`. Toutes les barres passent en édition ; cartes de survol désactivées.
+- **Entrée** : clic droit sur la barre → menu (« Modifier la barre », « Réglages de la barre », « Paramètres ») ; appui long 600 ms sur un widget (tactile) ; raccourci (proposé : `Super + Alt + E`) ; Paramètres › Barre ; IPC `bar edit`. Toutes les barres passent en édition ; cartes de survol désactivées.
 - **Affichage** : zones en pointillé accent 55 % + fond accent 7 % + étiquette mono 10 px ; chaque widget a une poignée ⋮⋮, une pastille S/M/L et une croix (20 px, 48 au doigt) ; barre d'outils flottante sous la barre de l'écran actif : Annuler, Rétablir, Palette, Valeurs du thème, Abandonner, Terminé, vignettes d'écrans.
 - **Glisser** : seuil 4 px (souris), 300 ms d'appui (doigt) ; widget soulevé échelle 1,05, rotation −1,5°, opacité 0,92, fantôme 35 % à sa place ; curseur d'insertion 3 px accent, voisins qui s'écartent en 160 ms ; insertion avant le premier widget dont le milieu dépasse le pointeur.
 - **Cibles** : entre widgets, tête/fin de zone, « + Nouvel îlot » / « + Groupe », palette (= retirer), vignette d'écran (= déplacer vers cet écran ; pas de glisser entre surfaces layer-shell) ; cible refusée bordée de rouge avec la raison.
-- **Taille** : pastille S → M → L ; `+` / `−`.
+- **Taille** : pastille S → M → L (en bas à droite du widget, la croix en haut à gauche : jamais de chevauchement entre voisins ; 28 px sur écran tactile) ; `+` / `−`.
 - **Inspecteur** (clic ; feuille du bas au doigt) : tailles avec aperçu, options du widget, « Déplacer vers… », « Retirer ».
 - **Palette** : widgets absents, aperçu, recherche ; glisser vers une zone ou « + » puis la zone.
 - **Annulation** : 50 instantanés, `Ctrl+Z` / `Ctrl+Maj+Z` ; « Abandonner » restaure l'état d'entrée ; après « Terminé », toast « Annuler » 8 s.

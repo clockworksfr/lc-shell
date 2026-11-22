@@ -266,5 +266,8 @@
   "weather.showers": "Averses",
   "weather.snow": "Neige",
   "weather.storm": "Orage",
-  "widget.weather": "Météo"
+  "widget.weather": "Météo",
+  "bar.menu.edit": "Modifier la barre",
+  "bar.menu.barSettings": "Réglages de la barre",
+  "bar.menu.settings": "Paramètres"
 }

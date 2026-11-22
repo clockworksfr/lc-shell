@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import qs.components
 import qs.services
 
 // Instantiates one block from a layout entry and hands it its context.
@@ -66,6 +67,24 @@ Item {
         id: hover
     }
 
+    // Long press (finger, or held mouse button): edit mode with this widget
+    // selected. On top and passive: the widget still gets its clicks.
+    Item {
+        anchors.fill: parent
+        z: 2
+        enabled: !root.editing && !!root.host
+
+        TapHandler {
+            gesturePolicy: TapHandler.DragThreshold
+            grabPermissions: PointerHandler.ApprovesTakeOverByAnything
+            longPressThreshold: 0.6
+            onLongPressed: {
+                ShellState.editing = true;
+                BarEditor.selected = root.at;
+            }
+        }
+    }
+
     // Edit mode: outline, click to select, drag to move.
     Rectangle {
         anchors.fill: parent
@@ -108,6 +127,64 @@ Item {
             else
                 BarEditor.selected = root.selected ? null : root.at;
             moved = false;
+        }
+    }
+
+    // Edit mode: size pill (S / M / L, click cycles) and remove cross, on
+    // opposite corners; bigger for touch screens.
+    readonly property real badge: (host?.theme?.hit?.pointer ?? 24) >= 48 ? 28 : 16
+
+    Rectangle {
+        visible: root.editing
+        z: 3
+        // Bottom-right (the cross is top-left): neighbours' badges never meet.
+        x: parent.width - width / 2
+        y: parent.height - height / 2
+        width: root.badge + 4
+        height: root.badge
+        radius: height / 2
+        color: root.host?.theme.color.accent ?? "white"
+
+        ThemedText {
+            anchors.centerIn: parent
+            text: ({ compact: "S", normal: "M", extended: "L" })[BarEditor.sizeOf(root.entry)] ?? "M"
+            color: root.host?.theme.color.onAccent ?? "black"
+            font.pixelSize: root.badge * 0.62
+            font.weight: Font.Bold
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            anchors.margins: -4
+            cursorShape: Qt.PointingHandCursor
+            onClicked: BarEditor.cycleSize(root.at)
+        }
+    }
+
+    Rectangle {
+        visible: root.editing
+        z: 3
+        x: -width / 2
+        y: -height / 2
+        width: root.badge
+        height: root.badge
+        radius: height / 2
+        color: root.host?.theme.color.surface3 ?? "grey"
+        border.width: 1
+        border.color: root.host?.theme.color.line ?? "grey"
+
+        ThemedText {
+            anchors.centerIn: parent
+            text: "×"
+            color: root.host?.theme.color.ink ?? "white"
+            font.pixelSize: root.badge * 0.75
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            anchors.margins: -4
+            cursorShape: Qt.PointingHandCursor
+            onClicked: BarEditor.remove(root.at)
         }
     }
 
