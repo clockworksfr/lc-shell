@@ -75,7 +75,6 @@ PanelWindow {
         }
         // Reopening while closing continues from where the drawer is.
         const reopening = phase === "closing";
-        probe.start("open");
         close.stop();
         shown = target;
         cardType = target.type;
@@ -234,51 +233,6 @@ PanelWindow {
         }
     }
 
-    // TEMPORARY (perf measurement): the process's animation tick at rest.
-    FrameAnimation {
-        property var d: []
-        running: root.screenName === "DP-1"
-        onTriggered: {
-            d.push(frameTime * 1000);
-            if (d.length % 120 === 0) {
-                const x = d.slice(-110);
-                console.warn(`cardperf idle tick: avg ${(x.reduce((a, b) => a + b, 0) / x.length).toFixed(1)} ms, max ${Math.max(...x).toFixed(1)} ms`);
-            }
-        }
-    }
-
-    // TEMPORARY (perf measurement): frame times while the drawer opens.
-    FrameAnimation {
-        id: probe
-
-        property string label
-        property real t0
-        property real first: -1
-        property var deltas: []
-
-        function start(what: string): void {
-            label = what;
-            t0 = Date.now();
-            first = -1;
-            deltas = [];
-            restart();
-        }
-        function report(): void {
-            stop();
-            const d = deltas.slice(1);
-            if (!d.length)
-                return;
-            const avg = d.reduce((a, b) => a + b, 0) / d.length;
-            console.warn(`cardperf ${label} ${root.screenName} ${root.width}x${root.height}: first frame ${first} ms, ${d.length} frames, avg ${avg.toFixed(1)} ms, max ${Math.max(...d).toFixed(1)} ms, >25ms ${d.filter(x => x > 25).length}`);
-        }
-
-        onTriggered: {
-            if (first < 0)
-                first = Date.now() - t0;
-            deltas.push(frameTime * 1000);
-        }
-    }
-
     // Opening: slides out of the bar.
     NumberAnimation {
         id: enter
@@ -286,7 +240,6 @@ PanelWindow {
         property: "progress"
         to: 1
         onFinished: {
-            probe.report();
             root.phase = "open";
             root.morph = true;
         }
