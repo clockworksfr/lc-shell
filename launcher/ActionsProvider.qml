@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import qs.services
+import qs.settings
 import qs.i18n
 
 // Session and system actions (">" prefix, also mixed in the default mode).
@@ -46,6 +47,12 @@ Singleton {
             icon: "system-shutdown",
             confirm: true,
             run: () => Quickshell.execDetached(["systemctl", "poweroff"])
+        },
+        {
+            key: "action:settings",
+            titleKey: "action.settings",
+            icon: "preferences-system",
+            run: () => Settings.open("")
         },
         {
             key: "action:reload",

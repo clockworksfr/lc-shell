@@ -40,6 +40,28 @@ Singleton {
         return out;
     }
 
+    // Screen profiles as the user settings will hold them: the user's list,
+    // or a copy of the defaults' list on first edit.
+    function editableScreens(): var {
+        return JSON.parse(JSON.stringify(user.screens ?? defaults.screens ?? []));
+    }
+
+    // Sets a key of the screen's profile, creating a profile matched by model
+    // (stable) when none exists. `undefined` removes the key.
+    function setScreen(screen: ShellScreen, key: string, value: var): void {
+        const screens = editableScreens();
+        let profile = screens.find(p => matches(p.match, screen));
+        if (!profile) {
+            profile = { match: screen.model ? { model: screen.model } : { name: screen.name } };
+            screens.unshift(profile);
+        }
+        if (value === undefined)
+            delete profile[key];
+        else
+            profile[key] = value;
+        set("screens", screens);
+    }
+
     // Value at a dotted path of the merged config ("appearance.variant").
     function get(path: string): var {
         return path.split(".").reduce((o, k) => o?.[k], data);

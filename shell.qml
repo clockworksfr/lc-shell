@@ -9,6 +9,7 @@ import qs.i18n
 import qs.launcher
 import qs.modules
 import qs.services
+import qs.settings
 import qs.theme
 
 ShellRoot {
@@ -24,6 +25,15 @@ ShellRoot {
     LauncherIpc {}
     ThemeIpc {}
     I18nIpc {}
+    SettingsIpc {}
+
+    LazyLoader {
+        active: Settings.opened
+
+        SettingsWindow {
+            visible: true
+        }
+    }
 
     // Singletons are lazy: touch the ones that must run from the start.
     Component.onCompleted: {

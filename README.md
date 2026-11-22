@@ -69,6 +69,16 @@ Exemple de réglages :
   - `notifications` — non lues ; clic : historique (ne pas déranger, tout effacer), clic milieu : ne pas déranger. Un nom inconnu s'affiche `?nom` en rouge. Ajouter un bloc : `blocks/Xxx.qml` (propriétés `screen`, `options`) + `blocks/Registry.qml`.
 - **Plein écran** : rien d'automatique (OSD, bientôt notifications) ne s'affiche au-dessus ; c'est redirigé vers un écran `modules` ou retenu. Le lanceur, appelé explicitement, reste autorisé.
 
+## Paramètres
+
+`qs -c lc ipc call settings toggle` (ou `openPage <page>`), ou « Paramètres » dans le lanceur. Fenêtre normale, réglages appliqués en direct et écrits dans `settings.json` :
+
+- **Apparence** : thème des écrans normaux / modules, clair / sombre / automatique, bascule à heures fixes ou au soleil (latitude, longitude) ;
+- **Écrans** : par écran branché — mode, thème, tactile, position de la barre, cadre (profil créé au besoin, repéré par le modèle) ;
+- **Barre** : rendu (style, flottante, opacité, position, cadre) et blocs par zone (monter, descendre, changer de zone, retirer, ajouter) ;
+- **Fond d'écran** : activation, dossier, grille de choix, au hasard ;
+- **Général** : langue, ne pas déranger, rangement des fenêtres du tableau de bord.
+
 ## Langues
 
 Interface en anglais et en français. `"language"` dans `settings.json` : `auto` (suit la locale du système), `en` ou `fr` ; `"locale"` pour forcer le format des dates et nombres (ex. `en_GB`). Bascule à chaud : `qs -c lc ipc call i18n set en|fr|auto`.
@@ -151,4 +161,5 @@ L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non a
 | `qs -c lc ipc call i18n set en\|fr\|auto` / `get` | Langue de l'interface |
 | `qs -c lc ipc call notifs toggleDnd` / `clear` / `markRead` | Notifications |
 | `qs -c lc ipc call wallpaper set <chemin>` / `setHere <chemin>` / `random` / `get` | Fond d'écran (tous / écran actif) |
+| `qs -c lc ipc call settings toggle` / `openPage <page>` / `close` | Paramètres |
 | `qs -c lc ipc call shell reload` | Rechargement complet (nécessaire après modification d'un `.js`) |
