@@ -38,9 +38,9 @@ ModuleBase {
         : full || drawer || (shape === "wide" && ch >= 400 && cw >= 1000) ? "three"
         : shape === "tiny" ? "tiny"
         : shape === "narrow" ? "list"
-        : shape === "strip" || (shape === "wide" && ch < 200) ? "row"
+        : (shape === "strip" || shape === "wide") && ch < 200 ? "row"
         : shape === "box" && (cw < 480 || ch < 400) ? "grid"
-        : shape === "wide" ? "side"
+        : shape === "wide" || shape === "strip" ? "side"
         : "stack"
 
     Component.onCompleted: HueBridge.refCount++
@@ -192,9 +192,11 @@ ModuleBase {
         property bool withMore: true
         readonly property var room: detail.m.selected
         readonly property real row: detail.m.hit
-        // Rows of scenes that fit under the slider and the color row.
-        readonly property bool colorRow: height - header.height - row * 3 - spacing * 3 >= 0
-        readonly property real scenesRoom: height - header.height - row - (colorRow ? row : 0) - spacing * (colorRow ? 3 : 2)
+        // The color row is lower (its swatches reach `hit` by their touch
+        // area): it fits with one row of scenes in a 4 × 2 cell.
+        readonly property real colorH: Math.min(row, 56)
+        readonly property bool colorRow: height - header.height - row * 2 - colorH - spacing * 3 >= 0
+        readonly property real scenesRoom: height - header.height - row - (colorRow ? colorH : 0) - spacing * (colorRow ? 3 : 2)
         readonly property int sceneCols: width >= 420 ? 3 : 2
         readonly property int sceneRows: Math.max(0, Math.floor((scenesRoom + 10) / (row + 10)))
         readonly property var scenes: {
@@ -207,7 +209,7 @@ ModuleBase {
             return all.slice(0, Math.max(0, capacity - 1)).concat([{ more: true }]);
         }
 
-        spacing: detail.m.gap
+        spacing: detail.m.gap * 0.6
         visible: !!room
 
         Row {
@@ -271,12 +273,12 @@ ModuleBase {
         // Current color (opens the picker), then the favorites.
         Row {
             visible: detail.colorRow
-            height: detail.row
+            height: detail.colorH
             spacing: Math.max(6, detail.m.gap * 0.6)
 
             HueParts.Swatch {
                 anchors.verticalCenter: parent.verticalCenter
-                size: Math.min(detail.row, 56)
+                size: detail.colorH
                 swatchColor: detail.room?.color || "#FFE9D2"
                 onTapped: detail.m.openPicker("room", detail.room.id, detail.room.name)
 
