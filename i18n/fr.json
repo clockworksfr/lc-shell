@@ -350,5 +350,10 @@
   "widget.system": "Système",
   "bar.v.cpu": "cpu\n{value}",
   "system.processes": "Processus les plus gourmands",
-  "system.openMonitor": "Clic sur le widget : moniteur système (btop)."
+  "system.openMonitor": "Clic sur le widget : moniteur système (btop).",
+  "tray.attention": "Demande votre attention",
+  "tray.passive": "En veille",
+  "tray.active": "En cours",
+  "tray.open": "Ouvrir",
+  "tray.menu": "Menu"
 }

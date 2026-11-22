@@ -23,6 +23,15 @@ Grid {
 
     readonly property var items: SystemTray.items.values.filter(item => root.options.showPassive || item.status !== Status.Passive)
     readonly property bool shown: items.length > 0
+    // Last hovered item: its own hover card (cards/TrayCard).
+    property SystemTrayItem hovered: null
+
+    // Opens an item's menu from its icon (the card's "Menu" button).
+    function menuFor(item: SystemTrayItem): void {
+        const index = root.items.indexOf(item);
+        if (index >= 0)
+            icons.itemAt(index)?.openMenu();
+    }
 
     columns: vertical ? 1 : Math.max(1, items.length)
     spacing: theme.space.s
@@ -44,6 +53,10 @@ Grid {
                 anchors.fill: parent
                 size: slot.size
                 source: slot.modelData.icon
+            }
+
+            HoverHandler {
+                onHoveredChanged: if (hovered) root.hovered = slot.modelData
             }
 
             // The app's menu, drawn in the theme's look (not a platform menu).

@@ -350,5 +350,10 @@
   "widget.system": "System",
   "bar.v.cpu": "cpu\n{value}",
   "system.processes": "Busiest processes",
-  "system.openMonitor": "Click the widget: system monitor (btop)."
+  "system.openMonitor": "Click the widget: system monitor (btop).",
+  "tray.attention": "Needs attention",
+  "tray.passive": "Idle",
+  "tray.active": "Running",
+  "tray.open": "Open",
+  "tray.menu": "Menu"
 }
