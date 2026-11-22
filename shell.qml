@@ -1,5 +1,7 @@
 // lc-shell entry point. Launch with: qs -c lc
+//@ pragma IconTheme Papirus-Dark
 import Quickshell
+import qs.launcher
 import qs.modules
 import qs.services
 
@@ -13,4 +15,5 @@ ShellRoot {
     }
 
     Ipc {}
+    LauncherIpc {}
 }

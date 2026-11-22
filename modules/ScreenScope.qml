@@ -1,6 +1,8 @@
 import QtQuick
 import Quickshell
+import qs.launcher
 import qs.modules.bar
+import qs.modules.launcher
 import qs.modules.osd
 import qs.services
 
@@ -27,6 +29,14 @@ Scope {
         OsdWindow {
             screen: root.modelData
             config: root.layout.osd
+        }
+    }
+
+    LazyLoader {
+        active: Launcher.opened && Launcher.screenName === root.modelData.name
+
+        LauncherWindow {
+            screen: root.modelData
         }
     }
 }

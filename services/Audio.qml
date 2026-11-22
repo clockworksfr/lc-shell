@@ -11,13 +11,17 @@ Singleton {
     readonly property PwNode sink: Pipewire.defaultAudioSink
     readonly property PwNode source: Pipewire.defaultAudioSource
 
+    // Hardware devices (streams and sink monitors excluded).
+    readonly property list<PwNode> sinks: Pipewire.nodes.values.filter(n => n.audio && n.isSink && !n.isStream)
+    readonly property list<PwNode> sources: Pipewire.nodes.values.filter(n => n.audio && !n.isSink && !n.isStream)
+
     readonly property real volume: sink?.audio?.volume ?? 0
     readonly property bool muted: sink?.audio?.muted ?? false
-    readonly property string sinkName: sink?.description || sink?.nickname || sink?.name || ""
+    readonly property string sinkName: nodeName(sink)
 
     readonly property real sourceVolume: source?.audio?.volume ?? 0
     readonly property bool sourceMuted: source?.audio?.muted ?? false
-    readonly property string sourceName: source?.description || source?.nickname || source?.name || ""
+    readonly property string sourceName: nodeName(source)
 
     // Same ceiling as the wpctl key binds (-l 1.5).
     readonly property real maxVolume: 1.5
@@ -28,6 +32,18 @@ Singleton {
     // a device is being (re)bound, so startup and device switches stay quiet.
     signal sinkTouched
     signal sourceTouched
+
+    function nodeName(node: PwNode): string {
+        return node?.description || node?.nickname || node?.name || "";
+    }
+
+    function setDefaultSink(node: PwNode): void {
+        Pipewire.preferredDefaultAudioSink = node;
+    }
+
+    function setDefaultSource(node: PwNode): void {
+        Pipewire.preferredDefaultAudioSource = node;
+    }
 
     function setVolume(value: real): void {
         if (!sink?.audio)
@@ -42,6 +58,13 @@ Singleton {
 
     function decrement(): void {
         setVolume(volume - step);
+    }
+
+    function setSourceVolume(value: real): void {
+        if (!source?.audio)
+            return;
+        source.audio.muted = false;
+        source.audio.volume = Math.max(0, Math.min(1, value));
     }
 
     function toggleMute(): void {
