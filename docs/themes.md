@@ -158,3 +158,70 @@ Alerte = rouge avec texte #FFFFFF.
   - Espaces : LED 6×6 (`line` si vide, encre si occupé), active = barre 14×6, 8 px avant un numéro Space Mono.
   - Notifications : en-tête mono avec point rouge 8 px, titre court en Doto (22), actions = pilule encre + pilule filaire, bande lumineuse 3 px à 40 % de largeur, rouge si critique.
   - À recréer dans lc-shell : arc de points, égaliseur de points, icônes en points, grille de points, statistique Matrix.
+
+## Cadre et position de la barre (étude v3)
+
+### Axes (défauts Classique moderne)
+
+| Axe | Valeurs | Défaut |
+|---|---|---|
+| `bar.position` | `top` · `bottom` · `left` · `right` | `top` |
+| `bar.frame.enabled` | booléen | `false` |
+| `bar.frame.thickness` | 4–16, surchargeable par côté (`top`/`bottom`/`left`/`right`, 0 accepté) | 8 |
+| `bar.frame.innerRadius` | 4–32 | 18 |
+| `bar.frame.opacity` | 0–100 (toujours celle de la barre) | 100 |
+| `bar.frame.outline` | 0/1/2 px, couleur `line` | 1 |
+| `bar.frame.color` | rôle | `surface` |
+| `bar.verticalWidth` | 48 compacte · 56 normale · 72 tactile | 56 |
+| `screenCorners` | `auto` avec le cadre = min(innerRadius + thickness, 32) | — |
+
+### Défauts par thème
+
+| Thème | Cadre | Épaisseur | Rayon intérieur | Opacité | Contour | Coins ext. | Largeur verticale |
+|---|---|---|---|---|---|---|---|
+| Classique moderne | non | 8 | 18 | 100 | 1 | 26 | 56 |
+| Ligne | non | 4 | 10 | 90 | 1 | 14 | 44 |
+| Façade | non | 12 | 6 | 100 | 2 | 18 | 64 |
+| Modulaire | non | 14 | 4 | 100 | 0 | 18 | 72 |
+| Matrix | **oui** | 10 | 24 | 100 | 0 | 32 | 56 |
+
+Position par défaut `top` partout.
+
+### Géométrie layer-shell
+
+- **Sans cadre** : une surface de barre ancrée à son bord et aux deux voisins ; `exclusiveZone` = marge + épaisseur (îlots flottants Classique : 8 + 40 = 48 en horizontal, 8 + 56 = 64 en vertical) ; Hyprland ajoute `gaps_out`.
+- **Avec cadre** :
+  - Réservation : quatre surfaces invisibles sans entrée, une par bord (ancrée à ce bord et à ses voisins), `exclusiveZone` = épaisseur du côté ; le côté barre réserve l'épaisseur de la barre.
+  - Dessin : une surface plein écran en couche `top`, `exclusionMode: Ignore`, anneau en pair-impair = rectangle extérieur (rayon des coins extérieurs) moins rectangle intérieur (rayon `innerRadius`). Masque d'entrée = côté barre + tiroirs ouverts.
+  - `innerRadius` ≈ `rounding` Hyprland + `gaps_out` (10 + 8 = 18) pour des arrondis concentriques.
+  - En cadre : îlots, flottant et auto-masquage ignorés, marge 0 ; groupes nus ou en capsules selon le thème.
+- **Tiroir fusionné** (coordonnées u le long du bord, v vers l'intérieur ; v0 = épaisseur du côté, p = position, L = longueur, d = profondeur, rf = rd = max(8, innerRadius)) : départ (p − rf, v0 − 2) ; arc concave rf jusqu'à (p, v0 + rf) ; droite jusqu'à (p, v0 + d − rd) ; arc convexe jusqu'à (p + rd, v0 + d) ; droite jusqu'à (p + L − rd, v0 + d) ; arc convexe jusqu'à (p + L, v0 + d − rd) ; droite jusqu'à (p + L, v0 + rf) ; arc concave jusqu'à (p + L + rf, v0) ; fermeture dans le cadre. Écran : haut (u, v), bas (u, H − v), gauche (v, u), droite (W − v, u) ; bas et gauche : sens des arcs inversé. Ouverture : d de 0 à sa valeur en 200 ms OutCubic, raccords fixes, contenu en fondu dès 60 %. Rendu : `Shape` pair-impair ou SDF en `ShaderEffect`.
+- **Plein écran** (fenêtre en mode 2 sur l'espace actif) : épaisseurs animées à 0 en 180 ms, réservations à 0, masque vide, tiroirs fermés ; jamais `overlay`. Une fenêtre agrandie (mode 1) garde le cadre.
+- **Xeneon en mode modules** : pas de cadre par défaut ; avec cadre, les modules deviennent les côtés épais (zone de fenêtres = le trou). En jeu sur DP-1, le Xeneon garde son cadre et reçoit OSD et urgences.
+
+### Barre verticale (de haut en bas)
+
+1. Lanceur (bouton carré de la largeur de la barre).
+2. Icône de l'appli active, puis espaces de travail empilés (défilement à la molette au-delà de 10). Classique : pastilles 8 px, actif = pilule debout 8 × 27.
+3. Ressort.
+4. Horloge sur deux lignes (HH / MM, chiffres tabulaires), date en option (0,7 em).
+5. Ressort.
+6. Média : pochette 32 px avec anneau de progression ; le titre passe dans le tiroir.
+7. Statuts : icône + valeur de 2–3 caractères dessous (0,7 em).
+8. Tray en colonne : icônes 20 px, 5 visibles puis « ⋯ ».
+9. Notifications, puis session.
+
+Jamais de texte pivoté ; pas de titre de fenêtre. Corps ≈ 0,27 × largeur. Îlots verticaux : trois îlots de la largeur de la barre à 8 px du bord (haut : lanceur et espaces ; milieu : horloge ; bas : média, statuts, tray, notifications).
+
+### Popups selon le bord
+
+| Bord | Ancrage | Direction | Alignement |
+|---|---|---|---|
+| Haut | bas de la barre | vers le bas | centré sur le déclencheur, borné à 8 px des bords |
+| Bas | haut de la barre | vers le haut | idem |
+| Gauche | bord droit de la barre | vers la droite | centré verticalement |
+| Droite | bord gauche de la barre | vers la gauche | idem |
+
+- Sans cadre : écart 8 px, rayon 20, ombre, glissement 12 px + fondu 180 ms. Avec cadre : tiroir fusionné.
+- Réglages, média et calendrier sortent du côté de la barre. Notifications à droite (à gauche si la barre est à droite). Session à droite, au milieu. Lanceur : centré (sans cadre), côté opposé à la barre (avec cadre).
+- DP-1 avec barre à gauche : 64 px sur 5120 (1,25 %) contre 48 sur 2160 (2,2 %) ; le bord gauche est loin du regard : toasts, OSD et lanceur restent au centre.
