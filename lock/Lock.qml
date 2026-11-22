@@ -55,31 +55,39 @@ Singleton {
     // "First Last" from the passwd entry, else the login.
     property string fullName: user
 
-    // While locked, a marker in the runtime dir: a shell restarted after a
-    // crash finds it and locks again (with Hyprland's
-    // misc.allow_session_lock_restore it takes the session lock back).
+    // While locked, a marker in the runtime dir holding Hyprland's instance
+    // signature: a shell restarted after a crash in the same Hyprland finds
+    // it and locks again (with misc.allow_session_lock_restore it takes the
+    // session lock back). Removed on unlock; ignored from another Hyprland
+    // instance (a new login after a crash).
     readonly property string marker: `${Quickshell.env("XDG_RUNTIME_DIR") || "/tmp"}/lc-shell-locked`
+    readonly property string instance: Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") ?? ""
 
     // Unlocked: hold the sleep delay again for the next suspend.
     onLockedChanged: {
         if (!locked) {
             sleepDelay.running = beforeSleep;
             cancelAfterLock();
-            Quickshell.execDetached(["rm", "-f", marker]);
+            console.info("lock: unlocked");
+            if (!harness)
+                Quickshell.execDetached(["rm", "-f", marker]);
         } else {
             failures = 0;
             checkCaps();
-            Quickshell.execDetached(["touch", marker]);
+            if (!harness)
+                Quickshell.execDetached(["sh", "-c", 'umask 077 && printf "%s" "$1" > "$2"', "sh", instance, marker]);
         }
     }
 
     Process {
-        running: true
-        command: ["test", "-e", root.marker]
+        running: !root.harness
+        command: ["sh", "-c", '[ -f "$1" ] && [ "$(cat "$1")" = "$2" ]', "sh", root.marker, root.instance]
         onExited: code => {
-            if (code === 0 && !root.locked && !root.harness) {
+            if (code === 0 && !root.locked) {
                 console.warn("lock: the shell stopped while locked; locking again");
-                root.lockQuiet();
+                root.lockQuiet("relock");
+            } else if (code !== 0) {
+                Quickshell.execDetached(["rm", "-f", root.marker]);
             }
         }
     }
@@ -87,6 +95,7 @@ Singleton {
     // A lock asked for by the user (shortcut, IPC): the after-lock action
     // follows.
     function lock(): void {
+        console.info("lock: locked (shortcut / IPC)");
         status = "";
         locked = true;
         if (afterLock !== "none") {
@@ -97,7 +106,9 @@ Singleton {
 
     // A lock from idle or logind: no after-lock action (idle has its own
     // delays; logind is about to suspend anyway).
-    function lockQuiet(): void {
+    function lockQuiet(reason: string): void {
+        if (!locked)
+            console.info(`lock: locked (${reason || "idle / logind"})`);
         status = "";
         locked = true;
     }
@@ -278,15 +289,16 @@ Singleton {
         target: Logind
 
         function onLockRequested(): void {
-            root.lockQuiet();
+            root.lockQuiet("logind lock-session");
         }
         function onUnlockRequested(): void {
+            console.info("lock: unlock asked by logind");
             root.locked = false;
         }
         function onPrepareForSleep(sleeping: bool): void {
             if (sleeping && root.beforeSleep) {
                 root.cancelAfterLock();
-                root.lockQuiet();
+                root.lockQuiet("before sleep");
             } else if (!sleeping) {
                 sleepDelay.running = root.beforeSleep;
             }

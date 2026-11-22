@@ -40,7 +40,7 @@ Singleton {
         enabled: root.active && root.lockAfter > 0
         timeout: Math.max(1, root.lockAfter)
         respectInhibitors: true
-        onIsIdleChanged: if (isIdle) Lock.lockQuiet()
+        onIsIdleChanged: if (isIdle) Lock.lockQuiet("idle")
     }
 
     IdleMonitor {
