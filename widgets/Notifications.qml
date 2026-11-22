@@ -14,7 +14,9 @@ TextWidget {
         : NotificationCenter.dnd ? I18n.tr("bar.dnd")
         : NotificationCenter.unread > 0 ? I18n.tr("bar.notifsCount", { n: NotificationCenter.unread })
         : I18n.tr("bar.notifs")
-    compactText: NotificationCenter.dnd ? I18n.tr("bar.dnd")
+    // Matrix (micro labels): the red dot and the count, nothing else.
+    compactText: theme.style.statusStack === true && size !== "compact" ? (NotificationCenter.dnd ? "∅" : NotificationCenter.unread > 0 ? `● ${NotificationCenter.unread}` : "0")
+        : NotificationCenter.dnd ? I18n.tr("bar.dnd")
         : NotificationCenter.unread > 0 ? I18n.tr("bar.v.notifs", { n: NotificationCenter.unread })
         : I18n.tr("bar.notifs")
     color: NotificationCenter.unread > 0 && !NotificationCenter.dnd ? theme.color.accent : theme.color.soft

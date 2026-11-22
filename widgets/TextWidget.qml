@@ -28,12 +28,34 @@ ThemedText {
 
     // Text mode: compact = label over value (e.g. VOL / 64), like vertical.
     readonly property bool stacked: !useIcon && (vertical || size === "compact")
-    label: stacked
-    text: useIcon ? iconText : stacked ? compactText : fullText
+    // Themes with micro labels (Matrix, style.statusStack): statuses as a
+    // small soft label over the value, mono capitals ("VOL / 64"); a
+    // leading "●" is the signal dot. Extended keeps its full line.
+    readonly property bool microStack: theme.style.statusStack === true && !useIcon && !!icon && !vertical && size !== "extended"
+
+    function micro(value: string): string {
+        const esc = t => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+        let rest = value;
+        let dot = "";
+        if (rest.startsWith("●")) {
+            dot = `<span style="color:${theme.color.signal ?? theme.color.urgent}">●</span> `;
+            rest = rest.slice(1).trim();
+        }
+        const parts = rest.split("\n");
+        if (parts.length < 2)
+            return dot + esc(rest);
+        return `<span style="font-size:${Math.round(theme.font.sizeS * 0.82)}px; color:${theme.color.soft}">${esc(parts[0])}</span><br>${dot}${esc(parts.slice(1).join(" "))}`;
+    }
+
+    label: stacked && !microStack
+    text: useIcon ? iconText : microStack ? micro(compactText) : stacked ? compactText : fullText
+    textFormat: microStack ? Text.RichText : Text.PlainText
     leftPadding: useIcon && !vertical ? iconItem.width + (iconText ? 6 : 0) : 0
     topPadding: useIcon && vertical ? iconItem.height + (iconText ? 2 : 0) : 0
-    font.pixelSize: vertical || stacked ? theme.font.sizeS : theme.font.sizeM
-    lineHeight: stacked ? 0.95 : 1
+    font.pixelSize: microStack ? 12 : vertical || stacked ? theme.font.sizeS : theme.font.sizeM
+    font.family: microStack ? theme.font.mono : theme.font.family
+    font.capitalization: microStack ? Font.AllUppercase : Font.MixedCase
+    lineHeight: stacked || microStack ? 0.9 : 1
     horizontalAlignment: Text.AlignHCenter
     width: vertical && crossSize > 0 ? crossSize : implicitWidth
     elide: Text.ElideRight
