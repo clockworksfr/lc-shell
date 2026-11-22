@@ -15,7 +15,7 @@ Item {
 
     property string text
     property real pixelSize: 64
-    property color color: theme.color.ink
+    property color color: theme.color.nixie ?? theme.color.ink
     property bool tubes: false
 
     implicitWidth: nixie ? tubeRow.implicitWidth : hero.implicitWidth
