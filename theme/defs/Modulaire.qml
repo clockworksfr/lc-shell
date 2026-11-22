@@ -66,6 +66,8 @@ Singleton {
                 family: "Barlow Condensed",
                 mono: "Michroma",
                 display: "Nixie One",
+                // Small LCD windows (clock, system knobs).
+                lcd: "Doto LCD",
                 displayWeight: 400,
                 heroScale: 1,
                 sizeS: 13,

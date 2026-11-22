@@ -8,7 +8,7 @@ import qs.theme
 // Time and date, by shape: tiny = time; narrow = hours over minutes;
 // wide = time left, day / date / week right (+ the week strip when tall
 // enough); box / tall = time, date, the week (the month when roomy);
-// strip = one line. Nixie tubes in modulaire. Options: format ("HH:mm").
+// strip = one line. In modulaire, the time sits in an amber LCD window. Options: format ("HH:mm").
 ModuleBase {
     id: root
 
@@ -46,7 +46,7 @@ ModuleBase {
         visible: root.shape === "tiny"
         anchors.centerIn: parent
         text: root.time
-        tubes: true
+        inDisplay: true
         pixelSize: root.figure(0.6, root.perChar(root.time.length))
     }
 
@@ -63,7 +63,7 @@ ModuleBase {
                 required property string modelData
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: modelData
-                tubes: true
+                inDisplay: true
                 pixelSize: Math.min(root.ch * 0.3, root.cw * root.perChar(2)) * root.hk
             }
         }
@@ -86,7 +86,7 @@ ModuleBase {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             text: root.time
-            tubes: true
+            inDisplay: true
             pixelSize: root.figure(0.62, (root.shape === "strip" ? 0.3 : 0.55) * root.perChar(root.time.length))
         }
 
@@ -157,7 +157,7 @@ ModuleBase {
 
         Figure {
             text: root.time
-            tubes: true
+            inDisplay: true
             pixelSize: root.figure(root.roomy ? 0.32 : 0.42, root.perChar(root.time.length))
         }
 
