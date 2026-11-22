@@ -44,12 +44,35 @@ Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md
 ```
 
 - **Écrans** : reconnus par `model` (stable, contrairement au connecteur avec l'eGPU) ou par `name` (motif, `eDP-*`). Le premier profil qui correspond gagne ; un écran inconnu est `normal`.
-- **Modes** : `normal` (barre permanente) ou `modules` (tableau de bord, en cours). La config d'un module (`bar`, `osd`) vient du mode, surchargée clé par clé par le profil ; `null` le désactive.
+- **Modes** : `normal` (barre permanente) ou `modules` (tableau de bord, voir plus bas). La config d'un module (`bar`, `osd`) vient du mode, surchargée clé par clé par le profil ; `null` le désactive.
 - **Thèmes** : un par mode (`appearance.themes`), surchargeable par profil (`"theme": "matrix"`). Disponibles : `classic` (provisoire), `matrix`.
 - **Clair/sombre** : `variant` = `dark`, `light` ou `auto` ; en `auto`, `schedule` = horaires fixes (`type: "time"`) ou soleil (`type: "sun"`, `latitude`, `longitude`, calcul local).
 - **Barre** : blocs dans `left`/`center`/`right`. Rendu fourni par le thème, surchargeable : `style` (`full`/`islands`), `floating`, `margin`, `radius`, `opacity`, `border`, `padding`, `spacing`, `height`, `position` (`top`/`bottom`), `screenCorners` (rayon des coins d'écran, 0 = aucun).
 - Blocs : `workspaces`, `clock` (`format`), `media` (`maxWidth`), `volume` (clic : panneau audio, clic milieu : muet, molette : volume). Un nom inconnu s'affiche `?nom` en rouge. Ajouter un bloc : `blocks/Xxx.qml` (propriétés `screen`, `options`) + `blocks/Registry.qml`.
 - **Plein écran** : rien d'automatique (OSD, bientôt notifications) ne s'affiche au-dessus ; c'est redirigé vers un écran `modules` ou retenu. Le lanceur, appelé explicitement, reste autorisé.
+
+## Mode modules (tableau de bord)
+
+`modes.modules.dashboard` (surchargeable par écran) :
+
+```json
+"dashboard": {
+  "grid": { "columns": 12, "rows": 4, "gap": 12, "margin": 12 },
+  "windows": { "enabled": true, "ignore": ["steam"], "only": [] },
+  "pages": {
+    "default": [
+      { "type": "clock",  "x": 0, "y": 0, "w": 3, "h": 2 },
+      { "type": "window", "x": 3, "y": 0, "w": 6, "h": 4 }
+    ],
+    "8": [ ... ]
+  }
+}
+```
+
+- Chaque espace de travail Hyprland de l'écran est une **page** : `pages["<nom de l'espace de travail>"]`, sinon `pages.default`.
+- Tuiles : `clock` (`format`), `media`, `system` (CPU, RAM, GPU, températures), `workspaces`, `window`.
+- **Cases fenêtre** (`"type": "window"`) : toute fenêtre arrivant sur un espace de travail de cet écran est rendue flottante et placée dans la première case libre (les suivantes s'empilent dans la dernière). Repartie vers un écran normal, elle redevient tuilée. Les fenêtres plein écran ne sont pas touchées. `windows.ignore` / `only` filtrent par classe.
+- Le tableau de bord est sur la couche `bottom`, sous les fenêtres.
 
 ## Lanceur
 

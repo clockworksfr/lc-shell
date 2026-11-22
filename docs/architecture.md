@@ -48,6 +48,9 @@ Rien d'**automatique** ne s'affiche au-dessus d'un jeu en plein écran (`Hyprlan
 
 ## Phases
 
+Fait : socle (1), premier jet du mode modules (3 : grille, pages, cases fenêtre, tuiles horloge/média/système/espaces de travail). En attente : spécification des thèmes (2).
+
+
 1. **Socle** — profils d'écran par modèle, registre de thèmes avec clair/sombre programmable, thème par fenêtre, styles de barre, politique plein écran, indicateur tactile.
 2. **Thèmes** — implémentation des cinq thèmes d'après la spécification de l'artifact (polices, palettes, composants).
 3. **Mode modules** — grille, pages par espace de travail, cases fenêtre, premiers modules (média, paroles, monitoring, VU).

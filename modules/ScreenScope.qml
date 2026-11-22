@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import qs.launcher
 import qs.modules.bar
+import qs.modules.dashboard
 import qs.modules.launcher
 import qs.modules.osd
 import qs.services
@@ -26,6 +27,16 @@ Scope {
         Bar {
             screen: root.modelData
             config: root.profile.bar
+            theme: root.theme
+        }
+    }
+
+    LazyLoader {
+        active: root.profile.mode === "modules" && !!root.profile.dashboard
+
+        DashboardWindow {
+            screen: root.modelData
+            config: root.profile.dashboard
             theme: root.theme
         }
     }
