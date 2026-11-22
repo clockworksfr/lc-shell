@@ -654,5 +654,12 @@
   "weather.rain.from": "{desc} à partir de {start}",
   "weather.rain.level1": "Pluie faible",
   "weather.rain.level2": "Pluie modérée",
-  "weather.rain.level3": "Pluie forte"
+  "weather.rain.level3": "Pluie forte",
+  "module.network": "Réseau",
+  "module.network.short": "Réseau",
+  "network.all": "Toutes",
+  "network.allLong": "Toutes les interfaces (total)",
+  "network.auto": "Automatique (interface active)",
+  "network.wifi": "Wi-Fi",
+  "network.wired": "Filaire"
 }

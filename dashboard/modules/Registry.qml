@@ -10,6 +10,7 @@ Singleton {
             hue: "Hue.qml",
             lyrics: "Lyrics.qml",
             media: "Media.qml",
+            network: "Network.qml",
             showcase: "ShowcaseButton.qml",
             system: "System.qml",
             themeSwitch: "ThemeSwitch.qml",

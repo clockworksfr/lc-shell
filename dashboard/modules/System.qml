@@ -38,6 +38,64 @@ ModuleBase {
         : look === "constellation" && shape !== "narrow" ? "orbits"
         : (look === "modulaire" || look === "matrix") && shape !== "narrow" ? "rings"
         : "rows"
+    // Temperature probes (those the machine has), a row of small gauges.
+    readonly property var temps: [
+        { label: "CPU", value: SystemStats.cpuTemp },
+        ...(gpu ? [{ label: "GPU", value: gpu.temp }] : []),
+        ...(igpu ? [{ label: "iGPU", value: igpu.temp }] : []),
+        { label: "SSD", value: SystemStats.diskTemp },
+        { label: "RAM", value: SystemStats.ramTemp }
+    ].filter(t => t.value > 0)
+    readonly property bool showTemps: temps.length > 0 && shape !== "tiny" && shape !== "strip" && ch >= 230
+    readonly property real tempsHeight: showTemps ? t3 * 2.6 : 0
+
+    component TempsRow: Row {
+        id: tempsRow
+
+        property var m
+
+        spacing: tempsRow.m.gap
+
+        Repeater {
+            model: tempsRow.m.temps
+
+            Column {
+                required property var modelData
+                width: (tempsRow.width - (tempsRow.m.temps.length - 1) * tempsRow.spacing) / tempsRow.m.temps.length
+                spacing: 4
+
+                Item {
+                    width: parent.width
+                    height: tempValue.implicitHeight
+
+                    ThemedText {
+                        anchors.baseline: tempValue.baseline
+                        label: true
+                        text: parent.parent.modelData.label
+                        font.pixelSize: tempsRow.m.t4
+                        color: tempsRow.m.theme.color.soft
+                    }
+
+                    ThemedText {
+                        id: tempValue
+                        anchors.right: parent.right
+                        text: `${Math.round(parent.parent.modelData.value)}°`
+                        font.pixelSize: tempsRow.m.t3
+                        font.features: ({ "tnum": 1 })
+                        color: parent.parent.modelData.value >= 85 ? (tempsRow.m.theme.color.signal ?? tempsRow.m.theme.color.urgent) : tempsRow.m.theme.color.ink
+                    }
+                }
+
+                // 20 → 100 °C.
+                Gauge {
+                    width: parent.width
+                    value: (parent.modelData.value - 20) / 80
+                    alarm: 0.8
+                }
+            }
+        }
+    }
+
     readonly property var grid: bestGrid(stats.length, look === "modulaire" ? 70 : 90)
 
     // tiny, dot / orbit themes: CPU in its ring, value and label inside.
@@ -106,6 +164,7 @@ ModuleBase {
         // Only the VFD holds the rows (modulaire's LCD is for figures).
         screen: root.look === "facade"
         anchors.fill: parent
+        anchors.bottomMargin: root.showTemps ? root.tempsHeight + root.gap : 0
 
         ColumnLayout {
             id: rows
@@ -182,6 +241,7 @@ ModuleBase {
     RowLayout {
         visible: root.layout === "orbits"
         anchors.fill: parent
+        anchors.bottomMargin: root.showTemps ? root.tempsHeight + root.gap : 0
         spacing: root.gap
 
         Item {
@@ -304,6 +364,7 @@ ModuleBase {
     ColumnLayout {
         visible: root.layout === "rings"
         anchors.fill: parent
+        anchors.bottomMargin: root.showTemps ? root.tempsHeight + root.gap : 0
         spacing: root.gap / 2
 
         // Even cells over the whole room, each ring centered in its own.
@@ -447,5 +508,15 @@ ModuleBase {
                 }
             }
         }
+    }
+
+    // Temperatures under the gauges.
+    TempsRow {
+        visible: root.showTemps && root.layout !== "tiny" && root.layout !== "strip"
+        m: root
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: root.tempsHeight
     }
 }

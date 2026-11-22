@@ -64,57 +64,79 @@ Singleton {
     property int watchers: 0
     // Active interface (wired first).
     readonly property string iface: (wiredConnected ? wired?.name : activeWifi ? wifi?.name : "") ?? ""
-    // Bytes per second, and the last 60 samples (1/s) of each.
+    // Interfaces with traffic to show (wired and Wi-Fi devices).
+    readonly property var interfaces: devices.filter(d => d.type === DeviceType.Wired || d.type === DeviceType.Wifi).map(d => ({ name: d.name, wifi: d.type === DeviceType.Wifi, connected: d.connected }))
+    // Traffic source: "auto" (the active interface), "all" (every
+    // interface added up) or an interface name. Kept in the settings.
+    readonly property string source: Config.get("network.trafficSource") ?? "auto"
+    readonly property var sourceNames: source === "auto" ? (iface ? [iface] : [])
+        : source === "all" ? interfaces.map(i => i.name)
+        : [source]
+    function setSource(value: string): void {
+        Config.set("network.trafficSource", value === "auto" ? undefined : value);
+    }
+
+    // Bytes per second, and the last 60 samples (1/s) of each, for the source.
     property real rxRate: 0
     property real txRate: 0
     property var rxHistory: []
     property var txHistory: []
     property string address
+    // Last counters per interface: { time, counters: { name: { rx, tx } } }.
     property var lastBytes: null
 
-    onIfaceChanged: {
-        lastBytes = null;
+    onSourceNamesChanged: {
         rxHistory = [];
         txHistory = [];
-        if (watchers > 0)
-            addressProc.running = true;
+        rxRate = 0;
+        txRate = 0;
     }
+    onIfaceChanged: if (watchers > 0) addressProc.running = true
     onWatchersChanged: if (watchers > 0) addressProc.running = true
 
     Timer {
         interval: 1000
         repeat: true
-        // Always on (two small sysfs reads per second): the curves are
+        // Always on (one small procfs read per second): the curves are
         // already filled when a card opens.
-        running: root.iface !== ""
+        running: root.interfaces.length > 0
         triggeredOnStart: true
-        onTriggered: rxFile.reload()
+        onTriggered: netDev.reload()
     }
 
+    // Every interface's counters in one file.
     FileView {
-        id: rxFile
-        path: root.iface ? `/sys/class/net/${root.iface}/statistics/rx_bytes` : ""
-        printErrors: false
-        onLoaded: txFile.reload()
-    }
-
-    FileView {
-        id: txFile
-        path: root.iface ? `/sys/class/net/${root.iface}/statistics/tx_bytes` : ""
+        id: netDev
+        path: "/proc/net/dev"
         printErrors: false
         onLoaded: {
             const now = Date.now();
-            const rx = Number(rxFile.text());
-            const tx = Number(text());
-            // The first delta after a (re)start covers an unknown span: skip it.
-            if (root.lastBytes && root.lastBytes.iface === root.iface && root.lastBytes.count++ >= 1) {
-                const seconds = Math.max(0.001, (now - root.lastBytes.time) / 1000);
-                root.rxRate = Math.max(0, (rx - root.lastBytes.rx) / seconds);
-                root.txRate = Math.max(0, (tx - root.lastBytes.tx) / seconds);
+            const counters = {};
+            for (const line of text().split("\n").slice(2)) {
+                const m = /^\s*([^:]+):\s*(.*)$/.exec(line);
+                if (!m)
+                    continue;
+                const f = m[2].trim().split(/\s+/);
+                counters[m[1]] = { rx: Number(f[0]), tx: Number(f[8]) };
+            }
+            const last = root.lastBytes;
+            if (last) {
+                const seconds = Math.max(0.001, (now - last.time) / 1000);
+                let rx = 0, tx = 0;
+                for (const name of root.sourceNames) {
+                    const a = last.counters[name], b = counters[name];
+                    // An interface that (re)appeared: no delta yet.
+                    if (a && b) {
+                        rx += Math.max(0, b.rx - a.rx);
+                        tx += Math.max(0, b.tx - a.tx);
+                    }
+                }
+                root.rxRate = rx / seconds;
+                root.txRate = tx / seconds;
                 root.rxHistory = [...root.rxHistory, root.rxRate].slice(-60);
                 root.txHistory = [...root.txHistory, root.txRate].slice(-60);
             }
-            root.lastBytes = { time: now, rx: rx, tx: tx, iface: root.iface, count: root.lastBytes?.count ?? 0 };
+            root.lastBytes = { time: now, counters: counters };
         }
     }
 

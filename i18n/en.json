@@ -654,5 +654,12 @@
   "weather.rain.from": "{desc} from {start}",
   "weather.rain.level1": "Light rain",
   "weather.rain.level2": "Moderate rain",
-  "weather.rain.level3": "Heavy rain"
+  "weather.rain.level3": "Heavy rain",
+  "module.network": "Network",
+  "module.network.short": "Network",
+  "network.all": "All",
+  "network.allLong": "All interfaces (total)",
+  "network.auto": "Automatic (active interface)",
+  "network.wifi": "Wi-Fi",
+  "network.wired": "Wired"
 }

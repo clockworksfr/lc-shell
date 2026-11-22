@@ -16,6 +16,8 @@ Singleton {
     property real memoryUsedGiB: 0
     property real memoryTotalGiB: 0
     property real cpuTemp: 0 // °C
+    property real diskTemp: 0 // °C, NVMe
+    property real ramTemp: 0 // °C, hottest memory module (SPD sensor)
     // [{ card, busy (0..1), temp (°C) }]
     property var gpus: []
 
@@ -62,7 +64,7 @@ Singleton {
     }
 
     // One shell call for the sysfs files whose names vary (cards, hwmon).
-    // Output lines: "gpu <card> <busy%> <temp milli°C>" and "cpu <temp milli°C>".
+    // Output lines: "gpu <card> <busy%> <temp milli°C> <kind>", "cpu", "disk", "ram" <temp milli°C>.
     Process {
         id: sensors
         command: ["sh", "-c", `
@@ -75,19 +77,30 @@ Singleton {
                 echo "gpu $c $(cat "$d/gpu_busy_percent") \${t:-0} $k"
             done
             for h in /sys/class/hwmon/hwmon*; do
-                case "$(cat "$h/name")" in k10temp|coretemp|zenpower) echo "cpu $(cat "$h/temp1_input")"; break;; esac
+                case "$(cat "$h/name")" in
+                    k10temp|coretemp|zenpower) echo "cpu $(cat "$h/temp1_input")";;
+                    nvme) echo "disk $(cat "$h/temp1_input")";;
+                    spd5118|jc42) echo "ram $(cat "$h/temp1_input")";;
+                esac
             done`]
         stdout: StdioCollector {
             onStreamFinished: {
                 const gpus = [];
+                let disk = 0, ram = 0;
                 for (const line of text.split("\n")) {
                     const f = line.trim().split(" ");
                     if (f[0] === "gpu")
                         gpus.push({ card: f[1], busy: Number(f[2]) / 100, temp: Number(f[3]) / 1000, integrated: f[4] === "integrated" });
                     else if (f[0] === "cpu")
                         root.cpuTemp = Number(f[1]) / 1000;
+                    else if (f[0] === "disk")
+                        disk = Math.max(disk, Number(f[1]) / 1000);
+                    else if (f[0] === "ram")
+                        ram = Math.max(ram, Number(f[1]) / 1000);
                 }
                 root.gpus = gpus;
+                root.diskTemp = disk;
+                root.ramTemp = ram;
             }
         }
     }
