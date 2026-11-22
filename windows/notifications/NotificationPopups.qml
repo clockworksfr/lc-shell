@@ -47,6 +47,33 @@ PanelWindow {
         width: parent.width
         spacing: win.theme.space.s
 
+        // New card slides in from its side; the others move to make room.
+        add: Transition {
+            ParallelAnimation {
+                NumberAnimation {
+                    property: "x"
+                    from: win.side === "left" ? -Motion.travel(48) : Motion.travel(48)
+                    to: 0
+                    duration: Motion.ms(win.theme, "base", win.screen?.name ?? "")
+                    easing.type: Motion.easing(win.theme)
+                    easing.overshoot: Motion.overshoot(win.theme)
+                }
+                NumberAnimation {
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                    duration: Motion.ms(win.theme, "fast", win.screen?.name ?? "")
+                }
+            }
+        }
+        move: Transition {
+            NumberAnimation {
+                properties: "y"
+                duration: Motion.ms(win.theme, "base", win.screen?.name ?? "")
+                easing.type: Easing.OutCubic
+            }
+        }
+
         Repeater {
             model: win.atBottom ? NotificationCenter.popups.slice(0, win.maxVisible).reverse() : NotificationCenter.popups.slice(0, win.maxVisible)
 

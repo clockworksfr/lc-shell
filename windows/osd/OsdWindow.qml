@@ -38,7 +38,33 @@ PanelWindow {
     mask: Region {}
 
     Rectangle {
-        anchors.fill: parent
+        id: osdBody
+
+        // Entrance: from its screen edge, with a fade.
+        width: parent.width
+        height: parent.height
+        opacity: 0
+        y: win.atTop ? -Motion.travel(16) : Motion.travel(16)
+        Component.onCompleted: osdEnter.start()
+
+        ParallelAnimation {
+            id: osdEnter
+            NumberAnimation {
+                target: osdBody
+                property: "opacity"
+                to: 1
+                duration: Motion.ms(win.theme, "fast", win.screen?.name ?? "")
+            }
+            NumberAnimation {
+                target: osdBody
+                property: "y"
+                to: 0
+                duration: Motion.ms(win.theme, "base", win.screen?.name ?? "")
+                easing.type: Motion.easing(win.theme)
+                easing.overshoot: Motion.overshoot(win.theme)
+            }
+        }
+
         radius: win.theme.radius.panel
         color: win.theme.color.surface
 

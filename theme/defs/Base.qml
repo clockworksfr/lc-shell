@@ -88,8 +88,17 @@ Singleton {
             border: {
                 width: 0
             },
+            // Animation tokens (docs/animations in the design study):
+            // fast / base / slow durations (ms), entry easing and overshoot,
+            // stagger between rows (ms). Exits: InCubic, 0.75 × duration.
             motion: {
-                duration: 180
+                fast: 140,
+                base: 200,
+                slow: 280,
+                duration: 200,
+                easing: "OutCubic",
+                overshoot: 0,
+                stagger: 20
             },
             drawer: {
                 // Concave fillet joining a drawer to the bar.

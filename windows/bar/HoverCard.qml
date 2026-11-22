@@ -41,10 +41,15 @@ PopupWindow {
             content.opacity = switching ? 0.4 : 1;
             frame.progress = switching ? 1 : 0;
             root.visible = true;
-            if (switching)
+            if (switching) {
+                swap.duration = Motion.ms(root.theme, "fast", root.host?.screen?.name ?? "");
                 swap.restart();
-            else
+            } else {
+                appear.duration = Motion.ms(root.theme, "base", root.host?.screen?.name ?? "");
+                appear.easing.type = Motion.easing(root.theme);
+                appear.easing.overshoot = Motion.overshoot(root.theme);
                 appear.restart();
+            }
         });
     }
 
@@ -144,8 +149,6 @@ PopupWindow {
         property: "progress"
         from: 0
         to: 1
-        duration: root.theme.motion.duration
-        easing.type: Easing.OutCubic
     }
 
     NumberAnimation {

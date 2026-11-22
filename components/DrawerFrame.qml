@@ -30,6 +30,10 @@ Item {
     default property alias content: body.data
 
     readonly property bool sideways: edge === "left" || edge === "right"
+    // Reduced motion: no slide, the drawer only fades in.
+    readonly property real slide: Motion.reduced ? 0 : 1 - progress
+    // Content shows from 40 % of the opening (and fades first on closing).
+    readonly property real contentOpacity: Motion.reduced ? progress : Math.max(0, Math.min(1, (progress - 0.4) / 0.6))
     // Canonical (bar on top) size: along the bar × away from it.
     readonly property real along: sideways ? height : width
     readonly property real depth: sideways ? width : height
@@ -42,8 +46,9 @@ Item {
         width: root.width
         height: root.height
         // Slide out of the bar.
-        x: root.edge === "left" ? -(1 - root.progress) * width : root.edge === "right" ? (1 - root.progress) * width : 0
-        y: root.edge === "top" ? -(1 - root.progress) * height : root.edge === "bottom" ? (1 - root.progress) * height : 0
+        x: root.edge === "left" ? -root.slide * width : root.edge === "right" ? root.slide * width : 0
+        y: root.edge === "top" ? -root.slide * height : root.edge === "bottom" ? root.slide * height : 0
+        opacity: Motion.reduced ? root.progress : 1
 
         // Background and border, drawn for a top bar then rotated.
         Shape {
@@ -95,6 +100,7 @@ Item {
         Item {
             id: body
 
+            opacity: root.contentOpacity
             x: root.edge === "left" ? root.overlap : root.sideways ? 0 : root.fillet
             y: root.edge === "top" ? root.overlap : !root.sideways ? 0 : root.fillet
             width: root.sideways ? root.width - root.overlap : root.width - root.fillet * 2

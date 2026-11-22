@@ -62,7 +62,12 @@ Singleton {
                 width: 1
             },
             motion: {
-                duration: 200
+                fast: 140,
+                base: 200,
+                slow: 280,
+                duration: 200,
+                easing: "OutCubic",
+                stagger: 20
             },
             bar: {
                 height: 40,

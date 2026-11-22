@@ -41,6 +41,9 @@ PanelWindow {
         drawer.progress = 0;
         visible = true;
         slide.to = 1;
+        slide.duration = Motion.ms(theme, "base", bar?.screen?.name ?? "");
+        slide.easing.type = Motion.easing(theme);
+        slide.easing.overshoot = Motion.overshoot(theme);
         slide.restart();
     }
 
@@ -48,7 +51,10 @@ PanelWindow {
     function close(): void {
         if (!visible || (slide.running && slide.to === 0))
             return;
+        // From the current value (interruptible), faster, no bounce.
         slide.to = 0;
+        slide.duration = Motion.exitMs(theme, "base", bar?.screen?.name ?? "");
+        slide.easing.type = Easing.InCubic;
         slide.restart();
     }
 
@@ -114,8 +120,6 @@ PanelWindow {
         id: slide
         target: drawer
         property: "progress"
-        duration: root.theme.motion.duration + 40
-        easing.type: Easing.OutCubic
         onFinished: {
             if (to === 0) {
                 root.visible = false;

@@ -31,7 +31,28 @@ PanelWindow {
     Rectangle {
         id: frame
 
+        // Entrance: scale 0.98 → 1 and fade.
         anchors.fill: parent
+        opacity: 0
+        scale: Motion.reduced ? 1 : 0.98
+        Component.onCompleted: frameEnter.start()
+
+        ParallelAnimation {
+            id: frameEnter
+            NumberAnimation {
+                target: frame
+                property: "opacity"
+                to: 1
+                duration: Motion.ms(win.theme, "base", "")
+            }
+            NumberAnimation {
+                target: frame
+                property: "scale"
+                to: 1
+                duration: Motion.ms(win.theme, "base", "")
+                easing.type: Motion.easing(win.theme)
+            }
+        }
         radius: win.theme.radius.panel
         color: win.theme.color.bg
         border.width: 1
@@ -92,6 +113,31 @@ PanelWindow {
                 // Readable line length even in a very wide window.
                 width: Math.min(parent.width - win.theme.space.xl * 2, 900)
                 source: `${Settings.page[0].toUpperCase()}${Settings.page.slice(1)}Page.qml`
+
+                // Page change: fade in with a small rise.
+                onLoaded: {
+                    opacity = 0;
+                    pageShift.from = win.theme.space.xl + Motion.travel(8);
+                    pageEnter.start();
+                }
+
+                ParallelAnimation {
+                    id: pageEnter
+                    NumberAnimation {
+                        target: page
+                        property: "opacity"
+                        to: 1
+                        duration: Motion.ms(win.theme, "fast", "")
+                    }
+                    NumberAnimation {
+                        id: pageShift
+                        target: page
+                        property: "y"
+                        to: win.theme.space.xl
+                        duration: Motion.ms(win.theme, "base", "")
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
         }
 

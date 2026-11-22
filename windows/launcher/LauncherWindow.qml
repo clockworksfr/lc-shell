@@ -38,6 +38,30 @@ PanelWindow {
     Rectangle {
         id: panel
 
+        // Entrance: scale 0.96 → 1 and fade (theme curve).
+        opacity: 0
+        scale: Motion.reduced ? 1 : 0.96
+        Component.onCompleted: enter.start()
+
+        ParallelAnimation {
+            id: enter
+            NumberAnimation {
+                target: panel
+                property: "opacity"
+                to: 1
+                duration: Motion.ms(win.theme, "base", "")
+                easing.type: Easing.OutCubic
+            }
+            NumberAnimation {
+                target: panel
+                property: "scale"
+                to: 1
+                duration: Motion.ms(win.theme, "base", "")
+                easing.type: Motion.easing(win.theme)
+                easing.overshoot: Motion.overshoot(win.theme)
+            }
+        }
+
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height * 0.2
         width: 640

@@ -75,7 +75,13 @@ Singleton {
                 width: 1
             },
             motion: {
-                duration: 230
+                fast: 160,
+                base: 230,
+                slow: 320,
+                duration: 230,
+                easing: "OutBack",
+                overshoot: 0.8,
+                stagger: 30
             },
             drawer: {
                 fillet: 14

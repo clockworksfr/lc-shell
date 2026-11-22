@@ -59,6 +59,14 @@ Singleton {
             border: {
                 width: 1
             },
+            motion: {
+                fast: 120,
+                base: 160,
+                slow: 220,
+                duration: 160,
+                easing: "OutQuart",
+                stagger: 0
+            },
             drawer: {
                 fillet: 12
             },

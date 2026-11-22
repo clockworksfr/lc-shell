@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import qs.theme
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.dashboard
@@ -44,6 +45,24 @@ PanelWindow {
             y: rect.y
             width: rect.width
             height: rect.height
+
+            // Page change: modules fade in, column by column.
+            opacity: 0
+            Component.onCompleted: cellEnter.start()
+
+            SequentialAnimation {
+                id: cellEnter
+                PauseAnimation {
+                    duration: Motion.reduced ? 0 : (cell.modelData.x ?? 0) * (win.theme.motion.stagger ?? 20)
+                }
+                NumberAnimation {
+                    target: cell
+                    property: "opacity"
+                    to: 1
+                    duration: Motion.ms(win.theme, "slow", win.screen?.name ?? "")
+                    easing.type: Easing.OutCubic
+                }
+            }
 
             Rectangle {
                 anchors.fill: parent
