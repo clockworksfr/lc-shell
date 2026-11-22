@@ -237,6 +237,7 @@ Jamais de texte pivoté ; pas de titre de fenêtre. Corps ≈ 0,27 × largeur. �
 
 - Un panneau ou une carte sort de la barre en **tiroir fusionné** : il recouvre la bordure intérieure de la barre (aucun trait à la jonction), a le même remplissage que l'îlot ou la barre (opaque pour rester lisible), et une seule bordure qui part de celle de l'îlot, suit deux raccords concaves puis fait le tour du tiroir.
 - Rayon des raccords : jeton `drawer.fillet` (Classique 10, Constellation 14, Matrix 12), indépendant du rayon des contrôles.
+- **Au bout d'un îlot** (bord d'écran ou de barre) : si l'îlot ne peut pas s'élargir de ce côté, le tiroir s'aligne sur le bout de l'îlot, sans raccord, et ce coin de l'îlot devient carré.
 - **L'îlot s'agrandit** : quand le tiroir est plus large que l'îlot dont il sort, le fond de l'îlot (pas son contenu) s'élargit, avec une animation, pour porter le tiroir et ses raccords, puis revient à sa taille à la fermeture.
 
 ## Animations
@@ -263,3 +264,8 @@ Axe de style `appIcons` (composant `AppIcon`), surchargeable dans Paramètres �
 - `mono` (Matrix) : monochromes, à la couleur de l'encre.
 
 Appliqué au tray, au widget fenêtre active et aux cartes (fenêtre, espaces de travail, tray). Le lanceur garde les icônes d'origine.
+
+- Rendu par un shader (`assets/shaders/appicon.frag`, compilé par `tools/gen-shaders.sh`).
+- `appearance.appIconTint` (0,6) : intensité de la bichromie ; `appearance.appIconContrast` (0,35) : seuil d'atténuation des parties claires en mono.
+- **Garde de contraste** (`appearance.appIconGuard`, activée) : une icône d'origine ou teintée dont la couleur moyenne contraste à moins de 1,6:1 avec la barre voit sa clarté inversée, teinte gardée.
+- Les pastilles dessinées dans une icône (point rouge de Discord) suivent la recoloration : un shader ne les distingue pas d'une icône rouge.

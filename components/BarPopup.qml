@@ -27,6 +27,12 @@ PanelWindow {
     readonly property real fillet: theme.drawer.fillet
     readonly property real overlap: Math.max(1, bar?.look?.border ?? 0)
 
+    // Fillets at each end (set by place(): 0 where the drawer continues
+    // its island's end).
+    property real filletLow: fillet
+    property real filletHigh: fillet
+    readonly property real bodyLength: (sideways ? column.implicitHeight : column.implicitWidth) + theme.space.m * 2
+
     // Offset along the bar (from the screen's left or top edge).
     property real along: 0
     // Distance from the bar's screen edge.
@@ -62,23 +68,19 @@ PanelWindow {
         if (!bar)
             return;
         const scr = bar.screen;
-        const p = anchorItem.mapToItem(bar.contentItem, 0, 0);
         // Bar window origin on its screen.
         const o = bar.origin();
-        const ox = o.x;
-        const oy = o.y;
-        // Kept on screen (8 px from the edges).
-        const clamp = (v, size, max) => Math.max(8, Math.min(v, max - size - 8));
-        if (sideways) {
-            along = clamp(oy + p.y + anchorItem.height / 2 - implicitHeight / 2, implicitHeight, scr.height);
-            across = edge === "left" ? ox + bar.width - overlap : scr.width - ox - overlap;
-        } else {
-            along = clamp(ox + p.x + anchorItem.width / 2 - implicitWidth / 2, implicitWidth, scr.width);
-            across = edge === "top" ? oy + bar.height - overlap : scr.height - oy - overlap;
-        }
+        const slot = anchorItem.parent?.parent ?? anchorItem;
+        const d = bar.drawerPlace(slot, bodyLength, fillet);
+        filletLow = d.low;
+        filletHigh = d.high;
+        along = d.start + (sideways ? o.y : o.x);
+        if (sideways)
+            across = edge === "left" ? o.x + bar.width - overlap : scr.width - o.x - overlap;
+        else
+            across = edge === "top" ? o.y + bar.height - overlap : scr.height - o.y - overlap;
         // Tell the bar where the drawer hangs (its island grows to carry it).
-        const start = along - (sideways ? oy : ox);
-        bar.drawerSpan = { slot: anchorItem.parent?.parent ?? null, start: start, end: start + (sideways ? implicitHeight : implicitWidth) };
+        bar.drawerSpan = { slot: slot, start: d.start, end: d.end, squareLow: d.squareLow, squareHigh: d.squareHigh };
     }
 
     screen: bar?.screen ?? null
@@ -98,8 +100,8 @@ PanelWindow {
     visible: false
     color: "transparent"
     // The drawer body plus room for the fillets on both ends along the bar.
-    implicitWidth: column.implicitWidth + theme.space.m * 2 + (sideways ? overlap : fillet * 2)
-    implicitHeight: column.implicitHeight + theme.space.m * 2 + (sideways ? fillet * 2 : overlap)
+    implicitWidth: sideways ? column.implicitWidth + theme.space.m * 2 + overlap : bodyLength + filletLow + filletHigh
+    implicitHeight: sideways ? bodyLength + filletLow + filletHigh : column.implicitHeight + theme.space.m * 2 + overlap
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "lc-panel"
@@ -135,6 +137,8 @@ PanelWindow {
         anchors.fill: parent
         edge: root.edge
         fillet: root.fillet
+        filletLow: root.filletLow
+        filletHigh: root.filletHigh
         overlap: root.overlap
         // Opaque: a panel must stay readable (the island is at most a hair lighter).
         color: root.theme.color.surface

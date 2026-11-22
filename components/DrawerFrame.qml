@@ -21,6 +21,10 @@ Item {
     property string edge: "top"
     property real radius: theme.radius.panel
     property real fillet: 12
+    // Fillet at each end along the bar (low = left / top); 0 = the body
+    // continues the island's end in a straight line.
+    property real filletLow: fillet
+    property real filletHigh: fillet
     // How far it reaches into the bar (the bar's inner border width).
     property real overlap: 1
     property color color: theme.color.surface
@@ -54,9 +58,13 @@ Item {
         Shape {
             id: shape
 
-            readonly property real f: root.fillet
+            // Canonical (top bar) left / right fillets: the rotation turns
+            // the canonical left end into the screen's right (bottom bar)
+            // or bottom (left bar) end.
+            readonly property real fl: root.edge === "bottom" || root.edge === "left" ? root.filletHigh : root.filletLow
+            readonly property real fr: root.edge === "bottom" || root.edge === "left" ? root.filletLow : root.filletHigh
             readonly property real o: root.overlap
-            readonly property real r: Math.max(0, Math.min(root.radius, (root.along - 2 * f) / 2, root.depth / 2))
+            readonly property real r: Math.max(0, Math.min(root.radius, (root.along - fl - fr) / 2, root.depth / 2))
             readonly property real cw: root.along
             readonly property real ch: root.depth
 
@@ -74,8 +82,8 @@ Item {
                 strokeWidth: -1
                 PathSvg {
                     path: {
-                        const f = shape.f, o = shape.o, r = shape.r, cw = shape.cw, ch = shape.ch;
-                        return `M 0 0 H ${cw} V ${o} A ${f} ${f} 0 0 0 ${cw - f} ${o + f} V ${ch - r} A ${r} ${r} 0 0 1 ${cw - f - r} ${ch} H ${f + r} A ${r} ${r} 0 0 1 ${f} ${ch - r} V ${o + f} A ${f} ${f} 0 0 0 0 ${o} Z`;
+                        const a = shape.fl, b = shape.fr, o = shape.o, r = shape.r, cw = shape.cw, ch = shape.ch;
+                        return `M 0 0 H ${cw} V ${o} A ${b} ${b} 0 0 0 ${cw - b} ${o + b} V ${ch - r} A ${r} ${r} 0 0 1 ${cw - b - r} ${ch} H ${a + r} A ${r} ${r} 0 0 1 ${a} ${ch - r} V ${o + a} A ${a} ${a} 0 0 0 0 ${o} Z`;
                     }
                 }
             }
@@ -89,8 +97,10 @@ Item {
                 capStyle: ShapePath.FlatCap
                 PathSvg {
                     path: {
-                        const f = shape.f, o = shape.o, r = shape.r, cw = shape.cw, ch = shape.ch;
-                        return `M 0 ${o} A ${f} ${f} 0 0 1 ${f} ${o + f} V ${ch - r} A ${r} ${r} 0 0 0 ${f + r} ${ch} H ${cw - f - r} A ${r} ${r} 0 0 0 ${cw - f} ${ch - r} V ${o + f} A ${f} ${f} 0 0 1 ${cw} ${o}`;
+                        const a = shape.fl, b = shape.fr, o = shape.o, r = shape.r, cw = shape.cw, ch = shape.ch;
+                        // No fillet on a side: the line starts at the island's
+                        // own border (no stroke inside the bar).
+                        return `M 0 ${a > 0 ? o : 0} A ${a} ${a} 0 0 1 ${a} ${o + a} V ${ch - r} A ${r} ${r} 0 0 0 ${a + r} ${ch} H ${cw - b - r} A ${r} ${r} 0 0 0 ${cw - b} ${ch - r} V ${o + b} A ${b} ${b} 0 0 1 ${cw} ${b > 0 ? o : 0}`;
                     }
                 }
             }
@@ -101,10 +111,10 @@ Item {
             id: body
 
             opacity: root.contentOpacity
-            x: root.edge === "left" ? root.overlap : root.sideways ? 0 : root.fillet
-            y: root.edge === "top" ? root.overlap : !root.sideways ? 0 : root.fillet
-            width: root.sideways ? root.width - root.overlap : root.width - root.fillet * 2
-            height: root.sideways ? root.height - root.fillet * 2 : root.height - root.overlap
+            x: root.edge === "left" ? root.overlap : root.sideways ? 0 : root.filletLow
+            y: root.edge === "top" ? root.overlap : !root.sideways ? 0 : root.filletLow
+            width: root.sideways ? root.width - root.overlap : root.width - root.filletLow - root.filletHigh
+            height: root.sideways ? root.height - root.filletLow - root.filletHigh : root.height - root.overlap
         }
     }
 }

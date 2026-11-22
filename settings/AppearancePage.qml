@@ -51,6 +51,39 @@ Column {
                 onPicked: value => Config.set("appearance.appIcons", value || undefined)
             }
         }
+
+        Field {
+            label: I18n.tr("settings.appIconTint")
+            hint: I18n.tr("settings.appIconTintHint")
+            Slider {
+                width: 220
+                from: 0.2
+                to: 1
+                value: Config.get("appearance.appIconTint") ?? 0.6
+                onMoved: value => Config.set("appearance.appIconTint", Math.round(value * 100) / 100)
+            }
+        }
+
+        Field {
+            label: I18n.tr("settings.appIconContrast")
+            hint: I18n.tr("settings.appIconContrastHint")
+            Slider {
+                width: 220
+                from: 0.1
+                to: 0.8
+                value: Config.get("appearance.appIconContrast") ?? 0.35
+                onMoved: value => Config.set("appearance.appIconContrast", Math.round(value * 100) / 100)
+            }
+        }
+
+        Field {
+            label: I18n.tr("settings.appIconGuard")
+            hint: I18n.tr("settings.appIconGuardHint")
+            Switch {
+                checked: Config.get("appearance.appIconGuard") ?? true
+                onToggled: Config.set("appearance.appIconGuard", !checked)
+            }
+        }
     }
 
     Section {

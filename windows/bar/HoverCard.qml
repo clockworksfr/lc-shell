@@ -24,6 +24,9 @@ PopupWindow {
     // +1: a popup's position is rounded; make sure the border line is covered.
     readonly property real overlap: Math.max(1, host?.look?.border ?? 0) + 1
     readonly property bool sideways: host?.edge === "left" || host?.edge === "right"
+    // Fillets at each end (place(): 0 where the card continues its island).
+    property real filletLow: fillet
+    property real filletHigh: fillet
 
     function showFor(target: Item): void {
         if (visible && slot === target)
@@ -65,33 +68,32 @@ PopupWindow {
     function place(): void {
         if (!slot || !host)
             return;
-        const p = slot.mapToItem(host.contentItem, 0, 0);
-        const w = slot.width;
-        const h = slot.height;
+        // The anchor rect spans exactly the drawer along the bar: the popup,
+        // centered on it, lands where drawerPlace() put it.
+        const d = host.drawerPlace(slot, sideways ? bodyHeight : 380, fillet);
+        filletLow = d.low;
+        filletHigh = d.high;
+        const span = d.end - d.start;
         let rect;
         let side;
         switch (host.edge) {
         case "bottom":
-            rect = Qt.rect(p.x - fillet, overlap, w + fillet * 2, 0);
+            rect = Qt.rect(d.start, overlap, span, 0);
             side = Edges.Top;
             break;
         case "left":
-            rect = Qt.rect(host.width - overlap, p.y - fillet, 0, h + fillet * 2);
+            rect = Qt.rect(host.width - overlap, d.start, 0, span);
             side = Edges.Right;
             break;
         case "right":
-            rect = Qt.rect(overlap, p.y - fillet, 0, h + fillet * 2);
+            rect = Qt.rect(overlap, d.start, 0, span);
             side = Edges.Left;
             break;
         default:
-            rect = Qt.rect(p.x - fillet, host.height - overlap, w + fillet * 2, 0);
+            rect = Qt.rect(d.start, host.height - overlap, span, 0);
             side = Edges.Bottom;
         }
-        // The popup is centered on the anchor rect: its real extent along
-        // the bar is the card's size around the rect's center.
-        const center = sideways ? rect.y + rect.height / 2 : rect.x + rect.width / 2;
-        const size = sideways ? implicitHeight : implicitWidth;
-        host.drawerSpan = { slot: slot, start: center - size / 2, end: center + size / 2 };
+        host.drawerSpan = { slot: slot, start: d.start, end: d.end, squareLow: d.squareLow, squareHigh: d.squareHigh };
         anchor.rect.x = rect.x;
         anchor.rect.y = rect.y;
         anchor.rect.width = rect.width;
@@ -104,8 +106,8 @@ PopupWindow {
     anchor.window: host
     color: "transparent"
     readonly property real bodyHeight: Math.min(loader.implicitHeight + theme.space.l * 2, (host?.screen?.height ?? 1000) * 0.6)
-    implicitWidth: sideways ? 380 + overlap : 380 + fillet * 2
-    implicitHeight: sideways ? bodyHeight + fillet * 2 : bodyHeight + overlap
+    implicitWidth: sideways ? 380 + overlap : 380 + filletLow + filletHigh
+    implicitHeight: sideways ? bodyHeight + filletLow + filletHigh : bodyHeight + overlap
 
     Item {
         id: content
@@ -118,6 +120,8 @@ PopupWindow {
             anchors.fill: parent
             edge: root.host?.edge ?? "top"
             fillet: root.fillet
+            filletLow: root.filletLow
+            filletHigh: root.filletHigh
             overlap: root.overlap
             color: root.theme.color.surface
             lineWidth: root.host?.look?.border ?? 0

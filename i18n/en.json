@@ -237,5 +237,11 @@
   "settings.ofTheme": "Theme's",
   "settings.appIcons.native": "Original",
   "settings.appIcons.tinted": "Tinted",
-  "settings.appIcons.mono": "Monochrome"
+  "settings.appIcons.mono": "Monochrome",
+  "settings.appIconTint": "Tint strength",
+  "settings.appIconTintHint": "Tinted icons: how much of the theme's accent replaces their colors",
+  "settings.appIconContrast": "Monochrome detail",
+  "settings.appIconContrastHint": "Monochrome icons: from which lightness parts are drawn fainter",
+  "settings.appIconGuard": "Keep icons visible",
+  "settings.appIconGuardHint": "Inverts the lightness of an icon that would vanish on the bar (white icon on a light bar…)"
 }

@@ -237,5 +237,11 @@
   "settings.ofTheme": "Du thème",
   "settings.appIcons.native": "D'origine",
   "settings.appIcons.tinted": "Teintées",
-  "settings.appIcons.mono": "Monochromes"
+  "settings.appIcons.mono": "Monochromes",
+  "settings.appIconTint": "Intensité de la teinte",
+  "settings.appIconTintHint": "Icônes teintées : part de l'accent du thème qui remplace leurs couleurs",
+  "settings.appIconContrast": "Détail en monochrome",
+  "settings.appIconContrastHint": "Icônes monochromes : clarté à partir de laquelle les parties sont atténuées",
+  "settings.appIconGuard": "Garder les icônes visibles",
+  "settings.appIconGuardHint": "Inverse la clarté d'une icône qui disparaîtrait sur la barre (icône blanche sur barre claire…)"
 }

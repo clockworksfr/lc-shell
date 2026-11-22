@@ -106,10 +106,16 @@ Item {
                     text = "";
                 }
                 Keys.onEscapePressed: text = ""
+                // Empty field: no caret over the hint (the hint stays).
+                cursorDelegate: Rectangle {
+                    width: 2
+                    color: root.theme.color.ink
+                    visible: password.activeFocus && password.text.length > 0
+                }
 
                 ThemedText {
                     anchors.centerIn: parent
-                    visible: !password.text && !password.activeFocus
+                    visible: !password.text
                     text: Lock.checking ? I18n.tr("lock.checking") : I18n.tr("lock.password")
                     color: root.theme.color.soft
                 }

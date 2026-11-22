@@ -126,8 +126,56 @@ PanelWindow {
     }
 
     // Open drawer (panel or card), so its island grows to carry it:
-    // { slot (WidgetSlot), start, end } along the bar, in bar coordinates.
+    // { slot (WidgetSlot), start, end, squareLow, squareHigh } along the
+    // bar, in bar coordinates.
     property var drawerSpan: null
+
+    // Where a drawer whose body is `bodyLen` long hangs for `slot`, along
+    // the bar (bar coordinates; low = left / top end):
+    // { start, end (with the fillets), low, high (fillet sizes),
+    //   squareLow, squareHigh }.
+    // Centered on the widget, body kept 8 px from the screen's edges. In
+    // islands, when the island can't grow far enough on a side (screen or
+    // bar end), the body aligns with the island's end there, without a
+    // fillet, and that corner of the island turns square (design study,
+    // case B).
+    function drawerPlace(slot: Item, bodyLen: real, fillet: real): var {
+        const p = slot.mapToItem(contentItem, 0, 0);
+        const center = vertical ? p.y + slot.height / 2 : p.x + slot.width / 2;
+        const o = origin();
+        const off = vertical ? o.y : o.x;
+        const scrLen = vertical ? screen.height : screen.width;
+        const len = vertical ? height : width;
+        let b0 = Math.max(8 - off, Math.min(center - bodyLen / 2, scrLen - off - bodyLen - 8));
+        let low = fillet;
+        let high = fillet;
+        let squareLow = false;
+        let squareHigh = false;
+        const group = slot.parent?.parent ?? null;
+        if (islands && group) {
+            const gp = group.mapToItem(contentItem, 0, 0);
+            const i0 = vertical ? gp.y : gp.x;
+            const i1 = i0 + (vertical ? group.height : group.width);
+            const r = look.radius ?? 0;
+            const lo = Math.min(i0, 8);
+            const hi = Math.max(i1, len - 8);
+            if (Math.min(i0, b0 - fillet - r) < lo) {
+                b0 = i0;
+                low = 0;
+                squareLow = true;
+            }
+            if (Math.max(i1, b0 + bodyLen + fillet + r) > hi && !squareLow) {
+                b0 = i1 - bodyLen;
+                high = 0;
+                squareHigh = true;
+            }
+        } else {
+            // Full bar: fillets never leave the bar.
+            low = Math.min(fillet, Math.max(0, b0));
+            high = Math.min(fillet, Math.max(0, len - b0 - bodyLen));
+        }
+        return { start: b0 - low, end: b0 + bodyLen + high, low: low, high: high, squareLow: squareLow, squareHigh: squareHigh };
+    }
 
     // --- Hover cards (docs/bar-editing.md) ---
     // 350 ms still on a block shows its card; moving to a neighbour while

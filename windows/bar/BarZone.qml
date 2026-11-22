@@ -79,8 +79,13 @@ Item {
                     return zone.vertical ? p.y : p.x;
                 }
                 readonly property real length: zone.vertical ? group.height : group.width
-                property real growStart: carries ? Math.max(0, startOnBar - (span.start - zone.look.radius)) : 0
-                property real growEnd: carries ? Math.max(0, (span.end + zone.look.radius) - (startOnBar + length)) : 0
+                property real growStart: carries && !span.squareLow ? Math.max(0, startOnBar - (span.start - zone.look.radius)) : 0
+                property real growEnd: carries && !span.squareHigh ? Math.max(0, (span.end + zone.look.radius) - (startOnBar + length)) : 0
+                // Corners on the drawer's side turn square where the drawer
+                // continues the island's end (case B).
+                readonly property bool squareLow: carries && !!span.squareLow
+                readonly property bool squareHigh: carries && !!span.squareHigh
+                readonly property string edge: zone.host.edge
 
                 Behavior on growStart {
                     NumberAnimation {
@@ -103,6 +108,10 @@ Item {
                     anchors.bottomMargin: zone.vertical ? -group.growEnd : 0
                     visible: zone.islands
                     radius: zone.look.radius
+                    topLeftRadius: (group.edge === "bottom" && group.squareLow) || (group.edge === "right" && group.squareLow) ? 0 : radius
+                    topRightRadius: (group.edge === "bottom" && group.squareHigh) || (group.edge === "left" && group.squareLow) ? 0 : radius
+                    bottomLeftRadius: (group.edge === "top" && group.squareLow) || (group.edge === "right" && group.squareHigh) ? 0 : radius
+                    bottomRightRadius: (group.edge === "top" && group.squareHigh) || (group.edge === "left" && group.squareHigh) ? 0 : radius
                     color: Qt.alpha(zone.theme.color.surface, zone.look.opacity)
                     border.width: zone.look.border
                     border.color: zone.theme.color.line

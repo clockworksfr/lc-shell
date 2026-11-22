@@ -17,6 +17,12 @@ Column {
     readonly property var look: Object.assign({}, themeBar, bar)
     readonly property var zones: ["left", "center", "right"]
     readonly property var blockTypes: Object.keys(Registry.widgets)
+    // Orientations the bar takes on screens (mode default + per-screen
+    // position overrides): length choices fit all of them.
+    readonly property var orientations: {
+        const positions = [look.position ?? "top", ...(Config.get("screens") ?? []).map(s => s.bar?.position).filter(p => !!p)];
+        return [...new Set(positions.map(p => p === "left" || p === "right" ? "vertical" : "horizontal"))];
+    }
 
     function setLook(key: string, value: var): void {
         Config.set(`modes.normal.bar.${key}`, value);
@@ -92,7 +98,7 @@ Column {
             hint: I18n.tr("settings.barLengthHint")
             Choice {
                 // Lengths that fit the bar's orientation.
-                model: ((root.look.position === "left" || root.look.position === "right") ? [0, 800, 1200, 1600] : [0, 1600, 2560, 3200]).map(v => ({ value: v, label: v ? `${v} px` : I18n.tr("settings.fullWidth") }))
+                model: (root.orientations.length > 1 ? [0, 800, 1200, 1600, 2560, 3200] : root.orientations[0] === "vertical" ? [0, 800, 1200, 1600] : [0, 1600, 2560, 3200]).map(v => ({ value: v, label: v ? `${v} px` : I18n.tr("settings.fullWidth") }))
                 value: root.look.length ?? 0
                 onPicked: value => root.setLook("length", value)
             }
