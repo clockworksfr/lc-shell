@@ -68,5 +68,6 @@ ShellRoot {
         Idle.enabled;
         Clipboard.count;
         HyprBorders.enabled;
+        HyprRules.applied;
     }
 }

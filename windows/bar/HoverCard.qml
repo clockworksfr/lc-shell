@@ -15,10 +15,9 @@ import qs.theme
 // A layer surface along the whole bar side (input limited to the drawer):
 // a popup can't move while shown, and only shows while the bar has the
 // pointer. The surface stays mapped (empty input region and nothing drawn
-// while closed): mapping a new one at each opening cost frames. Its depth
-// follows the drawer's (not the 60 % maximum), so each animation frame
-// redraws and recomposites only that band of the screen. The card's
-// content stays loaded between openings of the same type.
+// while closed) and only grows (deepest card so far, not the 60 %
+// maximum): no compositor animation or stretched frame at each opening.
+// The card's content stays loaded between openings of the same type.
 PanelWindow {
     id: root
 
@@ -56,9 +55,10 @@ PanelWindow {
     // Card type whose content is loaded (kept after closing).
     property string cardType
 
+    // Only grows: resizing the surface as it opens would show a frame at
+    // the old size (stretched by the compositor).
     function fitDepth(grow: bool): void {
-        const need = Math.ceil(bodyHeight + overlap + 2);
-        depth = grow ? Math.max(depth, need) : need;
+        depth = Math.max(depth, Math.ceil(bodyHeight + overlap + 2));
     }
 
     function showFor(target: Item): void {
@@ -85,8 +85,8 @@ PanelWindow {
             frame.progress = 0;
         phase = "opening";
         enter.duration = Motion.ms(theme, "base", screenName);
-        enter.easing.type = Motion.easing(theme);
-        enter.easing.overshoot = Motion.overshoot(theme);
+        // A zone that grows: no overshoot (it would grow past its size).
+        enter.easing.type = Easing.OutCubic;
         enter.restart();
     }
 
@@ -256,8 +256,6 @@ PanelWindow {
             root.phase = "";
             root.morph = false;
             root.shown = null;
-            // A 1 px band while closed: no invisible layer over the windows.
-            root.depth = 1;
             root.slot = null;
             if (root.host?.drawerSpan)
                 root.host.drawerSpan = null;

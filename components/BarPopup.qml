@@ -48,8 +48,8 @@ PanelWindow {
         visible = true;
         slide.to = 1;
         slide.duration = Motion.ms(theme, "base", bar?.screen?.name ?? "");
-        slide.easing.type = Motion.easing(theme);
-        slide.easing.overshoot = Motion.overshoot(theme);
+        // A zone that grows: no overshoot (it would grow past its size).
+        slide.easing.type = Easing.OutCubic;
         slide.restart();
     }
 
