@@ -14,6 +14,32 @@ Singleton {
     readonly property int bands: 32
     property var values: []
     property string lastLine
+    // Bumped with each new frame; resampled(count) caches per frame.
+    property int frame: 0
+    property var cache: ({})
+
+    // `count` values from the bands (max of each group), once a frame.
+    function resampled(count: int): var {
+        const hit = cache[count];
+        if (hit && hit.frame === frame)
+            return hit.levels;
+        const v = values;
+        const out = new Array(count);
+        for (let i = 0; i < count; i++) {
+            if (!v.length) {
+                out[i] = 0;
+                continue;
+            }
+            const a = Math.floor(i * v.length / count);
+            const b = Math.max(a + 1, Math.floor((i + 1) * v.length / count));
+            let m = 0;
+            for (let j = a; j < b; j++)
+                m = Math.max(m, v[j] ?? 0);
+            out[i] = m;
+        }
+        cache[count] = { frame: frame, levels: out };
+        return out;
+    }
     readonly property bool active: refCount > 0
 
     readonly property string configPath: Quickshell.cachePath("cava.conf")
@@ -59,12 +85,15 @@ Singleton {
                 for (let i = 0; i < parts.length; i++)
                     if (parts[i] !== "")
                         out.push(Math.min(1, Number(parts[i]) / 100));
-                if (out.length)
+                if (out.length) {
                     root.values = out;
+                    root.frame++;
+                }
             }
         }
         onRunningChanged: if (!running) {
             root.values = [];
+            root.frame++;
             root.lastLine = "";
         }
     }

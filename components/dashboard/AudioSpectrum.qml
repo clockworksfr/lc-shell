@@ -21,24 +21,9 @@ Item {
     Component.onCompleted: Spectrum.refCount++
     Component.onDestruction: Spectrum.refCount--
 
-    // `count` values from the service's bands (max of each group).
-    readonly property var levels: {
-        const v = Spectrum.values;
-        const out = [];
-        for (let i = 0; i < count; i++) {
-            if (!v.length) {
-                out.push(0);
-                continue;
-            }
-            const a = Math.floor(i * v.length / count);
-            const b = Math.max(a + 1, Math.floor((i + 1) * v.length / count));
-            let m = 0;
-            for (let j = a; j < b; j++)
-                m = Math.max(m, v[j] ?? 0);
-            out.push(m);
-        }
-        return out;
-    }
+    // `count` values from the service's bands (max of each group), computed
+    // once a frame for every spectrum of that count.
+    readonly property var levels: Spectrum.frame, Spectrum.resampled(count)
 
     // Bars, lines, segments, dots.
     Row {
@@ -274,6 +259,9 @@ Item {
                 strokeWidth: 1.4
                 PathPolyline {
                     path: {
+                        // Modulaire only (it ran in every theme, 121 points a frame).
+                        if (root.look !== "modulaire")
+                            return [];
                         const w = trace.width, h = trace.height;
                         const v = root.levels;
                         const n = Math.min(8, v.length);
