@@ -24,6 +24,10 @@ IpcHandler {
     function quickSettings(open: bool): void {
         Showcase.togglesPanel = open;
     }
+    // Lights panel on a screen ("" closes it), without grabbing (reviews).
+    function huePanel(screen: string): void {
+        Showcase.huePanel = screen;
+    }
     function showcase(type: string): void {
         Showcase.type = Showcase.types.includes(type) ? type : "";
     }

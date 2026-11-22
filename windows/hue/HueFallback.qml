@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.components.dashboard
+import qs.dashboard
 import qs.dashboard.modules
 import qs.services
 import qs.theme
@@ -28,6 +29,15 @@ Scope {
         }
     }
 
+    // Reviews: opened over IPC, no grab.
+    Connections {
+        target: Showcase
+
+        function onHuePanelChanged(): void {
+            root.target = Quickshell.screens.find(s => s.name === Showcase.huePanel) ?? null;
+        }
+    }
+
     LazyLoader {
         active: !!root.target
 
@@ -46,7 +56,7 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
             HyprlandFocusGrab {
-                active: true
+                active: !Showcase.huePanel
                 windows: [panel]
                 onCleared: root.target = null
             }

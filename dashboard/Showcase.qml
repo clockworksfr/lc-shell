@@ -15,6 +15,8 @@ Singleton {
     // Reviews: the quick-settings panel opened without a click (and without
     // grabbing the keyboard).
     property bool togglesPanel: false
+    // Reviews: the lights panel (Super+U fallback) on this screen, no grab.
+    property string huePanel: ""
     readonly property var types: ["clock", "media", "weather", "system", "lyrics", "vu", "workspaces", "toggles", "hue"]
 
     function next(): void {
