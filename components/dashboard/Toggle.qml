@@ -197,7 +197,6 @@ Item {
         Row {
             anchors.centerIn: parent
             spacing: root.labelSize * 0.5
-            width: Math.min(implicitWidth, parent.width - parent.height * 0.6)
 
             Icon {
                 id: pillIcon
@@ -211,8 +210,25 @@ Item {
             // Name, and its state under it when the pill is tall enough
             // (two lines of data: "SALON / 70 %").
             Column {
+                // Measured apart (the texts' own widths follow the column).
+                readonly property real room: pill.width - pill.height * 0.6 - pillIcon.width - root.labelSize * 0.5
+
                 anchors.verticalCenter: parent.verticalCenter
-                width: Math.min(Math.max(pillLabel.implicitWidth, pillSub.visible ? pillSub.implicitWidth : 0), pill.width - pill.height * 0.6 - pillIcon.width - parent.parent.spacing)
+                width: Math.max(0, Math.min(room, Math.max(labelMetrics.advanceWidth, pillSub.visible ? subMetrics.advanceWidth : 0) + 2))
+
+                TextMetrics {
+                    id: labelMetrics
+                    text: root.label.toUpperCase()
+                    font.family: root.theme.font.mono
+                    font.pixelSize: root.labelSize
+                }
+
+                TextMetrics {
+                    id: subMetrics
+                    text: root.sub
+                    font.family: root.theme.font.mono
+                    font.pixelSize: Math.max(10, root.labelSize * 0.72)
+                }
 
                 ThemedText {
                     id: pillLabel
