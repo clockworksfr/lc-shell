@@ -1,64 +1,77 @@
 import QtQuick
 import Quickshell
-import qs.widgets
 import qs.components
 import qs.i18n
 import qs.services
 import qs.theme
 
-// Bar of normal screens (mode defaults): look and blocks per zone.
-// Per-screen overrides (Screens page, settings.json) still apply on top.
+// Bar of normal screens: look, for all normal screens (mode defaults) or
+// one screen (its profile overrides them). Widgets are arranged in the
+// bar's edit mode ("Edit the bar").
 Column {
     id: root
 
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
-    readonly property var bar: Config.get("modes.normal.bar") ?? {}
+    // "" = all normal screens, else a screen name.
+    property string target: ""
+    readonly property var normalScreens: Quickshell.screens.filter(s => (Config.forScreen(s).mode ?? "normal") === "normal")
+    readonly property ShellScreen targetScreen: target ? (Quickshell.screens.find(s => s.name === target) ?? null) : null
+    readonly property var modeBar: Config.get("modes.normal.bar") ?? {}
     readonly property var themeBar: Themes.resolve(Themes.themeFor("normal"), false, "normal").bar
-    readonly property var look: Object.assign({}, themeBar, bar)
-    readonly property var zones: ["left", "center", "right"]
-    readonly property var blockTypes: Object.keys(Registry.widgets)
-    // Orientations the bar takes on screens (mode default + per-screen
-    // position overrides): length choices fit all of them.
+    readonly property var screenBar: {
+        if (!targetScreen)
+            return {};
+        const bar = Config.profileFor(targetScreen).bar;
+        return bar && typeof bar === "object" ? bar : {};
+    }
+    readonly property var look: targetScreen
+        ? Object.assign({}, Themes.resolve(Config.forScreen(targetScreen).theme ?? Themes.themeFor("normal"), false, "normal").bar, modeBar, screenBar)
+        : Object.assign({}, themeBar, modeBar)
+    // Orientations the bar takes: length choices fit all of them.
     readonly property var orientations: {
-        const positions = [look.position ?? "top", ...(Config.get("screens") ?? []).map(s => s.bar?.position).filter(p => !!p)];
+        const positions = targetScreen ? [look.position ?? "top"] : [look.position ?? "top", ...(Config.get("screens") ?? []).map(s => s.bar?.position).filter(p => !!p)];
         return [...new Set(positions.map(p => p === "left" || p === "right" ? "vertical" : "horizontal"))];
     }
 
     function setLook(key: string, value: var): void {
-        Config.set(`modes.normal.bar.${key}`, value);
-    }
-
-    function entries(zone: string): var {
-        return (bar[zone] ?? []).slice();
-    }
-
-    function setEntries(zone: string, list: var): void {
-        Config.set(`modes.normal.bar.${zone}`, list);
-    }
-
-    function move(zone: string, index: int, delta: int): void {
-        const list = entries(zone);
-        const target = index + delta;
-        if (target < 0 || target >= list.length)
+        if (!targetScreen) {
+            Config.set(`modes.normal.bar.${key}`, value);
             return;
-        [list[index], list[target]] = [list[target], list[index]];
-        setEntries(zone, list);
-    }
-
-    function moveToZone(zone: string, index: int, other: string): void {
-        const list = entries(zone);
-        const [entry] = list.splice(index, 1);
-        setEntries(zone, list);
-        setEntries(other, [...entries(other), entry]);
-    }
-
-    function remove(zone: string, index: int): void {
-        const list = entries(zone);
-        list.splice(index, 1);
-        setEntries(zone, list);
+        }
+        const next = Object.assign({}, screenBar);
+        next[key] = value;
+        Config.setScreen(targetScreen, "bar", next);
     }
 
     spacing: theme.space.s
+
+    Section {
+        title: I18n.tr("settings.barTarget")
+
+        Field {
+            label: I18n.tr("settings.barTargetLabel")
+            hint: root.target ? I18n.tr("settings.barTargetScreenHint") : I18n.tr("settings.barTargetAllHint")
+            Choice {
+                model: [{ value: "", label: I18n.tr("settings.barTargetAll") }, ...root.normalScreens.map(s => ({ value: s.name, label: s.name }))]
+                value: root.target
+                onPicked: value => root.target = value
+            }
+        }
+
+        Field {
+            label: I18n.tr("settings.barWidgets")
+            hint: I18n.tr("settings.barWidgetsHint")
+            Button {
+                primary: true
+                icon: "edit"
+                text: I18n.tr("bar.menu.edit")
+                onClicked: {
+                    Settings.opened = false;
+                    ShellState.editing = true;
+                }
+            }
+        }
+    }
 
     Section {
         title: I18n.tr("settings.barLook")
@@ -124,122 +137,4 @@ Column {
         }
     }
 
-    Repeater {
-        model: root.zones
-
-        Section {
-            id: zoneSection
-
-            required property string modelData
-            readonly property string zone: modelData
-
-            title: I18n.tr(`settings.zone.${zone}`)
-
-            Repeater {
-                model: root.entries(zoneSection.zone)
-
-                Rectangle {
-                    id: entryRow
-
-                    required property var modelData
-                    required property int index
-                    readonly property string type: Registry.typeOf(modelData)
-
-                    width: zoneSection.width
-                    implicitHeight: Math.max(root.theme.hit, 36)
-                    radius: root.theme.radius.control
-                    color: root.theme.color.surface2
-
-                    ThemedText {
-                        anchors.left: parent.left
-                        anchors.leftMargin: root.theme.space.m
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: I18n.tr(`widget.${entryRow.type}`)
-                    }
-
-                    Row {
-                        anchors.right: parent.right
-                        anchors.rightMargin: root.theme.space.s
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: root.theme.space.xs
-
-                        Repeater {
-                            model: [
-                                { glyph: "↑", run: () => root.move(zoneSection.zone, entryRow.index, -1) },
-                                { glyph: "↓", run: () => root.move(zoneSection.zone, entryRow.index, 1) },
-                                ...root.zones.filter(z => z !== zoneSection.zone).map(z => ({ glyph: I18n.tr(`settings.zoneShort.${z}`), run: () => root.moveToZone(zoneSection.zone, entryRow.index, z) })),
-                                { glyph: "✕", run: () => root.remove(zoneSection.zone, entryRow.index) }
-                            ]
-
-                            Rectangle {
-                                required property var modelData
-                                width: Math.max(32, glyph.implicitWidth + root.theme.space.m)
-                                height: 28
-                                radius: root.theme.radius.control
-                                color: buttonArea.containsMouse ? root.theme.color.surface3 : "transparent"
-
-                                ThemedText {
-                                    id: glyph
-                                    anchors.centerIn: parent
-                                    text: parent.modelData.glyph
-                                    font.pixelSize: root.theme.font.sizeS
-                                }
-
-                                MouseArea {
-                                    id: buttonArea
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: parent.modelData.run()
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Add a block to this zone.
-            Flow {
-                width: zoneSection.width
-                spacing: root.theme.space.xs
-                // Nothing left to add: no empty "Add:" line.
-                visible: addable.count > 0
-
-                ThemedText {
-                    text: I18n.tr("settings.addBlock")
-                    color: root.theme.color.soft
-                    height: 28
-                }
-
-                Repeater {
-                    id: addable
-                    // Only widgets not already in the bar.
-                    model: root.blockTypes.filter(t => !root.zones.some(z => BarEditor.groups(root.entries(z)).some(g => g.some(e => Registry.typeOf(e) === t))))
-
-                    Rectangle {
-                        required property string modelData
-                        width: addLabel.implicitWidth + root.theme.space.m
-                        height: 28
-                        radius: root.theme.radius.full
-                        color: addArea.containsMouse ? root.theme.color.surface3 : root.theme.color.surface2
-
-                        ThemedText {
-                            id: addLabel
-                            anchors.centerIn: parent
-                            text: `+ ${I18n.tr(`widget.${parent.modelData}`)}`
-                            font.pixelSize: root.theme.font.sizeS
-                        }
-
-                        MouseArea {
-                            id: addArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.setEntries(zoneSection.zone, [...root.entries(zoneSection.zone), parent.modelData])
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

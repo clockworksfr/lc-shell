@@ -4,11 +4,12 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.components
 import qs.i18n
+import qs.launcher
 import qs.theme
 
 // Settings app: a centered panel on the focused screen (layer surface, so
-// Hyprland never tiles it over the user's windows), sidebar of pages on the
-// left. Every change is applied live and written to the user settings.
+// Hyprland never tiles it over the user's windows), sidebar on the left:
+// search (every setting, Index.qml) and the pages. Every change is applied live and written to the user settings.
 // Close: the × button, Escape, or `settings close`. Clicking elsewhere keeps
 // it open (to watch a change apply).
 PanelWindow {
@@ -65,10 +66,18 @@ PanelWindow {
         Rectangle {
             id: sidebar
 
+            readonly property string query: Settings.query
+            readonly property var results: {
+                const q = Search.normalize(query.trim());
+                if (!q)
+                    return [];
+                return Index.entries.filter(e => Search.normalize(I18n.tr(e.key)).includes(q) || (e.hint && Search.normalize(I18n.tr(e.hint)).includes(q))).slice(0, 12);
+            }
+
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            width: 220
+            width: 240
             color: win.theme.color.surface
 
             Column {
@@ -80,23 +89,54 @@ PanelWindow {
                     text: I18n.tr("settings.title")
                     font.pixelSize: win.theme.font.sizeL
                     font.weight: Font.DemiBold
-                    bottomPadding: win.theme.space.m
+                    bottomPadding: win.theme.space.s
+                }
+
+                TextField {
+                    width: parent.width
+                    text: Settings.query
+                    placeholder: I18n.tr("settings.search")
+                    onEdited: text => Settings.query = text
+                    onCommitted: text => {
+                        Settings.query = text;
+                        if (sidebar.results.length)
+                            Settings.show(sidebar.results[0].page, sidebar.results[0].key);
+                    }
+                }
+
+                Item {
+                    width: 1
+                    height: win.theme.space.xs
+                }
+
+                // Search results (the query is set) or the pages.
+                ThemedText {
+                    visible: !!sidebar.query.trim() && !sidebar.results.length
+                    width: parent.width
+                    wrapMode: Text.Wrap
+                    text: I18n.tr("settings.noResult")
+                    color: win.theme.color.soft
                 }
 
                 Repeater {
-                    model: Settings.pages
+                    model: sidebar.query.trim() ? sidebar.results : Settings.pages
 
-                    ListRow {
-                        required property string modelData
-                        title: I18n.tr(`settings.page.${modelData}`)
-                        selected: Settings.page === modelData
-                        onClicked: Settings.page = modelData
+                    NavRow {
+                        required property var modelData
+                        readonly property bool result: typeof modelData === "object"
+                        icon: result ? Settings.icons[modelData.page] : Settings.icons[modelData]
+                        title: result ? I18n.tr(modelData.key) : I18n.tr(`settings.page.${modelData}`)
+                        subtitle: result ? I18n.tr(`settings.page.${modelData.page}`) : ""
+                        selected: !result && Settings.page === modelData
+                        onClicked: result ? Settings.show(modelData.page, modelData.key) : Settings.page = modelData
                     }
                 }
             }
         }
 
         Flickable {
+            id: flick
+
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.left: sidebar.right
@@ -164,6 +204,78 @@ PanelWindow {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: Settings.opened = false
             }
+        }
+    }
+
+    // A setting pointed out by the search: scrolled into view.
+    Connections {
+        target: Settings
+
+        function onReveal(item: Item): void {
+            Qt.callLater(() => {
+                const y = item.mapToItem(flick.contentItem, 0, 0).y;
+                flick.contentY = Math.max(0, Math.min(y - flick.height / 3, flick.contentHeight - flick.height));
+            });
+        }
+    }
+
+    component NavRow: Rectangle {
+        id: row
+
+        property string icon
+        property string title
+        property string subtitle
+        property bool selected: false
+
+        signal clicked
+
+        width: parent?.width ?? 0
+        height: Math.max(win.theme.hit + 8, subtitle ? 48 : 38)
+        radius: win.theme.radius.control
+        color: selected ? Qt.alpha(win.theme.color.accent, 0.16) : rowArea.containsMouse ? win.theme.color.surface2 : "transparent"
+
+        Row {
+            anchors.verticalCenter: parent.verticalCenter
+            x: win.theme.space.s
+            width: parent.width - win.theme.space.s * 2
+            spacing: win.theme.space.s
+
+            Icon {
+                anchors.verticalCenter: parent.verticalCenter
+                name: row.icon
+                size: 20
+                filled: row.selected
+                color: row.selected ? win.theme.color.accent : win.theme.color.soft
+            }
+
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width - 28
+
+                ThemedText {
+                    width: parent.width
+                    elide: Text.ElideRight
+                    text: row.title
+                    font.weight: row.selected ? Font.DemiBold : Font.Normal
+                }
+
+                ThemedText {
+                    visible: !!row.subtitle
+                    width: parent.width
+                    elide: Text.ElideRight
+                    text: row.subtitle
+                    color: win.theme.color.soft
+                    font.pixelSize: win.theme.font.sizeS
+                }
+            }
+        }
+
+        MouseArea {
+            id: rowArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: row.clicked()
         }
     }
 }

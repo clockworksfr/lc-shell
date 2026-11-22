@@ -12,6 +12,8 @@ Rectangle {
     property string placeholder
 
     signal committed(string text)
+    // Every keystroke (live filtering).
+    signal edited(string text)
 
     implicitWidth: 240
     implicitHeight: Math.max(theme.hit, 32)
@@ -35,6 +37,7 @@ Rectangle {
         font.family: root.theme.font.family
         font.pixelSize: root.theme.font.sizeM
         onAccepted: root.committed(text)
+        onTextEdited: root.edited(text)
         onActiveFocusChanged: if (!activeFocus && text !== root.text) root.committed(text)
 
         ThemedText {

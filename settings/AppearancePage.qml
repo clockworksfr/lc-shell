@@ -99,6 +99,74 @@ Column {
             }
         }
 
+        // 24 h strip: light and dark ranges of the schedule, now marked.
+        Item {
+            id: strip
+
+            readonly property bool sun: root.schedule.type === "sun"
+            readonly property var sunTimes: sun && root.schedule.latitude !== undefined ? Sun.times(new Date(), root.schedule.latitude, root.schedule.longitude ?? 0) : null
+            function minutes(text: string): int {
+                const m = /^(\d{1,2}):(\d{2})$/.exec(text ?? "");
+                return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : -1;
+            }
+            readonly property int lightAt: sun ? (sunTimes?.sunrise ? sunTimes.sunrise.getHours() * 60 + sunTimes.sunrise.getMinutes() : (sunTimes?.polar === "day" ? 0 : -1)) : minutes(root.schedule.light ?? "07:30")
+            readonly property int darkAt: sun ? (sunTimes?.sunset ? sunTimes.sunset.getHours() * 60 + sunTimes.sunset.getMinutes() : (sunTimes?.polar === "day" ? 1440 : -1)) : minutes(root.schedule.dark ?? "19:30")
+
+            visible: Themes.variantMode === "auto" && lightAt >= 0 && darkAt >= 0
+            width: parent.width
+            height: 46
+
+            Rectangle {
+                id: bar
+
+                width: parent.width
+                height: 18
+                radius: 9
+                color: "#20232b"
+                clip: true
+
+                // Light range (may wrap past midnight).
+                Repeater {
+                    model: strip.lightAt <= strip.darkAt ? [[strip.lightAt, strip.darkAt]] : [[strip.lightAt, 1440], [0, strip.darkAt]]
+
+                    Rectangle {
+                        required property var modelData
+                        x: bar.width * modelData[0] / 1440
+                        width: bar.width * (modelData[1] - modelData[0]) / 1440
+                        height: bar.height
+                        color: "#f3efe4"
+                    }
+                }
+
+                // Now.
+                Rectangle {
+                    readonly property date now: clock.date
+                    x: bar.width * (now.getHours() * 60 + now.getMinutes()) / 1440 - 1
+                    width: 2
+                    height: bar.height
+                    color: root.theme.color.accent
+                }
+            }
+
+            Repeater {
+                model: [0, 6, 12, 18, 24]
+
+                ThemedText {
+                    required property int modelData
+                    x: Math.max(0, Math.min(strip.width - width, strip.width * modelData / 24 - width / 2))
+                    y: bar.height + 4
+                    text: `${String(modelData).padStart(2, "0")}h`
+                    color: root.theme.color.soft
+                    font.pixelSize: root.theme.font.sizeS
+                }
+            }
+
+            SystemClock {
+                id: clock
+                precision: SystemClock.Minutes
+            }
+        }
+
         Field {
             visible: Themes.variantMode === "auto"
             label: I18n.tr("settings.schedule")
@@ -140,6 +208,20 @@ Column {
                 text: root.schedule.latitude !== undefined ? `${root.schedule.latitude}` : ""
                 placeholder: "48.85"
                 onCommitted: text => !isNaN(parseFloat(text)) && Config.set("appearance.schedule.latitude", parseFloat(text))
+            }
+        }
+
+        Field {
+            visible: Themes.variantMode === "auto" && root.schedule.type === "sun" && !!Weather.location
+            label: I18n.tr("settings.sunFromWeather")
+            hint: Weather.location?.name ?? ""
+            Button {
+                icon: "location_on"
+                text: I18n.tr("settings.useWeatherPlace")
+                onClicked: {
+                    Config.set("appearance.schedule.latitude", Math.round(Weather.location.latitude * 100) / 100);
+                    Config.set("appearance.schedule.longitude", Math.round(Weather.location.longitude * 100) / 100);
+                }
             }
         }
 

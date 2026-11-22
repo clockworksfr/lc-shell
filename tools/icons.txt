@@ -97,3 +97,10 @@ radio_button_checked
 radio_button_unchecked
 check_box
 check_box_outline_blank
+palette
+view_quilt
+dashboard
+settings_accessibility
+content_copy
+folder_open
+toolbar
