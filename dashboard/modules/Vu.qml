@@ -14,11 +14,23 @@ ModuleBase {
 
     readonly property bool horizontal: inner.width >= inner.height
     readonly property var levels: monitor.peaks.slice(0, root.options.channels === "all" || !root.options.channels ? 8 : 2)
+    // With nothing playing, PipeWire stops sending peaks: the last ones
+    // would stay. Peaks older than 250 ms count as silence.
+    property real lastPeakAt: 0
+    readonly property bool silent: now - lastPeakAt > 250
+    property real now: 0
 
     function toMeter(peak: real): real {
         if (peak <= 0)
             return 0;
         return Math.max(0, Math.min(1, (20 * Math.log10(peak) + 48) / 48));
+    }
+
+    Connections {
+        target: monitor
+        function onPeaksChanged(): void {
+            root.lastPeakAt = Date.now();
+        }
     }
 
     PwNodePeakMonitor {
@@ -39,7 +51,7 @@ ModuleBase {
                 id: meter
 
                 required property int index
-                readonly property real level: root.toMeter(root.levels[index] ?? 0)
+                readonly property real level: root.silent ? 0 : root.toMeter(root.levels[index] ?? 0)
                 property real smooth: 0
                 property real hold: 0
 
@@ -56,7 +68,14 @@ ModuleBase {
                     interval: 50
                     repeat: true
                     running: root.visible
-                    onTriggered: meter.hold = Math.max(meter.smooth, meter.hold - 0.01)
+                    onTriggered: {
+                        root.now = Date.now();
+                        // Release even when no new level comes.
+                        meter.smooth = meter.level > meter.smooth ? meter.level : meter.smooth * 0.85 + meter.level * 0.15;
+                        if (meter.smooth < 0.003)
+                            meter.smooth = 0;
+                        meter.hold = Math.max(meter.smooth, meter.hold - 0.01);
+                    }
                 }
 
                 Rectangle {
