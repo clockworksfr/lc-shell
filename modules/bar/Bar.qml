@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.cards
 import qs.components
+import qs.services
 import qs.theme
 
 // Bar of "normal" screens, on any edge. Its look comes from the theme
