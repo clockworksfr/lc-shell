@@ -135,12 +135,9 @@ Item {
             y: root.size / 2 + Math.sin(angle) * (root.size / 2 - 3) - d / 2
             color: level > 0.75 ? (root.theme.color.signal ?? root.theme.color.ink) : root.theme.color.ink
             opacity: 0.45 + level * 0.55
-
-            Behavior on width {
-                NumberAnimation {
-                    duration: 60
-                }
-            }
+            // (No width animation: 56 of them running 30 times a second cost
+            // more than the spectrum; only the width moved, the dots went
+            // oval for 60 ms.)
         }
     }
 }
