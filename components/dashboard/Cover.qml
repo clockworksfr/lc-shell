@@ -126,13 +126,14 @@ Item {
                 const k = index < 28 ? index : 55 - index;
                 return v[Math.min(v.length - 1, Math.floor(k * v.length / 28))] ?? 0;
             }
-            readonly property real r: root.size / 2 - 3 - level * root.size * 0.04
-            readonly property real d: 3 + level * 4
-            width: d
-            height: d
-            radius: d / 2
-            x: root.size / 2 + Math.cos(angle) * (root.size / 2 - 3) - d / 2
-            y: root.size / 2 + Math.sin(angle) * (root.size / 2 - 3) - d / 2
+            // A fixed 7 px dot, placed once, scaled with the level (3 → 7 px):
+            // a new frame changes its scale, color and opacity only.
+            width: 7
+            height: 7
+            radius: 3.5
+            x: root.size / 2 + Math.cos(angle) * (root.size / 2 - 3) - 3.5
+            y: root.size / 2 + Math.sin(angle) * (root.size / 2 - 3) - 3.5
+            scale: (3 + level * 4) / 7
             color: level > 0.75 ? (root.theme.color.signal ?? root.theme.color.ink) : root.theme.color.ink
             opacity: 0.45 + level * 0.55
             // (No width animation: 56 of them running 30 times a second cost

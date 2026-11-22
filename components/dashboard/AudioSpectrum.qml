@@ -57,7 +57,7 @@ Item {
                 // Facade: the crest holds 400 ms, then falls.
                 property real crest: 0
                 property real crestAt: 0
-                onLevelChanged: if (level >= crest) {
+                onLevelChanged: if (root.look === "facade" && level >= crest) {
                     crest = level;
                     crestAt = Date.now();
                 }
@@ -65,7 +65,7 @@ Item {
                 Timer {
                     interval: 50
                     repeat: true
-                    running: root.look === "facade"
+                    running: root.look === "facade" && root.visible
                     onTriggered: if (Date.now() - band.crestAt > 400) band.crest = Math.max(band.level, band.crest - 0.04)
                 }
 
