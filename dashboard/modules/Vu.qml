@@ -243,21 +243,23 @@ ModuleBase {
         id: scale
 
         property var m
-        readonly property real padLeft: m.t3 * 1.4
-        readonly property real padRight: m.t3 * 2.6 + m.gap / 2
+        readonly property real padLeft: m ? m.t3 * 1.4 : 0
+        readonly property real padRight: m ? m.t3 * 2.6 + m.gap / 2 : 0
 
-        implicitHeight: m.t4 * 1.4
+        implicitHeight: m ? m.t4 * 1.4 : 0
 
         Repeater {
             model: [-40, -30, -20, -10, -3, 0]
 
             ThemedText {
                 required property int modelData
-                x: scale.padLeft + (scale.width - scale.padLeft - scale.padRight) * scale.m.frac(modelData) - width / 2
+                readonly property var m: scale.m
+                visible: !!m
+                x: m ? scale.padLeft + (scale.width - scale.padLeft - scale.padRight) * m.frac(modelData) - width / 2 : 0
                 text: modelData === 0 ? "0" : `−${Math.abs(modelData)}`
-                font.family: scale.m.theme.font.mono
-                font.pixelSize: scale.m.t4
-                color: modelData >= -3 ? (scale.m.theme.color.signal ?? scale.m.theme.color.urgent) : scale.m.theme.color.soft
+                font.family: m ? m.theme.font.mono : "monospace"
+                font.pixelSize: m ? m.t4 : 11
+                color: !m ? "grey" : modelData >= -3 ? (m.theme.color.signal ?? m.theme.color.urgent) : m.theme.color.soft
             }
         }
     }

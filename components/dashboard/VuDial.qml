@@ -52,30 +52,34 @@ Item {
 
         anchors.fill: parent
 
-        Repeater {
-            model: [-20, -10, -7, -5, -3, -2, -1, 0, 1, 2, 3]
-
-            Item {
-                required property real modelData
-                readonly property real a: (root.angle(modelData) - 90) * Math.PI / 180
-
-                Rectangle {
-                    x: scale.cx + Math.cos(parent.a) * scale.r - width / 2
-                    y: scale.cy + Math.sin(parent.a) * scale.r - height / 2
-                    width: 2
-                    height: modelData % 5 === 0 || modelData === 3 ? 10 : 6
-                    rotation: root.angle(modelData)
-                    color: modelData > 0 ? "#CC3333" : "#222222"
-                }
-
-                Text {
-                    visible: [-20, -10, -5, 0, 3].includes(modelData)
-                    x: scale.cx + Math.cos(parent.a) * (scale.r - 20) - width / 2
-                    y: scale.cy + Math.sin(parent.a) * (scale.r - 20) - height / 2
-                    text: modelData > 0 ? `+${modelData}` : `${modelData}`
-                    color: modelData > 0 ? "#CC3333" : "#222222"
-                    font.family: root.theme.font.family
-                    font.pixelSize: Math.max(9, scale.r * 0.11)
+        // Ticks and figures.
+        Canvas {
+            anchors.fill: parent
+            onWidthChanged: requestPaint()
+            onHeightChanged: requestPaint()
+            onPaint: {
+                const ctx = getContext("2d");
+                ctx.clearRect(0, 0, width, height);
+                const marks = [-20, -10, -7, -5, -3, -2, -1, 0, 1, 2, 3];
+                const labels = [-20, -10, -5, 0, 3];
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.font = `${Math.max(9, Math.round(scale.r * 0.11))}px "${root.theme.font.family}"`;
+                for (const v of marks) {
+                    const a = (root.angle(v) - 90) * Math.PI / 180;
+                    const long = v % 5 === 0 || v === 3;
+                    const r1 = scale.r, r2 = scale.r - (long ? 10 : 6);
+                    ctx.strokeStyle = v > 0 ? "#CC3333" : "#222222";
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(scale.cx + Math.cos(a) * r1, scale.cy + Math.sin(a) * r1);
+                    ctx.lineTo(scale.cx + Math.cos(a) * r2, scale.cy + Math.sin(a) * r2);
+                    ctx.stroke();
+                    if (labels.includes(v)) {
+                        ctx.fillStyle = v > 0 ? "#CC3333" : "#222222";
+                        const rl = scale.r - 22;
+                        ctx.fillText(v > 0 ? `+${v}` : `${v}`, scale.cx + Math.cos(a) * rl, scale.cy + Math.sin(a) * rl);
+                    }
                 }
             }
         }
