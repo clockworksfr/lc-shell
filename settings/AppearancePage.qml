@@ -84,6 +84,15 @@ Column {
                 onToggled: Config.set("appearance.appIconGuard", !checked)
             }
         }
+
+        Field {
+            label: I18n.tr("settings.windowBorders")
+            hint: I18n.tr("settings.windowBordersHint")
+            Switch {
+                checked: Config.get("appearance.windowBorders") ?? true
+                onToggled: Config.set("appearance.windowBorders", !checked)
+            }
+        }
     }
 
     Section {

@@ -516,5 +516,7 @@
   "settings.clipKey.menuHint": "Every action",
   "settings.clipKey.pause": "Ctrl+I",
   "settings.clipKey.pauseHint": "Pause / resume recording",
-  "clip.kinds": "Kinds"
+  "clip.kinds": "Kinds",
+  "settings.windowBorders": "Window borders follow the theme",
+  "settings.windowBordersHint": "Hyprland's active / inactive window borders take the colors of the normal screens' theme"
 }

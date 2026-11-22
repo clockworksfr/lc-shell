@@ -16,6 +16,7 @@ Singleton {
         { page: "appearance", key: "settings.appIconTint", hint: "settings.appIconTintHint" },
         { page: "appearance", key: "settings.appIconContrast", hint: "settings.appIconContrastHint" },
         { page: "appearance", key: "settings.appIconGuard", hint: "settings.appIconGuardHint" },
+        { page: "appearance", key: "settings.windowBorders", hint: "settings.windowBordersHint" },
         { page: "appearance", key: "settings.variant", hint: "" },
         { page: "appearance", key: "settings.variant", hint: "settings.variantNow" },
         { page: "appearance", key: "settings.schedule", hint: "" },

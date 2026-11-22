@@ -59,5 +59,6 @@ ShellRoot {
         NotificationCenter.dnd;
         Idle.enabled;
         Clipboard.count;
+        HyprBorders.enabled;
     }
 }
