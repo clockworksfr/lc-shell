@@ -2,7 +2,8 @@ import QtQuick
 import Quickshell.Io
 
 // qs -c lc ipc call lock <lock|preview|isLocked>
-// (loginctl lock-session works too.)
+// lock: like the shortcut (the after-lock action follows);
+// loginctl lock-session works too (no after-lock action).
 IpcHandler {
     target: "lock"
 

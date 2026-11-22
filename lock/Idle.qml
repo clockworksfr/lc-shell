@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.services
 
@@ -10,44 +9,60 @@ import qs.services
 // compositor's rules (e.g. idle_inhibit fullscreen) and apps keep it awake.
 //
 // Settings, in seconds (0 = never):
-//   "idle": { "enabled": true, "lock": 600, "screenOff": 900,
-//             "lockedScreenOff": 30, "suspend": 0 }
+//   "idle": { "enabled": true, "lock": 900, "screenOff": 930,
+//             "lockedScreenOff": 30, "suspend": 1800,
+//             "inhibitWhenAudio": true, "inhibitWhenCharging": false }
+// inhibitWhenAudio: nothing happens while a player plays (MPRIS);
+// inhibitWhenCharging: nor while the battery charges (or on AC power).
 Singleton {
     id: root
 
     readonly property var config: Config.data.idle ?? {}
     readonly property bool enabled: config.enabled ?? true
+    readonly property int lockAfter: config.lock ?? 900
+    readonly property int screenOffAfter: config.screenOff ?? 930
+    readonly property int lockedScreenOffAfter: config.lockedScreenOff ?? 30
+    readonly property int suspendAfter: config.suspend ?? 1800
+    readonly property bool inhibitWhenAudio: config.inhibitWhenAudio ?? true
+    readonly property bool inhibitWhenCharging: config.inhibitWhenCharging ?? false
+
+    readonly property bool playing: Players.list.some(p => p.isPlaying)
+    readonly property bool onPower: Power.hasBattery ? !Power.onBattery : false
+    // Why idle actions are held right now ("" = they aren't).
+    readonly property string inhibitedBy: inhibitWhenAudio && playing ? "audio" : inhibitWhenCharging && onPower ? "charging" : ""
+    readonly property bool active: enabled && !inhibitedBy
 
     function screens(on: bool): void {
-        Hyprland.dispatch(`hl.dsp.dpms({ action = "${on ? "on" : "off"}" })`);
+        Lock.screens(on);
     }
 
     IdleMonitor {
-        enabled: root.enabled && (root.config.lock ?? 600) > 0
-        timeout: root.config.lock ?? 600
+        enabled: root.active && root.lockAfter > 0
+        timeout: Math.max(1, root.lockAfter)
         respectInhibitors: true
-        onIsIdleChanged: if (isIdle) Lock.lock()
+        onIsIdleChanged: if (isIdle) Lock.lockQuiet()
     }
 
     IdleMonitor {
-        enabled: root.enabled && (root.config.screenOff ?? 900) > 0
-        timeout: root.config.screenOff ?? 900
-        respectInhibitors: true
-        onIsIdleChanged: root.screens(!isIdle)
-    }
-
-    // Once locked, screens go off sooner.
-    IdleMonitor {
-        enabled: root.enabled && Lock.locked && (root.config.lockedScreenOff ?? 30) > 0
-        timeout: root.config.lockedScreenOff ?? 30
+        enabled: root.active && root.screenOffAfter > 0
+        timeout: Math.max(1, root.screenOffAfter)
         respectInhibitors: true
         onIsIdleChanged: root.screens(!isIdle)
     }
 
+    // Once locked, screens go off sooner (the lock itself is no reason to
+    // keep them lit). Not held by audio: the session is locked.
     IdleMonitor {
-        enabled: root.enabled && (root.config.suspend ?? 0) > 0
-        timeout: Math.max(1, root.config.suspend ?? 0)
+        enabled: root.enabled && Lock.locked && root.lockedScreenOffAfter > 0
+        timeout: Math.max(1, root.lockedScreenOffAfter)
         respectInhibitors: true
-        onIsIdleChanged: if (isIdle) Quickshell.execDetached(["systemctl", "suspend"])
+        onIsIdleChanged: root.screens(!isIdle)
+    }
+
+    IdleMonitor {
+        enabled: root.active && root.suspendAfter > 0
+        timeout: Math.max(1, root.suspendAfter)
+        respectInhibitors: true
+        onIsIdleChanged: if (isIdle) Lock.suspend()
     }
 }

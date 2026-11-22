@@ -8,7 +8,7 @@ import os
 import re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PAGES = ["appearance", "bar", "screens", "dashboard", "wallpaper", "notifications", "clipboard", "screenshot", "weather", "system", "shortcuts"]
+PAGES = ["appearance", "bar", "screens", "dashboard", "wallpaper", "notifications", "clipboard", "screenshot", "lock", "weather", "system", "shortcuts"]
 KEY = re.compile(r'\b(label|title|hint): I18n\.tr\("([^"]+)"')
 
 entries = []

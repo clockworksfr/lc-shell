@@ -3,11 +3,10 @@ import Quickshell
 import Quickshell.Services.UPower
 import qs.components
 import qs.i18n
-import qs.lock
 import qs.services
 import qs.theme
 
-// Language, animations, lock and idle, power profile, about (config file).
+// Language, animations, power profile, about (config file). Lock and idle: LockPage.
 Column {
     id: root
 
@@ -39,42 +38,6 @@ Column {
                 model: [{ value: "system", label: I18n.tr("settings.motion.system") }, { value: "full", label: I18n.tr("settings.motion.full") }, { value: "reduced", label: I18n.tr("settings.motion.reduced") }]
                 value: { const v = Config.get("appearance.reducedMotion"); return v === true ? "reduced" : v === false ? "full" : "system"; }
                 onPicked: value => Config.set("appearance.reducedMotion", value === "reduced" ? true : value === "full" ? false : undefined)
-            }
-        }
-    }
-
-    Section {
-        title: I18n.tr("settings.lockTitle")
-
-        Field {
-            label: I18n.tr("settings.idleEnabled")
-            hint: I18n.tr("settings.idleEnabledHint")
-            Switch {
-                width: 60
-                checked: Config.get("idle.enabled") ?? true
-                onToggled: Config.set("idle.enabled", !checked)
-            }
-        }
-
-        Field {
-            label: I18n.tr("settings.idleLock")
-            Choice {
-                model: [300, 600, 900, 1800].map(v => ({ value: v, label: I18n.tr("settings.minutes", { n: v / 60 }) }))
-                value: Config.get("idle.lock") ?? 600
-                onPicked: value => Config.set("idle.lock", value)
-            }
-        }
-
-        Field {
-            label: I18n.tr("settings.lockPreview")
-            hint: I18n.tr("settings.lockPreviewHint")
-            Button {
-                icon: "lock"
-                text: I18n.tr("settings.lockPreviewOpen")
-                onClicked: {
-                    Lock.status = "";
-                    Lock.previewing = true;
-                }
             }
         }
     }

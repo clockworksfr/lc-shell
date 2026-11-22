@@ -83,11 +83,15 @@ Exemple de réglages :
 
 ## Verrouillage et inactivité
 
-- **Verrouillage** (`ext-session-lock`) : une surface par écran (fond flouté, heure, champ mot de passe), authentification PAM (service `lock.pamService`, `hyprlock` par défaut). Déclenché par `loginctl lock-session` (logind, écouté via `gdbus monitor`), l'inactivité, l'IPC `lock lock`, ou avant la mise en veille (verrou « delay » de `systemd-inhibit` relâché une fois l'écran verrouillé affiché).
-- **Aperçu** : `qs -c lc ipc call lock preview` ou « Aperçu du verrouillage » dans le lanceur — même écran dans une fenêtre, vrai contrôle PAM, rien n'est verrouillé. Attention : les échecs comptent pour `pam_faillock` (3 = compte bloqué 10 min).
-- **Inactivité** (`idle`, secondes, 0 = jamais) : `lock` 600, `screenOff` 900, `lockedScreenOff` 30, `suspend` 0. Les inhibiteurs sont respectés (`idle_inhibit fullscreen` de Hyprland, applis).
-- **Sécurité** : si le shell plante verrouillé, Hyprland garde la session verrouillée (écran rouge). Ajouter dans `hyprland.lua`, section `misc` : `allow_session_lock_restore = true,` ; un shell relancé (ou `hyprlock`, gardé en secours) peut alors reprendre la main. Depuis un TTY : `hyprlock` (avec `WAYLAND_DISPLAY` / `HYPRLAND_INSTANCE_SIGNATURE` de la session).
-- **Tant que Caelestia tourne**, il gère aussi inactivité et verrouillage : couper l'un des deux (`"idle": { "enabled": false }`).
+Tout se règle dans Paramètres › Verrouillage (ou `settings.json`, sections `lock` et `idle`).
+
+- **Raccourci** (`lock.shortcut`, `SUPER + Escape` par défaut) : lc-shell l'applique lui-même à Hyprland (`hyprctl eval` : `hl.unbind` puis `hl.bind` vers `lc:lock`), à la place du raccourci de la config sur les mêmes touches, et le réapplique après chaque rechargement de la config. Le raccourci de `shell.lua` (`lock-and-dpms.sh`, repli sur hyprlock) reste ainsi le secours quand lc-shell ne tourne pas.
+- **Après le verrouillage** (`lock.afterLock` : `screensOff` / `suspend` / `none`, `lock.afterLockDelay` en secondes, 5 par défaut) : au raccourci ou par IPC, les écrans s'éteignent (ou la machine se met en veille) au bout du délai, affiché sur le panneau ; annulé si on tape ou bouge la souris entre-temps. Les écrans se rallument au clavier ou à la souris (`misc.{mouse_move,key_press}_enables_dpms`).
+- **Panneau** (`ext-session-lock`, une surface par écran) : fond d'écran flouté (`lock.blur`), heure, date, photo (`~/.face`, sinon l'initiale ; `lock.avatar`), nom, champ mot de passe (Verr. Maj signalé, secousse en cas d'erreur), batterie (`lock.battery`) et boutons veille / redémarrer / éteindre à double clic (`lock.power`). Authentification PAM (`lock.pamService`, `hyprlock` par défaut).
+- **Aperçu** : `qs -c lc ipc call lock preview`, bouton Aperçu des paramètres ou « Aperçu du verrouillage » dans le lanceur — même écran dans une fenêtre, vrai contrôle PAM, rien n'est verrouillé. Attention : les échecs comptent pour `pam_faillock` (3 = compte bloqué 10 min).
+- **Autres déclencheurs** : `loginctl lock-session` (logind, écouté via `gdbus monitor`), l'inactivité, avant la mise en veille (`lock.beforeSleep` : verrou « delay » de `systemd-inhibit` relâché une fois l'écran verrouillé affiché).
+- **Inactivité** (`idle`, secondes, 0 = jamais ; reprise des règles Caelestia) : `lock` 900, `screenOff` 930, `lockedScreenOff` 30 (écrans éteints après 30 s sans activité sur l'écran verrouillé), `suspend` 1800. `inhibitWhenAudio` (oui) : rien tant qu'un lecteur MPRIS joue ; `inhibitWhenCharging` (non) : rien sur secteur. Les inhibiteurs sont respectés (`idle_inhibit fullscreen` de Hyprland, applis).
+- **Sécurité** : si le shell plante verrouillé, Hyprland garde la session verrouillée (écran rouge). Avec `allow_session_lock_restore = true` dans la section `misc` de `hyprland.lua`, le shell relancé reprend le verrou : un marqueur (`$XDG_RUNTIME_DIR/lc-shell-locked`) lui dit de reverrouiller. Depuis un TTY : `hyprlock` (avec `WAYLAND_DISPLAY` / `HYPRLAND_INSTANCE_SIGNATURE` de la session).
 
 ## Langues
 

@@ -133,7 +133,7 @@ Scope {
     GlobalShortcut {
         appid: "lc"
         name: "lock"
-        description: "Lock the session"
+        description: "Lock the session (then the after-lock action: screens off, suspend)"
         onPressed: Lock.lock()
     }
 }
