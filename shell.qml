@@ -7,6 +7,7 @@
 // fed by cava at 30 fps) paced every animation of the shell at 30 fps,
 // bar drawers on the 120 Hz screen included (measured: 33 ms → 9.6 ms a
 // tick).
+//@ pragma Env QSG_USE_SIMPLE_ANIMATION_DRIVER=1
 import QtQuick
 import Quickshell
 import qs.clipboard
