@@ -22,18 +22,23 @@ PopupWindow {
         if (visible && slot === target)
             return;
         const switching = visible;
-        // A visible popup doesn't follow anchor changes reliably: close it,
-        // re-anchor, reopen. Between neighbours that reads as a quick swap.
+        // A visible popup doesn't follow anchor changes: close it, then
+        // re-anchor and reopen on the next event loop turn (hiding and
+        // showing in the same turn is a no-op). Reads as a quick swap.
         visible = false;
         slot = target;
-        place();
-        content.opacity = switching ? 0.4 : 0;
-        content.scale = switching ? 1 : 0.96;
-        visible = true;
-        if (switching)
-            swap.restart();
-        else
-            appear.restart();
+        Qt.callLater(() => {
+            if (root.slot !== target)
+                return;
+            root.place();
+            content.opacity = switching ? 0.4 : 0;
+            content.scale = switching ? 1 : 0.96;
+            root.visible = true;
+            if (switching)
+                swap.restart();
+            else
+                appear.restart();
+        });
     }
 
     function hide(): void {

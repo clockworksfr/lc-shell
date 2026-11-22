@@ -20,7 +20,11 @@ Singleton {
     // when a node gets bound: reading `properties` here made a binding loop
     // (bind → properties change → list changes → rebind…) that crashed
     // Quickshell's PipeWire module.
-    readonly property list<PwNode> streams: Pipewire.nodes.values.filter(n => n.isStream && !n.isSink && !!n.audio)
+    // (Quickshell marks playback streams as sinks.)
+    readonly property list<PwNode> streams: Pipewire.nodes.values.filter(n => n.isStream && n.isSink && !!n.audio)
+    // What to show: without the shell's own level probes. Not tracked, so
+    // reading names here can't loop.
+    readonly property var appStreams: streams.filter(n => !/quickshell/i.test(streamName(n)))
 
     readonly property real volume: sink?.audio?.volume ?? 0
     readonly property bool muted: sink?.audio?.muted ?? false

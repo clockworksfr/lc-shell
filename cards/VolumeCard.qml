@@ -52,14 +52,14 @@ Column {
     }
 
     ThemedText {
-        visible: Audio.streams.length === 0
+        visible: Audio.appStreams.length === 0
         text: I18n.tr("card.noApps")
         color: root.theme.color.soft
         font.pixelSize: root.theme.font.sizeS
     }
 
     Repeater {
-        model: Audio.streams
+        model: Audio.appStreams
 
         Row {
             required property PwNode modelData
