@@ -57,9 +57,9 @@ ModuleBase {
         parent: root
         visible: root.inner.y > root.pad + 1 && (Players.list.length > 1 || Players.locked)
         x: root.width - width - 14
-        y: 6
-        width: chipRow.implicitWidth + 16
-        height: 24
+        y: 3
+        width: chipRow.implicitWidth + 22
+        height: 30
 
         Rectangle {
             anchors.fill: parent
@@ -72,14 +72,14 @@ ModuleBase {
         Row {
             id: chipRow
             anchors.centerIn: parent
-            spacing: 4
+            spacing: 6
 
             Icon {
                 anchors.verticalCenter: parent.verticalCenter
                 visible: Players.locked
                 name: "push_pin"
                 filled: true
-                size: 13
+                size: 16
                 color: root.theme.color.accent
             }
 
@@ -87,14 +87,15 @@ ModuleBase {
                 anchors.verticalCenter: parent.verticalCenter
                 label: true
                 text: `${root.player?.identity ?? I18n.tr("media.source.title")}${Players.locked ? "" : ` · ${I18n.tr("media.source.autoShort")}`}`
-                font.pixelSize: 12
-                color: root.theme.color.soft
+                // The size of the menu's text it opens.
+                font.pixelSize: 15
+                color: root.theme.color.ink
             }
 
             Icon {
                 anchors.verticalCenter: parent.verticalCenter
                 name: "expand_more"
-                size: 14
+                size: 18
                 color: root.theme.color.soft
             }
         }
