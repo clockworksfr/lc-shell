@@ -60,6 +60,7 @@ ModuleBase {
                 width: parent.width
                 elide: Text.ElideRight
                 text: track.m.player?.trackTitle || track.m.player?.identity || ""
+                font.family: track.m.theme.font.lyric ?? track.m.theme.font.family
                 font.pixelSize: track.m.t2 * (track.big ? 1.2 : 1)
                 font.weight: Font.DemiBold
                 color: track.ink
@@ -69,6 +70,7 @@ ModuleBase {
                 width: parent.width
                 elide: Text.ElideRight
                 text: track.m.player?.trackArtist ?? ""
+                font.family: track.m.theme.font.lyric ?? track.m.theme.font.family
                 font.pixelSize: track.m.t3
                 color: track.soft
             }

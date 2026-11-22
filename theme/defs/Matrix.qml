@@ -54,6 +54,8 @@ Singleton {
                 family: "Space Grotesk",
                 mono: "Space Mono",
                 display: "Doto Matrix",
+                // Lyrics and the playing track, in dots.
+                lyric: "Doto Matrix",
                 heroScale: 0.8,
                 displayWeight: 400
             },

@@ -53,6 +53,7 @@ ModuleBase {
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
             text: modelData.text || "♪"
+            font.family: root.theme.font.lyric ?? root.theme.font.family
             font.pixelSize: distance === 0 ? root.lineSize * 1.25 : root.lineSize
             font.weight: distance === 0 ? Font.DemiBold : Font.Normal
             color: distance === 0 ? root.theme.color.ink : root.theme.color.soft
