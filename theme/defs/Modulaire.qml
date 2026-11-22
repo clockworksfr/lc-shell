@@ -33,7 +33,7 @@ Singleton {
                     lcdInk: "#C6F37A",
                     lcdAmber: "#2A1606",
                     lcdAmberInk: "#FFB35A",
-                    glow: "#CCFF8A2A",
+                    glow: "#EEFF8A2A",
                     glass: "#0DFFFFFF",
                     star: "#00000000"
                 },
@@ -57,7 +57,7 @@ Singleton {
                     lcdInk: "#C6F37A",
                     lcdAmber: "#2A1606",
                     lcdAmberInk: "#FFB35A",
-                    glow: "#88FF8A2A",
+                    glow: "#AAFF8A2A",
                     glass: "#40FFFFFF",
                     star: "#00000000"
                 }

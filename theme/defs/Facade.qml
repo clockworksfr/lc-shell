@@ -30,7 +30,7 @@ Singleton {
                     warn: "#FFB547",
                     ok: "#6EF3D6",
                     accent2: "#F1DFAE",
-                    glow: "#596EF3D6",
+                    glow: "#8C6EF3D6",
                     // Display windows (VFD): black glass in the dark, a
                     // grey-green LCD in the light.
                     screen: "#030505",

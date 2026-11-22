@@ -170,9 +170,9 @@ ModuleBase {
                     layer.effect: MultiEffect {
                         autoPaddingEnabled: true
                         shadowEnabled: true
-                        shadowColor: root.look === "matrix" ? (root.theme.color.glow ?? "transparent") : cell.active ? "#CCE8742A" : "#CC46C46A"
-                        shadowBlur: 0.6
-                        blurMax: 10
+                        shadowColor: root.look === "matrix" ? (root.theme.color.glow ?? "transparent") : cell.active ? "#EEE8742A" : "#EE46C46A"
+                        shadowBlur: 0.81
+                        blurMax: 15
                         shadowHorizontalOffset: 0
                         shadowVerticalOffset: 0
                     }
@@ -193,8 +193,8 @@ ModuleBase {
                         autoPaddingEnabled: true
                         shadowEnabled: true
                         shadowColor: "#CC9FB8FF"
-                        shadowBlur: 0.8
-                        blurMax: 16
+                        shadowBlur: 1.0
+                        blurMax: 24
                         shadowHorizontalOffset: 0
                         shadowVerticalOffset: 0
                     }

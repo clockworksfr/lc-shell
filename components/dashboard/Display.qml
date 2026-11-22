@@ -61,9 +61,9 @@ Item {
         layer.effect: MultiEffect {
             autoPaddingEnabled: true
             shadowEnabled: true
-            shadowColor: root.kind === "vfd" ? (root.theme.color.glow ?? "transparent") : root.tint === "amber" ? "#77FF8A2A" : "#66C6F37A"
-            shadowBlur: root.kind === "vfd" ? 0.35 : 0.5
-            blurMax: 12
+            shadowColor: root.kind === "vfd" ? (root.theme.color.glow ?? "transparent") : root.tint === "amber" ? "#AAFF8A2A" : "#99C6F37A"
+            shadowBlur: root.kind === "vfd" ? 0.5 : 0.65
+            blurMax: 18
             shadowHorizontalOffset: 0
             shadowVerticalOffset: 0
         }

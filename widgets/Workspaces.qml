@@ -59,8 +59,8 @@ Grid {
                 autoPaddingEnabled: true
                 shadowEnabled: true
                 shadowColor: root.theme.color.glow ?? "transparent"
-                shadowBlur: 0.7
-                blurMax: 12
+                shadowBlur: 0.94
+                blurMax: 18
                 shadowHorizontalOffset: 0
                 shadowVerticalOffset: 0
             }

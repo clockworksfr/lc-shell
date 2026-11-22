@@ -29,8 +29,8 @@ Item {
         autoPaddingEnabled: true
         shadowEnabled: true
         shadowColor: root.theme.color.glow ?? "transparent"
-        shadowBlur: 0.5
-        blurMax: 12
+        shadowBlur: 0.68
+        blurMax: 18
         shadowHorizontalOffset: 0
         shadowVerticalOffset: 0
     }

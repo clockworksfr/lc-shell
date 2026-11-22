@@ -28,7 +28,7 @@ Singleton {
                     ok: "#8FCB9F",
                     accent2: "#8C8C8C",
                     // Glow of dot-matrix figures (dark only).
-                    glow: "#80F2F2F2",
+                    glow: "#B3F2F2F2",
                     // Red touches beyond alerts (design: today, active
                     // workspace, play, progress head, slider handle).
                     signal: "#E5323A"

@@ -215,8 +215,8 @@ Item {
                 autoPaddingEnabled: true
                 shadowEnabled: true
                 shadowColor: "#AA9CFF9C"
-                shadowBlur: 0.4
-                blurMax: 8
+                shadowBlur: 0.54
+                blurMax: 12
                 shadowHorizontalOffset: 0
                 shadowVerticalOffset: 0
             }

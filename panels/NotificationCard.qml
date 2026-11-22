@@ -179,8 +179,8 @@ Rectangle {
             autoPaddingEnabled: true
             shadowEnabled: true
             shadowColor: root.critical ? root.theme.color.urgent : (root.theme.color.glow ?? "transparent")
-            shadowBlur: 0.6
-            blurMax: 12
+            shadowBlur: 0.81
+            blurMax: 18
             shadowHorizontalOffset: 0
             shadowVerticalOffset: 0
         }
