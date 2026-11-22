@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Services.Notifications
 import Quickshell.Widgets
@@ -8,7 +9,9 @@ import qs.services
 import qs.theme
 
 // One notification: icon/image, app and time, summary, body, actions.
-// Click: default action. `popup`: hovering pauses its expiry.
+// Click: default action. `popup`: hovering pauses its expiry, and a strip
+// on the bottom edge shrinks toward its middle until the popup goes
+// (glowing where the theme glows; red when critical, which never expires).
 Rectangle {
     id: root
 
@@ -145,6 +148,41 @@ Rectangle {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: NotificationCenter.dismiss(root.entry.uid)
             }
+        }
+    }
+
+    // Time left (popups that expire).
+    property real now: Date.now()
+    readonly property real left: root.entry.expiresAt > 0 && root.entry.duration > 0 ? Math.max(0, Math.min(1, (root.entry.expiresAt - now) / root.entry.duration)) : 0
+
+    Timer {
+        interval: 50
+        repeat: true
+        running: root.popup && root.entry.expiresAt > 0 && NotificationCenter.heldUid !== root.entry.uid
+        onTriggered: root.now = Date.now()
+    }
+
+    Rectangle {
+        id: strip
+
+        visible: root.popup && (root.entry.expiresAt > 0 || root.critical)
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Math.max(2, root.border.width)
+        width: (parent.width - root.radius * 2) * (root.critical ? 1 : root.left)
+        height: 3
+        radius: 1.5
+        color: root.critical ? root.theme.color.urgent : root.theme.color.accent
+
+        layer.enabled: Qt.color(root.theme.color.glow ?? "#00000000").a > 0
+        layer.effect: MultiEffect {
+            autoPaddingEnabled: true
+            shadowEnabled: true
+            shadowColor: root.critical ? root.theme.color.urgent : (root.theme.color.glow ?? "transparent")
+            shadowBlur: 0.6
+            blurMax: 12
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 0
         }
     }
 }

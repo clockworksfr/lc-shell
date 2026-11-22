@@ -94,7 +94,7 @@ Singleton {
         const critical = entry.urgency === NotificationUrgency.Critical;
         const timeout = notification?.expireTimeout > 0 ? notification.expireTimeout : defaultTimeout;
         // Critical popups stay until dismissed (expiresAt 0).
-        const popup = Object.assign({}, entry, { expiresAt: critical ? 0 : Date.now() + timeout });
+        const popup = Object.assign({}, entry, { expiresAt: critical ? 0 : Date.now() + timeout, duration: timeout });
         popups = [popup, ...popups.filter(p => p.uid !== entry.uid)];
     }
 
