@@ -76,6 +76,18 @@ Scope {
         }
     }
 
+    // Bar edit mode toolbar.
+    LazyLoader {
+        active: ShellState.editing && root.hasBar
+
+        EditToolbar {
+            screen: root.modelData
+            theme: root.theme
+            barEdge: root.barEdge === "bottom" ? "bottom" : "top"
+            barExtent: root.barEdge === "top" || root.barEdge === "bottom" ? root.barExtent(root.barEdge) : 0
+        }
+    }
+
     // Frame: drawing + reservation of the sides other than the bar's.
     // Gone while a fullscreen window is shown.
     LazyLoader {

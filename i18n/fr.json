@@ -197,5 +197,15 @@
   "card.history": "6 dernières heures",
   "card.noTray": "Aucune icône",
   "card.noApps": "Aucune application ne joue",
-  "card.open": "Clic pour plus"
+  "card.open": "Clic pour plus",
+  "edit.title": "Modifier la barre",
+  "edit.hint": "Glisser un bloc pour le déplacer · cliquer pour le choisir",
+  "edit.size.compact": "S",
+  "edit.size.normal": "M",
+  "edit.size.extended": "L",
+  "edit.undo": "Annuler",
+  "edit.redo": "Rétablir",
+  "edit.discard": "Abandonner",
+  "edit.done": "Terminé",
+  "block.unknown": "?"
 }

@@ -11,7 +11,8 @@ TextBlock {
 
     readonly property string signal: NetworkService.activeWifi ? I18n.percent(NetworkService.activeWifi.signalStrength) : ""
 
-    fullText: NetworkService.kind === "wired" ? I18n.tr("net.wired")
+    fullText: size === "compact" ? compactText.replace("\n", " ")
+        : NetworkService.kind === "wired" ? I18n.tr("net.wired")
         : NetworkService.kind === "wifi" ? `${NetworkService.activeWifi.name} ${signal}`
         : I18n.tr("net.offline")
     compactText: NetworkService.kind === "wired" ? I18n.tr("bar.v.wired")

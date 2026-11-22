@@ -12,7 +12,9 @@ TextBlock {
     readonly property bool shown: BluetoothService.available
     readonly property int count: BluetoothService.connected.length
 
-    fullText: !BluetoothService.enabled ? I18n.tr("bar.bluetoothOff")
+    fullText: size === "compact" ? compactText.replace("\n", " ")
+        : size === "extended" && count > 0 ? `bt · ${BluetoothService.connected.map(d => d.name).join(", ")}`
+        : !BluetoothService.enabled ? I18n.tr("bar.bluetoothOff")
         : count > 0 ? I18n.tr("bar.bluetoothCount", { n: count })
         : I18n.tr("bar.bluetooth")
     compactText: !BluetoothService.enabled ? I18n.tr("bar.v.bluetoothOff") : I18n.tr("bar.v.bluetooth", { n: count })

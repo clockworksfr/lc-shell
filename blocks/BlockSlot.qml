@@ -22,16 +22,27 @@ Item {
     property int crossSize: 0
     // The Bar window (for hover cards); null outside a bar.
     property var host: null
+    // Position in the bar's layout (edit mode).
+    property string zoneName
+    property int groupIndex: 0
+    property int blockIndex: 0
+
+    readonly property var at: ({ screen: screen?.name ?? "", zone: zoneName, group: groupIndex, index: blockIndex })
+    readonly property bool editing: ShellState.editing && !!host
+    readonly property bool selected: editing && JSON.stringify(BarEditor.selected) === JSON.stringify(at)
+    readonly property bool lifted: editing && JSON.stringify(BarEditor.dragging?.at) === JSON.stringify(at)
 
     readonly property string type: Registry.typeOf(entry)
     readonly property var item: loader.item
     readonly property bool hovered: hover.hovered
 
-    visible: item?.shown ?? true
-    implicitWidth: loader.implicitWidth
-    implicitHeight: loader.implicitHeight
+    // Blocks that hide themselves still show (dimmed) while editing.
+    visible: (item?.shown ?? true) || editing
+    opacity: lifted ? 0.35 : (item?.shown ?? true) ? 1 : 0.4
+    implicitWidth: Math.max(loader.implicitWidth, editing ? 16 : 0)
+    implicitHeight: Math.max(loader.implicitHeight, editing ? 16 : 0)
 
-    onHoveredChanged: host?.blockHovered(root, hovered)
+    onHoveredChanged: if (!editing) host?.blockHovered(root, hovered)
 
     Component.onCompleted: if (host) ShellState.addSlot(root)
     Component.onDestruction: ShellState.removeSlot(root)
@@ -53,6 +64,51 @@ Item {
 
     HoverHandler {
         id: hover
+    }
+
+    // Edit mode: outline, click to select, drag to move.
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: -4
+        visible: root.editing
+        radius: 6
+        color: root.selected ? Qt.alpha(root.host?.theme.color.accent ?? "white", 0.2) : "transparent"
+        border.width: root.selected ? 2 : 1
+        border.color: Qt.alpha(root.host?.theme.color.accent ?? "white", root.selected ? 1 : 0.5)
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        anchors.margins: -4
+        enabled: root.editing
+        cursorShape: drag.active || root.lifted ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+
+        property point origin
+        property bool moved: false
+
+        onPressed: mouse => {
+            origin = Qt.point(mouse.x, mouse.y);
+            moved = false;
+        }
+        onPositionChanged: mouse => {
+            if (!pressed)
+                return;
+            if (!moved && Math.hypot(mouse.x - origin.x, mouse.y - origin.y) < 4)
+                return;
+            if (!moved) {
+                moved = true;
+                BarEditor.dragging = { at: root.at, type: root.type };
+            }
+            const p = mapToItem(root.host.contentItem, mouse.x, mouse.y);
+            root.host.dragMove(p.x, p.y);
+        }
+        onReleased: {
+            if (moved)
+                root.host.dragDrop();
+            else
+                BarEditor.selected = root.selected ? null : root.at;
+            moved = false;
+        }
     }
 
     Connections {

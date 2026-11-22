@@ -15,9 +15,9 @@ TextBlock {
     readonly property string glyph: player?.isPlaying ? "▶" : "⏸"
     readonly property string track: [player?.trackArtist, player?.trackTitle].filter(s => !!s).join(" — ") || player?.identity || ""
 
-    fullText: `${glyph}  ${track}`
+    fullText: size === "compact" ? glyph : `${glyph}  ${track}`
     compactText: glyph
-    width: vertical ? crossSize : Math.min(implicitWidth, options.maxWidth ?? 400)
+    width: vertical ? crossSize : Math.min(implicitWidth, options.maxWidth ?? (size === "extended" ? 560 : 360))
     horizontalAlignment: vertical ? Text.AlignHCenter : Text.AlignLeft
     color: player?.isPlaying ? theme.color.ink : theme.color.soft
 

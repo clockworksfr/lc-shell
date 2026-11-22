@@ -51,6 +51,16 @@ Scope {
         function hideCard(): void {
             ShellState.cardRequested("", "");
         }
+        // Edit mode: enter, leave keeping changes, leave restoring them.
+        function edit(): void {
+            ShellState.editing = true;
+        }
+        function done(): void {
+            BarEditor.done();
+        }
+        function discard(): void {
+            BarEditor.discard();
+        }
         // Hover card: "visible type screen" or "hidden".
         function card(): string {
             const c = ShellState.card;

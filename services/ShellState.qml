@@ -7,6 +7,9 @@ import Quickshell
 Singleton {
     property bool barVisible: true
 
+    // Bar edit mode (every bar): drag blocks, sizes, palette (BarEditor).
+    property bool editing: false
+
     // Ask the bar block of `type` on screen `screenName` (focused screen if
     // empty) to toggle its panel: keyboard binds, scripts, reviews.
     signal panelRequested(string type, string screenName)

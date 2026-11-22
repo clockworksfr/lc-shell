@@ -8,7 +8,10 @@ import qs.i18n
 TextBlock {
     id: root
 
-    readonly property string format: vertical ? (options.verticalFormat ?? "HH\nmm") : (options.format ?? "HH:mm")
+    readonly property string format: vertical ? (options.verticalFormat ?? "HH\nmm")
+        : size === "compact" ? "HH:mm"
+        : size === "extended" ? `${I18n.tr("format.dateLong")}  HH:mm`
+        : (options.format ?? "HH:mm")
 
     // Month and day names follow the shell language (I18n.locale).
     fullText: I18n.locale.toString(clock.date, format)

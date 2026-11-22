@@ -10,7 +10,8 @@ import qs.services
 TextBlock {
     id: root
 
-    fullText: NotificationCenter.dnd ? I18n.tr("bar.dnd")
+    fullText: size === "compact" ? (NotificationCenter.dnd ? "∅" : `${NotificationCenter.unread}`)
+        : NotificationCenter.dnd ? I18n.tr("bar.dnd")
         : NotificationCenter.unread > 0 ? I18n.tr("bar.notifsCount", { n: NotificationCenter.unread })
         : I18n.tr("bar.notifs")
     compactText: NotificationCenter.dnd ? I18n.tr("bar.dnd")
