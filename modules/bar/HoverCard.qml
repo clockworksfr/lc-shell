@@ -19,18 +19,21 @@ PopupWindow {
     readonly property int gap: theme.space.s
 
     function showFor(target: Item): void {
+        if (visible && slot === target)
+            return;
+        const switching = visible;
+        // A visible popup doesn't follow anchor changes reliably: close it,
+        // re-anchor, reopen. Between neighbours that reads as a quick swap.
+        visible = false;
         slot = target;
         place();
-        if (!visible) {
-            content.opacity = 0;
-            content.scale = 0.96;
-            visible = true;
-            appear.restart();
-        } else {
-            // Moving to a neighbour: refresh the content softly.
-            content.opacity = 0.4;
+        content.opacity = switching ? 0.4 : 0;
+        content.scale = switching ? 1 : 0.96;
+        visible = true;
+        if (switching)
             swap.restart();
-        }
+        else
+            appear.restart();
     }
 
     function hide(): void {
