@@ -229,13 +229,14 @@ ModuleBase {
                     anchors.verticalCenter: parent.verticalCenter
                     text: I18n.locale.toString(new Date(modelData.time), "HH")
                     font.pixelSize: root.t3
-                    color: root.theme.color.soft
+                    color: root.softColor
                 }
 
                 Icon {
                     anchors.centerIn: parent
                     name: Weather.icon(modelData.code, modelData.isDay)
                     size: root.t3 * 1.4
+                    color: root.inkColor
                 }
 
                 ThemedText {
@@ -243,6 +244,7 @@ ModuleBase {
                     anchors.verticalCenter: parent.verticalCenter
                     text: Weather.temp(modelData.temp)
                     font.pixelSize: root.t3
+                    color: root.inkColor
                 }
             }
         }
@@ -273,7 +275,8 @@ ModuleBase {
             id: wideDetails
             m: root
             anchors.left: wideCurrent.right
-            anchors.leftMargin: root.gap
+            // Slanted figures (facade) lean past their box.
+            anchors.leftMargin: root.gap + (root.theme.font.displayItalic ? wideCurrent.height * 0.25 : 0)
             anchors.verticalCenter: parent.verticalCenter
             width: Math.min(root.cw * 0.22, 260)
         }
@@ -294,21 +297,22 @@ ModuleBase {
         anchors.fill: parent
         spacing: root.gap
 
-        Row {
-            id: boxTop
-
+        Item {
             width: parent.width
-            spacing: root.gap
+            height: boxTop.implicitHeight
 
             // facade: the current block in its VFD.
             Display {
                 visible: root.vfdBlock
-                x: -8
-                y: -8
-                width: boxTop.width + 16
-                height: boxTop.height + 16
-                z: -1
+                anchors.fill: parent
+                anchors.margins: -8
             }
+
+        Row {
+            id: boxTop
+
+            width: parent.width
+            spacing: root.gap + (root.theme.font.displayItalic ? boxCurrent.height * 0.2 : 0)
 
             Current {
                 id: boxCurrent
@@ -318,8 +322,9 @@ ModuleBase {
 
             Details {
                 m: root
-                width: parent.width - boxCurrent.width - root.gap
+                width: parent.width - boxCurrent.width - boxTop.spacing
                 anchors.verticalCenter: parent.verticalCenter
+            }
             }
         }
 
