@@ -110,7 +110,7 @@ ModuleBase {
     readonly property int total: 6
     readonly property int levels: 2
     readonly property int cols: shape === "tiny" || shape === "narrow" ? 1
-        : shape === "strip" ? Math.max(1, Math.min(total, Math.floor((cw + gap) / (150 + gap))))
+        : shape === "strip" ? Math.max(1, Math.min(total, Math.floor((tilesWidth + gap) / (150 + gap))))
         : shape === "wide" ? Math.ceil(total / (ch > 250 ? 2 : 1))
         : shape === "tall" ? 2
         : cw / 3 >= 160 ? 3 : 2
@@ -119,7 +119,7 @@ ModuleBase {
     readonly property real sliderRow: Math.max(48, theme.hit * 0.75)
     readonly property real sliderBlock: levels * sliderRow + levels * gap
     // Wide cells: the sliders in a column on the right of the tiles.
-    readonly property bool sideSliders: !full && shape === "wide" && cw >= 620 && ch >= sliderBlock - gap
+    readonly property bool sideSliders: !full && ((shape === "wide" && cw >= 620) || (shape === "strip" && cw >= 900)) && ch >= sliderBlock - gap
     readonly property real sideWidth: Math.min(cw * 0.36, 420)
     readonly property real tilesWidth: sideSliders ? cw - sideWidth - gap * 1.5 : cw
     // Sliders under the tiles: always in the panel; in the cell when the

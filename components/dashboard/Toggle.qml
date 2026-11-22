@@ -148,6 +148,9 @@ Item {
                 width: parent.width
                 horizontalAlignment: root.look === "classic" ? Text.AlignLeft : Text.AlignHCenter
                 elide: Text.ElideRight
+                // Shrinks a little before eliding (long names in small tiles).
+                fontSizeMode: Text.HorizontalFit
+                minimumPixelSize: 11
                 text: root.label
                 font.family: root.look === "modulaire" ? root.theme.font.mono : root.theme.font.family
                 font.capitalization: root.look === "facade" || root.look === "modulaire" ? Font.AllUppercase : Font.MixedCase
@@ -199,6 +202,8 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(implicitWidth, pill.width - pill.height * 0.6 - pillIcon.width - parent.spacing)
                 elide: Text.ElideRight
+                fontSizeMode: Text.HorizontalFit
+                minimumPixelSize: 11
                 text: root.label
                 font.family: root.theme.font.mono
                 font.capitalization: Font.AllUppercase
