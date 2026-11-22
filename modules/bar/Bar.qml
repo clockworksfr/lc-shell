@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import qs.components
 import qs.theme
 
 // Bar of "normal" screens, on any edge. Its look comes from the theme
@@ -56,6 +57,8 @@ PanelWindow {
         color: Qt.alpha(bar.theme.color.bg, bar.look.opacity)
         border.width: bar.look.floating ? bar.look.border : 0
         border.color: bar.theme.color.line
+
+        Glass {}
 
         Rectangle {
             visible: !bar.look.floating && bar.look.border > 0

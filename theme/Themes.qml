@@ -17,6 +17,7 @@ Singleton {
 
     readonly property var definitions: ({
             classic: Classic.definition,
+            constellation: Constellation.definition,
             matrix: Matrix.definition
         })
 

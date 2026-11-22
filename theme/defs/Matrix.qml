@@ -24,7 +24,8 @@ Singleton {
                     onAccent: "#FFFFFF",
                     urgent: "#E5323A",
                     warn: "#D71921",
-                    ok: "#8FCB9F"
+                    ok: "#8FCB9F",
+                    accent2: "#D71921"
                 },
                 light: {
                     bg: "#E4E4E2",
@@ -38,7 +39,8 @@ Singleton {
                     onAccent: "#FFFFFF",
                     urgent: "#D71921",
                     warn: "#D71921",
-                    ok: "#3E7D52"
+                    ok: "#3E7D52",
+                    accent2: "#D71921"
                 }
             },
             font: {

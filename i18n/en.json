@@ -178,5 +178,6 @@
   "lock.preview": "Preview — nothing is locked",
   "lock.previewTitle": "Lock screen preview",
   "action.lockPreview": "Lock screen preview",
-  "action.lockPreview.keywords": "lock preview test"
+  "action.lockPreview.keywords": "lock preview test",
+  "theme.constellation": "Constellation"
 }

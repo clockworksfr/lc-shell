@@ -178,5 +178,6 @@
   "lock.preview": "Aperçu — rien n'est verrouillé",
   "lock.previewTitle": "Aperçu de l'écran de verrouillage",
   "action.lockPreview": "Aperçu du verrouillage",
-  "action.lockPreview.keywords": "verrouillage aperçu test"
+  "action.lockPreview.keywords": "verrouillage aperçu test",
+  "theme.constellation": "Constellation"
 }

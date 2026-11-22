@@ -56,7 +56,7 @@ Item {
             text: I18n.locale.toString(clock.date, "HH:mm")
             font.family: root.theme.font.display
             font.pixelSize: 96
-            font.weight: Font.DemiBold
+            font.weight: root.theme.font.displayWeight
             font.features: ({ "tnum": 1 })
         }
 

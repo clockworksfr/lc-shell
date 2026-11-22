@@ -23,7 +23,8 @@ Singleton {
                     onAccent: "#06281D",
                     urgent: "#FF6B5E",
                     warn: "#F2C14E",
-                    ok: "#8BD17C"
+                    ok: "#8BD17C",
+                    accent2: "#5FD0A8"
                 },
                 light: {
                     bg: "#E7EAEE",
@@ -37,13 +38,15 @@ Singleton {
                     onAccent: "#FFFFFF",
                     urgent: "#C8372D",
                     warn: "#9A6A00",
-                    ok: "#2E7D3A"
+                    ok: "#2E7D3A",
+                    accent2: "#0E7A5C"
                 }
             },
             font: {
                 family: "Figtree",
                 mono: "JetBrains Mono",
                 display: "Figtree",
+                displayWeight: 700,
                 sizeS: 12,
                 sizeM: 14,
                 sizeL: 17,

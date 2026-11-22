@@ -1,5 +1,6 @@
 import QtQuick
 import qs.blocks
+import qs.components
 
 // One zone of the bar: blocks in a row (horizontal bar) or a column
 // (vertical bar). In "islands" style it draws its own background.
@@ -27,6 +28,8 @@ Item {
         color: Qt.alpha(zone.theme.color.bg, zone.look.opacity)
         border.width: zone.look.border
         border.color: zone.theme.color.line
+
+        Glass {}
     }
 
     Grid {

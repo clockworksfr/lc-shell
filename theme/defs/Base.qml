@@ -33,7 +33,12 @@ Singleton {
                     onAccent: "#1c1c1c",
                     urgent: "#e06c5a",
                     warn: "#e0b050",
-                    ok: "#8cc87c"
+                    ok: "#8cc87c",
+                    // Second accent (gradients, comets); same as accent unless set.
+                    accent2: "#d0d0d0",
+                    // Glass highlight and decorative stars (themes that use them).
+                    glass: "#14ffffff",
+                    star: "#80ffffff"
                 },
                 light: {
                     bg: "#ececec",
@@ -47,13 +52,18 @@ Singleton {
                     onAccent: "#ffffff",
                     urgent: "#c0392b",
                     warn: "#9a6a00",
-                    ok: "#2e7d3a"
+                    ok: "#2e7d3a",
+                    accent2: "#303030",
+                    glass: "#99ffffff",
+                    star: "#60000000"
                 }
             },
             font: {
                 family: "sans-serif",
                 mono: "monospace",
                 display: "sans-serif",
+                // Weight of big numerals (clocks, gauges).
+                displayWeight: 600,
                 sizeS: 11,
                 sizeM: 13,
                 sizeL: 16,
@@ -121,8 +131,10 @@ Singleton {
             style: {
                 // Text case of small labels: "none" | "upper"
                 labelCase: "none",
-                // Workspaces indicator: "labels" | "dots"
-                workspaces: "labels"
+                // Workspaces indicator: "labels" | "dots" | "stars"
+                workspaces: "labels",
+                // Glass highlight over the top of islands and panels.
+                glass: false
             }
         })
 }

@@ -15,7 +15,14 @@ Singleton {
         "figtree/Figtree-Bold.ttf",
         "jetbrains-mono/JetBrainsMono-Regular.ttf",
         "jetbrains-mono/JetBrainsMono-Medium.ttf",
-        "jetbrains-mono/JetBrainsMono-SemiBold.ttf"
+        "jetbrains-mono/JetBrainsMono-SemiBold.ttf",
+        "outfit/Outfit-ExtraLight.ttf",
+        "outfit/Outfit-Light.ttf",
+        "outfit/Outfit-Regular.ttf",
+        "outfit/Outfit-Medium.ttf",
+        "outfit/Outfit-SemiBold.ttf",
+        "geist-mono/GeistMono-Regular.ttf",
+        "geist-mono/GeistMono-Medium.ttf"
     ]
 
     Instantiator {

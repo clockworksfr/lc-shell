@@ -25,6 +25,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             text: I18n.locale.toString(clock.date, root.options.format ?? "HH:mm")
             font.family: root.theme.font.display
+            font.weight: root.theme.font.displayWeight
             font.pixelSize: Math.min(root.height * 0.5, root.width * 0.3)
         }
 

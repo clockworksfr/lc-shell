@@ -22,7 +22,9 @@ Grid {
         .filter(ws => ws.id > 0 && ws.monitor?.name === root.screen?.name)
         .sort((a, b) => a.id - b.id)
 
-    readonly property bool dots: theme.style.workspaces === "dots"
+    // "stars" draws like "dots", with a star for the active workspace.
+    readonly property bool stars: theme.style.workspaces === "stars"
+    readonly property bool dots: theme.style.workspaces === "dots" || stars
     readonly property int cell: (crossSize > 0 ? crossSize : theme.bar.height - theme.space.s)
 
     columns: vertical ? 1 : Math.max(1, workspaces.length)
@@ -43,10 +45,21 @@ Grid {
                 : root.theme.color.soft
             readonly property int pill: modelData.active ? 27 : 8
 
-            implicitWidth: root.dots ? (root.vertical ? 8 : pill) : Math.max(root.cell, label.implicitWidth + root.theme.space.s * 2)
-            implicitHeight: root.dots ? (root.vertical ? pill : 8) : Math.min(root.cell, 32)
+            readonly property bool star: root.stars && modelData.active
+
+            implicitWidth: star ? 16 : root.dots ? (root.vertical ? 8 : pill) : Math.max(root.cell, label.implicitWidth + root.theme.space.s * 2)
+            implicitHeight: star ? 16 : root.dots ? (root.vertical ? pill : 8) : Math.min(root.cell, 32)
             radius: root.dots ? root.theme.radius.full : root.theme.radius.control
-            color: root.dots ? dotColor : modelData.active ? root.theme.color.surface2 : "transparent"
+            color: star ? "transparent" : root.dots ? dotColor : modelData.active ? root.theme.color.surface2 : "transparent"
+
+            // Four-pointed star for the active workspace ("stars" style).
+            ThemedText {
+                anchors.centerIn: parent
+                visible: item.star
+                text: "✦"
+                color: item.modelData.urgent ? root.theme.color.urgent : root.theme.color.accent
+                font.pixelSize: 18
+            }
 
             Behavior on implicitWidth {
                 NumberAnimation {

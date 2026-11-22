@@ -76,6 +76,8 @@ PopupWindow {
         border.width: root.theme.border.width
         border.color: root.theme.color.line
 
+        Glass {}
+
         Column {
             id: column
 
