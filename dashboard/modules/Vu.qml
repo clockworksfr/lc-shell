@@ -274,15 +274,17 @@ ModuleBase {
             Layout.fillHeight: true
         }
 
+        // A fixed model (2 channels): the rows read their level; a model
+        // rebuilt at each update recreated every row and its dots 20 times a
+        // second.
         Repeater {
-            model: root.channels
+            model: 2
 
             LevelRow {
-                required property var modelData
                 required property int index
                 m: root
-                ch_: modelData
-                withScale: root.roomy && index === root.channels.length - 1
+                ch_: root.channels[index]
+                withScale: root.roomy && index === 1
                 Layout.fillWidth: true
             }
         }
@@ -356,10 +358,13 @@ ModuleBase {
         }
 
         Repeater {
-            model: root.channels
+            model: 2
 
             ColumnLayout {
-                required property var modelData
+                id: ladder
+
+                required property int index
+                readonly property var modelData: root.channels[index]
                 Layout.fillHeight: root.shape !== "tall"
                 Layout.fillWidth: root.shape === "tall" || root.shape === "tiny" || root.shape === "narrow"
                 Layout.preferredWidth: root.shape === "tall" ? -1 : Math.max(28, root.cw * 0.08)
