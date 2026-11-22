@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import qs.cards
 import qs.components
+import qs.services
 import qs.theme
 
 // The bar's hover card: one per bar, moved from block to block. Opens
@@ -45,6 +46,8 @@ PopupWindow {
         visible = false;
         slot = null;
     }
+
+    onVisibleChanged: ShellState.card = { visible: visible, type: slot?.type ?? "", screen: host?.screen?.name ?? "" }
 
     function place(): void {
         if (!slot || !host)

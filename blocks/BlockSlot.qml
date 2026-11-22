@@ -33,6 +33,9 @@ Item {
 
     onHoveredChanged: host?.blockHovered(root, hovered)
 
+    Component.onCompleted: if (host) ShellState.addSlot(root)
+    Component.onDestruction: ShellState.removeSlot(root)
+
     Loader {
         id: loader
 
