@@ -144,7 +144,8 @@ Item {
         label: true
         text: root.title
         font.family: root.look === "modulaire" ? root.theme.font.mono : root.theme.font.family
-        font.pixelSize: root.look === "modulaire" ? Math.max(11, root.height * 0.04) : Math.max(13, root.height * 0.045)
+        // The same size on every module (Michroma is wide: a bit smaller).
+        font.pixelSize: root.look === "modulaire" ? 12 : 14
         font.letterSpacing: 1.5
         color: root.look === "facade" ? (root.theme.color.silk ?? root.theme.color.soft) : root.theme.color.soft
     }
