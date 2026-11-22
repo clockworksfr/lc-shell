@@ -151,8 +151,8 @@ PanelWindow {
                     text: modelData.text ?? ""
                     enabled: modelData.enabled ?? true
                     submenu: !!modelData.hasChildren
-                    check: root.menu ? (modelData.buttonType === QsMenuButtonType.CheckBox ? "box" : modelData.buttonType === QsMenuButtonType.RadioButton ? "radio" : "") : ""
-                    checked: root.menu ? modelData.checkState === Qt.Checked : false
+                    check: root.menu ? (modelData.buttonType === QsMenuButtonType.CheckBox ? "box" : modelData.buttonType === QsMenuButtonType.RadioButton ? "radio" : "") : (modelData.check ?? "")
+                    checked: root.menu ? modelData.checkState === Qt.Checked : !!modelData.checked
                     onClicked: root.activate(modelData)
                 }
             }

@@ -316,6 +316,12 @@ ModuleBase {
         readonly property date first: new Date(month.m.now.getFullYear(), month.m.now.getMonth(), 1)
         readonly property date start: month.m.monday(first)
         readonly property int weeks: Math.ceil(((first.getDay() + 6) % 7 + new Date(month.m.now.getFullYear(), month.m.now.getMonth() + 1, 0).getDate()) / 7)
+        // A narrow week-number column and a short header row leave the
+        // days more room.
+        readonly property real weekW: Math.max(month.m.t4 * 2, width * 0.075)
+        readonly property real dayW: (width - weekW) / 7
+        readonly property real rowH: height / (weeks + 0.7)
+        readonly property real daySize: Math.max(11, Math.min(month.m.t3 * 1.1, rowH * 0.62, dayW * 0.5))
 
         columns: 8
 
@@ -323,6 +329,8 @@ ModuleBase {
             model: 8 * (month.weeks + 1)
 
             Item {
+                id: slot
+
                 required property int index
                 readonly property int row: Math.floor(index / 8) - 1
                 readonly property int col: index % 8 - 1
@@ -332,28 +340,31 @@ ModuleBase {
                 readonly property bool inMonth: day.getMonth() === month.m.now.getMonth()
                 readonly property bool today: !header && !weekCol && day.toDateString() === month.m.now.toDateString()
 
-                width: month.width / 8
-                height: month.height / (month.weeks + 1)
+                width: weekCol ? month.weekW : month.dayW
+                height: header ? month.rowH * 0.7 : month.rowH
 
+                // Today: a pill wide enough for two digits, bold figure.
                 Rectangle {
                     anchors.centerIn: parent
-                    visible: parent.today
-                    width: Math.min(parent.width, parent.height) * 0.86
-                    height: width
-                    radius: month.m.theme.radius.full
+                    visible: slot.today
+                    height: Math.min(parent.height * 0.94, month.daySize * 1.55)
+                    width: Math.min(parent.width * 0.96, Math.max(height, dayLabel.implicitWidth + month.daySize * 0.9))
+                    radius: height / 2
                     color: month.m.theme.color.signal ?? month.m.theme.color.accent
                 }
 
                 ThemedText {
+                    id: dayLabel
                     anchors.centerIn: parent
-                    label: parent.header || parent.weekCol
-                    text: parent.header ? (parent.weekCol ? "" : I18n.locale.dayName((parent.col + 1) % 7, Locale.NarrowFormat))
-                        : parent.weekCol ? month.m.week(new Date(month.start.getTime() + parent.row * 7 * 86400000 + 3600000))
-                        : parent.day.getDate()
-                    font.pixelSize: parent.header || parent.weekCol ? month.m.t4 : month.m.t3
+                    label: slot.header || slot.weekCol
+                    text: slot.header ? (slot.weekCol ? "" : I18n.locale.dayName((slot.col + 1) % 7, Locale.NarrowFormat))
+                        : slot.weekCol ? month.m.week(new Date(month.start.getTime() + slot.row * 7 * 86400000 + 3600000))
+                        : slot.day.getDate()
+                    font.pixelSize: slot.header || slot.weekCol ? Math.min(month.m.t4, month.daySize * 0.75) : month.daySize
+                    font.weight: slot.today ? Font.Bold : Font.Normal
                     font.features: ({ "tnum": 1 })
-                    color: parent.today ? month.m.theme.color.onAccent : parent.header || parent.weekCol || !parent.inMonth ? month.m.theme.color.soft : month.m.theme.color.ink
-                    opacity: !parent.header && !parent.weekCol && !parent.inMonth ? 0.45 : 1
+                    color: slot.today ? (month.m.theme.color.signal ? "white" : month.m.theme.color.onAccent) : slot.header || slot.weekCol || !slot.inMonth ? month.m.theme.color.soft : month.m.theme.color.ink
+                    opacity: slot.weekCol ? 0.6 : !slot.header && !slot.inMonth ? 0.45 : 1
                 }
             }
         }

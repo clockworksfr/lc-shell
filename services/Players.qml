@@ -7,13 +7,17 @@ import Quickshell.Services.Mpris
 // MPRIS players and the "active" one the shell controls.
 //
 // The active player is the one that most recently started playing.
-// cycle() pins another player by hand, until some player starts playing.
+// cycle() pins another player by hand, until some player starts playing;
+// choose() pins one for good (the source no longer follows the players)
+// until auto().
 Singleton {
     id: root
 
     readonly property list<MprisPlayer> list: Mpris.players.values
 
     property MprisPlayer pinned
+    // Pinned by hand from the source menu: kept when another player starts.
+    property bool locked: false
     property MprisPlayer lastStarted
 
     readonly property MprisPlayer active: pinned ?? lastStarted ?? list.find(p => p.isPlaying) ?? list[0] ?? null
@@ -32,6 +36,19 @@ Singleton {
         if (active?.canGoPrevious)
             active.previous();
     }
+
+    function choose(player: MprisPlayer): void {
+        pinned = player;
+        locked = true;
+    }
+
+    function auto(): void {
+        locked = false;
+        pinned = null;
+    }
+
+    // A pinned player that went away: back to automatic.
+    onListChanged: if (pinned && !list.includes(pinned)) auto()
 
     function cycle(): void {
         if (list.length < 2)
@@ -67,7 +84,8 @@ Singleton {
                 if (Date.now() - stoppedAt < 3000)
                     return;
                 root.lastStarted = modelData;
-                root.pinned = null;
+                if (!root.locked)
+                    root.pinned = null;
             }
         }
     }

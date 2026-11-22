@@ -530,5 +530,8 @@
   "toggles.bluetooth": "Bluetooth",
   "toggles.dark": "Sombre",
   "toggles.on": "Activé",
-  "toggles.auto": "Automatique"
+  "toggles.auto": "Automatique",
+  "media.source.auto": "Automatique (suit le lecteur qui démarre)",
+  "media.source.title": "Source",
+  "media.source.autoShort": "Auto"
 }

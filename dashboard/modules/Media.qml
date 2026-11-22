@@ -21,6 +21,94 @@ ModuleBase {
     id: root
 
     readonly property var player: Players.active
+
+    // Source menu: automatic, or one player pinned by hand. From the chip in
+    // the title row (touch) or a right click anywhere on the module.
+    function openSources(item: Item): void {
+        const p = item.mapToItem(null, item.width / 2, item.height);
+        sources.openAt(p.x, p.y);
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        anchors.margins: -root.pad
+        acceptedButtons: Qt.RightButton
+        onClicked: mouse => {
+            const p = mapToItem(null, mouse.x, mouse.y);
+            sources.openAt(p.x, p.y);
+        }
+    }
+
+    MenuPopup {
+        id: sources
+
+        host: root.QsWindow.window
+        actions: [
+            { id: "auto", text: I18n.tr("media.source.auto"), check: "radio", checked: !Players.locked },
+            ...Players.list.map((p, i) => ({ id: `${i}`, text: p.identity || p.desktopEntry || "?", check: "radio", checked: Players.locked && Players.pinned === p }))
+        ]
+        onPicked: id => id === "auto" ? Players.auto() : Players.choose(Players.list[parseInt(id)])
+    }
+
+    // The chip in the title row: current source; a lock when pinned.
+    Item {
+        id: chip
+
+        parent: root
+        visible: root.inner.y > root.pad + 1 && (Players.list.length > 1 || Players.locked)
+        x: root.width - width - 14
+        y: 6
+        width: chipRow.implicitWidth + 16
+        height: 24
+
+        Rectangle {
+            anchors.fill: parent
+            radius: height / 2
+            color: chipArea.containsMouse || chipArea.pressed ? root.theme.color.surface3 : "transparent"
+            border.width: 1
+            border.color: root.theme.color.line
+        }
+
+        Row {
+            id: chipRow
+            anchors.centerIn: parent
+            spacing: 4
+
+            Icon {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: Players.locked
+                name: "push_pin"
+                filled: true
+                size: 13
+                color: root.theme.color.accent
+            }
+
+            ThemedText {
+                anchors.verticalCenter: parent.verticalCenter
+                label: true
+                text: `${root.player?.identity ?? I18n.tr("media.source.title")}${Players.locked ? "" : ` · ${I18n.tr("media.source.autoShort")}`}`
+                font.pixelSize: 12
+                color: root.theme.color.soft
+            }
+
+            Icon {
+                anchors.verticalCenter: parent.verticalCenter
+                name: "expand_more"
+                size: 14
+                color: root.theme.color.soft
+            }
+        }
+
+        // A bigger target than the chip (touch).
+        MouseArea {
+            id: chipArea
+            anchors.fill: parent
+            anchors.margins: -12
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.openSources(chip)
+        }
+    }
     readonly property real length: player?.length ?? 0
     readonly property real position: player?.position ?? 0
     readonly property bool timed: (player?.lengthSupported ?? false) && length > 0 && length < 86400 && position <= length + 2

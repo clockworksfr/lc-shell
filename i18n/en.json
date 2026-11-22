@@ -530,5 +530,8 @@
   "toggles.bluetooth": "Bluetooth",
   "toggles.dark": "Dark",
   "toggles.on": "On",
-  "toggles.auto": "Automatic"
+  "toggles.auto": "Automatic",
+  "media.source.auto": "Automatic (follows the player that starts)",
+  "media.source.title": "Source",
+  "media.source.autoShort": "Auto"
 }
