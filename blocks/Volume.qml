@@ -27,6 +27,10 @@ TextBlock {
         onWheel: wheel => wheel.angleDelta.y > 0 ? Audio.increment() : Audio.decrement()
     }
 
+    function togglePanel(): void {
+        popup.toggle();
+    }
+
     BarPopup {
         id: popup
         anchorItem: root

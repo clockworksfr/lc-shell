@@ -19,6 +19,14 @@ Scope {
         function close(): void {
             ShellState.barVisible = false;
         }
+        // Toggle a block's panel: volume, network, bluetooth, battery,
+        // notifications. On the focused screen, or the named one.
+        function panel(type: string): void {
+            ShellState.panelRequested(type, "");
+        }
+        function panelOn(type: string, screen: string): void {
+            ShellState.panelRequested(type, screen);
+        }
     }
 
     IpcHandler {

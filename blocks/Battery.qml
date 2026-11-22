@@ -22,6 +22,10 @@ TextBlock {
         onClicked: popup.toggle()
     }
 
+    function togglePanel(): void {
+        popup.toggle();
+    }
+
     BarPopup {
         id: popup
         anchorItem: root

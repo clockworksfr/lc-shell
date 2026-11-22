@@ -1,5 +1,7 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
+import qs.services
 
 // Instantiates one block from a layout entry and hands it its context.
 // Blocks expose `screen`, `options`, and optionally:
@@ -19,6 +21,16 @@ Loader {
 
     source: Registry.url(type)
     visible: item?.shown ?? true
+
+    Connections {
+        target: ShellState
+
+        function onPanelRequested(type: string, screenName: string): void {
+            const target = screenName || Hyprland.focusedMonitor?.name || "";
+            if (type === root.type && root.screen?.name === target && typeof root.item?.togglePanel === "function")
+                root.item.togglePanel();
+        }
+    }
 
     onLoaded: {
         item.screen = Qt.binding(() => root.screen);
