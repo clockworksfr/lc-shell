@@ -6,7 +6,7 @@ import qs.i18n
 import qs.theme
 
 // One clipboard item as a card: header (kind, source app), preview by
-// kind, footer (age, size, tags, pin, Ctrl+n shortcut).
+// kind, footer (age, size, tags). The header pin toggles pinning.
 Rectangle {
     id: root
 
@@ -29,24 +29,27 @@ Rectangle {
     readonly property string text: entry?.text ?? ""
     readonly property int pad: compact ? theme.space.s : theme.space.m
 
+    readonly property int borderWidth: current ? 2 : 1
+
     radius: theme.radius.tile
     color: theme.color.surface2
-    border.width: current ? 2 : 1
-    border.color: current ? theme.color.accent : theme.color.line
     clip: true
+
+    HoverHandler {
+        id: hover
+    }
 
     // --- Header ---
     Rectangle {
         id: header
 
-        // Inside the border.
-        x: root.border.width
-        y: root.border.width
-        width: parent.width - root.border.width * 2
+        // Above the card's mouse area (the pin button), below the border.
+        z: 1
+        width: parent.width
         height: root.compact ? 28 : 34
         // Opaque: the filler below squares its bottom corners.
         color: Qt.tint(root.theme.color.surface2, Qt.alpha(root.kindColor, 0.18))
-        radius: Math.max(0, root.radius - root.border.width)
+        radius: root.radius
 
         // Square bottom corners.
         Rectangle {
@@ -93,13 +96,35 @@ Rectangle {
                 color: root.theme.color.soft
             }
 
-            Icon {
+            // Pin toggle: shown when pinned, hovered or selected.
+            Item {
                 anchors.verticalCenter: parent.verticalCenter
-                visible: !!root.entry?.pinned
-                name: "push_pin"
-                filled: true
-                size: 15
-                color: root.theme.color.accent
+                visible: !!root.entry?.pinned || hover.hovered || root.current
+                width: 22
+                height: 22
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: pinArea.containsMouse ? Qt.alpha(root.theme.color.ink, 0.12) : "transparent"
+                }
+
+                Icon {
+                    anchors.centerIn: parent
+                    name: "push_pin"
+                    filled: !!root.entry?.pinned
+                    size: 15
+                    color: root.entry?.pinned || pinArea.containsMouse ? root.theme.color.accent : root.theme.color.soft
+                }
+
+                MouseArea {
+                    id: pinArea
+
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: if (root.entry) Clipboard.togglePin(root.entry.id)
+                }
             }
 
             AppIcon {
@@ -362,6 +387,16 @@ Rectangle {
             font.pixelSize: root.theme.font.sizeS
             color: root.theme.color.soft
         }
+    }
+
+    // Drawn over the header so its corners stay whole.
+    Rectangle {
+        z: 2
+        anchors.fill: parent
+        radius: root.radius
+        color: "transparent"
+        border.width: root.borderWidth
+        border.color: root.current ? root.theme.color.accent : root.theme.color.line
     }
 
     MouseArea {

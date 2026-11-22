@@ -501,7 +501,7 @@
   "settings.clipKey.number": "Ctrl+1…9",
   "settings.clipKey.numberHint": "Paste one of the first nine",
   "settings.clipKey.pin": "Ctrl+P",
-  "settings.clipKey.pinHint": "Pin / unpin (also middle click)",
+  "settings.clipKey.pinHint": "Pin / unpin (also the card's pin or middle click)",
   "settings.clipKey.tags": "Ctrl+T",
   "settings.clipKey.tagsHint": "The item's tags",
   "settings.clipKey.delete": "Delete",

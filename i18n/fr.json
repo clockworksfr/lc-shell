@@ -501,7 +501,7 @@
   "settings.clipKey.number": "Ctrl+1…9",
   "settings.clipKey.numberHint": "Coller l'un des neuf premiers",
   "settings.clipKey.pin": "Ctrl+P",
-  "settings.clipKey.pinHint": "Épingler / désépingler (aussi clic milieu)",
+  "settings.clipKey.pinHint": "Épingler / désépingler (aussi l’épingle de la carte ou clic milieu)",
   "settings.clipKey.tags": "Ctrl+T",
   "settings.clipKey.tagsHint": "Tags de l'élément",
   "settings.clipKey.delete": "Suppr",
