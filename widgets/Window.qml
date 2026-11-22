@@ -55,7 +55,9 @@ Item {
         id: row
 
         anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: root.vertical ? parent.horizontalCenter : undefined
+        // A position, not a conditional anchor (a removed anchor leaves the
+        // row where it was when the bar changes edge).
+        x: root.vertical ? (parent.width - width) / 2 : 0
         spacing: 8
 
         AppIcon {

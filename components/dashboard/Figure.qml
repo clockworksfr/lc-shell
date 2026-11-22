@@ -31,7 +31,10 @@ Item {
 
     HeroText {
         id: hero
-        anchors.centerIn: root.vfd ? parent : undefined
+        // Positions, not a conditional anchor: an anchor removed when the
+        // theme changes leaves the item where it was (off the cell).
+        x: root.vfd ? (root.width - width) / 2 : 0
+        y: root.vfd ? (root.height - height) / 2 : 0
         visible: !root.lcd
         text: root.text
         pixelSize: root.pixelSize
