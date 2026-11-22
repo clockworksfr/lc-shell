@@ -43,6 +43,15 @@ Ce que simon a demandé et décidé, dans l'ordre où c'est arrivé (22/11/2026)
 - Barre agençable : îlots, barre complète, flottante ou non, arrondis, transparence, bordures, coins… (défauts par thème, surchargeables) ; **mode « cadre »** comme Caelestia ; barre **sur le côté de son choix**.
 - Chaque élément de la barre : **réagençable, redimensionnable, déplaçable** vers un autre endroit ; **détail au survol**, soigné (« assez sympa »).
 - Un widget **fenêtre active** (titre de la fenêtre) ; l'emplacement par défaut de la date et de l'heure est à revoir en conséquence (l'agencement restant libre).
+- Barre : **pleine largeur** ou **largeur fixe centrée**.
+- Notifications en haut à droite par défaut, **position réglable**.
+- Ouverture des widgets en **tiroir** plutôt qu'en bulles flottantes, un tiroir qui **fusionne avec le widget et sa bordure**, « comme si sa zone s'agrandissait » (dans l'esprit de Caelestia et Nebula).
+- **Animations** soignées à l'ouverture des fenêtres et des menus, pas de simples fondus.
+- **Icônes d'applis recolorables** selon le thème (barre, cartes).
+
+## Vocabulaire
+
+- **widget** : élément de la barre ; **module** : élément de l'écran modules (tableau de bord).
 
 ## Organisation
 

@@ -232,3 +232,34 @@ Jamais de texte pivoté ; pas de titre de fenêtre. Corps ≈ 0,27 × largeur. �
 - Sans cadre : écart 8 px, rayon 20, ombre, glissement 12 px + fondu 180 ms. Avec cadre : tiroir fusionné.
 - Réglages, média et calendrier sortent du côté de la barre. Notifications à droite (à gauche si la barre est à droite). Session à droite, au milieu. Lanceur : centré (sans cadre), côté opposé à la barre (avec cadre).
 - DP-1 avec barre à gauche : 64 px sur 5120 (1,25 %) contre 48 sur 2160 (2,2 %) ; le bord gauche est loin du regard : toasts, OSD et lanceur restent au centre.
+
+## Tiroirs (panneaux et cartes de survol)
+
+- Un panneau ou une carte sort de la barre en **tiroir fusionné** : il recouvre la bordure intérieure de la barre (aucun trait à la jonction), a le même remplissage que l'îlot ou la barre (opaque pour rester lisible), et une seule bordure qui part de celle de l'îlot, suit deux raccords concaves puis fait le tour du tiroir.
+- Rayon des raccords : jeton `drawer.fillet` (Classique 10, Constellation 14, Matrix 12), indépendant du rayon des contrôles.
+- **L'îlot s'agrandit** : quand le tiroir est plus large que l'îlot dont il sort, le fond de l'îlot (pas son contenu) s'élargit, avec une animation, pour porter le tiroir et ses raccords, puis revient à sa taille à la fermeture.
+
+## Animations
+
+Jetons `motion` par thème, appliqués par le singleton `Motion` :
+
+| Jeton | Classique | Constellation | Matrix |
+|---|---|---|---|
+| fast / base / slow | 140 / 200 / 280 ms | 160 / 230 / 320 ms | 120 / 160 / 220 ms |
+| Entrée | `OutCubic` | `OutBack`, overshoot 0,8 | `OutQuart` |
+| Décalage entre lignes | 20 ms | 30 ms | 0 |
+
+- **Sortie** : `InCubic`, durée × 0,75, sans rebond, toujours depuis la valeur courante (interruptible).
+- **Jeu en plein écran** : sur l'écran concerné, toutes les durées valent 0.
+- **Animations réduites** (`appearance.reducedMotion`, par défaut la valeur `enable-animations` de GNOME) : fondus de 90 ms au plus, aucun déplacement.
+- Tiroirs : le contenu apparaît à partir de 40 % de l'ouverture et s'efface en premier à la fermeture. Lanceur : échelle 0,96 → 1. Paramètres : échelle 0,98 → 1, et changement de page en fondu avec une montée de 8 px. OSD : depuis son bord. Notifications : glissement depuis leur côté, la pile se resserre. Tableau de bord : modules en fondu, colonne par colonne.
+
+## Icônes d'applis
+
+Axe de style `appIcons` (composant `AppIcon`), surchargeable dans Paramètres › Apparence (`appearance.appIcons`) :
+
+- `native` (Classique) : couleurs d'origine ;
+- `tinted` (Constellation) : désaturées et teintées de l'accent ;
+- `mono` (Matrix) : monochromes, à la couleur de l'encre.
+
+Appliqué au tray, au widget fenêtre active et aux cartes (fenêtre, espaces de travail, tray). Le lanceur garde les icônes d'origine.
