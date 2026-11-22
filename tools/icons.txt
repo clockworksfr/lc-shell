@@ -108,3 +108,4 @@ open_in_full
 open_in_new
 menu
 screen_share
+lyrics
