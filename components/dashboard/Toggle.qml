@@ -29,8 +29,9 @@ Item {
 
     readonly property real m: Math.min(width, look === "matrix" ? pill.height : height)
     // Matrix pills: from their height (a tall pill gets bigger text).
-    readonly property real labelSize: Math.max(15, Math.min(look === "matrix" ? pill.height * 0.22 : m * 0.17, 24))
-    readonly property real iconSize: Math.max(22, Math.min(m * 0.3, 46))
+    // Compact: the tile may be big, its text and icon stay moderate.
+    readonly property real labelSize: Math.max(14, Math.min(look === "matrix" ? pill.height * 0.27 : m * 0.15, look === "matrix" ? 16 : 19))
+    readonly property real iconSize: Math.max(20, Math.min(m * 0.26, look === "matrix" ? 22 : 34))
     // Low wide tiles (narrow columns, strips): icon (or lever) left, labels
     // right, all vertically centered.
     readonly property bool inline: look !== "matrix" && height < 110 && width >= height * 1.6
@@ -186,7 +187,8 @@ Item {
         visible: root.look === "matrix"
         anchors.centerIn: parent
         width: parent.width
-        height: Math.max(Math.min(parent.height, 56), Math.min(parent.height, 96))
+        // At most 60 px high, centered in its cell (a touch target, not a slab).
+        height: Math.min(parent.height, 60)
         radius: height / 2
         color: root.on ? root.theme.color.ink : area.pressed ? Qt.alpha(root.theme.color.ink, 0.12) : "transparent"
         border.width: 1.5

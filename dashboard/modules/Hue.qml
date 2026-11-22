@@ -438,7 +438,7 @@ ModuleBase {
         visible: root.mode === "list" || root.mode === "row" || root.mode === "grid"
         m: root
         anchors.fill: parent
-        cols: root.mode === "list" ? 1 : root.mode === "grid" ? 2 : Math.max(1, Math.min(HueBridge.rooms.length + 1, Math.floor((root.cw + root.gap) / (150 + root.gap))))
+        cols: root.mode === "list" ? 1 : root.mode === "grid" ? 2 : Math.max(1, Math.min(HueBridge.rooms.length + 1, Math.floor((root.cw + root.gap) / (140 + root.gap))))
     }
 
     // box / tall: rooms on top, the room under.
