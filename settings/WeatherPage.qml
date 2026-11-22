@@ -46,6 +46,28 @@ Column {
         }
 
         Field {
+            label: I18n.tr("weather.source")
+            hint: I18n.tr("weather.sourceHint")
+            Choice {
+                model: [{ value: "openmeteo", label: "Open-Meteo" }, { value: "local", label: I18n.tr("weather.sourceLocal") }]
+                value: Config.get("weather.source") ?? "openmeteo"
+                onPicked: value => Config.set("weather.source", value)
+            }
+        }
+
+        Field {
+            visible: (Config.get("weather.source") ?? "openmeteo") === "local"
+            label: I18n.tr("weather.localSite")
+            hint: Weather.stationLive ? I18n.tr("weather.stationName", { name: Weather.station.name, time: I18n.locale.toString(new Date(Weather.station.time), "HH:mm") }) : I18n.tr("weather.localSiteHint")
+            TextField {
+                implicitWidth: 300
+                text: Config.get("weather.localSite") ?? ""
+                placeholder: "https://www.meteo-biarritz.com"
+                onCommitted: text => Config.set("weather.localSite", text.trim())
+            }
+        }
+
+        Field {
             label: I18n.tr("weather.units")
             Choice {
                 model: [{ value: "metric", label: "°C · km/h" }, { value: "imperial", label: "°F · mph" }]

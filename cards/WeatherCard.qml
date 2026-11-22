@@ -13,7 +13,7 @@ Column {
     property var block
     property ShellScreen screen
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
-    readonly property var now: Weather.current
+    readonly property var now: Weather.now
 
     spacing: theme.space.m
 
@@ -52,7 +52,22 @@ Column {
             }
 
             ThemedText {
-                text: root.now ? I18n.tr("weather.feels", { value: Weather.temp(root.now.feels), wind: Math.round(root.now.wind), unit: Weather.windUnit }) : ""
+                text: root.now ? I18n.tr("weather.feelsOnly", { value: Weather.temp(root.now.feels) }) + " · " + Weather.windLine : ""
+                color: root.theme.color.soft
+                font.pixelSize: root.theme.font.sizeS
+            }
+
+            ThemedText {
+                visible: !!Weather.rainSoon
+                text: Weather.rainText()
+                color: Weather.rainSoon === "dry" ? root.theme.color.soft : (root.theme.color.signal ?? root.theme.color.accent)
+                font.pixelSize: root.theme.font.sizeS
+                font.weight: Weather.rainSoon === "dry" ? Font.Normal : Font.DemiBold
+            }
+
+            ThemedText {
+                visible: !!root.now?.station
+                text: root.now?.station ? I18n.tr("weather.stationName", { name: root.now.station, time: I18n.locale.toString(new Date(root.now.stationTime), "HH:mm") }) : ""
                 color: root.theme.color.soft
                 font.pixelSize: root.theme.font.sizeS
             }

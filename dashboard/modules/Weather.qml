@@ -14,7 +14,7 @@ import qs.theme
 ModuleBase {
     id: root
 
-    readonly property var now: Weather.current
+    readonly property var now: Weather.now
     readonly property var today: Weather.daily[0] ?? null
     readonly property real hourWidth: Math.max(56, t3 * 3.4)
     // modulaire: everything on its green LCD; facade: the current block in
@@ -87,6 +87,8 @@ ModuleBase {
 
         property var m
         property int align: Text.AlignLeft
+        // Wind and next-hour rain lines (where there's room).
+        property bool extended: m.ch >= 150
 
         spacing: 2
 
@@ -117,11 +119,53 @@ ModuleBase {
             color: details.m.softColor
         }
 
+        // Wind, gusts, pressure.
+        ThemedText {
+            width: parent.width
+            horizontalAlignment: details.align
+            visible: details.extended && !!Weather.windLine
+            elide: Text.ElideRight
+            text: Weather.windLine
+            font.family: details.m.screenText ? details.m.screenFont : details.m.theme.font.family
+            font.pixelSize: details.m.t4 * 1.1
+            font.features: ({ "tnum": 1 })
+            color: details.m.softColor
+        }
+
+        // Rain in the next hour (signal color when it rains or will).
+        Row {
+            visible: details.extended && !!Weather.rainSoon
+            width: parent.width
+            spacing: 4
+
+            Icon {
+                id: rainIcon
+                anchors.verticalCenter: parent.verticalCenter
+                name: "water_drop"
+                filled: Weather.rainSoon !== "dry"
+                size: details.m.t4 * 1.3
+                color: rainText.color
+            }
+
+            ThemedText {
+                id: rainText
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width - rainIcon.width - parent.spacing
+                elide: Text.ElideRight
+                text: Weather.rainText()
+                font.family: details.m.screenText ? details.m.screenFont : details.m.theme.font.family
+                font.pixelSize: details.m.t4 * 1.1
+                font.weight: Weather.rainSoon === "dry" ? Font.Normal : Font.DemiBold
+                color: Weather.rainSoon === "dry" ? details.m.softColor : details.m.onLcd ? details.m.inkColor : (details.m.theme.color.signal ?? details.m.theme.color.accent)
+            }
+        }
+
+        // Place, and the station's reading time when it's live.
         ThemedText {
             width: parent.width
             horizontalAlignment: details.align
             elide: Text.ElideRight
-            text: Weather.location?.name ?? ""
+            text: (Weather.location?.name ?? "") + (details.m.now?.station ? ` · ${I18n.tr("weather.stationAt", { time: I18n.locale.toString(new Date(details.m.now.stationTime), "HH:mm") })}` : "")
             font.family: details.m.screenText ? details.m.screenFont : details.m.theme.font.family
             font.capitalization: details.m.screenText ? Font.AllUppercase : Font.MixedCase
             font.pixelSize: details.m.t4

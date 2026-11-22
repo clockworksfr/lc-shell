@@ -16,6 +16,14 @@ Singleton {
     readonly property var location: Config.get("weather.location") ?? null
     readonly property bool enabled: !!location && (Config.get("weather.enabled") ?? true)
     readonly property bool imperial: Config.get("weather.units") === "imperial"
+    // "openmeteo": forecast and conditions from Open-Meteo. "local": a
+    // Météo-villes site (meteo-biarritz.com…, `weather.localSite`) for the
+    // live station readings and the rain within the hour (its umbrellas,
+    // Météo-France style levels), over Open-Meteo's forecast (the same
+    // AROME model those sites show); Open-Meteo whenever the site is silent.
+    readonly property string source: Config.get("weather.source") ?? "openmeteo"
+    readonly property string localSite: (Config.get("weather.localSite") ?? "").replace(/\/+$/, "")
+    readonly property bool useStation: source === "local" && /^https:\/\/[a-z0-9.-]+$/i.test(localSite)
 
     // { temp, feels, code, wind, isDay } of the last reading.
     property var current: null
@@ -25,6 +33,66 @@ Singleton {
     property var daily: []
     // When the reading was taken (ms since epoch), 0 = none.
     property real updated: 0
+    // Live station reading (source "local"): { temp, feels, wind, windDir,
+    // gusts, pressure, humidity, name, time } or null.
+    property var station: null
+    // Station readings older than an hour aren't shown.
+    readonly property bool stationLive: !!station && Date.now() - station.time < 3600 * 1000
+    // What to show now: Open-Meteo's conditions, with the station's live
+    // readings over them when there are some (`station` set to its name).
+    readonly property var now: {
+        if (!current)
+            return null;
+        if (!stationLive)
+            return current;
+        const s = station;
+        return Object.assign({}, current, {
+            temp: s.temp,
+            feels: s.feels,
+            wind: s.wind ?? current.wind,
+            windDir: s.windDir || current.windDir,
+            gusts: s.gusts ?? current.gusts,
+            pressure: s.pressure ?? current.pressure,
+            humidity: s.humidity ?? current.humidity,
+            station: s.name,
+            stationTime: s.time
+        });
+    }
+    // Wind, gusts, pressure in one line ("O 41 km/h · raf. 58 · 1026 hPa").
+    readonly property string windLine: {
+        if (!now)
+            return "";
+        const parts = [`${now.windDir ?? ""} ${Math.round(now.wind ?? 0)} ${windUnit}`.trim()];
+        if (now.gusts && now.gusts > (now.wind ?? 0) + 5)
+            parts.push(I18n.tr("weather.gusts", { value: Math.round(now.gusts) }));
+        if (now.pressure)
+            parts.push(`${Math.round(now.pressure)} hPa`);
+        return parts.join(" · ");
+    }
+
+    // Next hour's rain: [{ time, level (0 dry … 3 heavy), desc }], from the
+    // local site (5–10 min steps) or Open-Meteo (quarter hours).
+    property var nowcast: []
+    property var siteNowcast: []
+    property var modelNowcast: []
+    onSiteNowcastChanged: nowcast = siteNowcast.length ? siteNowcast : modelNowcast
+    onModelNowcastChanged: nowcast = siteNowcast.length ? siteNowcast : modelNowcast
+    // "dry" | "soon" (starts within the hour) | "now" (raining) | ""
+    readonly property string rainSoon: {
+        if (!nowcast.length)
+            return "";
+        if (nowcast[0].level > 0)
+            return "now";
+        return nowcast.some(q => q.level > 0 && q.time - Date.now() < 3600 * 1000) ? "soon" : "dry";
+    }
+    // The quarter it starts (soon) or stops (now) in, as a time; 0 if none.
+    readonly property real rainChange: {
+        if (rainSoon === "soon")
+            return nowcast.find(q => q.level > 0)?.time ?? 0;
+        if (rainSoon === "now")
+            return nowcast.find(q => q.level === 0)?.time ?? 0;
+        return 0;
+    }
     property bool failed: false
     readonly property bool ready: enabled && !!current
     // Older than an hour (offline): shown with its time.
@@ -85,12 +153,69 @@ Singleton {
         return `${Math.round(value)}°`;
     }
 
+    // Compass point (N, NE…) of a wind direction in degrees.
+    function compass(degrees: real): string {
+        return I18n.tr(`weather.dir.${["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.round(((degrees % 360) + 360) % 360 / 45) % 8]}`);
+    }
+
+    // "Pas de pluie dans l'heure", "Pluie vers 20:15", "Pluie jusqu'à 20:30".
+    function rainText(): string {
+        const at = rainChange ? I18n.locale.toString(new Date(rainChange), "HH:mm") : "";
+        return rainSoon === "dry" ? I18n.tr("weather.rain.dry")
+            : rainSoon === "soon" ? I18n.tr("weather.rain.soon", { time: at })
+            : rainSoon === "now" ? (nowcast[0].desc ? (at ? I18n.tr("weather.rain.descUntil", { desc: nowcast[0].desc, time: at }) : nowcast[0].desc) : at ? I18n.tr("weather.rain.until", { time: at }) : I18n.tr("weather.rain.now"))
+            : "";
+    }
+
+    // A Météo-villes home page: the station's "realtimeReport" and the
+    // "rain" list (umbrellas) of its Next.js flight data (self.__next_f).
+    function parseStation(html: string): void {
+        const chunks = [];
+        const re = /self\.__next_f\.push\(\[1,"((?:[^"\\]|\\.)*)"\]\)/g;
+        let m;
+        while ((m = re.exec(html)) !== null)
+            chunks.push(JSON.parse(`"${m[1]}"`));
+        const flight = chunks.join("");
+        const rain = /\{"rain":(\[[^\]]*\])/.exec(flight);
+        siteNowcast = rain ? JSON.parse(rain[1]).map(q => ({ time: Date.parse(q.dt), level: Math.max(0, Math.min(3, (q.rain ?? 1) - 1)), desc: q.desc ?? "" })).filter(q => q.time + 600 * 1000 > Date.now()) : [];
+        const r = /"(?:realtimeReport|report)":(\{[^{}]*\})/.exec(flight);
+        if (!r) {
+            station = null;
+            return;
+        }
+        const d = JSON.parse(r[1]);
+        if (d.out_of_service || d.temperature === null || d.temperature === undefined) {
+            station = null;
+            return;
+        }
+        const title = /<title>Météo ([^<0-9–]+?)\s+\d{5}/.exec(html);
+        station = {
+            temp: d.temperature,
+            feels: d.windchill ?? d.humidex ?? d.temperature,
+            wind: d.wind_speed ?? null,
+            windDir: d.wind_direction_label ?? "",
+            gusts: d.gust ?? null,
+            pressure: d.pressure ?? null,
+            humidity: d.humidity ?? null,
+            name: title ? title[1].trim() : localSite.replace(/^https:\/\/(www\.)?/, ""),
+            time: Date.parse(d.updated_at)
+        };
+    }
+
+    function refreshStation(): void {
+        if (!enabled || !useStation || stationFetch.running)
+            return;
+        // A generic client name; nothing about the user is sent.
+        stationFetch.command = ["curl", "-fsSL", "--max-time", "20", "-A", "Mozilla/5.0 (X11; Linux x86_64) lc-shell", `${localSite}/`];
+        stationFetch.running = true;
+    }
+
     function refresh(): void {
         if (!enabled || fetch.running)
             return;
         const p = location;
         const units = imperial ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : "";
-        fetch.command = ["curl", "-fsS", "--max-time", "15", `https://api.open-meteo.com/v1/forecast?latitude=${p.latitude}&longitude=${p.longitude}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&forecast_hours=13&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&forecast_days=6&timeformat=unixtime&timezone=auto${units}`];
+        fetch.command = ["curl", "-fsS", "--max-time", "15", `https://api.open-meteo.com/v1/forecast?latitude=${p.latitude}&longitude=${p.longitude}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,relative_humidity_2m,pressure_msl,is_day&minutely_15=precipitation&forecast_minutely_15=8&hourly=temperature_2m,precipitation_probability,weather_code,is_day&forecast_hours=13&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&forecast_days=6&timeformat=unixtime&timezone=auto${units}`];
         fetch.running = true;
     }
 
@@ -118,7 +243,15 @@ Singleton {
     function parse(text: string): void {
         const d = JSON.parse(text);
         const c = d.current;
-        current = { temp: c.temperature_2m, feels: c.apparent_temperature, code: c.weather_code, wind: c.wind_speed_10m, isDay: !!c.is_day };
+        current = { temp: c.temperature_2m, feels: c.apparent_temperature, code: c.weather_code, wind: c.wind_speed_10m, windDir: compass(c.wind_direction_10m ?? 0), gusts: c.wind_gusts_10m, humidity: c.relative_humidity_2m, pressure: c.pressure_msl, isDay: !!c.is_day };
+        const q = d.minutely_15 ?? { time: [], precipitation: [] };
+        const quarters = [];
+        for (let i = 0; i < q.time.length; i++) {
+            const mm = q.precipitation[i] ?? 0;
+            if (q.time[i] + 900 > Date.now() / 1000)
+                quarters.push({ time: q.time[i] * 1000, level: mm < 0.05 ? 0 : mm < 0.5 ? 1 : mm < 2 ? 2 : 3, desc: "" });
+        }
+        modelNowcast = quarters;
         const h = d.hourly;
         const now = Date.now() / 1000;
         const hours = [];
@@ -133,6 +266,12 @@ Singleton {
         for (let i = 0; i < d6.time.length; i++)
             days.push({ time: d6.time[i] * 1000, max: d6.temperature_2m_max[i], min: d6.temperature_2m_min[i], code: d6.weather_code[i], rain: d6.precipitation_probability_max?.[i] ?? 0 });
         daily = days;
+    }
+
+    onUseStationChanged: {
+        station = null;
+        siteNowcast = [];
+        Qt.callLater(refreshStation);
     }
 
     onEnabledChanged: if (enabled) refresh()
@@ -157,6 +296,30 @@ Singleton {
             if (code !== 0)
                 root.failed = true;
         }
+    }
+
+    Process {
+        id: stationFetch
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    root.parseStation(text);
+                } catch (e) {
+                    root.station = null;
+                    root.siteNowcast = [];
+                }
+            }
+        }
+    }
+
+    // The station reports every few minutes; the rain within the hour moves
+    // in 5–10 min steps.
+    Timer {
+        running: root.enabled && root.useStation
+        interval: 5 * 60 * 1000
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: root.refreshStation()
     }
 
     Process {

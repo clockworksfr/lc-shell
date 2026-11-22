@@ -9,7 +9,7 @@ TextWidget {
     id: root
 
     readonly property bool shown: Weather.ready
-    readonly property var now: Weather.current
+    readonly property var now: Weather.now
 
     fullText: !now ? "" : size === "extended" ? `${Weather.temp(now.temp)} · ${I18n.tr(Weather.condition(now.code))}` : Weather.temp(now.temp)
     compactText: now ? Weather.temp(now.temp) : ""
