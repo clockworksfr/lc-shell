@@ -46,22 +46,24 @@ ModuleBase {
         { label: "SSD", value: SystemStats.diskTemp },
         { label: "RAM", value: SystemStats.ramTemp }
     ].filter(t => t.value > 0)
-    readonly property bool showTemps: temps.length > 0 && shape !== "tiny" && shape !== "strip" && ch >= 230
+    readonly property bool showTemps: temps.length > 0 && shape !== "tiny" && layout !== "strip" && ch >= 230
     readonly property real tempsHeight: showTemps ? t3 * 2.6 : 0
 
     component TempsRow: Row {
         id: tempsRow
 
         property var m
+        // As many probes as fit at 90 px each.
+        readonly property var shown: tempsRow.m.temps.slice(0, Math.max(1, Math.floor((width + spacing) / (90 + spacing))))
 
         spacing: tempsRow.m.gap
 
         Repeater {
-            model: tempsRow.m.temps
+            model: tempsRow.shown
 
             Column {
                 required property var modelData
-                width: (tempsRow.width - (tempsRow.m.temps.length - 1) * tempsRow.spacing) / tempsRow.m.temps.length
+                width: (tempsRow.width - (tempsRow.shown.length - 1) * tempsRow.spacing) / tempsRow.shown.length
                 spacing: 4
 
                 Item {
@@ -512,7 +514,7 @@ ModuleBase {
 
     // Temperatures under the gauges.
     TempsRow {
-        visible: root.showTemps && root.layout !== "tiny" && root.layout !== "strip"
+        visible: root.showTemps
         m: root
         anchors.left: parent.left
         anchors.right: parent.right

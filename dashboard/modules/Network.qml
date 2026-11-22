@@ -18,8 +18,6 @@ ModuleBase {
 
     readonly property string look: theme.style.module ?? "classic"
     readonly property bool stacked: shape === "narrow" || shape === "box" || shape === "tall"
-    // Largest rate of both curves: one scale for the two.
-    readonly property real peak: Math.max(64 * 1024, ...NetworkService.rxHistory, ...NetworkService.txHistory)
 
     Component.onCompleted: NetworkService.watchers++
     Component.onDestruction: NetworkService.watchers--
@@ -61,7 +59,8 @@ ModuleBase {
         id: chip
 
         parent: root
-        visible: root.inner.y > root.pad + 1
+        // Beside the title only when there's room for both.
+        visible: root.inner.y > root.pad + 1 && root.width >= width + 150
         x: root.width - width - 14
         y: 3
         width: chipRow.implicitWidth + 22
@@ -168,7 +167,8 @@ ModuleBase {
             anchors.bottom: parent.bottom
             width: parent.width
             values: lane.history
-            max: lane.m.peak
+            // Its own scale (upload would flatten under download).
+            max: Math.max(16 * 1024, ...lane.history)
             color: lane.lineColor
         }
     }
