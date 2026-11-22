@@ -221,8 +221,10 @@ Rectangle {
                         // Matrix: the first one filled with ink.
                         readonly property bool filled: root.look === "matrix" && index === 0
 
-                        width: actionText.implicitWidth + (root.look === "matrix" ? 36 : root.theme.space.m * 2)
-                        height: Math.max(root.theme.hit, root.look === "matrix" ? 34 : 30)
+                        // Pills (a touch target of 56 px high on the modules
+                        // screen: 72 made them discs).
+                        height: root.theme.hit >= 48 ? 56 : Math.max(root.theme.hit, root.look === "matrix" ? 34 : 30)
+                        width: Math.max(height * 1.8, actionText.implicitWidth + (root.look === "matrix" ? 36 : root.theme.space.m * 2) + 16)
                         radius: root.onScreen ? 3 : height / 2
                         color: filled ? root.theme.color.ink
                             : root.look === "matrix" ? (actionArea.pressed ? Qt.alpha(root.theme.color.ink, 0.12) : "transparent")

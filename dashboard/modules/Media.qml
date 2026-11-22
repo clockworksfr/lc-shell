@@ -50,6 +50,8 @@ ModuleBase {
         onPicked: id => id === "auto" ? Players.auto() : Players.choose(Players.list[parseInt(id)])
     }
 
+    titleReserve: chip.visible ? chip.width + 14 : 0
+
     // The chip in the title row: current source; a lock when pinned.
     Item {
         id: chip

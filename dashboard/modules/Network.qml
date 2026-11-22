@@ -54,6 +54,8 @@ ModuleBase {
         onPicked: id => NetworkService.setSource(id)
     }
 
+    titleReserve: chip.visible ? chip.width + 14 : 0
+
     // The chip in the title row.
     Item {
         id: chip

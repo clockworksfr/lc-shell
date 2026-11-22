@@ -34,7 +34,9 @@ Item {
         width: parent.width
         height: 6
         radius: root.theme.radius.full
-        color: root.theme.color.bg
+        // Visible on every card (the background color vanished on dark
+        // cards, e.g. a light that's off in Matrix).
+        color: Qt.alpha(root.theme.color.ink, 0.18)
 
         Rectangle {
             width: parent.width * root.ratio

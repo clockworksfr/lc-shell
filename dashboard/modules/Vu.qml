@@ -241,7 +241,8 @@ ModuleBase {
         }
 
         Repeater {
-            model: row.withScale ? [-40, -30, -20, -10, -3, 0] : []
+            // Fewer marks on a short bar (−3 and 0 read as "−30" there).
+            model: !row.withScale ? [] : bar.width < 260 ? [-40, -20, 0] : bar.width < 420 ? [-40, -20, -10, 0] : [-40, -30, -20, -10, -3, 0]
 
             ThemedText {
                 required property int modelData

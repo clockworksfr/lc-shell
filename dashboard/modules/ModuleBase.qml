@@ -25,6 +25,8 @@ Item {
     // Narrow cells take the short name when there is one ("Espaces").
     property string title: !options.type ? "" : width < 220 && I18n.has(`module.${options.type}.short`) ? I18n.tr(`module.${options.type}.short`) : I18n.tr(`module.${options.type}`)
     property bool framed: true
+    // Room on the right of the title row (Media / Network chips).
+    property real titleReserve: 0
 
     readonly property real pad: Math.max(12, Math.min(24, Math.min(width, height) * 0.07))
     readonly property real gap: Math.max(8, pad * 0.6)
@@ -76,6 +78,7 @@ Item {
         anchors.fill: parent
         visible: base.framed
         title: base.framed ? base.title : ""
+        titleReserve: base.titleReserve
     }
 
     Item {

@@ -221,8 +221,10 @@ ModuleBase {
             const all = (room?.scenes ?? []).slice();
             const active = HueBridge.activeScene[room?.id ?? ""];
             all.sort((a, b) => (b.id === active) - (a.id === active));
-            const capacity = sceneCols * sceneRows;
-            if (all.length <= capacity || !withMore)
+            // Lights not shown here (withMore): More is always the last slot,
+            // even when the scenes fit or there are none.
+            const capacity = sceneCols * Math.max(withMore ? 1 : 0, sceneRows);
+            if (!withMore)
                 return all.slice(0, capacity);
             return all.slice(0, Math.max(0, capacity - 1)).concat([{ more: true }]);
         }

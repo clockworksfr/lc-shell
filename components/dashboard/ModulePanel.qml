@@ -15,6 +15,8 @@ Item {
     readonly property string look: theme.style.module ?? "classic"
 
     property string title
+    // Room kept on the right of the title row (a chip there).
+    property real titleReserve: 0
     readonly property bool titled: !!title && height > 200
     readonly property real titleHeight: titled ? titleText.implicitHeight + 6 : 0
 
@@ -141,9 +143,10 @@ Item {
 
         visible: root.titled
         // Never wider than the panel (long titles end with "…").
-        width: Math.min(implicitWidth, parent.width - 36)
+        width: Math.min(implicitWidth, parent.width - 36 - root.titleReserve)
         elide: Text.ElideRight
-        x: root.look === "modulaire" ? (parent.width - width) / 2 : 18
+        // Modulaire: centered, but never under a chip on the right.
+        x: root.look === "modulaire" ? Math.max(18, Math.min((parent.width - width) / 2, parent.width - root.titleReserve - 10 - width)) : 18
         y: 10
         label: true
         text: root.title
