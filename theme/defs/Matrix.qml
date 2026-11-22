@@ -26,7 +26,9 @@ Singleton {
                     urgent: "#E5323A",
                     warn: "#A6A6A6",
                     ok: "#8FCB9F",
-                    accent2: "#8C8C8C"
+                    accent2: "#8C8C8C",
+                    // Glow of dot-matrix figures (dark only).
+                    glow: "#80F2F2F2"
                 },
                 light: {
                     bg: "#E4E4E2",

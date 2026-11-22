@@ -38,7 +38,11 @@ Singleton {
                     accent2: "#d0d0d0",
                     // Glass highlight and decorative stars (themes that use them).
                     glass: "#14ffffff",
-                    star: "#80ffffff"
+                    star: "#80ffffff",
+                    // Glow of big figures (HeroText), transparent = none;
+                    // unlit segments behind them (style.ghostDigits).
+                    glow: "#00000000",
+                    ghost: "#00000000"
                 },
                 light: {
                     bg: "#ececec",
@@ -55,7 +59,9 @@ Singleton {
                     ok: "#2e7d3a",
                     accent2: "#303030",
                     glass: "#99ffffff",
-                    star: "#60000000"
+                    star: "#60000000",
+                    glow: "#00000000",
+                    ghost: "#00000000"
                 }
             },
             font: {

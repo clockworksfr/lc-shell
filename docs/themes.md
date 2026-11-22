@@ -269,3 +269,13 @@ Appliqué au tray, au widget fenêtre active et aux cartes (fenêtre, espaces de
 - `appearance.appIconTint` (0,6) : intensité de la bichromie ; `appearance.appIconContrast` (0,35) : seuil d'atténuation des parties claires en mono.
 - **Garde de contraste** (`appearance.appIconGuard`, activée) : une icône d'origine ou teintée dont la couleur moyenne contraste à moins de 1,6:1 avec la barre voit sa clarté inversée, teinte gardée.
 - Les pastilles dessinées dans une icône (point rouge de Discord) suivent la recoloration : un shader ne les distingue pas d'une icône rouge.
+
+## Implémentation de Façade et Modulaire (design 6)
+
+- Définitions dans `theme/defs/Facade.qml` et `theme/defs/Modulaire.qml`, jetons de l'étude 6 (palettes claire et sombre, polices, rayons, `drawer.fillet` 6 et 4, `motion`, `appIcons`).
+- Polices embarquées (OFL) : IBM Plex Sans Condensed, IBM Plex Mono, DSEG7 Classic (Façade) ; Barlow Condensed, Michroma, Nixie One (Modulaire).
+- Couleurs supplémentaires : `ghost` (segments éteints), `glow` (lueur des grands chiffres), `silk` (sérigraphie, Façade), `nixie`, `lcd`, `lcdInk` (Modulaire).
+- `font.heroScale` : correction de largeur des grands chiffres (Façade 0,74, Matrix 0,8, Constellation 1,04).
+- `HeroText` (composant des grands chiffres) : segments éteints derrière la valeur si `style.ghostDigits` (Façade, « 88:88 »), lueur si `color.glow` n'est pas transparent (Façade et Modulaire, Matrix en sombre) ; un seul `MultiEffect` par chiffre.
+- Pas encore rendus : espaces de travail en segments (Façade) ou en séquenceur (Modulaire), qui retombent sur les étiquettes ; alu brossé et vis de Modulaire ; lignes de balayage de Façade.
+

@@ -34,12 +34,10 @@ ModuleBase {
                 radius: root.theme.radius.tile
                 color: modelData.active ? root.theme.color.accent : root.theme.color.surface2
 
-                ThemedText {
+                HeroText {
                     anchors.centerIn: parent
                     text: ws.modelData.name
-                    font.family: root.theme.font.display
-                    font.weight: root.theme.font.displayWeight
-                    font.pixelSize: Math.min(ws.height * 0.5, ws.width * 0.5) * root.hk
+                    pixelSize: Math.min(ws.height * 0.5, ws.width * 0.5) * root.hk
                     color: ws.modelData.active ? root.theme.color.onAccent : root.theme.color.ink
                 }
 

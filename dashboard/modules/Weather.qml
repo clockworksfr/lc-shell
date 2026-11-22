@@ -53,13 +53,10 @@ ModuleBase {
                 color: root.theme.color.accent
             }
 
-            ThemedText {
+            HeroText {
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.now ? Weather.temp(root.now.temp) : ""
-                font.family: root.theme.font.display
-                font.weight: root.theme.font.displayWeight
-                font.pixelSize: big.figure
-                font.features: ({ "tnum": 1 })
+                pixelSize: big.figure
             }
         }
 

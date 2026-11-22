@@ -18,6 +18,8 @@ Singleton {
     readonly property var definitions: ({
             classic: Classic.definition,
             constellation: Constellation.definition,
+            facade: Facade.definition,
+            modulaire: Modulaire.definition,
             matrix: Matrix.definition
         })
 

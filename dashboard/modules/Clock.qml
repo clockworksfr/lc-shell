@@ -40,17 +40,14 @@ ModuleBase {
         width: root.tier === "S" ? parent.width : parent.width * (root.tier === "L" ? 0.42 : 0.5)
         height: parent.height
 
-        ThemedText {
+        HeroText {
             id: time
 
             anchors.left: parent.left
             anchors.verticalCenter: root.tier === "S" ? parent.verticalCenter : undefined
             anchors.bottom: root.tier === "S" ? undefined : dateCol.top
             text: I18n.locale.toString(root.now, root.format)
-            font.family: root.theme.font.display
-            font.weight: root.theme.font.displayWeight
-            font.pixelSize: Math.min(root.t1, (root.tier === "S" ? parent.width * 0.58 : parent.width) / (root.format.length * 0.62))
-            font.features: ({ "tnum": 1 })
+            pixelSize: Math.min(root.t1, (root.tier === "S" ? parent.width * 0.58 : parent.width) / (root.format.length * 0.62))
         }
 
         Column {

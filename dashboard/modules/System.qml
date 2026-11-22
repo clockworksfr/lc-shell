@@ -137,13 +137,10 @@ ModuleBase {
 
         height: figure.height
 
-        ThemedText {
+        HeroText {
             id: figure
             text: I18n.percent(header.data_?.value ?? 0)
-            font.family: header.m.theme.font.display
-            font.weight: header.m.theme.font.displayWeight
-            font.pixelSize: header.big
-            font.features: ({ "tnum": 1 })
+            pixelSize: header.big
             color: (header.data_?.value ?? 0) > 0.9 ? header.m.theme.color.urgent : header.m.theme.color.ink
         }
 
@@ -202,15 +199,12 @@ ModuleBase {
             color: tile.m.theme.color.soft
         }
 
-        ThemedText {
+        HeroText {
             x: tile.m.gap * 0.8
             anchors.verticalCenter: parent.verticalCenter
             anchors.verticalCenterOffset: label.height * 0.3
             text: I18n.percent(tile.value)
-            font.family: tile.m.theme.font.display
-            font.weight: tile.m.theme.font.displayWeight
-            font.pixelSize: Math.min(tile.height * (tile.compact ? 0.42 : 0.46), tile.width / 3.2) * tile.m.hk
-            font.features: ({ "tnum": 1 })
+            pixelSize: Math.min(tile.height * (tile.compact ? 0.42 : 0.46), tile.width / 3.2) * tile.m.hk
             color: tile.value > 0.9 ? tile.m.theme.color.urgent : tile.m.theme.color.ink
         }
 
