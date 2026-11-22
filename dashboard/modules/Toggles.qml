@@ -310,6 +310,10 @@ ModuleBase {
                     Component.onCompleted: setSource(Qt.resolvedUrl("Toggles.qml"), { full: true, options: { type: "toggles" } })
                 }
 
+                WindowBorder {
+                    radius: root.look === "matrix" ? 28 : root.theme.radius.card
+                }
+
                 ModuleButton {
                     anchors.top: parent.top
                     anchors.right: parent.right

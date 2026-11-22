@@ -242,13 +242,10 @@ PanelWindow {
             }
         }
 
-        // The border, over the sidebar.
-        Rectangle {
-            anchors.fill: parent
+        // The border (Hyprland's width and the theme's window color), over
+        // the sidebar.
+        WindowBorder {
             radius: win.theme.radius.panel
-            color: "transparent"
-            border.width: 1
-            border.color: win.theme.color.line
         }
 
         // Close.

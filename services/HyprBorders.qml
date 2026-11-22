@@ -31,7 +31,12 @@ Singleton {
         return `rgba(${h(c.r)}${h(c.g)}${h(c.b)}${h(c.a)})`;
     }
 
+    // Hyprland's border width (general:border_size), for the shell's own
+    // windows (WindowBorder).
+    property int borderSize: 3
+
     function apply(): void {
+        sizeReader.running = true;
         if (!enabled)
             return;
         const a = hypr(colors.active), i = hypr(colors.inactive);
@@ -67,6 +72,18 @@ Singleton {
         function onRawEvent(event: HyprlandEvent): void {
             if (event.name === "configreloaded")
                 debounce.restart();
+        }
+    }
+
+    Process {
+        id: sizeReader
+        command: ["hyprctl", "getoption", "general:border_size", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    root.borderSize = Math.max(1, JSON.parse(text).int ?? 3);
+                } catch (e) {}
+            }
         }
     }
 }

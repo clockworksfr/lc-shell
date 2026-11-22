@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
+import qs.components
 import qs.components.dashboard
 import qs.dashboard
 import qs.dashboard.modules
@@ -104,6 +105,10 @@ Scope {
                     options: ({ type: "hue" })
                 }
 
+                WindowBorder {
+                    radius: panel.theme.style.module === "matrix" ? 28 : panel.theme.radius.card
+                }
+
                 ModuleButton {
                     anchors.top: parent.top
                     anchors.right: parent.right
@@ -160,6 +165,10 @@ Scope {
                     onColorPicked: hex => pickerWindow.target.kind === "light" ? HueBridge.setLightColor(pickerWindow.target.id, hex) : HueBridge.setRoomColor(pickerWindow.target.id, hex)
                     onWhitePicked: kelvin => pickerWindow.target.kind === "light" ? HueBridge.setLightWhite(pickerWindow.target.id, kelvin) : HueBridge.setRoomWhite(pickerWindow.target.id, kelvin)
                 }
+            }
+
+            WindowBorder {
+                radius: pickerWindow.theme.style.module === "matrix" ? 28 : pickerWindow.theme.radius.card
             }
 
             ModuleButton {
