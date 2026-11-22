@@ -11,18 +11,18 @@ import qs.services
 TextWidget {
     id: root
 
-    readonly property bool shown: Hue.available
+    readonly property bool shown: HueBridge.available
 
-    fullText: Hue.roomsOn > 0 ? I18n.tr("bar.lightsOn", { n: Hue.roomsOn }) : I18n.tr("bar.lightsOff")
-    compactText: `${Hue.roomsOn}`
-    color: Hue.roomsOn > 0 ? theme.color.ink : theme.color.soft
+    fullText: HueBridge.roomsOn > 0 ? I18n.tr("bar.lightsOn", { n: HueBridge.roomsOn }) : I18n.tr("bar.lightsOff")
+    compactText: `${HueBridge.roomsOn}`
+    color: HueBridge.roomsOn > 0 ? theme.color.ink : theme.color.soft
 
     icon: "lightbulb"
-    iconFilled: Hue.roomsOn > 0
-    iconText: size === "compact" || Hue.roomsOn === 0 ? "" : `${Hue.roomsOn}`
+    iconFilled: HueBridge.roomsOn > 0
+    iconText: size === "compact" || HueBridge.roomsOn === 0 ? "" : `${HueBridge.roomsOn}`
 
     // The state for the count, without keeping the drawer's refresh on.
-    Component.onCompleted: Hue.refresh()
+    Component.onCompleted: HueBridge.refresh()
 
     MouseArea {
         anchors.fill: parent

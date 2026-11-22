@@ -240,7 +240,7 @@ Item {
                 spacing: 18
 
                 Repeater {
-                    model: Hue.favorites
+                    model: HueBridge.favorites
 
                     HueParts.Swatch {
                         required property var modelData

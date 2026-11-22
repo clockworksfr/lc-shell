@@ -33,8 +33,8 @@ ModuleBase {
 
     readonly property string look: theme.style.module ?? "classic"
     readonly property real hit: Math.max(36, theme.hit)
-    readonly property var selected: Hue.room(selectedId) ?? Hue.rooms.find(r => r.on) ?? Hue.rooms[0] ?? null
-    readonly property string mode: !Hue.loaded ? "state"
+    readonly property var selected: HueBridge.room(selectedId) ?? HueBridge.rooms.find(r => r.on) ?? HueBridge.rooms[0] ?? null
+    readonly property string mode: !HueBridge.loaded ? "state"
         : full || drawer || (shape === "wide" && ch >= 400 && cw >= 1000) ? "three"
         : shape === "tiny" ? "tiny"
         : shape === "narrow" ? "list"
@@ -43,8 +43,8 @@ ModuleBase {
         : shape === "wide" ? "side"
         : "stack"
 
-    Component.onCompleted: Hue.refCount++
-    Component.onDestruction: Hue.refCount--
+    Component.onCompleted: HueBridge.refCount++
+    Component.onDestruction: HueBridge.refCount--
 
     function more(): void {
         panelOpen = true;
@@ -58,7 +58,7 @@ ModuleBase {
     Column {
         anchors.centerIn: parent
         width: parent.width
-        visible: !Hue.available || !Hue.loaded || Hue.rooms.length === 0
+        visible: !HueBridge.available || !HueBridge.loaded || HueBridge.rooms.length === 0
         spacing: root.gap / 2
 
         Icon {
@@ -72,7 +72,7 @@ ModuleBase {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
-            text: !Hue.available ? I18n.tr("hue.noBinary") : Hue.loaded ? I18n.tr("hue.noRooms") : Hue.lastError ? I18n.tr("hue.noBridge") : I18n.tr("hue.loading")
+            text: !HueBridge.available ? I18n.tr("hue.noBinary") : HueBridge.loaded ? I18n.tr("hue.noRooms") : HueBridge.lastError ? I18n.tr("hue.noBridge") : I18n.tr("hue.loading")
             font.pixelSize: root.t3
             color: root.theme.color.soft
         }
@@ -80,12 +80,12 @@ ModuleBase {
 
     // tiny: one tile.
     Toggle {
-        visible: root.mode === "tiny" && Hue.rooms.length > 0
+        visible: root.mode === "tiny" && HueBridge.rooms.length > 0
         anchors.fill: parent
         icon: "lightbulb"
         label: I18n.tr("module.hue")
-        sub: I18n.tr("hue.rooms", { on: Hue.roomsOn, total: Hue.rooms.length })
-        on: Hue.roomsOn > 0
+        sub: I18n.tr("hue.rooms", { on: HueBridge.roomsOn, total: HueBridge.rooms.length })
+        on: HueBridge.roomsOn > 0
         onTapped: root.more()
     }
 
@@ -102,7 +102,7 @@ ModuleBase {
         // More last: always when the room isn't shown beside (it's the only
         // way to the rest), else only when the rooms overflow.
         readonly property var list: {
-            const all = Hue.rooms;
+            const all = HueBridge.rooms;
             const needMore = withMore && (!selecting || all.length > capacity);
             if (!needMore)
                 return all.slice(0, capacity);
@@ -129,7 +129,7 @@ ModuleBase {
 
                 Toggle {
                     anchors.fill: parent
-                    icon: slot.isMore ? "more_horiz" : Hue.roomIcon(slot.modelData.cls)
+                    icon: slot.isMore ? "more_horiz" : HueBridge.roomIcon(slot.modelData.cls)
                     label: slot.isMore ? I18n.tr("hue.more") : slot.modelData.name
                     sub: slot.isMore ? I18n.tr("hue.moreSub") : slot.modelData.on ? I18n.percent(slot.modelData.brightness / 100) : I18n.tr("hue.off")
                     on: !slot.isMore && slot.modelData.on
@@ -139,7 +139,7 @@ ModuleBase {
                         else if (slot.dual)
                             rooms.m.selectedId = slot.modelData.id;
                         else {
-                            Hue.toggleRoom(slot.modelData.id);
+                            HueBridge.toggleRoom(slot.modelData.id);
                             if (rooms.selecting)
                                 rooms.m.selectedId = slot.modelData.id;
                         }
@@ -178,7 +178,7 @@ ModuleBase {
                     anchors.verticalCenter: parent.verticalCenter
                     on: !slot.isMore && slot.modelData.on
                     onAccent: rooms.m.look === "classic" && on
-                    onToggled: Hue.toggleRoom(slot.modelData.id)
+                    onToggled: HueBridge.toggleRoom(slot.modelData.id)
                 }
             }
         }
@@ -199,7 +199,7 @@ ModuleBase {
         readonly property int sceneRows: Math.max(0, Math.floor((scenesRoom + 10) / (row + 10)))
         readonly property var scenes: {
             const all = (room?.scenes ?? []).slice();
-            const active = Hue.activeScene[room?.id ?? ""];
+            const active = HueBridge.activeScene[room?.id ?? ""];
             all.sort((a, b) => (b.id === active) - (a.id === active));
             const capacity = sceneCols * sceneRows;
             if (all.length <= capacity || !withMore)
@@ -226,7 +226,7 @@ ModuleBase {
 
             ThemedText {
                 id: lampCount
-                text: detail.room ? I18n.tr("hue.lamps", { on: detail.room.lights.filter(id => Hue.lights[id]?.on).length, total: detail.room.lights.length }) : ""
+                text: detail.room ? I18n.tr("hue.lamps", { on: detail.room.lights.filter(id => HueBridge.lights[id]?.on).length, total: detail.room.lights.length }) : ""
                 font.pixelSize: detail.m.t4
                 color: detail.m.theme.color.soft
             }
@@ -253,7 +253,7 @@ ModuleBase {
                 anchors.verticalCenter: parent.verticalCenter
                 value: (detail.room?.brightness ?? 0) / 100
                 dimmed: !detail.room?.on
-                onMoved: value => Hue.setRoomBrightness(detail.room.id, Math.max(1, Math.round(value * 100)))
+                onMoved: value => HueBridge.setRoomBrightness(detail.room.id, Math.max(1, Math.round(value * 100)))
             }
 
             ThemedText {
@@ -289,14 +289,14 @@ ModuleBase {
             }
 
             Repeater {
-                model: Hue.favorites
+                model: HueBridge.favorites
 
                 HueParts.Swatch {
                     required property var modelData
                     anchors.verticalCenter: parent.verticalCenter
                     size: Math.min(detail.row * 0.62, 40)
                     swatchColor: modelData.color
-                    onTapped: Hue.setRoomColor(detail.room.id, modelData.color)
+                    onTapped: HueBridge.setRoomColor(detail.room.id, modelData.color)
                 }
             }
         }
@@ -316,9 +316,9 @@ ModuleBase {
                     height: detail.row
                     text: modelData.more ? I18n.tr("hue.more") : modelData.name
                     icon: modelData.more ? "more_horiz" : ""
-                    active: !modelData.more && Hue.activeScene[detail.room?.id ?? ""] === modelData.id
+                    active: !modelData.more && HueBridge.activeScene[detail.room?.id ?? ""] === modelData.id
                     textSize: Math.min(detail.m.t3, 18)
-                    onTapped: modelData.more ? detail.m.more() : Hue.startScene(detail.room.id, modelData.id)
+                    onTapped: modelData.more ? detail.m.more() : HueBridge.startScene(detail.room.id, modelData.id)
                 }
             }
         }
@@ -347,7 +347,7 @@ ModuleBase {
                     id: lamp
 
                     required property var modelData
-                    readonly property var light: Hue.lights[modelData] ?? null
+                    readonly property var light: HueBridge.lights[modelData] ?? null
 
                     width: lampColumn.width
                     height: lamps.m.hit
@@ -405,7 +405,7 @@ ModuleBase {
                         anchors.verticalCenter: parent.verticalCenter
                         on: !!lamp.light?.on
                         enabled: !!lamp.light?.reachable
-                        onToggled: Hue.toggleLight(lamp.modelData)
+                        onToggled: HueBridge.toggleLight(lamp.modelData)
                     }
                 }
             }
@@ -417,7 +417,7 @@ ModuleBase {
         visible: root.mode === "list" || root.mode === "row" || root.mode === "grid"
         m: root
         anchors.fill: parent
-        cols: root.mode === "list" ? 1 : root.mode === "grid" ? 2 : Math.max(1, Math.min(Hue.rooms.length + 1, Math.floor((root.cw + root.gap) / (200 + root.gap))))
+        cols: root.mode === "list" ? 1 : root.mode === "grid" ? 2 : Math.max(1, Math.min(HueBridge.rooms.length + 1, Math.floor((root.cw + root.gap) / (200 + root.gap))))
     }
 
     // box / tall: rooms on top, the room under.
@@ -430,7 +430,7 @@ ModuleBase {
             id: stackRooms
             m: root
             width: parent.width
-            height: root.shape === "tall" ? Math.min(parent.height * 0.45, Hue.rooms.length * (root.hit + root.gap)) : Math.min(parent.height * 0.42, Math.ceil(Hue.rooms.length / cols) * (root.hit + root.gap))
+            height: root.shape === "tall" ? Math.min(parent.height * 0.45, HueBridge.rooms.length * (root.hit + root.gap)) : Math.min(parent.height * 0.42, Math.ceil(HueBridge.rooms.length / cols) * (root.hit + root.gap))
             cols: root.shape === "tall" ? 1 : root.cw >= 700 ? 4 : 2
             selecting: true
         }
@@ -526,7 +526,7 @@ ModuleBase {
                 // By url: a type can't name itself.
                 Loader {
                     anchors.fill: parent
-                    Component.onCompleted: setSource(Qt.resolvedUrl("Hue.qml"), { full: true, options: { type: "hue" }, selectedId: root.selected?.id ?? "" })
+                    Component.onCompleted: setSource(Qt.resolvedUrl("HueBridge.qml"), { full: true, options: { type: "hue" }, selectedId: root.selected?.id ?? "" })
                 }
 
                 ModuleButton {
@@ -580,9 +580,9 @@ ModuleBase {
                 HueColorPicker {
                     anchors.fill: parent
                     title: pickerWindow.target?.name ?? ""
-                    current: pickerWindow.target?.kind === "light" ? (Hue.lights[pickerWindow.target.id]?.color || "#FFE9D2") : (Hue.room(pickerWindow.target?.id ?? "")?.color || "#FFE9D2")
-                    onColorPicked: hex => pickerWindow.target.kind === "light" ? Hue.setLightColor(pickerWindow.target.id, hex) : Hue.setRoomColor(pickerWindow.target.id, hex)
-                    onWhitePicked: kelvin => pickerWindow.target.kind === "light" ? Hue.setLightWhite(pickerWindow.target.id, kelvin) : Hue.setRoomWhite(pickerWindow.target.id, kelvin)
+                    current: pickerWindow.target?.kind === "light" ? (HueBridge.lights[pickerWindow.target.id]?.color || "#FFE9D2") : (HueBridge.room(pickerWindow.target?.id ?? "")?.color || "#FFE9D2")
+                    onColorPicked: hex => pickerWindow.target.kind === "light" ? HueBridge.setLightColor(pickerWindow.target.id, hex) : HueBridge.setRoomColor(pickerWindow.target.id, hex)
+                    onWhitePicked: kelvin => pickerWindow.target.kind === "light" ? HueBridge.setLightWhite(pickerWindow.target.id, kelvin) : HueBridge.setRoomWhite(pickerWindow.target.id, kelvin)
                 }
             }
 
