@@ -172,12 +172,14 @@ ModuleBase {
                 // The room's color while it's on.
                 Rectangle {
                     visible: !slot.isMore && !!slot.room?.on && !!slot.room?.color
-                    // Matrix: inside the pill, on its left; else the tile's corner.
-                    x: rooms.m.look === "matrix" ? 16 : slot.dual ? parent.width - sw.width - width - 14 : parent.width - width - 12
-                    y: rooms.m.look === "matrix" ? (parent.height - height) / 2 : 12
-                    width: 12
-                    height: 12
-                    radius: 6
+                    // Matrix: inside the pill, at its right end; else the tile's
+                    // corner.
+                    readonly property bool inPill: rooms.m.look === "matrix"
+                    x: slot.dual ? parent.width - sw.width - width - (inPill ? 18 : 14) : parent.width - width - (inPill ? 12 : 12)
+                    y: inPill ? (parent.height - height) / 2 : 12
+                    width: inPill ? 8 : 12
+                    height: width
+                    radius: width / 2
                     color: slot.room?.color || "transparent"
                     border.width: 1
                     border.color: Qt.alpha("black", 0.3)
