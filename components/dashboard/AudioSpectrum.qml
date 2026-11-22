@@ -15,7 +15,7 @@ Item {
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
     readonly property string look: theme.style.module ?? "classic"
     property int count: 24
-    property color color: theme.color.signal ?? theme.color.accent
+    property color color: theme.style.module === "matrix" ? theme.color.ink : theme.color.accent
 
     Component.onCompleted: Spectrum.refCount++
     Component.onDestruction: Spectrum.refCount--

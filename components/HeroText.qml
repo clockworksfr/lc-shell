@@ -18,6 +18,8 @@ Item {
     // Modulaire's figures are Nixie orange.
     property color color: theme.color.nixie ?? theme.color.ink
     property int horizontalAlignment: Text.AlignLeft
+    // Unlit segments behind (where the theme has them); off for labels.
+    property bool ghost: true
     readonly property bool glows: Qt.color(theme.color.glow ?? "#00000000").a > 0
 
     implicitWidth: label.implicitWidth
@@ -27,7 +29,7 @@ Item {
 
     Text {
         anchors.fill: label
-        visible: !!root.theme.style.ghostDigits
+        visible: root.ghost && !!root.theme.style.ghostDigits
         text: root.text.replace(/[0-9]/g, "8")
         font: label.font
         horizontalAlignment: root.horizontalAlignment

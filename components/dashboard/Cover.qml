@@ -46,7 +46,7 @@ Item {
         visible: root.look === "inset"
         anchors.fill: parent
         radius: 4
-        color: "#030505"
+        color: root.theme.color.screen ?? "#030505"
         border.width: 2
         border.color: "black"
 

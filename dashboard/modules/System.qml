@@ -53,6 +53,8 @@ ModuleBase {
 
         Figure {
             Layout.fillHeight: true
+            // In the theme's screen where it has one (modulaire's LCD).
+            inDisplay: true
             text: I18n.percent(SystemStats.cpu)
             pixelSize: root.figure(0.4, 0.3)
             color: SystemStats.cpu > 0.9 ? root.theme.color.urgent : root.theme.color.nixie ?? root.theme.color.ink
@@ -384,6 +386,7 @@ ModuleBase {
                     }
 
                     Figure {
+                        inDisplay: true
                         text: I18n.percent(parent.parent.modelData.value)
                         pixelSize: Math.min(root.ch * 0.42, root.t2 * 1.6)
                         color: parent.parent.modelData.value > 0.9 ? root.theme.color.urgent : root.theme.color.nixie ?? root.theme.color.ink

@@ -110,7 +110,7 @@ ModuleBase {
                     visible: root.look === "facade"
                     anchors.fill: parent
                     radius: 3
-                    color: "#030505"
+                    color: root.theme.color.screen ?? "#030505"
                     border.width: 1
                     border.color: "#000000"
                 }
@@ -233,7 +233,8 @@ ModuleBase {
                         anchors.centerIn: parent
                         text: cell.modelData.name
                         pixelSize: cell.figureSize
-                        color: cell.urgent ? "#FFB547" : cell.active ? root.theme.color.ink : cell.busy ? Qt.alpha(root.theme.color.ink, 0.45) : root.theme.color.ghost
+                        ghost: false
+                        color: cell.urgent ? "#FFB547" : cell.active ? root.theme.color.ink : cell.busy ? Qt.alpha(root.theme.color.ink, 0.45) : Qt.alpha(root.theme.color.ink, 0.2)
                     }
 
                     ThemedText {

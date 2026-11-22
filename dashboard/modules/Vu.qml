@@ -154,7 +154,7 @@ ModuleBase {
                         width: (bar.width - 3 * (segs.count - 1)) / segs.count
                         height: bar.height
                         radius: 2
-                        color: isHold ? "#FFFFFF" : !lit ? "#2B3037" : atDb > -3 ? "#FF6B5E" : atDb > -9 ? "#F2C14E" : "#5FD0A8"
+                        color: isHold ? row.m.theme.color.ink : !lit ? row.m.theme.color.surface3 : atDb > -3 ? row.m.theme.color.urgent : atDb > -9 ? row.m.theme.color.warn : row.m.theme.color.accent
                     }
                 }
             }
@@ -432,7 +432,7 @@ ModuleBase {
                             radius: width / 2
                             x: ring.size / 2 + Math.cos(ray.angle) * r - width / 2
                             y: ring.size / 2 + Math.sin(ray.angle) * r - height / 2
-                            color: lit ? (index === 2 ? (root.theme.color.signal ?? root.theme.color.ink) : root.theme.color.ink) : Qt.alpha(root.theme.color.ink, 0.1)
+                            color: lit ? (index === 2 && Math.max(root.levelL, root.levelR) > -3 ? (root.theme.color.signal ?? root.theme.color.ink) : root.theme.color.ink) : Qt.alpha(root.theme.color.ink, 0.1)
                         }
                     }
                 }

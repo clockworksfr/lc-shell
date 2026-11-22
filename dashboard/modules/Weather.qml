@@ -74,8 +74,8 @@ ModuleBase {
             visible: current.m.onLcd
             anchors.verticalCenter: parent.verticalCenter
             text: current.m.now ? Weather.temp(current.m.now.temp) : ""
-            // Big figure: Nixie One in amber, on the screen.
-            color: current.m.theme.color.nixie ?? current.m.inkColor
+            // Big figure: Nixie One in the green LCD's ink (like the page).
+            color: current.m.inkColor
             font.family: current.m.theme.font.display
             font.pixelSize: current.size
         }
@@ -106,6 +106,7 @@ ModuleBase {
             width: parent.width
             horizontalAlignment: details.align
             visible: !!details.m.today
+            elide: Text.ElideRight
             text: details.m.today ? `↑ ${Weather.temp(details.m.today.max)}  ↓ ${Weather.temp(details.m.today.min)}` : ""
             font.family: details.m.screenText ? details.m.screenFont : details.m.theme.font.family
             font.pixelSize: details.m.t3

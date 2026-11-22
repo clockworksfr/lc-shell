@@ -31,6 +31,10 @@ Singleton {
                     ok: "#6EF3D6",
                     accent2: "#F1DFAE",
                     glow: "#596EF3D6",
+                    // Display windows (VFD): black glass in the dark, a
+                    // grey-green LCD in the light.
+                    screen: "#030505",
+                    screenEdge: "#000000",
                     glass: "#00000000",
                     star: "#00000000"
                 },
@@ -52,7 +56,9 @@ Singleton {
                     accent2: "#1E2022",
                     glow: "#00000000",
                     glass: "#00000000",
-                    star: "#00000000"
+                    star: "#00000000",
+                    screen: "#B6BEA1",
+                    screenEdge: "#6F7468"
                 }
             },
             font: {

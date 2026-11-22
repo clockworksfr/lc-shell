@@ -266,7 +266,7 @@ ModuleBase {
                 radius: strip.m.theme.radius.tile
                 readonly property string look: strip.m.theme.style.module ?? "classic"
                 // facade: display cells; constellation: today in a gradient.
-                color: look === "facade" ? (today ? strip.m.theme.color.ink : "#030505") : today ? (strip.m.theme.color.signal ?? strip.m.theme.color.accent) : strip.m.theme.color.surface2
+                color: look === "facade" ? (today ? strip.m.theme.color.ink : (strip.m.theme.color.screen ?? "#030505")) : today ? (strip.m.theme.color.signal ?? strip.m.theme.color.accent) : strip.m.theme.color.surface2
                 border.width: look === "facade" ? 1 : 0
                 border.color: "#000000"
                 gradient: look === "constellation" && today ? todayGradient : null
@@ -290,7 +290,7 @@ ModuleBase {
                     label: true
                     text: I18n.locale.dayName(parent.day.getDay(), Locale.NarrowFormat)
                     font.pixelSize: strip.m.t4
-                    color: parent.look === "facade" ? (parent.today ? "#030505" : Qt.alpha(strip.m.theme.color.ink, 0.6)) : parent.today ? strip.m.theme.color.onAccent : strip.m.theme.color.soft
+                    color: parent.look === "facade" ? (parent.today ? (strip.m.theme.color.screen ?? "#030505") : Qt.alpha(strip.m.theme.color.ink, 0.6)) : parent.today ? strip.m.theme.color.onAccent : strip.m.theme.color.soft
                 }
 
                 ThemedText {
@@ -301,7 +301,7 @@ ModuleBase {
                     font.pixelSize: Math.min(strip.m.t2 * 1.2, parent.width * 0.42, parent.height * 0.4)
                     font.weight: Font.DemiBold
                     font.features: ({ "tnum": 1 })
-                    color: parent.look === "facade" ? (parent.today ? "#030505" : strip.m.theme.color.ink) : parent.today ? strip.m.theme.color.onAccent : strip.m.theme.color.ink
+                    color: parent.look === "facade" ? (parent.today ? (strip.m.theme.color.screen ?? "#030505") : strip.m.theme.color.ink) : parent.today ? strip.m.theme.color.onAccent : strip.m.theme.color.ink
                 }
             }
         }

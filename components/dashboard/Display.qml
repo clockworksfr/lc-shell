@@ -30,15 +30,16 @@ Item {
         anchors.fill: parent
         visible: root.kind !== "none"
         radius: 4
-        color: root.kind === "lcd" ? (root.tint === "amber" ? (root.theme.color.lcdAmber ?? "#2A1606") : (root.theme.color.lcd ?? "#1A2410")) : "#030505"
-        border.width: 2
-        border.color: Qt.alpha("black", 0.6)
+        color: root.kind === "lcd" ? (root.tint === "amber" ? (root.theme.color.lcdAmber ?? "#2A1606") : (root.theme.color.lcd ?? "#1A2410")) : (root.theme.color.screen ?? "#030505")
+        border.width: root.kind === "vfd" && root.theme.variant === "light" ? 1 : 2
+        border.color: root.kind === "vfd" ? (root.theme.color.screenEdge ?? Qt.alpha("black", 0.6)) : Qt.alpha("black", 0.6)
 
         // Static scanlines (VFD).
         Canvas {
             anchors.fill: parent
             anchors.margins: 2
-            visible: root.kind === "vfd" && !!root.theme.style.scanlines
+            // Scanlines on the dark glass only.
+            visible: root.kind === "vfd" && !!root.theme.style.scanlines && root.theme.variant !== "light"
             onWidthChanged: requestPaint()
             onHeightChanged: requestPaint()
             onPaint: {

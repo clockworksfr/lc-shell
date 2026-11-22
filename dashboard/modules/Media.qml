@@ -26,6 +26,8 @@ ModuleBase {
     readonly property bool timed: (player?.lengthSupported ?? false) && length > 0 && length < 86400 && position <= length + 2
     readonly property bool playing: player?.isPlaying ?? false
     readonly property real buttonSize: Math.max(theme.hit, Math.min(72, m * (shape === "tiny" ? 0.34 : 0.24)))
+    // Matrix keys are pills (1.5 × as wide as tall).
+    readonly property real keyAspect: theme.style.module === "matrix" ? 1.5 : 1
 
     function time(seconds: real): string {
         const s = Math.max(0, Math.round(seconds));
@@ -292,8 +294,8 @@ ModuleBase {
         Transport {
             m: root
             Layout.alignment: Qt.AlignHCenter
-            full: root.cw >= root.buttonSize * 3.6
-            size: Math.min(root.buttonSize, root.ch * 0.2)
+            full: root.cw >= root.buttonSize * 3.6 * root.keyAspect
+            size: Math.min(root.buttonSize, root.ch * 0.2, root.cw / (3.6 * root.keyAspect))
         }
     }
 
@@ -352,7 +354,7 @@ ModuleBase {
             Transport {
                 m: root
                 // Never cut at the bottom: bounded by the height and width.
-                size: Math.min(root.buttonSize, root.ch * 0.22, (root.cw * 0.64) / 3.9)
+                size: Math.min(root.buttonSize, root.ch * 0.22, (root.cw * 0.64) / (3.9 * root.keyAspect))
             }
         }
     }
@@ -410,7 +412,7 @@ ModuleBase {
         Transport {
             m: root
             Layout.alignment: Qt.AlignVCenter
-            size: Math.min(root.buttonSize, root.ch * 0.8)
+            size: Math.min(root.buttonSize, root.ch * 0.8, root.cw * 0.28 / (3.6 * root.keyAspect))
         }
     }
 }
