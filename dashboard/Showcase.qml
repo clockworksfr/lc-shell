@@ -23,6 +23,10 @@ Singleton {
         type = "";
     }
 
+    // Renders the dashboard windows to images (reviews): the shell's own
+    // pixels only, even under other windows. `path` gets "-<screen>.png".
+    signal snapshotRequested(string path)
+
     // Covers the 12 × 4 grid; (10, 3) and (11, 3) stay for the buttons.
     readonly property var shapes: [
         { x: 0, y: 0, w: 6, h: 2 },

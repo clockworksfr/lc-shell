@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import qs.theme
 
@@ -15,6 +16,12 @@ Item {
     readonly property color ink: kind === "lcd" ? (tint === "amber" ? (theme.color.lcdAmberInk ?? "#2A1A05") : (theme.color.lcdInk ?? "#1A2410")) : theme.color.ink
     readonly property color soft: kind === "lcd" ? Qt.alpha(ink, 0.65) : theme.color.soft
     readonly property real inset: kind === "none" ? 0 : 10
+    // Text inside a display: the theme's screen font (square dots), upper
+    // case; outside one, the theme's text (or lyric) font.
+    readonly property string textFont: kind === "none" ? (theme.font.lyric ?? theme.font.family) : (theme.font.lcd ?? theme.font.mono)
+    readonly property int caps: kind === "none" || !theme.font.lyricCaps ? Font.MixedCase : Font.AllUppercase
+    // VFD phosphor and amber LCD glow; the green LCD doesn't.
+    readonly property bool glows: (kind === "vfd" && Qt.color(theme.color.glow ?? "#00000000").a > 0) || (kind === "lcd" && tint === "amber")
     default property alias content: inner.data
 
     Rectangle {
@@ -46,5 +53,16 @@ Item {
         id: inner
         anchors.fill: parent
         anchors.margins: root.inset
+
+        layer.enabled: root.glows
+        layer.effect: MultiEffect {
+            autoPaddingEnabled: true
+            shadowEnabled: true
+            shadowColor: root.kind === "vfd" ? (root.theme.color.glow ?? "transparent") : "#99FF8A2A"
+            shadowBlur: root.kind === "vfd" ? 0.35 : 0.5
+            blurMax: 12
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 0
+        }
     }
 }

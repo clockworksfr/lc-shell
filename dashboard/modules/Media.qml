@@ -47,38 +47,70 @@ ModuleBase {
         color: root.theme.color.soft
     }
 
-    // Title and artist (in the theme's display when it has no cover art).
+    // Where things go: facade puts the spectrum and the progress inside its
+    // VFD, modulaire the progress on its amber screen (oscilloscope under
+    // it); matrix shows the sound on the ring around its disc instead of
+    // columns (but in strips and tiny cells, which have no disc).
+    readonly property string screenKind: theme.style.display ?? "none"
+    readonly property bool spectrumInside: screenKind === "vfd"
+    readonly property bool progressInside: screenKind !== "none"
+    readonly property bool ringShowsSound: theme.style.cover === "disc"
+
+    // Title and artist, in the theme's display where it has one (with the
+    // spectrum and / or the progress inside it, see above).
     component Track: Display {
         id: track
 
         property var m
         property bool big: false
+        property bool withSpectrum: false
+        property bool withProgress: false
 
         tint: "amber"
         implicitHeight: col.implicitHeight + inset * 2
 
-        Column {
+        ColumnLayout {
             id: col
-            width: parent.width
+            anchors.fill: parent
             spacing: 2
 
             ThemedText {
-                width: parent.width
+                Layout.fillWidth: true
                 elide: Text.ElideRight
+                maximumLineCount: 2
+                wrapMode: Text.Wrap
                 text: track.m.player?.trackTitle || track.m.player?.identity || ""
-                font.family: track.m.theme.font.lyric ?? track.m.theme.font.family
+                font.family: track.textFont
+                font.capitalization: track.caps
                 font.pixelSize: track.m.t2 * (track.big ? 1.15 : 0.9)
                 font.weight: Font.DemiBold
                 color: track.ink
             }
 
             ThemedText {
-                width: parent.width
+                Layout.fillWidth: true
                 elide: Text.ElideRight
                 text: track.m.player?.trackArtist ?? ""
-                font.family: track.m.theme.font.lyric ?? track.m.theme.font.family
+                font.family: track.textFont
+                font.capitalization: track.caps
                 font.pixelSize: track.m.t3 * (track.big ? 1 : 0.9)
                 color: track.soft
+            }
+
+            AudioSpectrum {
+                visible: track.withSpectrum
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.topMargin: 4
+                count: Math.max(8, Math.min(32, Math.floor(width / 14)))
+            }
+
+            Progress {
+                visible: track.withProgress
+                m: track.m
+                ink: track.ink
+                Layout.fillWidth: true
+                Layout.topMargin: 4
             }
         }
     }
@@ -89,6 +121,8 @@ ModuleBase {
 
         property var m
         property bool times: true
+        // Text color (inside a display: its ink).
+        property color ink: m.theme.color.soft
 
         spacing: 3
 
@@ -107,18 +141,21 @@ ModuleBase {
             ThemedText {
                 text: progress.m.timed ? progress.m.time(progress.m.position) : I18n.tr("media.live")
                 label: !progress.m.timed
+                font.family: progress.m.theme.font.mono
                 font.pixelSize: progress.m.t4
                 font.features: ({ "tnum": 1 })
-                color: progress.m.theme.color.soft
+                // "Live" in the signal color where the theme has one.
+                color: !progress.m.timed && (progress.m.theme.style.module === "facade" || progress.m.theme.style.module === "matrix") ? (progress.m.theme.color.signal ?? "#FFB547") : progress.ink
             }
 
             ThemedText {
                 anchors.right: parent.right
                 visible: progress.m.timed
                 text: `−${progress.m.time(progress.m.length - progress.m.position)}`
+                font.family: progress.m.theme.font.mono
                 font.pixelSize: progress.m.t4
                 font.features: ({ "tnum": 1 })
-                color: progress.m.theme.color.soft
+                color: progress.ink
             }
         }
     }
@@ -135,14 +172,14 @@ ModuleBase {
         ModuleButton {
             visible: transport.full
             icon: "skip_previous"
-            legend: "PREV"
+            legend: I18n.tr("media.prev")
             size: transport.size * 0.85
             anchors.verticalCenter: parent.verticalCenter
             onTapped: Players.previous()
         }
         ModuleButton {
             icon: transport.m.playing ? "pause" : "play_arrow"
-            legend: "PLAY"
+            legend: I18n.tr("media.play")
             primary: true
             size: transport.size
             anchors.verticalCenter: parent.verticalCenter
@@ -151,7 +188,7 @@ ModuleBase {
         ModuleButton {
             visible: transport.full
             icon: "skip_next"
-            legend: "NEXT"
+            legend: I18n.tr("media.next")
             size: transport.size * 0.85
             anchors.verticalCenter: parent.verticalCenter
             onTapped: Players.next()
@@ -166,11 +203,19 @@ ModuleBase {
 
         Track {
             m: root
+
+            withSpectrum: root.spectrumInside
+
+            withProgress: root.progressInside
+
+            Layout.fillHeight: root.spectrumInside
             Layout.fillWidth: true
         }
 
         Progress {
             m: root
+
+            visible: !root.progressInside
             times: false
             Layout.fillWidth: true
         }
@@ -181,6 +226,8 @@ ModuleBase {
             spacing: root.gap / 2
 
             AudioSpectrum {
+
+                visible: !root.spectrumInside
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 count: 6
@@ -209,19 +256,35 @@ ModuleBase {
 
         Track {
             m: root
+
+            withSpectrum: root.spectrumInside
+
+            withProgress: root.progressInside
+
+            Layout.fillHeight: root.spectrumInside
             big: root.shape !== "narrow"
             Layout.fillWidth: true
         }
 
         AudioSpectrum {
+
+            visible: !root.spectrumInside && !root.ringShowsSound
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumHeight: 16
             count: Math.max(8, Math.min(32, Math.floor(width / 18)))
         }
 
+        // The ring shows the sound: the room left stays between the blocks.
+        Item {
+            visible: !root.spectrumInside && root.ringShowsSound
+            Layout.fillHeight: true
+        }
+
         Progress {
             m: root
+
+            visible: !root.progressInside
             Layout.fillWidth: true
         }
 
@@ -229,7 +292,7 @@ ModuleBase {
             m: root
             Layout.alignment: Qt.AlignHCenter
             full: root.cw >= root.buttonSize * 3.6
-            size: root.buttonSize
+            size: Math.min(root.buttonSize, root.ch * 0.2)
         }
     }
 
@@ -253,25 +316,42 @@ ModuleBase {
 
             Track {
                 m: root
+
+                withSpectrum: root.spectrumInside
+
+                withProgress: root.progressInside
+
+                Layout.fillHeight: root.spectrumInside
                 big: true
                 Layout.fillWidth: true
             }
 
             AudioSpectrum {
+
+                visible: !root.spectrumInside && !root.ringShowsSound
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.minimumHeight: 12
                 count: Math.max(12, Math.min(32, Math.floor(width / 18)))
             }
 
+            // The ring shows the sound: the room left stays between the blocks.
+            Item {
+                visible: !root.spectrumInside && root.ringShowsSound
+                Layout.fillHeight: true
+            }
+
             Progress {
                 m: root
+
+                visible: !root.progressInside
                 Layout.fillWidth: true
             }
 
             Transport {
                 m: root
-                size: Math.min(root.buttonSize, root.ch * 0.26)
+                // Never cut at the bottom: bounded by the height and width.
+                size: Math.min(root.buttonSize, root.ch * 0.22, (root.cw * 0.64) / 3.9)
             }
         }
     }
@@ -297,17 +377,27 @@ ModuleBase {
 
             Track {
                 m: root
+
+                withSpectrum: root.spectrumInside
+
+                withProgress: root.progressInside
+
+                Layout.fillHeight: root.spectrumInside
                 Layout.fillWidth: true
             }
 
             Progress {
                 m: root
+
+                visible: !root.progressInside
                 times: root.ch > 110
                 Layout.fillWidth: true
             }
         }
 
         AudioSpectrum {
+
+            visible: !root.spectrumInside
             Layout.fillWidth: true
             Layout.fillHeight: true
             count: Math.max(12, Math.min(32, Math.floor(width / 18)))

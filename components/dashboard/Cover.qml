@@ -105,7 +105,7 @@ Item {
                 running: root.look === "disc" && root.playing && !Motion.reduced
                 from: 0
                 to: 360
-                duration: 24000
+                duration: 8000
                 loops: Animation.Infinite
             }
         }
@@ -113,18 +113,18 @@ Item {
 
     // Ring of dots (disc).
     Repeater {
-        model: root.look === "disc" ? 40 : 0
+        model: root.look === "disc" ? 56 : 0
 
         Rectangle {
             required property int index
-            readonly property real angle: index / 40 * Math.PI * 2
+            readonly property real angle: index / 56 * Math.PI * 2
             // The band under this dot (the ring is mirrored: bass at the top).
             readonly property real level: {
                 const v = Spectrum.values;
                 if (!root.listening || !v.length)
                     return 0;
-                const k = index < 20 ? index : 39 - index;
-                return v[Math.min(v.length - 1, Math.floor(k * v.length / 20))] ?? 0;
+                const k = index < 28 ? index : 55 - index;
+                return v[Math.min(v.length - 1, Math.floor(k * v.length / 28))] ?? 0;
             }
             readonly property real r: root.size / 2 - 3 - level * root.size * 0.04
             readonly property real d: 3 + level * 4

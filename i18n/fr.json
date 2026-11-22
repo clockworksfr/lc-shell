@@ -365,5 +365,8 @@
   "themeSwitch.hint": "toucher : suivant",
   "module.showcase": "Vitrine",
   "showcase.title": "Vitrine",
-  "media.live": "En direct"
+  "media.live": "En direct",
+  "media.prev": "PRÉC.",
+  "media.play": "LECTURE",
+  "media.next": "SUIV."
 }

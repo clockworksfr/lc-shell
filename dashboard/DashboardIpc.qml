@@ -16,6 +16,10 @@ IpcHandler {
         DashboardEditor.discard();
     }
     // Showcase: one module type at every shape ("" = back to the pages).
+    // Saves the dashboard as rendered by the shell (PNG per screen).
+    function snapshot(path: string): void {
+        Showcase.snapshotRequested(path);
+    }
     function showcase(type: string): void {
         Showcase.type = Showcase.types.includes(type) ? type : "";
     }

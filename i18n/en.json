@@ -365,5 +365,8 @@
   "themeSwitch.hint": "tap: next",
   "module.showcase": "Showcase",
   "showcase.title": "Showcase",
-  "media.live": "Live"
+  "media.live": "Live",
+  "media.prev": "PREV",
+  "media.play": "PLAY",
+  "media.next": "NEXT"
 }

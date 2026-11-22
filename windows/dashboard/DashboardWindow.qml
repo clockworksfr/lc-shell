@@ -32,6 +32,14 @@ PanelWindow {
     WlrLayershell.namespace: "lc-dashboard"
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
+    Connections {
+        target: Showcase
+
+        function onSnapshotRequested(path: string): void {
+            win.contentItem.grabToImage(result => result.saveToFile(`${path}-${win.screen.name}.png`));
+        }
+    }
+
     // Long press anywhere on the dashboard: edit it.
     Item {
         anchors.fill: parent

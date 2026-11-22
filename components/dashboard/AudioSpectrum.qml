@@ -1,13 +1,14 @@
 import QtQuick
 import QtQuick.Shapes
+import QtQuick.Effects
 import Quickshell
 import qs.services
 import qs.theme
 
 // Live audio spectrum (Spectrum service, cava) in the theme's language:
 // classic rounded bars; constellation thin glowing lines; facade
-// segmented columns (unlit = ghost); modulaire oscilloscope trace on its
-// green LCD; matrix columns of dots. `count` bands (resampled).
+// segmented columns (unlit = ghost); modulaire oscilloscope on a dark
+// CRT; matrix columns of dots. `count` bands (resampled).
 Item {
     id: root
 
@@ -52,6 +53,20 @@ Item {
 
                 required property int index
                 readonly property real level: root.levels[index] ?? 0
+                // Facade: the crest holds 400 ms, then falls.
+                property real crest: 0
+                property real crestAt: 0
+                onLevelChanged: if (level >= crest) {
+                    crest = level;
+                    crestAt = Date.now();
+                }
+
+                Timer {
+                    interval: 50
+                    repeat: true
+                    running: root.look === "facade"
+                    onTriggered: if (Date.now() - band.crestAt > 400) band.crest = Math.max(band.level, band.crest - 0.04)
+                }
 
                 width: (root.width - parent.spacing * (root.count - 1)) / root.count
                 height: root.height
@@ -94,15 +109,17 @@ Item {
 
                     Repeater {
                         id: cells
-                        model: Math.max(4, Math.floor(band.height / (root.look === "matrix" ? 8 : 7)))
+                        model: root.look === "facade" ? Math.max(4, Math.min(12, Math.floor(band.height / 6))) : Math.max(4, Math.floor(band.height / 8))
 
                         Rectangle {
                             required property int index
-                            readonly property bool lit: (cells.count - index) / cells.count <= band.level + 0.001 && band.level > 0.02
+                            readonly property real at: (cells.count - index) / cells.count
+                            readonly property bool lit: at <= band.level + 0.001 && band.level > 0.02
+                            readonly property bool isCrest: root.look === "facade" && band.crest > 0.04 && Math.abs(at - Math.ceil(band.crest * cells.count) / cells.count) < 0.001
                             width: root.look === "matrix" ? Math.min(5, band.width) : band.width
-                            height: root.look === "matrix" ? width : 5
+                            height: root.look === "matrix" ? width : Math.max(3, (band.height - (cells.count - 1) * 2) / cells.count)
                             radius: root.look === "matrix" ? width / 2 : 1
-                            color: lit ? root.color : (root.look === "facade" ? root.theme.color.ghost : Qt.alpha(root.theme.color.ink, 0.1))
+                            color: isCrest ? "#FFB547" : lit ? root.color : (root.look === "facade" ? root.theme.color.ghost : Qt.alpha(root.theme.color.ink, 0.1))
                         }
                     }
                 }
@@ -110,32 +127,120 @@ Item {
         }
     }
 
-    // modulaire: an oscilloscope trace on the green LCD.
-    Rectangle {
+    // modulaire: an oscilloscope on its own CRT (dark green glass, grid,
+    // glowing trace): a waveform rebuilt from the bands (a sum of sines,
+    // phase moving at 30 fps).
+    property real phase: 0
+
+    Timer {
+        interval: 33
+        repeat: true
+        running: root.look === "modulaire" && root.visible && Spectrum.values.length > 0
+        onTriggered: root.phase += 0.35
+    }
+
+    Item {
+        id: crt
+
         visible: root.look === "modulaire"
         anchors.fill: parent
-        radius: 4
-        color: root.theme.color.lcd ?? "#C6F37A"
-        border.width: 2
-        border.color: Qt.alpha("black", 0.6)
 
         Shape {
             anchors.fill: parent
-            anchors.margins: 6
             preferredRendererType: Shape.CurveRenderer
 
             ShapePath {
+                strokeColor: "#000000"
+                strokeWidth: 3
+                fillGradient: RadialGradient {
+                    centerX: crt.width / 2
+                    centerY: crt.height / 2
+                    centerRadius: Math.max(crt.width, crt.height) * 0.7
+                    focalX: centerX
+                    focalY: centerY
+                    GradientStop {
+                        position: 0
+                        color: "#0F2A12"
+                    }
+                    GradientStop {
+                        position: 1
+                        color: "#030B04"
+                    }
+                }
+                PathRectangle {
+                    x: 1.5
+                    y: 1.5
+                    width: crt.width - 3
+                    height: crt.height - 3
+                    radius: 14
+                }
+            }
+        }
+
+        // Graticule every 24 px.
+        Canvas {
+            anchors.fill: parent
+            anchors.margins: 6
+            onWidthChanged: requestPaint()
+            onHeightChanged: requestPaint()
+            onPaint: {
+                const ctx = getContext("2d");
+                ctx.clearRect(0, 0, width, height);
+                ctx.strokeStyle = "rgba(156,255,156,0.08)";
+                ctx.lineWidth = 1;
+                for (let x = 0; x <= width; x += 24) {
+                    ctx.beginPath();
+                    ctx.moveTo(x + 0.5, 0);
+                    ctx.lineTo(x + 0.5, height);
+                    ctx.stroke();
+                }
+                for (let y = 0; y <= height; y += 24) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y + 0.5);
+                    ctx.lineTo(width, y + 0.5);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        Shape {
+            id: trace
+
+            anchors.fill: parent
+            anchors.margins: 8
+            preferredRendererType: Shape.CurveRenderer
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                autoPaddingEnabled: true
+                shadowEnabled: true
+                shadowColor: "#AA9CFF9C"
+                shadowBlur: 0.4
+                blurMax: 8
+                shadowHorizontalOffset: 0
+                shadowVerticalOffset: 0
+            }
+
+            ShapePath {
                 fillColor: "transparent"
-                strokeColor: root.theme.color.lcdInk ?? "#1A2410"
-                strokeWidth: 2
+                strokeColor: "#9CFF9C"
+                strokeWidth: 1.4
                 PathPolyline {
                     path: {
-                        const w = root.width - 12, h = root.height - 12;
+                        const w = trace.width, h = trace.height;
+                        const v = root.levels;
+                        const n = Math.min(8, v.length);
+                        let sum = 0;
+                        for (let k = 0; k < n; k++)
+                            sum += v[k];
                         const pts = [];
-                        const n = root.levels.length;
-                        for (let i = 0; i < n; i++) {
-                            const sign = i % 2 === 0 ? -1 : 1;
-                            pts.push(Qt.point(w * i / Math.max(1, n - 1), h / 2 + sign * (h / 2) * root.levels[i] * 0.9));
+                        const steps = 120;
+                        for (let i = 0; i <= steps; i++) {
+                            const t = i / steps;
+                            let y = 0;
+                            for (let k = 0; k < n; k++)
+                                y += v[k] * Math.sin(2 * Math.PI * (k + 1) * 1.5 * t + root.phase * (k + 1) * 0.3);
+                            const norm = Math.max(1, sum);
+                            pts.push(Qt.point(w * t, h / 2 - (h / 2) * 0.9 * y / norm));
                         }
                         return pts;
                     }

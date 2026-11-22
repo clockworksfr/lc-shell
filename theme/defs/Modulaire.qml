@@ -31,8 +31,8 @@ Singleton {
                     nixie: "#FF8A2A",
                     lcd: "#C6F37A",
                     lcdInk: "#1A2410",
-                    lcdAmber: "#FFB547",
-                    lcdAmberInk: "#2A1A05",
+                    lcdAmber: "#1E0E03",
+                    lcdAmberInk: "#FF9A3C",
                     glow: "#CCFF8A2A",
                     glass: "#0DFFFFFF",
                     star: "#00000000"
@@ -55,8 +55,8 @@ Singleton {
                     nixie: "#E8742A",
                     lcd: "#C6F37A",
                     lcdInk: "#1A2410",
-                    lcdAmber: "#FFB547",
-                    lcdAmberInk: "#2A1A05",
+                    lcdAmber: "#2A1606",
+                    lcdAmberInk: "#FF9A3C",
                     glow: "#88FF8A2A",
                     glass: "#40FFFFFF",
                     star: "#00000000"
@@ -68,6 +68,8 @@ Singleton {
                 display: "Nixie One",
                 // Small LCD windows (clock, system knobs).
                 lcd: "Doto LCD",
+                lyric: "Doto LCD",
+                lyricCaps: true,
                 displayWeight: 400,
                 heroScale: 1,
                 sizeS: 13,

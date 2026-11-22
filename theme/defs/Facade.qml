@@ -62,6 +62,10 @@ Singleton {
                 displayWeight: 700,
                 // Slanted segments, like the theme's presentation tab.
                 displayItalic: true,
+                // Text inside the VFD: square dots, upper case.
+                lcd: "Doto LCD",
+                lyric: "Doto LCD",
+                lyricCaps: true,
                 heroScale: 0.74,
                 sizeS: 12,
                 sizeM: 14,

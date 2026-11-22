@@ -141,7 +141,7 @@ Item {
         label: true
         text: root.title
         font.family: root.look === "modulaire" ? root.theme.font.mono : root.theme.font.family
-        font.pixelSize: 11
+        font.pixelSize: root.look === "modulaire" ? Math.max(11, root.height * 0.04) : Math.max(13, root.height * 0.045)
         font.letterSpacing: 1.5
         color: root.look === "facade" ? (root.theme.color.silk ?? root.theme.color.soft) : root.theme.color.soft
     }
