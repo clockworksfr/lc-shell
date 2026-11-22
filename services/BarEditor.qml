@@ -9,9 +9,11 @@ import Quickshell
 // A bar's layout is three zones (left/start, center, right/end); a zone is
 // a list of groups (islands), a group a list of block entries. In settings a
 // zone with one group is a plain list; with several, a list of lists.
-// Edits go to the screen's profile (Config.setScreen "bar"), so each screen
-// has its own layout. Undo/redo keep the last 50 layouts; "discard" restores
-// every screen as it was when editing started.
+// While editing, changes live in drafts (one per screen) that the bars
+// show; "done" saves them to each screen's profile (Config.setScreen "bar"),
+// so each screen has its own layout. A zone equal to the mode's default is
+// not copied into the profile: later default changes still apply to it.
+// Undo/redo keep the last 50 layouts; "discard" drops the drafts.
 Singleton {
     id: root
 
@@ -24,8 +26,8 @@ Singleton {
     // Drag in progress: { screen, zone, group, index, type } or null.
     property var dragging: null
 
-    // screen name -> zones, as they were when editing started.
-    property var initial: ({})
+    // screen name -> zones being edited (not saved yet).
+    property var drafts: ({})
     property var undoStack: []
     property var redoStack: []
 
@@ -33,10 +35,7 @@ Singleton {
         selected = null;
         dragging = null;
         if (editing) {
-            const snapshot = {};
-            for (const screen of Quickshell.screens)
-                snapshot[screen.name] = zonesOf(screen);
-            initial = snapshot;
+            drafts = {};
             undoStack = [];
             redoStack = [];
         }
@@ -58,32 +57,77 @@ Singleton {
         return kept.length <= 1 ? (kept[0] ?? []) : kept;
     }
 
-    // { left: [[entry]], center: [[…]], right: [[…]] } of a screen.
-    function zonesOf(screen: ShellScreen): var {
-        const bar = Config.forScreen(screen).bar ?? {};
+    function zonesFrom(bar: var): var {
         return {
-            left: groups(bar.left ?? bar.start),
-            center: groups(bar.center),
-            right: groups(bar.right ?? bar.end)
+            left: groups(bar?.left ?? bar?.start),
+            center: groups(bar?.center),
+            right: groups(bar?.right ?? bar?.end)
         };
+    }
+
+    // { left: [[entry]], center: [[…]], right: [[…]] } of a screen: its
+    // draft while editing, else its saved layout.
+    function zonesOf(screen: ShellScreen): var {
+        return drafts[screen.name] ?? zonesFrom(Config.forScreen(screen).bar);
+    }
+
+    // Bar config to display for a screen: the saved one, with the draft's
+    // zones while editing.
+    function barConfig(screen: ShellScreen, saved: var): var {
+        const draft = drafts[screen?.name ?? ""];
+        if (!draft || !saved)
+            return saved;
+        const bar = Object.assign({}, saved);
+        delete bar.start;
+        delete bar.end;
+        for (const name of zoneNames)
+            bar[name] = flatten(draft[name]);
+        return bar;
+    }
+
+    // Block types already on a screen's bar.
+    function typesOn(screen: ShellScreen): var {
+        const zones = zonesOf(screen);
+        // Plain loops: QML lists have no flatMap/flat.
+        const out = [];
+        for (const zone of ["left", "center", "right"])
+            for (const group of zones[zone])
+                for (const entry of group)
+                    out.push(typeof entry === "string" ? entry : entry.type);
+        return out;
     }
 
     function copy(value: var): var {
         return JSON.parse(JSON.stringify(value));
     }
 
+    // Changes a screen's draft (recorded for undo when `record`).
     function write(screen: ShellScreen, zones: var, record: bool): void {
         if (record) {
             undoStack = [...undoStack, { screen: screen.name, zones: zonesOf(screen) }].slice(-50);
             redoStack = [];
         }
+        const next = Object.assign({}, drafts);
+        next[screen.name] = copy(zones);
+        drafts = next;
+    }
+
+    // Saves a screen's zones into its profile; zones equal to the mode's
+    // default are left out (inherited).
+    function save(screen: ShellScreen, zones: var): void {
+        const mode = Config.forScreen(screen).mode;
+        const defaults = zonesFrom(Config.get(`modes.${mode}.bar`));
         const current = Config.profileFor(screen).bar;
         const bar = Object.assign({}, current && typeof current === "object" ? current : {});
         delete bar.start;
         delete bar.end;
-        for (const name of zoneNames)
-            bar[name] = flatten(zones[name]);
-        Config.setScreen(screen, "bar", bar);
+        for (const name of zoneNames) {
+            if (JSON.stringify(flatten(zones[name])) === JSON.stringify(flatten(defaults[name])))
+                delete bar[name];
+            else
+                bar[name] = flatten(zones[name]);
+        }
+        Config.setScreen(screen, "bar", Object.keys(bar).length > 0 ? bar : undefined);
     }
 
     function entryAt(at: var): var {
@@ -179,18 +223,20 @@ Singleton {
         selected = null;
     }
 
-    // Leave, keeping the changes.
+    // Leave, saving the drafts.
     function done(): void {
+        for (const name in drafts) {
+            const screen = screenNamed(name);
+            if (screen)
+                save(screen, drafts[name]);
+        }
+        drafts = {};
         ShellState.editing = false;
     }
 
-    // Leave, restoring every screen's layout as it was.
+    // Leave, dropping the drafts: layouts stay as they were.
     function discard(): void {
-        for (const name in initial) {
-            const screen = screenNamed(name);
-            if (screen && JSON.stringify(zonesOf(screen)) !== JSON.stringify(initial[name]))
-                write(screen, initial[name], false);
-        }
+        drafts = {};
         ShellState.editing = false;
     }
 }

@@ -13,7 +13,7 @@ Column {
 
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
     readonly property var bar: Config.get("modes.normal.bar") ?? {}
-    readonly property var themeBar: Themes.resolve(Themes.themeFor("normal"), false).bar
+    readonly property var themeBar: Themes.resolve(Themes.themeFor("normal"), false, "normal").bar
     readonly property var look: Object.assign({}, themeBar, bar)
     readonly property var zones: ["left", "center", "right"]
     readonly property var blockTypes: Object.keys(Registry.blocks)

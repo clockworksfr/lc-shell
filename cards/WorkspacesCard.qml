@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Widgets
 import qs.components
 import qs.i18n
 import qs.theme
@@ -70,14 +71,28 @@ Column {
                 border.color: focused ? root.theme.color.accent : root.theme.color.line
                 clip: true
 
-                ThemedText {
+                Column {
                     anchors.centerIn: parent
                     width: parent.width - 6
-                    horizontalAlignment: Text.AlignHCenter
-                    text: parent.modelData.info.class ?? ""
-                    font.pixelSize: root.theme.font.sizeS
-                    color: parent.focused ? root.theme.color.ink : root.theme.color.soft
-                    elide: Text.ElideRight
+                    spacing: 2
+
+                    IconImage {
+                        readonly property var entry: DesktopEntries.heuristicLookup(parent.parent.modelData.info.class ?? "")
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        visible: !!entry?.icon && parent.parent.height > 40
+                        width: 20
+                        height: 20
+                        source: entry?.icon ? Quickshell.iconPath(entry.icon, true) : ""
+                    }
+
+                    ThemedText {
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                        text: parent.parent.modelData.info.title || parent.parent.modelData.info.class || ""
+                        font.pixelSize: root.theme.font.sizeS
+                        color: parent.parent.focused ? root.theme.color.ink : root.theme.color.soft
+                        elide: Text.ElideRight
+                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import qs.components
 import qs.i18n
 import qs.theme
@@ -11,14 +12,33 @@ FloatingWindow {
     id: win
 
     // Normal-screen theme: the window lives among the user's windows.
-    property var theme: Themes.resolve(Themes.themeFor("normal"), false)
+    property var theme: Themes.resolve(Themes.themeFor("normal"), false, "normal")
 
-    title: I18n.tr("settings.title")
+    // The "lc-shell · " prefix lets Hyprland rules (and the float below) find it.
+    title: `lc-shell · ${I18n.tr("settings.title")}`
     implicitWidth: 980
     implicitHeight: 720
     color: theme.color.bg
 
-    onVisibleChanged: if (!visible) Settings.opened = false
+    onVisibleChanged: {
+        if (!visible)
+            Settings.opened = false;
+        else
+            floatIt.restart();
+    }
+
+    // Float it, sized and centered, rather than tiling it over the user's
+    // windows (Hyprland tiles new windows by default).
+    Timer {
+        id: floatIt
+        interval: 150
+        onTriggered: {
+            const target = `window = "title:^lc-shell · "`;
+            Hyprland.dispatch(`hl.dsp.window.float({ action = "set", ${target} })`);
+            Hyprland.dispatch(`hl.dsp.window.resize({ x = ${win.implicitWidth}, y = ${win.implicitHeight}, ${target} })`);
+            Hyprland.dispatch(`hl.dsp.window.center({ ${target} })`);
+        }
+    }
 
     Rectangle {
         id: sidebar

@@ -9,7 +9,8 @@ import qs.theme
 
 // Edit mode toolbar, next to the bar: the selected block (size, zone,
 // remove), the palette (add a block), undo/redo, discard, done.
-// Keys: Escape = done, Ctrl+Z / Ctrl+Shift+Z = undo / redo, Delete = remove.
+// Keys (the toolbar holds the keyboard while editing): Escape = done,
+// Ctrl+Z / Ctrl+Shift+Z = undo / redo, Delete = remove.
 PanelWindow {
     id: win
 
@@ -33,7 +34,8 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "lc-bar-edit"
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+    // While editing, keys go to the toolbar (Escape, Ctrl+Z, Delete).
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
     Rectangle {
         anchors.fill: parent
@@ -128,7 +130,8 @@ PanelWindow {
                 }
 
                 Repeater {
-                    model: Object.keys(Registry.blocks)
+                    // Only blocks not on this screen's bar yet.
+                    model: Object.keys(Registry.blocks).filter(t => !BarEditor.typesOn(win.screen).includes(t))
 
                     ToolButton {
                         required property string modelData

@@ -8,7 +8,7 @@ Singleton {
     id: root
 
     function normalize(text: string): string {
-        return (text ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        return (text ?? "").toLowerCase().replace(/œ/g, "oe").replace(/æ/g, "ae").replace(/ß/g, "ss").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
 
     function isBoundary(text: string, index: int): bool {

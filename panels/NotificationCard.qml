@@ -23,9 +23,9 @@ Rectangle {
 
     width: parent?.width ?? 0
     implicitHeight: content.implicitHeight + theme.space.m * 2
-    radius: theme.radius.tile
+    radius: theme.radius.panel
     color: theme.color.surface
-    border.width: critical ? 2 : theme.border.width
+    border.width: critical ? 4 : theme.border.width
     border.color: critical ? theme.color.urgent : theme.color.line
 
     MouseArea {

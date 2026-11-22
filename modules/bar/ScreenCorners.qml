@@ -35,21 +35,21 @@ PanelWindow {
     }
     Corner {
         radius: win.radius
-        fill: win.theme.color.bg
+        fill: win.fill
         anchors.top: parent.top
         anchors.right: parent.right
         rotation: 90
     }
     Corner {
         radius: win.radius
-        fill: win.theme.color.bg
+        fill: win.fill
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         rotation: 180
     }
     Corner {
         radius: win.radius
-        fill: win.theme.color.bg
+        fill: win.fill
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         rotation: 270

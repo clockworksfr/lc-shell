@@ -19,7 +19,7 @@ Item {
     readonly property var rows: [
         { label: "CPU", value: SystemStats.cpu, detail: SystemStats.cpuTemp ? `${Math.round(SystemStats.cpuTemp)}°` : "" },
         { label: "RAM", value: SystemStats.memory, detail: I18n.tr("system.memory", { used: I18n.number(SystemStats.memoryUsedGiB, 1), total: Math.round(SystemStats.memoryTotalGiB) }) },
-        ...SystemStats.gpus.map((gpu, i) => ({ label: SystemStats.gpus.length > 1 ? `GPU ${i + 1}` : "GPU", value: gpu.busy, detail: gpu.temp ? `${Math.round(gpu.temp)}°` : "" }))
+        ...SystemStats.gpus.map(gpu => ({ label: SystemStats.gpus.length > 1 ? I18n.tr(gpu.integrated ? "system.gpuIntegrated" : "system.gpuDiscrete") : "GPU", value: gpu.busy, detail: gpu.temp ? `${Math.round(gpu.temp)}°` : "" }))
     ]
 
     Column {

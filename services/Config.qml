@@ -83,7 +83,20 @@ Singleton {
         else
             node[last] = value;
         user = next;
-        mkdir.running = true;
+        // Several set() in a row (one IPC call can make two) end in one write.
+        Qt.callLater(root.flush);
+    }
+
+    // Last content we wrote: the file watcher reports our own writes too,
+    // and reloading them late used to overwrite newer in-memory settings.
+    property string lastWritten
+
+    function flush(): void {
+        const text = JSON.stringify(user, null, 2) + "\n";
+        if (text === lastWritten)
+            return;
+        lastWritten = text;
+        userFile.setText(text);
     }
 
     function matches(match: var, screen: ShellScreen): bool {
@@ -157,21 +170,26 @@ Singleton {
         id: userFile
         path: root.userPath
         watchChanges: true
+        // Temp file + rename: a reader never sees half a file.
+        atomicWrites: true
         printErrors: false
         onFileChanged: reload()
         onLoaded: {
+            const content = text();
+            // Our own write coming back: memory is already up to date.
+            if (content === root.lastWritten)
+                return;
             try {
-                root.user = JSON.parse(text());
+                root.user = JSON.parse(content);
             } catch (e) {
                 console.warn(`${root.userPath}: invalid JSON, keeping previous settings (${e})`);
             }
         }
     }
 
-    // The settings directory may not exist yet: create it, then write.
+    // The settings directory may not exist yet.
     Process {
-        id: mkdir
+        running: true
         command: ["mkdir", "-p", `${root.configHome}/lc`]
-        onExited: userFile.setText(JSON.stringify(root.user, null, 2) + "\n")
     }
 }

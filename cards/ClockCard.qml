@@ -39,7 +39,9 @@ Column {
             }
             if (w === 5 && !days.some(d => d.inMonth))
                 break;
-            out.push({ week: isoWeek(days[3].date), days: days });
+            // ISO week of the row = week of its Thursday (rows may start on Sunday).
+            const thursday = days.find(d => d.date.getDay() === 4) ?? days[3];
+            out.push({ week: isoWeek(thursday.date), days: days });
         }
         return out;
     }

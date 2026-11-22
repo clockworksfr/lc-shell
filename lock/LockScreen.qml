@@ -14,7 +14,7 @@ WlSessionLock {
     WlSessionLockSurface {
         id: surface
 
-        property var theme: Themes.resolve(Config.forScreen(screen).theme ?? Themes.themeFor(Config.forScreen(screen).mode), false)
+        property var theme: Themes.resolve(Config.forScreen(screen).theme ?? Themes.themeFor(Config.forScreen(screen).mode), false, "normal")
 
         color: theme.color.bg
 

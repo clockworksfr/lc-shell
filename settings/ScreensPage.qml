@@ -22,7 +22,7 @@ Column {
 
             required property ShellScreen modelData
             readonly property var profile: Config.forScreen(modelData)
-            readonly property var bar: Object.assign({}, Themes.resolve(profile.theme ?? Themes.themeFor(profile.mode), false).bar, profile.bar ?? {})
+            readonly property var bar: Object.assign({}, Themes.resolve(profile.theme ?? Themes.themeFor(profile.mode), false, profile.mode).bar, profile.bar ?? {})
 
             function setBar(key: string, value: var): void {
                 const current = Config.profileFor(modelData).bar;

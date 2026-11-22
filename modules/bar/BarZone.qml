@@ -70,7 +70,7 @@ Item {
                     anchors.fill: parent
                     visible: zone.islands
                     radius: zone.look.radius
-                    color: Qt.alpha(zone.theme.color.bg, zone.look.opacity)
+                    color: Qt.alpha(zone.theme.color.surface, zone.look.opacity)
                     border.width: zone.look.border
                     border.color: zone.theme.color.line
 

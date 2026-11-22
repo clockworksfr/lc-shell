@@ -57,7 +57,7 @@ PanelWindow {
         anchors.fill: parent
         visible: !bar.islands && !bar.framed
         radius: bar.look.floating ? bar.look.radius : 0
-        color: Qt.alpha(bar.theme.color.bg, bar.look.opacity)
+        color: Qt.alpha(bar.theme.color.surface, bar.look.opacity)
         border.width: bar.look.floating ? bar.look.border : 0
         border.color: bar.theme.color.line
 

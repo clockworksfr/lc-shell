@@ -93,7 +93,9 @@ Singleton {
             },
             hit: {
                 pointer: 24,
-                touch: 48
+                touch: 48,
+                // Touch dashboard (modules screen).
+                modules: 72
             },
             bar: {
                 // "top" | "bottom" | "left" | "right"

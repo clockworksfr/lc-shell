@@ -207,5 +207,8 @@
   "edit.redo": "Redo",
   "edit.discard": "Discard",
   "edit.done": "Done",
-  "block.unknown": "?"
+  "block.unknown": "?",
+  "launcher.calcHint": "e.g. 2+2*3, 10 EUR to USD, 5 km to mi",
+  "system.gpuIntegrated": "iGPU",
+  "system.gpuDiscrete": "GPU"
 }

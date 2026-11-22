@@ -12,8 +12,14 @@ Singleton {
         return Hyprland.monitors.values.find(m => m.name === name) ?? null;
     }
 
+    // A real fullscreen window (Hyprland mode 2) on the screen's active
+    // workspace. A maximized window (mode 1) also sets hasFullscreen: it
+    // doesn't count, the shell keeps showing over it.
     function hasFullscreen(name: string): bool {
-        return monitor(name)?.activeWorkspace?.hasFullscreen ?? false;
+        const workspace = monitor(name)?.activeWorkspace;
+        if (!workspace?.hasFullscreen)
+            return false;
+        return Hyprland.toplevels.values.some(t => t.workspace === workspace && ((t.lastIpcObject?.fullscreen ?? 0) & 2));
     }
 
     // Where an automatic popup (OSD, notification) may appear.

@@ -115,8 +115,9 @@ Singleton {
                 urgent: pending,
                 icon: action.icon,
                 confirm: action.confirm ?? false,
-                // Slightly below apps with the same match.
-                score: score * 0.95 + Launcher.usageBonus(action.key),
+                // Slightly below apps with the same match; audio devices below
+                // session actions.
+                score: score * (action.key.startsWith("action:sink") || action.key.startsWith("action:source") ? 0.75 : 0.95) + Launcher.usageBonus(action.key),
                 activate: action.run
             });
         }

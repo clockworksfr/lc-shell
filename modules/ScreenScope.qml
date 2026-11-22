@@ -19,7 +19,7 @@ Scope {
 
     readonly property var profile: Config.forScreen(modelData)
     readonly property bool normal: profile.mode === "normal"
-    readonly property var theme: Themes.resolve(profile.theme ?? Themes.themeFor(profile.mode), profile.touch)
+    readonly property var theme: Themes.resolve(profile.theme ?? Themes.themeFor(profile.mode), profile.touch, profile.mode)
     readonly property bool fullscreen: Screens.hasFullscreen(modelData.name)
     readonly property var barLook: Object.assign({}, theme.bar, profile.bar ?? {})
     readonly property bool hasBar: normal && !!profile.bar && ShellState.barVisible
@@ -70,7 +70,7 @@ Scope {
 
         Bar {
             screen: root.modelData
-            config: root.profile.bar
+            config: BarEditor.barConfig(root.modelData, root.profile.bar)
             theme: root.theme
             framed: root.framed
         }

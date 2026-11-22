@@ -84,7 +84,9 @@ Singleton {
     Timer {
         interval: 1000
         repeat: true
-        running: root.watchers > 0 && root.iface !== ""
+        // Always on (two small sysfs reads per second): the curves are
+        // already filled when a card opens.
+        running: root.iface !== ""
         triggeredOnStart: true
         onTriggered: rxFile.reload()
     }

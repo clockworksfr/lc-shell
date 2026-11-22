@@ -26,14 +26,15 @@ Singleton {
     property string scheduledVariant: "dark"
     readonly property string variant: variantMode === "auto" ? scheduledVariant : variantMode
 
-    readonly property var fallback: resolve("classic", false)
+    readonly property var fallback: resolve("classic", false, "normal")
 
     function themeFor(mode: string): string {
         const id = (Config.appearance.themes ?? {})[mode] ?? "classic";
         return definitions[id] ? id : "classic";
     }
 
-    function resolve(id: string, touch: bool): var {
+    // `mode` "modules" + touch: dashboard targets (72) instead of 48.
+    function resolve(id: string, touch: bool, mode: string): var {
         const definition = definitions[id] ?? definitions.classic;
         const merged = deepMerge(Base.definition, definition);
         return {
@@ -47,7 +48,7 @@ Singleton {
             radius: merged.radius,
             border: merged.border,
             motion: merged.motion,
-            hit: touch ? merged.hit.touch : merged.hit.pointer,
+            hit: touch ? (mode === "modules" ? merged.hit.modules : merged.hit.touch) : merged.hit.pointer,
             bar: merged.bar,
             style: merged.style
         };

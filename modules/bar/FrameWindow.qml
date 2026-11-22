@@ -46,7 +46,7 @@ PanelWindow {
 
         ShapePath {
             fillRule: ShapePath.OddEvenFill
-            fillColor: Qt.alpha(win.theme.color.bg, win.fillOpacity)
+            fillColor: Qt.alpha(win.theme.color.surface, win.fillOpacity)
             strokeWidth: -1
             PathSvg {
                 path: `M 0 0 H ${win.width} V ${win.height} H 0 Z ${win.innerPath}`

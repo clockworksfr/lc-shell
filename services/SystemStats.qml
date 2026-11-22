@@ -69,7 +69,10 @@ Singleton {
             for d in /sys/class/drm/card[0-9]*/device; do
                 [ -r "$d/gpu_busy_percent" ] || continue
                 t=$(cat "$d"/hwmon/hwmon*/temp1_input 2>/dev/null | head -n1)
-                echo "gpu $(basename "$(dirname "$d")") $(cat "$d/gpu_busy_percent") \${t:-0}"
+                c=$(basename "$(dirname "$d")")
+                # Integrated = the one driving the laptop panel.
+                k=discrete; ls -d /sys/class/drm/$c-eDP-* >/dev/null 2>&1 && k=integrated
+                echo "gpu $c $(cat "$d/gpu_busy_percent") \${t:-0} $k"
             done
             for h in /sys/class/hwmon/hwmon*; do
                 case "$(cat "$h/name")" in k10temp|coretemp|zenpower) echo "cpu $(cat "$h/temp1_input")"; break;; esac
@@ -80,7 +83,7 @@ Singleton {
                 for (const line of text.split("\n")) {
                     const f = line.trim().split(" ");
                     if (f[0] === "gpu")
-                        gpus.push({ card: f[1], busy: Number(f[2]) / 100, temp: Number(f[3]) / 1000 });
+                        gpus.push({ card: f[1], busy: Number(f[2]) / 100, temp: Number(f[3]) / 1000, integrated: f[4] === "integrated" });
                     else if (f[0] === "cpu")
                         root.cpuTemp = Number(f[1]) / 1000;
                 }

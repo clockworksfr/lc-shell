@@ -122,6 +122,7 @@ Item {
         ThemedText {
             anchors.centerIn: parent
             text: control.glyph
+            font.pixelSize: Math.round(control.width * 0.38)
         }
 
         MouseArea {

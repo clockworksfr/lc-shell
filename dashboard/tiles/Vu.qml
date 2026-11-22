@@ -5,7 +5,8 @@ import qs.components
 import qs.services
 import qs.theme
 
-// VU meter of the default output: one bar per channel (dB scale, -60..0),
+// VU meter of the default output: one bar per channel (dB scale, -48..0,
+// ticks every 12 dB; warn above -6 dB, red above -2 dB),
 // with a falling peak marker. Bars run along the tile's longer side.
 // Options: channels ("all" default, or "stereo" to keep only 2).
 Item {
@@ -21,7 +22,7 @@ Item {
     function toMeter(peak: real): real {
         if (peak <= 0)
             return 0;
-        return Math.max(0, Math.min(1, (20 * Math.log10(peak) + 60) / 60));
+        return Math.max(0, Math.min(1, (20 * Math.log10(peak) + 48) / 48));
     }
 
     PwNodePeakMonitor {
@@ -75,7 +76,22 @@ Item {
                     width: root.horizontal ? parent.width * amount : parent.width
                     height: root.horizontal ? parent.height : parent.height * amount
                     radius: root.theme.radius.control
-                    color: meter.smooth > 0.92 ? root.theme.color.urgent : meter.smooth > 0.8 ? root.theme.color.warn : root.theme.color.accent
+                    color: meter.smooth > 46 / 48 ? root.theme.color.urgent : meter.smooth > 42 / 48 ? root.theme.color.warn : root.theme.color.accent
+                }
+
+                // Ticks at -36, -24, -12 dB.
+                Repeater {
+                    model: [0.25, 0.5, 0.75]
+
+                    Rectangle {
+                        required property real modelData
+                        x: root.horizontal ? parent.width * modelData : 0
+                        y: root.horizontal ? 0 : parent.height * (1 - modelData)
+                        width: root.horizontal ? 1 : parent.width
+                        height: root.horizontal ? parent.height : 1
+                        color: Qt.alpha(root.theme.color.ink, 0.25)
+                        z: 1
+                    }
                 }
 
                 Rectangle {

@@ -165,8 +165,8 @@ PanelWindow {
                         anchors.left: parent.left
                         anchors.leftMargin: win.theme.space.s
                         anchors.verticalCenter: parent.verticalCenter
-                        width: 28
-                        height: 28
+                        width: row.modelData.image ? 64 : 28
+                        height: row.modelData.image ? 40 : 28
 
                         Image {
                             anchors.fill: parent
@@ -228,7 +228,9 @@ PanelWindow {
 
             ThemedText {
                 visible: list.count === 0
-                text: Launcher.modeId === "files" && Launcher.term.length < 2 ? I18n.tr("launcher.minChars", { n: 2 }) : I18n.tr("launcher.noResults")
+                text: Launcher.modeId === "files" && Launcher.term.length < 2 ? I18n.tr("launcher.minChars", { n: 2 })
+                    : Launcher.modeId === "calc" && !Launcher.term ? I18n.tr("launcher.calcHint")
+                    : I18n.tr("launcher.noResults")
                 color: win.theme.color.soft
                 font.pixelSize: win.theme.font.sizeS
             }
