@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import Quickshell
 import qs.components
 import qs.components.dashboard
@@ -6,12 +7,16 @@ import qs.i18n
 import qs.services
 import qs.theme
 
-// Active player by shape: tiny = cover + play; narrow = cover, title,
-// play; wide / strip = cover, title / artist, progress, transport; box /
-// tall = cover on top, title, transport. Themes without cover art (facade,
-// modulaire) show the track in their display (VFD, amber LCD). Progress
-// and times only for a real length (not streams). A live spectrum (cava)
-// fills the room left while playing.
+// Active player. Every shape shows the track, a live spectrum (cava),
+// the progress (a "live" bar for streams, which have no length) and the
+// transport, laid out to fill the cell without overlaps:
+//   tiny   track, progress, play + a small spectrum
+//   narrow cover / track, spectrum filling, progress, play
+//   wide   cover left; track, spectrum filling, progress, transport right
+//   strip  one line: cover, track over the progress, spectrum, transport
+//   box / tall  cover on top, track, spectrum filling, progress, transport
+// Themes without cover art (facade, modulaire) show the track in their
+// display (VFD, amber LCD).
 ModuleBase {
     id: root
 
@@ -19,7 +24,8 @@ ModuleBase {
     readonly property real length: player?.length ?? 0
     readonly property real position: player?.position ?? 0
     readonly property bool timed: (player?.lengthSupported ?? false) && length > 0 && length < 86400 && position <= length + 2
-    readonly property bool art: theme.style.cover !== "none"
+    readonly property bool playing: player?.isPlaying ?? false
+    readonly property real buttonSize: Math.max(theme.hit, Math.min(72, m * (shape === "tiny" ? 0.34 : 0.24)))
 
     function time(seconds: real): string {
         const s = Math.max(0, Math.round(seconds));
@@ -29,7 +35,7 @@ ModuleBase {
     Timer {
         interval: 1000
         repeat: true
-        running: root.player?.isPlaying ?? false
+        running: root.playing
         onTriggered: root.player.positionChanged()
     }
 
@@ -41,7 +47,7 @@ ModuleBase {
         color: root.theme.color.soft
     }
 
-    // Title, artist (in the theme's display when it has no cover art).
+    // Title and artist (in the theme's display when it has no cover art).
     component Track: Display {
         id: track
 
@@ -61,7 +67,7 @@ ModuleBase {
                 elide: Text.ElideRight
                 text: track.m.player?.trackTitle || track.m.player?.identity || ""
                 font.family: track.m.theme.font.lyric ?? track.m.theme.font.family
-                font.pixelSize: track.m.t2 * (track.big ? 1.2 : 1)
+                font.pixelSize: track.m.t2 * (track.big ? 1.15 : 0.9)
                 font.weight: Font.DemiBold
                 color: track.ink
             }
@@ -71,16 +77,48 @@ ModuleBase {
                 elide: Text.ElideRight
                 text: track.m.player?.trackArtist ?? ""
                 font.family: track.m.theme.font.lyric ?? track.m.theme.font.family
-                font.pixelSize: track.m.t3
+                font.pixelSize: track.m.t3 * (track.big ? 1 : 0.9)
                 color: track.soft
+            }
+        }
+    }
+
+    // Progress with times, or a "live" bar for streams.
+    component Progress: Column {
+        id: progress
+
+        property var m
+        property bool times: true
+
+        spacing: 3
+
+        Gauge {
+            width: parent.width
+            value: progress.m.timed ? progress.m.position / Math.max(1, progress.m.length) : 1
+            color: progress.m.timed ? (progress.m.theme.color.signal ?? progress.m.theme.color.accent) : Qt.alpha(progress.m.theme.color.soft, 0.6)
+            alarm: 2
+        }
+
+        Item {
+            visible: progress.times
+            width: parent.width
+            height: progress.m.t4 * 1.3
+
+            ThemedText {
+                text: progress.m.timed ? progress.m.time(progress.m.position) : I18n.tr("media.live")
+                label: !progress.m.timed
+                font.pixelSize: progress.m.t4
+                font.features: ({ "tnum": 1 })
+                color: progress.m.theme.color.soft
             }
 
             ThemedText {
-                visible: track.m.timed && track.big
-                text: `${track.m.time(track.m.position)} / ${track.m.time(track.m.length)}`
-                font.pixelSize: track.m.t4
+                anchors.right: parent.right
+                visible: progress.m.timed
+                text: `−${progress.m.time(progress.m.length - progress.m.position)}`
+                font.pixelSize: progress.m.t4
                 font.features: ({ "tnum": 1 })
-                color: track.soft
+                color: progress.m.theme.color.soft
             }
         }
     }
@@ -92,7 +130,7 @@ ModuleBase {
         property real size: 56
         property bool full: true
 
-        spacing: transport.size * 0.25
+        spacing: transport.size * 0.22
 
         ModuleButton {
             visible: transport.full
@@ -103,7 +141,7 @@ ModuleBase {
             onTapped: Players.previous()
         }
         ModuleButton {
-            icon: transport.m.player?.isPlaying ? "pause" : "play_arrow"
+            icon: transport.m.playing ? "pause" : "play_arrow"
             legend: "PLAY"
             primary: true
             size: transport.size
@@ -120,133 +158,165 @@ ModuleBase {
         }
     }
 
-    // tiny / narrow.
-    Column {
-        visible: !!root.player && (root.shape === "tiny" || root.shape === "narrow")
-        anchors.centerIn: parent
-        width: parent.width
-        spacing: root.gap
-
-        Cover {
-            anchors.horizontalCenter: parent.horizontalCenter
-            source: root.player?.trackArtUrl ?? ""
-            playing: root.player?.isPlaying ?? false
-            size: Math.min(root.cw * 0.8, root.ch * (root.shape === "tiny" ? 0.6 : 0.45))
-        }
+    // tiny: track, progress, play beside a small spectrum.
+    ColumnLayout {
+        visible: !!root.player && root.shape === "tiny"
+        anchors.fill: parent
+        spacing: root.gap / 2
 
         Track {
             m: root
-            visible: root.shape === "narrow" || !root.art
-            width: parent.width
+            Layout.fillWidth: true
         }
 
-        Transport {
+        Progress {
             m: root
-            anchors.horizontalCenter: parent.horizontalCenter
-            full: false
-            size: Math.max(root.theme.hit, root.t2 * 2)
-        }
-    }
-
-    // wide / strip.
-    Item {
-        visible: !!root.player && (root.shape === "wide" || root.shape === "strip")
-        anchors.fill: parent
-
-        Cover {
-            id: wideCover
-            anchors.verticalCenter: parent.verticalCenter
-            source: root.player?.trackArtUrl ?? ""
-            playing: root.player?.isPlaying ?? false
-            size: Math.min(root.ch, root.cw * 0.36)
+            times: false
+            Layout.fillWidth: true
         }
 
-        Item {
-            anchors.left: wideCover.right
-            anchors.leftMargin: wideCover.shown ? root.gap : 0
-            anchors.right: parent.right
-            height: parent.height
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: root.gap / 2
 
-            Track {
-                id: wideTrack
-                m: root
-                big: true
-                width: root.shape === "strip" ? parent.width - wideTransport.width - root.gap : parent.width
-                anchors.top: root.shape === "strip" ? undefined : parent.top
-                anchors.verticalCenter: root.shape === "strip" ? parent.verticalCenter : undefined
-            }
-
-            // What's playing, live (cava): fills the room left.
             AudioSpectrum {
-                visible: root.shape === "wide" && height >= 24 && (root.player?.isPlaying ?? false)
-                anchors.top: wideTrack.bottom
-                anchors.topMargin: root.gap
-                anchors.bottom: wideGauge.visible ? wideGauge.top : wideTransport.top
-                anchors.bottomMargin: root.gap
-                width: parent.width
-                count: Math.max(12, Math.min(32, Math.floor(width / 18)))
-            }
-
-            Gauge {
-                id: wideGauge
-                visible: root.timed && root.shape !== "strip"
-                anchors.bottom: wideTransport.top
-                anchors.bottomMargin: root.gap
-                width: parent.width
-                value: root.position / Math.max(1, root.length)
-                color: root.theme.color.signal ?? root.theme.color.accent
-                alarm: 2
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                count: 6
             }
 
             Transport {
-                id: wideTransport
                 m: root
-                anchors.bottom: root.shape === "strip" ? undefined : parent.bottom
-                anchors.right: root.shape === "strip" ? parent.right : undefined
-                anchors.verticalCenter: root.shape === "strip" ? parent.verticalCenter : undefined
-                size: Math.max(root.theme.hit, Math.min(root.ch * (root.shape === "strip" ? 0.7 : 0.3), 72))
+                full: false
+                size: Math.min(root.buttonSize, parent.height)
             }
         }
     }
 
-    // box / tall: cover on top.
-    Column {
-        visible: !!root.player && (root.shape === "box" || root.shape === "tall")
+    // narrow / box / tall: a column; the spectrum takes the room left.
+    ColumnLayout {
+        visible: !!root.player && (root.shape === "narrow" || root.shape === "box" || root.shape === "tall")
         anchors.fill: parent
-        spacing: root.gap
+        spacing: root.gap / 1.5
 
         Cover {
-            anchors.horizontalCenter: parent.horizontalCenter
+            Layout.alignment: Qt.AlignHCenter
             source: root.player?.trackArtUrl ?? ""
-            playing: root.player?.isPlaying ?? false
-            size: Math.min(root.cw, root.ch * 0.55)
+            playing: root.playing
+            size: Math.min(root.cw * (root.shape === "narrow" ? 0.9 : 0.7), root.ch * 0.4)
         }
 
         Track {
             m: root
-            big: true
-            width: parent.width
+            big: root.shape !== "narrow"
+            Layout.fillWidth: true
         }
 
         AudioSpectrum {
-            visible: root.ch >= 360 && (root.player?.isPlaying ?? false)
-            width: parent.width
-            height: Math.min(root.ch * 0.16, 90)
-            count: Math.max(12, Math.min(32, Math.floor(width / 18)))
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.minimumHeight: 16
+            count: Math.max(8, Math.min(32, Math.floor(width / 18)))
         }
 
-        Gauge {
-            visible: root.timed
-            width: parent.width
-            value: root.position / Math.max(1, root.length)
-            color: root.theme.color.signal ?? root.theme.color.accent
-            alarm: 2
+        Progress {
+            m: root
+            Layout.fillWidth: true
         }
 
         Transport {
             m: root
-            anchors.horizontalCenter: parent.horizontalCenter
-            size: Math.max(root.theme.hit, Math.min(root.ch * 0.16, 72))
+            Layout.alignment: Qt.AlignHCenter
+            full: root.cw >= root.buttonSize * 3.6
+            size: root.buttonSize
+        }
+    }
+
+    // wide: cover left; track, spectrum, progress, transport right.
+    RowLayout {
+        visible: !!root.player && root.shape === "wide"
+        anchors.fill: parent
+        spacing: root.gap
+
+        Cover {
+            Layout.alignment: Qt.AlignVCenter
+            source: root.player?.trackArtUrl ?? ""
+            playing: root.playing
+            size: Math.min(root.ch, root.cw * 0.36)
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: root.gap / 1.5
+
+            Track {
+                m: root
+                big: true
+                Layout.fillWidth: true
+            }
+
+            AudioSpectrum {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumHeight: 12
+                count: Math.max(12, Math.min(32, Math.floor(width / 18)))
+            }
+
+            Progress {
+                m: root
+                Layout.fillWidth: true
+            }
+
+            Transport {
+                m: root
+                size: Math.min(root.buttonSize, root.ch * 0.26)
+            }
+        }
+    }
+
+    // strip: one line.
+    RowLayout {
+        visible: !!root.player && root.shape === "strip"
+        anchors.fill: parent
+        spacing: root.gap
+
+        Cover {
+            Layout.alignment: Qt.AlignVCenter
+            source: root.player?.trackArtUrl ?? ""
+            playing: root.playing
+            size: root.ch
+        }
+
+        ColumnLayout {
+            Layout.preferredWidth: root.cw * 0.3
+            Layout.maximumWidth: root.cw * 0.3
+            Layout.alignment: Qt.AlignVCenter
+            spacing: root.gap / 2
+
+            Track {
+                m: root
+                Layout.fillWidth: true
+            }
+
+            Progress {
+                m: root
+                times: root.ch > 110
+                Layout.fillWidth: true
+            }
+        }
+
+        AudioSpectrum {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            count: Math.max(12, Math.min(32, Math.floor(width / 18)))
+        }
+
+        Transport {
+            m: root
+            Layout.alignment: Qt.AlignVCenter
+            size: Math.min(root.buttonSize, root.ch * 0.8)
         }
     }
 }

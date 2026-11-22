@@ -364,5 +364,6 @@
   "module.themeSwitch": "Theme",
   "themeSwitch.hint": "tap: next",
   "module.showcase": "Showcase",
-  "showcase.title": "Showcase"
+  "showcase.title": "Showcase",
+  "media.live": "Live"
 }

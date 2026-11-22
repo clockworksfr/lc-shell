@@ -44,7 +44,7 @@ ModuleBase {
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             text: I18n.tr(`theme.${root.current}`)
-            font.family: root.theme.font.display
+            font.family: root.theme.font.family
             font.pixelSize: Math.min(root.t2 * 1.2, root.cw / 6)
             font.weight: Font.DemiBold
         }

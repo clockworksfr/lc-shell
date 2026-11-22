@@ -364,5 +364,6 @@
   "module.themeSwitch": "Thème",
   "themeSwitch.hint": "toucher : suivant",
   "module.showcase": "Vitrine",
-  "showcase.title": "Vitrine"
+  "showcase.title": "Vitrine",
+  "media.live": "En direct"
 }

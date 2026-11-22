@@ -35,7 +35,7 @@ ModuleBase {
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             text: Showcase.type ? I18n.tr(`module.${Showcase.type}`) : I18n.tr("showcase.title")
-            font.family: root.theme.font.display
+            font.family: root.theme.font.family
             font.pixelSize: Math.min(root.t2 * 1.2, root.cw / 6)
             font.weight: Font.DemiBold
         }
