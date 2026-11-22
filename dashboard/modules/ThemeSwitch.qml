@@ -62,9 +62,9 @@ ModuleBase {
     // Light / dark.
     ModuleButton {
         anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        anchors.top: parent.top
         size: Math.max(32, Math.min(root.ch * 0.3, 44))
         icon: Themes.variant === "dark" ? "light_mode" : "dark_mode"
-        onTapped: Themes.setVariant(Themes.variant === "dark" ? "light" : "dark")
+        onTapped: Themes.toggleVariant()
     }
 }
