@@ -22,7 +22,8 @@ Item {
     // The cell ({ type, x, y, w, h, ...options }).
     property var options: ({})
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
-    property string title: options.type ? I18n.tr(`module.${options.type}`) : ""
+    // Narrow cells take the short name when there is one ("Espaces").
+    property string title: !options.type ? "" : width < 220 && I18n.has(`module.${options.type}.short`) ? I18n.tr(`module.${options.type}.short`) : I18n.tr(`module.${options.type}`)
     property bool framed: true
 
     readonly property real pad: Math.max(12, Math.min(24, Math.min(width, height) * 0.07))

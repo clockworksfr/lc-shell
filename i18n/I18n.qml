@@ -40,6 +40,11 @@ Singleton {
         return text;
     }
 
+    // Whether a key has a text (current language or English).
+    function has(key: string): bool {
+        return key in (tables[language] ?? {}) || key in (tables.en ?? {});
+    }
+
     // The text of a key in every language, e.g. to search keywords in both.
     function all(key: string): string {
         return languages.map(code => (tables[code] ?? {})[key] ?? "").join(" ");

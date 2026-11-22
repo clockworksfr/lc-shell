@@ -370,5 +370,6 @@
   "media.play": "LECTURE",
   "media.next": "SUIV.",
   "vu.left": "G",
-  "vu.right": "D"
+  "vu.right": "D",
+  "module.workspaces.short": "Espaces"
 }

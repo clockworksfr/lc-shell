@@ -370,5 +370,6 @@
   "media.play": "PLAY",
   "media.next": "NEXT",
   "vu.left": "L",
-  "vu.right": "R"
+  "vu.right": "R",
+  "module.workspaces.short": "Spaces"
 }
