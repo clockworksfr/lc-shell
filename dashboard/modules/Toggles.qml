@@ -156,6 +156,7 @@ ModuleBase {
                 width: grid.cellW
                 height: grid.cellH
                 opacity: modelData.placeholder ? 0.5 : 1
+                plain: modelData.id === "more" || !!modelData.placeholder
                 icon: modelData.icon
                 label: modelData.label
                 sub: modelData.sub

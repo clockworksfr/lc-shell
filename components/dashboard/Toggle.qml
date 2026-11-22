@@ -22,6 +22,8 @@ Item {
     property string label
     property string sub
     property bool on: false
+    // Not a switch (More, a placeholder): no lever or LED, the icon instead.
+    property bool plain: false
 
     signal tapped
 
@@ -63,7 +65,7 @@ Item {
 
         // Facade / modulaire: the LED.
         Rectangle {
-            visible: root.look === "facade" || root.look === "modulaire"
+            visible: (root.look === "facade" || root.look === "modulaire") && !root.plain
             x: 10
             y: 10
             width: 8
@@ -86,7 +88,7 @@ Item {
         // Classic: icon top-left, labels bottom-left. Constellation /
         // facade: centered.
         Icon {
-            visible: root.look !== "modulaire"
+            visible: root.look !== "modulaire" || root.plain
             x: root.look === "classic" ? root.labelSize * 0.8 : (parent.width - width) / 2
             y: root.look === "classic" ? root.labelSize * 0.8 : (parent.height - height - labels.height - root.labelSize * 0.4) / 2
             name: root.icon
@@ -99,7 +101,7 @@ Item {
         Rectangle {
             id: lever
 
-            visible: root.look === "modulaire"
+            visible: root.look === "modulaire" && !root.plain
             anchors.horizontalCenter: parent.horizontalCenter
             y: (parent.height - height - labels.height - root.labelSize * 0.5) / 2
             width: Math.min(parent.width * 0.5, root.iconSize * 1.6)
@@ -140,7 +142,7 @@ Item {
 
             x: root.look === "classic" ? root.labelSize * 0.8 : 0
             y: root.look === "classic" ? parent.height - height - root.labelSize * 0.7
-                : root.look === "modulaire" ? lever.y + lever.height + root.labelSize * 0.5
+                : root.look === "modulaire" && !root.plain ? lever.y + lever.height + root.labelSize * 0.5
                 : (parent.height - height - root.iconSize - root.labelSize * 0.4) / 2 + root.iconSize + root.labelSize * 0.4
             width: parent.width - x * (root.look === "classic" ? 2 : 1)
             spacing: 2

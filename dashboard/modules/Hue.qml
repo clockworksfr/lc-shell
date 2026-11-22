@@ -121,7 +121,9 @@ ModuleBase {
 
                 required property var modelData
                 readonly property bool isMore: !!modelData.more
-                readonly property bool dual: rooms.selecting && width >= 240
+                // Modulaire's tile is a lever already: one action (toggle and
+                // select).
+                readonly property bool dual: rooms.selecting && width >= 240 && rooms.m.look !== "modulaire"
                 readonly property bool isSelected: rooms.selecting && !isMore && rooms.m.selected?.id === modelData.id
 
                 width: (rooms.width - (rooms.cols - 1) * rooms.spacing) / rooms.cols
@@ -133,6 +135,7 @@ ModuleBase {
                     label: slot.isMore ? I18n.tr("hue.more") : slot.modelData.name
                     sub: slot.isMore ? I18n.tr("hue.moreSub") : slot.modelData.on ? I18n.percent(slot.modelData.brightness / 100) : I18n.tr("hue.off")
                     on: !slot.isMore && slot.modelData.on
+                    plain: slot.isMore
                     onTapped: {
                         if (slot.isMore)
                             rooms.m.more();
@@ -291,7 +294,8 @@ ModuleBase {
             }
 
             Repeater {
-                model: HueBridge.favorites
+                // As many favorites as the width holds.
+                model: HueBridge.favorites.slice(0, Math.max(0, Math.floor((detail.width - detail.colorH) / (Math.min(detail.row * 0.62, 40) + Math.max(6, detail.m.gap * 0.6)))))
 
                 HueParts.Swatch {
                     required property var modelData
