@@ -17,7 +17,7 @@ Singleton {
     property bool togglesPanel: false
     // Reviews: the lights panel (Super+U fallback) on this screen, no grab.
     property string huePanel: ""
-    readonly property var types: ["clock", "media", "weather", "system", "lyrics", "vu", "workspaces", "toggles", "hue", "network"]
+    readonly property var types: ["clock", "media", "weather", "system", "lyrics", "vu", "workspaces", "toggles", "hue", "network", "notificationSample"]
 
     function next(): void {
         const index = types.indexOf(type);
