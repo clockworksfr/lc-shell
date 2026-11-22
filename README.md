@@ -139,6 +139,35 @@ Tab change de mode. Les actions destructrices demandent une seconde validation. 
 
 Les choix faits par IPC (thème, variante, langue) sont écrits dans `settings.json`.
 
+## Presse-papier
+
+Gestionnaire d'historique façon Paste / Copyous : **Super+Maj+V** (raccourci global `lc:clipboard`), sur l'écran actif.
+
+- **Capture** : `wl-paste --watch` lance `clipboard/capture.py` (Python, sans dépendance) à chaque copie ; il choisit le type le plus utile (fichiers, image, texte) et range le contenu dans `$XDG_DATA_HOME/lc/clipboard/` (`index.json` + `blobs/`, dossier en 700). Même contenu = même élément, remonté en tête. Appli source = fenêtre focalisée au moment de la copie.
+- **Types** reconnus et prévisualisés : texte, code (police mono), lien (domaine), couleur (pastille, hex / rgb / hsl), caractère ou emoji, image (miniature, dimensions), fichiers (`text/uri-list`, miniature si image).
+- **Organisation** : onglets Tout / Épinglés / un par tag, filtre par type, recherche (texte, appli, tags). Épingler = garder indéfiniment ; tags colorés (9 couleurs) créés depuis le gestionnaire (clic droit, Ctrl+T, « + ») ou les paramètres, gardés indéfiniment eux aussi par défaut.
+- **Coller** : Entrée copie l'élément puis l'envoie à la fenêtre qui avait le focus (`hl.dsp.send_shortcut`, Ctrl+Maj+V dans les terminaux listés) ; Maj+Entrée fait l'inverse (copie seule) ; Ctrl+Entrée colle les chemins de fichiers en texte ; Ctrl+1…9 ; Espace : grand aperçu au texte sélectionnable.
+- **Confidentialité** : copies marquées sensibles par les gestionnaires de mots de passe ignorées (`CLIPBOARD_STATE`, `x-kde-passwordManagerHint`), applis ignorées, pause « incognito » (`lc:clipboardIncognito`, Ctrl+I, IPC) non mémorisée.
+- Réglages (Paramètres › Presse-papier, ou `settings.json`) :
+
+```json
+"clipboard": {
+  "enabled": true,
+  "position": "bottom",
+  "cardSize": "m",
+  "maxItems": 500,
+  "maxDays": 0,
+  "keepTagged": true,
+  "images": true, "maxImageMB": 20,
+  "ignoreSensitive": true,
+  "ignoreApps": ["org.keepassxc.KeePassXC", "Bitwarden"],
+  "pasteOnEnter": true,
+  "terminals": ["kitty", "foot", "Alacritty"]
+}
+```
+
+`position` : `bottom` / `top` (bande de cartes), `left` / `right` (colonne), `center` (liste + grand aperçu), `pointer` (colonne compacte sous la souris). `maxItems` et `maxDays` (0 = sans limite) ne touchent jamais les éléments épinglés (ni les tagués avec `keepTagged`). Le mode `+` du lanceur lit le même historique. Tests : `LC_CLIPBOARD_DIR=<dossier>` (autre stockage), `LC_CLIPBOARD_CAPTURE=0` (sans capture).
+
 ## Fond d'écran
 
 `"wallpaper": { "enabled": true, "directory": "~/Images/Wallpapers" }`. Une image par écran (repéré par son modèle) ou une pour tous, gardée dans `…/wallpaper.json` ; sans image, la couleur de fond du thème. Changement en fondu enchaîné, image décodée à la taille de l'écran. Choix dans le lanceur (`@`) ou par IPC. Tant que Caelestia dessine aussi son fond, `"enabled": false` évite la superposition.
@@ -174,6 +203,9 @@ L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non a
 | `qs -c lc ipc call wallpaper set <chemin>` / `setHere <chemin>` / `random` / `get` | Fond d'écran (tous / écran actif) |
 | `qs -c lc ipc call settings toggle` / `openPage <page>` / `close` | Paramètres |
 | `qs -c lc ipc call lock lock` / `preview` / `isLocked` | Verrouillage |
+| `qs -c lc ipc call clipboard toggle` / `open` / `close` | Gestionnaire du presse-papier |
+| `qs -c lc ipc call clipboard pause` / `resume` / `togglePause` / `isPaused` | Pause de l'enregistrement (incognito) |
+| `qs -c lc ipc call clipboard copy <n>` / `paste <n>` / `clear` / `clearAll` / `count` / `list` | n-ième élément (1 = le plus récent), effacer (hors épinglés et tagués / tout), diagnostic (sans contenu) |
 | `qs -c lc ipc call bar edit` / `done` / `discard` | Mode édition de la barre |
 | `qs -c lc ipc call bar panel <widget>` / `panelOn <widget> <écran>` / `showCard <widget>` / `hideCard` / `blocks` / `card` | Panneaux, cartes, diagnostic |
 | `qs -c lc ipc call shell reload` | Rechargement complet (nécessaire après modification d'un `.js`) |
@@ -199,6 +231,8 @@ hl.bind("SUPER + Space", hl.dsp.global("lc:launcher"))
 | `lc:launcher` | Ouvrir / fermer le lanceur |
 | `lc:emoji` | Lanceur sur la recherche d'emoji |
 | `lc:files` | Lanceur sur la recherche de fichiers |
+| `lc:clipboard` | Gestionnaire du presse-papier (Super+Maj+V) |
+| `lc:clipboardIncognito` | Presse-papier : pause / reprise de l'enregistrement |
 | `lc:settings` | Ouvrir / fermer les paramètres |
 | `lc:editBar` | Modifier la barre |
 | `lc:clearNotifs` | Effacer les notifications |

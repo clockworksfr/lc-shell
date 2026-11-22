@@ -17,6 +17,7 @@ Column {
         { name: "launcher", keys: "SUPER + Space" },
         { name: "emoji", keys: "SUPER + period" },
         { name: "clipboard", keys: "SUPER + SHIFT + V" },
+        { name: "clipboardIncognito", keys: "SUPER + CTRL + SHIFT + V" },
         { name: "files", keys: "SUPER + SHIFT + F" },
         { name: "screenshot", keys: "Print" },
         { name: "screenshotScreen", keys: "SHIFT + Print" },

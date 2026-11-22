@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import qs.clipboard
 import qs.launcher
 import qs.lock
 import qs.theme
@@ -64,8 +65,15 @@ Scope {
     GlobalShortcut {
         appid: "lc"
         name: "clipboard"
-        description: "Launcher on the clipboard history"
-        onPressed: Launcher.open("+")
+        description: "Clipboard manager"
+        onPressed: Clipboard.toggle()
+    }
+
+    GlobalShortcut {
+        appid: "lc"
+        name: "clipboardIncognito"
+        description: "Clipboard: pause / resume recording"
+        onPressed: Clipboard.setPaused(!Clipboard.paused)
     }
 
     GlobalShortcut {

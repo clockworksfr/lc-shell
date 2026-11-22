@@ -2,6 +2,21 @@
   "language": "auto",
   "wallpaper": { "enabled": true, "directory": "~/Pictures/Wallpapers" },
   "notifications": { "position": "top-right" },
+  "clipboard": {
+    "enabled": true,
+    "position": "bottom",
+    "cardSize": "m",
+    "dim": true,
+    "maxItems": 500,
+    "maxDays": 0,
+    "keepTagged": true,
+    "images": true,
+    "maxImageMB": 20,
+    "ignoreSensitive": true,
+    "ignoreApps": ["org.keepassxc.KeePassXC", "KeePassXC", "1Password", "Bitwarden", "com.bitwarden.desktop"],
+    "pasteOnEnter": true,
+    "terminals": ["kitty", "foot", "footclient", "Alacritty", "com.mitchellh.ghostty", "org.wezfurlong.wezterm", "org.kde.konsole", "org.gnome.Console", "org.gnome.Ptyxis", "xterm"]
+  },
   "idle": { "enabled": true, "lock": 600, "screenOff": 900, "lockedScreenOff": 30, "suspend": 0 },
   "lock": { "pamService": "hyprlock", "beforeSleep": true },
   "appearance": {

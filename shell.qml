@@ -4,6 +4,7 @@
 //@ pragma UseQApplication
 import QtQuick
 import Quickshell
+import qs.clipboard
 import qs.dashboard
 import qs.i18n
 import qs.launcher
@@ -30,6 +31,7 @@ ShellRoot {
     I18nIpc {}
     SettingsIpc {}
     LockIpc {}
+    ClipboardIpc {}
 
     // Locks only when Lock.locked is set (idle, logind, IPC).
     LockScreen {}
@@ -56,5 +58,6 @@ ShellRoot {
         Fonts.files;
         NotificationCenter.dnd;
         Idle.enabled;
+        Clipboard.count;
     }
 }

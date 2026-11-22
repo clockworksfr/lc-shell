@@ -1,9 +1,11 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import qs.clipboard
 import qs.dashboard
 import qs.launcher
 import qs.windows.bar
+import qs.windows.clipboard
 import qs.windows.dashboard
 import qs.windows.launcher
 import qs.windows.notifications
@@ -199,6 +201,17 @@ Scope {
         LauncherWindow {
             screen: root.modelData
             theme: root.theme
+        }
+    }
+
+    // Clipboard manager: explicit too.
+    LazyLoader {
+        active: Clipboard.opened && Clipboard.screenName === root.modelData.name
+
+        ClipboardWindow {
+            screen: root.modelData
+            theme: root.theme
+            edgeOffsets: ({ top: root.barExtent("top"), bottom: root.barExtent("bottom"), left: root.barExtent("left"), right: root.barExtent("right") })
         }
     }
 }

@@ -109,3 +109,16 @@ open_in_new
 menu
 screen_share
 lyrics
+content_paste
+push_pin
+sell
+link
+code
+notes
+description
+mood
+visibility_off
+history
+new_label
+filter_list
+keyboard_return
