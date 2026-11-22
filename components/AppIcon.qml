@@ -1,41 +1,42 @@
 import QtQuick
-import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import qs.services
 import qs.theme
 
 // An application icon (tray, active window, cards) that can follow the
-// theme: "native" colors, "tinted" (desaturated, washed with the accent) or
-// "mono" (in the theme's ink). Setting appearance.appIcons, else the
-// theme's style.appIcons.
+// theme: "native" colors, "tinted" (duotone in the accent) or "mono" (a
+// silhouette in the ink; the app's -symbolic icon when the theme has one).
+// Setting appearance.appIcons, else the theme's style.appIcons. Status
+// badges (saturated red) keep their color. Shader: assets/shaders.
 Item {
     id: root
 
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
 
     property string source
+    // Icon name, when known: lets mono use the app's symbolic icon.
+    property string name
     property real size: 18
     readonly property string mode: Config.get("appearance.appIcons") ?? theme.style.appIcons ?? "native"
+    readonly property string symbolic: mode === "mono" && name ? Quickshell.iconPath(`${name}-symbolic`, true) : ""
 
     implicitWidth: size
     implicitHeight: size
 
     IconImage {
-        id: image
         anchors.fill: parent
-        source: root.source
+        source: root.symbolic || root.source
         asynchronous: true
-        visible: root.mode === "native"
-    }
 
-    MultiEffect {
-        anchors.fill: parent
-        source: image
-        visible: root.mode !== "native"
-        saturation: -1
-        colorization: root.mode === "mono" ? 1 : 0.55
-        colorizationColor: root.mode === "mono" ? root.theme.color.ink : root.theme.color.accent
-        brightness: root.mode === "mono" ? 0.1 : 0
+        layer.enabled: root.mode !== "native"
+        layer.effect: ShaderEffect {
+            readonly property color tint: root.mode === "mono" ? root.theme.color.ink : root.theme.color.accent
+            readonly property real mode: root.mode === "mono" ? 2 : 1
+            readonly property real amount: Config.get("appearance.appIconTint") ?? 0.6
+            readonly property real threshold: Config.get("appearance.appIconContrast") ?? 0.35
+
+            fragmentShader: Qt.resolvedUrl("../assets/shaders/appicon.frag.qsb")
+        }
     }
 }

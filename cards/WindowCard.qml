@@ -43,6 +43,7 @@ Column {
         AppIcon {
             anchors.verticalCenter: parent.verticalCenter
             size: 36
+            name: root.block?.entry?.icon ?? ""
             visible: !!root.block?.entry?.icon
             source: root.block?.entry?.icon ? Quickshell.iconPath(root.block.entry.icon, true) : ""
         }

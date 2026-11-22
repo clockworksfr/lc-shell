@@ -36,7 +36,8 @@ Item {
 
     readonly property bool valid: !!current
     readonly property string appClass: current?.lastIpcObject?.class ?? current?.wayland?.appId ?? ""
-    readonly property var entry: appClass ? DesktopEntries.heuristicLookup(appClass) : null
+    // Reads the entry list so it re-runs once desktop entries are loaded.
+    readonly property var entry: (DesktopEntries.applications.values.length, appClass) ? DesktopEntries.heuristicLookup(appClass) : null
     readonly property string appName: entry?.name || appClass
     // Compact: the app's first word ("Brave Web Browser" -> "Brave").
     readonly property string shortName: (appName.split(" ")[0] || appName)
@@ -60,6 +61,7 @@ Item {
         AppIcon {
             anchors.verticalCenter: parent.verticalCenter
             size: 18
+            name: root.entry?.icon ?? ""
             visible: !!root.entry?.icon
             source: root.entry?.icon ? Quickshell.iconPath(root.entry.icon, true) : ""
         }

@@ -181,7 +181,7 @@ PanelWindow {
                     width: list.width
                     height: win.rowHeight
                     radius: win.theme.radius.control
-                    color: current ? win.theme.color.bg : "transparent"
+                    color: current ? Qt.alpha(win.theme.color.accent, 0.14) : "transparent"
 
                     Item {
                         id: iconBox

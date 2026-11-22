@@ -196,6 +196,8 @@ Column {
             Flow {
                 width: zoneSection.width
                 spacing: root.theme.space.xs
+                // Nothing left to add: no empty "Add:" line.
+                visible: addable.count > 0
 
                 ThemedText {
                     text: I18n.tr("settings.addBlock")
@@ -204,6 +206,7 @@ Column {
                 }
 
                 Repeater {
+                    id: addable
                     // Only widgets not already in the bar.
                     model: root.blockTypes.filter(t => !root.zones.some(z => BarEditor.groups(root.entries(z)).some(g => g.some(e => Registry.typeOf(e) === t))))
 

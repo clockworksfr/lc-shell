@@ -77,7 +77,7 @@ Column {
                     spacing: 2
 
                     AppIcon {
-                        readonly property var entry: DesktopEntries.heuristicLookup(parent.parent.modelData.info.class ?? "")
+                        readonly property var entry: (DesktopEntries.applications.values.length, DesktopEntries.heuristicLookup(parent.parent.modelData.info.class ?? ""))
                         anchors.horizontalCenter: parent.horizontalCenter
                         visible: !!entry?.icon && parent.parent.height > 40
                         size: 20

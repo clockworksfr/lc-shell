@@ -41,7 +41,7 @@
   "theme.classic": "Classique",
   "theme.matrix": "Matrix",
   "bar.battery": "bat {value}",
-  "bar.batteryCharging": "bat {value} ⚡",
+  "bar.batteryCharging": "bat {value} ↑",
   "bar.bluetooth": "bt",
   "bar.bluetoothOff": "bt désactivé",
   "bar.bluetoothCount": "bt {n}",
