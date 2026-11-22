@@ -63,8 +63,18 @@ Item {
         }
     }
 
-    HoverHandler {
-        id: hover
+    // Hover area across the whole bar (cross axis), not just the block's
+    // content: the pointer pushed against the screen edge still hovers it
+    // (the bar window clips it to the bar).
+    Item {
+        x: root.vertical ? -(root.host?.thickness ?? 0) : 0
+        y: root.vertical ? 0 : -(root.host?.thickness ?? 0)
+        width: root.vertical ? root.width + 2 * (root.host?.thickness ?? 0) : root.width
+        height: root.vertical ? root.height : root.height + 2 * (root.host?.thickness ?? 0)
+
+        HoverHandler {
+            id: hover
+        }
     }
 
     // Long press (finger, or held mouse button): edit mode with this widget
