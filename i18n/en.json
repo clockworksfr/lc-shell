@@ -713,5 +713,6 @@
   "hue.lampCount.one": "{n} light",
   "hue.lampCount.other": "{n} lights",
   "toggles.caffeine": "Caffeine",
-  "toggles.awake": "Stays awake"
+  "toggles.awake": "Stays awake",
+  "notifications.app": "Application"
 }
