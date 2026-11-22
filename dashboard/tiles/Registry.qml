@@ -7,8 +7,10 @@ import Quickshell
 Singleton {
     readonly property var tiles: ({
             clock: "Clock.qml",
+            lyrics: "Lyrics.qml",
             media: "Media.qml",
             system: "System.qml",
+            vu: "Vu.qml",
             window: "Window.qml",
             workspaces: "Workspaces.qml"
         })

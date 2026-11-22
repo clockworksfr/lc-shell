@@ -90,7 +90,7 @@ Interface en anglais et en français. `"language"` dans `shell.json` : `auto` (s
 ```
 
 - Chaque espace de travail Hyprland de l'écran est une **page** : `pages["<nom de l'espace de travail>"]`, sinon `pages.default`.
-- Tuiles : `clock` (`format`), `media`, `system` (CPU, RAM, GPU, températures), `workspaces`, `window`.
+- Tuiles : `clock` (`format`), `media`, `system` (CPU, RAM, GPU, températures), `workspaces`, `window`, `lyrics` (paroles synchronisées via lrclib.net — seuls artiste, titre et durée sont envoyés ; cache local), `vu` (VU-mètre de la sortie par défaut, échelle en dB, crête retenue ; barres dans le sens long de la tuile).
 - **Cases fenêtre** (`"type": "window"`) : toute fenêtre arrivant sur un espace de travail de cet écran est rendue flottante et placée dans la première case libre (les suivantes s'empilent dans la dernière). Repartie vers un écran normal, elle redevient tuilée. Les fenêtres plein écran ne sont pas touchées. `windows.ignore` / `only` filtrent par classe.
 - Le tableau de bord est sur la couche `bottom`, sous les fenêtres.
 
@@ -136,7 +136,8 @@ L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non a
 | `qs -c lc ipc call bar toggle` / `open` / `close` | Afficher ou masquer les barres |
 | `qs -c lc ipc call launcher toggle` / `openWith <texte>` / `close` | Lanceur |
 | `qs -c lc ipc call audio increment` / `decrement` / `toggleMute` / `toggleMicMute` | Volume de la sortie par défaut |
-| `qs -c lc ipc call media togglePlaying` / `next` / `previous` / `cycle` | Lecteur actif (`cycle` change de lecteur) |
+| `qs -c lc ipc call media togglePlaying` / `next` / `previous` / `cycle` / `info` | Lecteur actif (`cycle` change de lecteur, `info` le décrit) |
+| `qs -c lc ipc call lyrics status` / `current` | Paroles (état, ligne en cours) |
 | `qs -c lc ipc call brightness increment` / `decrement` | Luminosité de l'écran focalisé (rétroéclairage ou DDC/CI) |
 | `qs -c lc ipc call theme set <id>` / `setModules <id>` / `list` | Thème des écrans normaux / modules |
 | `qs -c lc ipc call theme variant dark\|light\|auto` / `toggleVariant` | Clair / sombre |

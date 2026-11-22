@@ -89,5 +89,9 @@
   "bar.v.bluetoothOff": "bt\noff",
   "bar.v.battery": "bat\n{value}",
   "bar.v.notifs": "notif\n{n}",
-  "launcher.mode.wallpapers": "wallpapers"
+  "launcher.mode.wallpapers": "wallpapers",
+  "lyrics.idle": "No track",
+  "lyrics.loading": "Looking for lyrics…",
+  "lyrics.missing": "No lyrics found",
+  "lyrics.error": "Lyrics unavailable (network)"
 }

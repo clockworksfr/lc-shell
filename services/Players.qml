@@ -47,11 +47,27 @@ Singleton {
             required property MprisPlayer modelData
             target: modelData
 
+            // Only real transitions count: some players re-signal "playing"
+            // without having stopped, and streams flap while buffering (a
+            // resume within a few seconds of a stop isn't a new start).
+            property bool wasPlaying: false
+            property real stoppedAt: 0
+
+            Component.onCompleted: wasPlaying = modelData.isPlaying
+
             function onIsPlayingChanged(): void {
-                if (modelData.isPlaying) {
-                    root.lastStarted = modelData;
-                    root.pinned = null;
+                const playing = modelData.isPlaying;
+                if (playing === wasPlaying)
+                    return;
+                wasPlaying = playing;
+                if (!playing) {
+                    stoppedAt = Date.now();
+                    return;
                 }
+                if (Date.now() - stoppedAt < 3000)
+                    return;
+                root.lastStarted = modelData;
+                root.pinned = null;
             }
         }
     }

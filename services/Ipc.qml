@@ -54,6 +54,12 @@ Scope {
         function cycle(): void {
             Players.cycle();
         }
+        // Controlled player and track, then the other players.
+        function info(): string {
+            const describe = p => `${p.identity}: ${[p.trackArtist, p.trackTitle].filter(s => !!s).join(" - ")} (${p.isPlaying ? "playing" : "paused"})`;
+            const active = Players.active;
+            return [active ? `* ${describe(active)}` : "* none", ...Players.list.filter(p => p !== active).map(p => `  ${describe(p)}`)].join("\n");
+        }
     }
 
     // Acts on the focused screen (backlight or DDC/CI).
@@ -98,6 +104,19 @@ Scope {
         }
         function get(): string {
             return Quickshell.screens.map(s => `${s.name}: ${Wallpaper.pathFor(s) || "-"}`).join("\n");
+        }
+    }
+
+    IpcHandler {
+        target: "lyrics"
+
+        // "idle" | "loading" | "found" | "plain" | "missing" | "error"
+        function status(): string {
+            return Lyrics.status;
+        }
+        // Current synced line (empty if none).
+        function current(): string {
+            return Lyrics.lines[Lyrics.index]?.text ?? "";
         }
     }
 
