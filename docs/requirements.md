@@ -42,6 +42,7 @@ Ce que simon a demandé et décidé, dans l'ordre où c'est arrivé (22/11/2026)
 - L'écran modules a des **espaces de travail** : grille libre, **cases fenêtre** où n'importe quelle fenêtre Hyprland peut aller (kitty sur l'écran déporté) ; idéalement des espaces de travail de modules (une page par espace de travail).
 - Barre agençable : îlots, barre complète, flottante ou non, arrondis, transparence, bordures, coins… (défauts par thème, surchargeables) ; **mode « cadre »** comme Caelestia ; barre **sur le côté de son choix**.
 - Chaque élément de la barre : **réagençable, redimensionnable, déplaçable** vers un autre endroit ; **détail au survol**, soigné (« assez sympa »).
+- Un bloc **fenêtre active** (titre de la fenêtre) ; l'emplacement par défaut de la date et de l'heure est à revoir en conséquence (l'agencement restant libre).
 
 ## Organisation
 

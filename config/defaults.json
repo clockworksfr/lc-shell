@@ -11,7 +11,7 @@
   "modes": {
     "normal": {
       "bar": {
-        "left": ["workspaces"],
+        "left": ["workspaces", "window"],
         "center": ["clock"],
         "right": ["tray", "media", "network", "bluetooth", "battery", "volume", "notifications"]
       },

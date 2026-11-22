@@ -210,5 +210,6 @@
   "block.unknown": "?",
   "launcher.calcHint": "ex. 2+2*3, 10 EUR to USD, 5 km to mi",
   "system.gpuIntegrated": "iGPU",
-  "system.gpuDiscrete": "GPU"
+  "system.gpuDiscrete": "GPU",
+  "block.window": "Fenêtre active"
 }

@@ -15,6 +15,7 @@ Singleton {
             network: "Network.qml",
             notifications: "Notifications.qml",
             tray: "Tray.qml",
+            window: "Window.qml",
             volume: "Volume.qml",
             workspaces: "Workspaces.qml"
         })
