@@ -8,8 +8,8 @@ import qs.components.dashboard
 import qs.theme
 
 // Workspaces of this screen (design study 8, § 6): those Hyprland puts
-// on it by its rules, plus any other open there; empty ones stay, dimmed,
-// to keep the bearings. Tap: go there. In each theme's language:
+// on it by its rules, plus any other open there, and empty ones (dimmed)
+// up to 6 to keep the bearings. Tap: go there. In each theme's language:
 //   classic        tiles; the active one filled; a dot per window
 //   constellation  connected stars (active ✦ with a halo, busy ✧, empty ·)
 //   facade         7-segment figures in display cells (unlit / busy / lit)
@@ -26,6 +26,14 @@ ModuleBase {
     // { id, name, ws (HyprlandWorkspace or null) }, by id.
     readonly property var slots: {
         const ids = new Set([...ruled, ...open.map(w => w.id)]);
+        // At least 6, continuing after the last one (empty, for bearings).
+        const taken = new Set(Hyprland.workspaces.values.filter(w => w.id > 0 && w.monitor?.name !== screen?.name).map(w => w.id));
+        let next = ids.size ? Math.max(...ids) + 1 : 1;
+        while (ids.size < 6 && next < 100) {
+            if (!taken.has(next))
+                ids.add(next);
+            next++;
+        }
         return [...ids].sort((a, b) => a - b).map(id => {
             const ws = open.find(w => w.id === id) ?? null;
             return { id: id, name: ws?.name ?? `${id}`, ws: ws };
@@ -138,8 +146,8 @@ ModuleBase {
                 Rectangle {
                     visible: root.look === "matrix"
                     anchors.centerIn: parent
-                    width: parent.width
-                    height: Math.min(parent.height, Math.max(56, parent.width * 0.9))
+                    height: Math.min(parent.height, Math.max(56, Math.min(96, parent.height * 0.7)))
+                    width: Math.min(parent.width, height * 1.6)
                     radius: height / 2
                     color: "transparent"
                     border.width: 1
