@@ -141,7 +141,8 @@ Singleton {
                 // Rounded screen corners radius, 0 = none.
                 screenCorners: 0,
                 // Bar length along its edge: 0 = full, else a centered bar of
-                // that many px (ignored in a frame).
+                // that many px, or that share of the edge under 1 (ignored in
+                // a frame).
                 length: 0,
                 // Frame around the screen, the bar being its thick side
                 // (docs/themes.md, "Cadre"). `frame: true` in settings is

@@ -37,7 +37,10 @@ PanelWindow {
     // Space taken from the screen edge (what popups must clear).
     readonly property int extent: thickness + gap
     // Fixed length (centered on its edge) instead of full width/height.
-    readonly property int fixedLength: framed ? 0 : Math.max(0, Math.min(look.length ?? 0, (vertical ? (screen?.height ?? 0) : (screen?.width ?? 0)) - 2 * Math.max(gap, 8)))
+    // `length`: px, or a share of the edge when under 1 (0.62: a centered
+    // front panel, Facade / Modulaire).
+    readonly property real edgeLength: vertical ? (screen?.height ?? 0) : (screen?.width ?? 0)
+    readonly property int fixedLength: framed ? 0 : Math.max(0, Math.min((look.length ?? 0) > 0 && (look.length ?? 0) < 1 ? Math.round(edgeLength * look.length) : (look.length ?? 0), edgeLength - 2 * Math.max(gap, 8)))
 
     // Top-left of the bar window on its screen (popups and IPC need it).
     function origin(): point {

@@ -512,6 +512,16 @@ ModuleBase {
         }
     }
 
+    // Facade: the temperatures in a VFD too (under the gauges' one).
+    Display {
+        visible: root.showTemps && root.look === "facade"
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: -6
+        height: root.tempsHeight + 12
+    }
+
     // Temperatures under the gauges.
     TempsRow {
         visible: root.showTemps

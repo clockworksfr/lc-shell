@@ -98,6 +98,8 @@ Singleton {
                 stagger: 25
             },
             bar: {
+                // A centered front panel / rail (the mockup's bar tab).
+                length: 0.62,
                 height: 56,
                 verticalWidth: 64,
                 style: "full",
@@ -111,6 +113,8 @@ Singleton {
                 screenCorners: 0
             },
             style: {
+                // The bar's clock in the display font (7 segments / Nixie).
+                barClock: "display",
                 labelCase: "upper",
                 statusIcons: true,
                 appIcons: "native",

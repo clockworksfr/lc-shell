@@ -128,6 +128,18 @@ ModuleBase {
         property bool showCurve: height >= lane.m.t2 * 2.6
 
         readonly property string text: I18n.bytes(rate, true)
+        // Facade / modulaire: the lane in the theme's screen (VFD, amber LCD).
+        readonly property bool onScreen: lane.m.look === "facade" || lane.m.look === "modulaire"
+        readonly property color ink: onScreen ? screen.ink : lane.m.theme.color.ink
+        readonly property color soft: onScreen ? screen.soft : lane.m.theme.color.soft
+
+        Display {
+            id: screen
+            visible: lane.onScreen
+            anchors.fill: parent
+            anchors.margins: -6
+            tint: "amber"
+        }
         // "12,4 Mo/s" → figure "12,4", unit "Mo/s".
         readonly property var parts: /^([\d\s.,]+)\s*(.*)$/.exec(text) ?? [text, text, ""]
 
@@ -139,8 +151,9 @@ ModuleBase {
             ThemedText {
                 label: true
                 text: `${lane.glyph} ${lane.label}`
+                font.family: lane.onScreen ? screen.textFont : lane.m.theme.font.family
                 font.pixelSize: lane.m.t4
-                color: lane.m.theme.color.soft
+                color: lane.soft
             }
 
             Row {
@@ -149,6 +162,7 @@ ModuleBase {
                 Figure {
                     text: lane.parts[1].trim()
                     glow: false
+                    color: lane.onScreen ? lane.ink : lane.m.theme.color.nixie ?? lane.m.theme.color.ink
                     pixelSize: Math.min(lane.m.t2 * 1.5, lane.height * (lane.showCurve ? 0.32 : 0.55))
                 }
 
@@ -157,7 +171,7 @@ ModuleBase {
                     anchors.bottomMargin: 4
                     text: lane.parts[2]
                     font.pixelSize: lane.m.t3
-                    color: lane.m.theme.color.soft
+                    color: lane.soft
                 }
             }
         }
@@ -171,7 +185,7 @@ ModuleBase {
             values: lane.history
             // Its own scale (upload would flatten under download).
             max: Math.max(16 * 1024, ...lane.history)
-            color: lane.lineColor
+            color: lane.onScreen ? lane.ink : lane.lineColor
         }
     }
 
@@ -220,7 +234,9 @@ ModuleBase {
                 label: modelData.label
                 rate: modelData.rx ? NetworkService.rxRate : NetworkService.txRate
                 history: modelData.rx ? NetworkService.rxHistory : NetworkService.txHistory
-                lineColor: modelData.rx ? root.theme.color.accent : (root.theme.color.accent2 ?? root.theme.color.accent)
+                // Upload: the second accent, or a cool blue where the theme
+                // has a single one (Classic).
+                lineColor: modelData.rx ? root.theme.color.accent : (root.theme.color.accent2 && Qt.colorEqual(root.theme.color.accent2, root.theme.color.accent) === false ? root.theme.color.accent2 : "#5AA0C8")
             }
         }
     }
