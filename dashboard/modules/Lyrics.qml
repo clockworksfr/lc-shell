@@ -25,6 +25,8 @@ ModuleBase {
         return out;
     }
     readonly property real spacingFactor: 0.3
+    // Matrix: room on both sides for the red dot (kept symmetric).
+    readonly property bool dotted: theme.style.module === "matrix"
     readonly property real maxSize: Math.max(15, t2 * 1.3)
     // Advance (at 100 px) of each shown line, from the measures below.
     property var advances: []
@@ -37,7 +39,8 @@ ModuleBase {
             for (let i = 0; i < shown.length; i++) {
                 const big = shown[i].index === current;
                 const px = big ? size * 1.25 : size;
-                const rows = Math.max(1, Math.ceil((advances[i] ?? 0) * px / 100 * (big ? 1.06 : 1) * 1.08 / w));
+                const room = Math.max(1, w - (dotted ? px * 1.4 : 0));
+                const rows = Math.max(1, Math.ceil((advances[i] ?? 0) * px / 100 * (big ? 1.06 : 1) * 1.08 / room));
                 total += rows * px * 1.3 + (i > 0 ? size * spacingFactor : 0);
             }
             if (total <= h)
@@ -147,9 +150,10 @@ ModuleBase {
                     readonly property int distance: Math.abs(modelData.index - root.current)
 
                     width: parent.width
+                    leftPadding: root.dotted ? font.pixelSize * 0.7 : 0
+                    rightPadding: leftPadding
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
-                    lineHeight: 1.0
                     text: modelData.text
                     font.family: root.theme.font.lyric ?? root.theme.font.family
                     font.capitalization: root.theme.font.lyricCaps ? Font.AllUppercase : Font.MixedCase
@@ -161,7 +165,7 @@ ModuleBase {
                     // Matrix: a red dot before the sung line (its first row).
                     Rectangle {
                         visible: line.distance === 0 && root.theme.style.module === "matrix"
-                        x: Math.max(0, (line.width - Math.min(line.width, line.contentWidth)) / 2 - width - line.font.pixelSize * 0.3)
+                        x: Math.max(0, (line.width - Math.min(line.width - line.leftPadding * 2, line.contentWidth)) / 2 - width - line.font.pixelSize * 0.25)
                         y: line.font.pixelSize * 0.62 - height / 2
                         width: line.font.pixelSize * 0.32
                         height: width
