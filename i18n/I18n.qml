@@ -101,18 +101,34 @@ Singleton {
         model: root.languages
 
         FileView {
+            id: file
+
             required property string modelData
+            // A change event can arrive mid-write (git checkout, editors
+            // that truncate first): read again a few times before giving up.
+            property int attempts: 0
+            readonly property Timer retry: Timer {
+                interval: 250
+                onTriggered: file.reload()
+            }
 
             path: `${Quickshell.shellDir}/i18n/${modelData}.json`
             watchChanges: true
-            onFileChanged: reload()
+            onFileChanged: {
+                attempts = 0;
+                reload();
+            }
             onLoaded: {
                 try {
                     const next = Object.assign({}, root.tables);
                     next[modelData] = JSON.parse(text());
                     root.tables = next;
+                    attempts = 0;
                 } catch (e) {
-                    console.warn(`i18n/${modelData}.json: invalid JSON, keeping previous strings (${e})`);
+                    if (++attempts < 4)
+                        retry.restart();
+                    else
+                        console.warn(`i18n/${modelData}.json: invalid JSON, keeping previous strings (${e})`);
                 }
             }
         }
