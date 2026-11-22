@@ -128,6 +128,7 @@ ModuleBase {
         Cover {
             anchors.horizontalCenter: parent.horizontalCenter
             source: root.player?.trackArtUrl ?? ""
+            playing: root.player?.isPlaying ?? false
             size: Math.min(root.cw * 0.8, root.ch * (root.shape === "tiny" ? 0.6 : 0.45))
         }
 
@@ -154,6 +155,7 @@ ModuleBase {
             id: wideCover
             anchors.verticalCenter: parent.verticalCenter
             source: root.player?.trackArtUrl ?? ""
+            playing: root.player?.isPlaying ?? false
             size: Math.min(root.ch, root.cw * 0.36)
         }
 
@@ -214,6 +216,7 @@ ModuleBase {
         Cover {
             anchors.horizontalCenter: parent.horizontalCenter
             source: root.player?.trackArtUrl ?? ""
+            playing: root.player?.isPlaying ?? false
             size: Math.min(root.cw, root.ch * 0.55)
         }
 
