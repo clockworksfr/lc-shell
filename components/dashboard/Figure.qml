@@ -12,17 +12,25 @@ Item {
 
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
     readonly property bool lcd: inDisplay && (theme.style.display ?? "none") === "lcd"
+    readonly property bool vfd: inDisplay && (theme.style.display ?? "none") === "vfd"
 
     property string text
     property real pixelSize: 64
     property color color: theme.color.nixie ?? theme.color.ink
     property bool inDisplay: false
 
-    implicitWidth: lcd ? lcdText.implicitWidth + window.inset * 2 + pixelSize * 0.3 : hero.implicitWidth
-    implicitHeight: lcd ? lcdText.implicitHeight + window.inset * 2 : hero.implicitHeight
+    implicitWidth: lcd ? lcdText.implicitWidth + window.inset * 2 + pixelSize * 0.3 : vfd ? hero.implicitWidth + pixelSize * 0.28 + 20 : hero.implicitWidth
+    implicitHeight: lcd ? lcdText.implicitHeight + window.inset * 2 : vfd ? hero.implicitHeight + pixelSize * 0.12 + 20 : hero.implicitHeight
+
+    // facade: the figure in its VFD window.
+    Display {
+        visible: root.vfd
+        anchors.fill: parent
+    }
 
     HeroText {
         id: hero
+        anchors.centerIn: root.vfd ? parent : undefined
         visible: !root.lcd
         text: root.text
         pixelSize: root.pixelSize

@@ -38,7 +38,8 @@ ModuleBase {
 
     SystemClock {
         id: clock
-        precision: root.format.includes("s") ? SystemClock.Seconds : SystemClock.Minutes
+        // Matrix counts the seconds in dots.
+        precision: root.format.includes("s") || root.theme.style.module === "matrix" ? SystemClock.Seconds : SystemClock.Minutes
     }
 
     // tiny: the time alone, centered.
@@ -88,6 +89,13 @@ ModuleBase {
             text: root.time
             inDisplay: true
             pixelSize: root.figure(0.62, (root.shape === "strip" ? 0.3 : 0.55) * root.perChar(root.time.length))
+        }
+
+        SecondDots {
+            m: root
+            anchors.top: wideTime.bottom
+            anchors.topMargin: root.gap / 2
+            anchors.horizontalCenter: wideTime.horizontalCenter
         }
 
         Column {
@@ -161,6 +169,10 @@ ModuleBase {
             pixelSize: root.figure(root.roomy ? 0.32 : 0.42, root.perChar(root.time.length))
         }
 
+        SecondDots {
+            m: root
+        }
+
         Column {
             width: parent.width
             spacing: 2
@@ -198,6 +210,29 @@ ModuleBase {
         }
     }
 
+    // Matrix: 7 dots under the time, one more lit each second (mod 7).
+    component SecondDots: Row {
+        id: secondDots
+
+        property var m
+
+        visible: secondDots.m.theme.style.module === "matrix"
+        spacing: 11
+
+        Repeater {
+            model: 7
+
+            Rectangle {
+                required property int index
+                readonly property bool lit: index <= secondDots.m.now.getSeconds() % 7
+                width: 7
+                height: 7
+                radius: 3.5
+                color: lit ? secondDots.m.theme.color.ink : "#1A1A1A"
+            }
+        }
+    }
+
     component DayName: ThemedText {
         id: dayName
 
@@ -228,7 +263,25 @@ ModuleBase {
                 width: (strip.width - strip.spacing * 6) / 7
                 height: strip.height
                 radius: strip.m.theme.radius.tile
-                color: today ? (strip.m.theme.color.signal ?? strip.m.theme.color.accent) : strip.m.theme.color.surface2
+                readonly property string look: strip.m.theme.style.module ?? "classic"
+                // facade: display cells; constellation: today in a gradient.
+                color: look === "facade" ? (today ? strip.m.theme.color.ink : "#030505") : today ? (strip.m.theme.color.signal ?? strip.m.theme.color.accent) : strip.m.theme.color.surface2
+                border.width: look === "facade" ? 1 : 0
+                border.color: "#000000"
+                gradient: look === "constellation" && today ? todayGradient : null
+
+                Gradient {
+                    id: todayGradient
+                    orientation: Gradient.Horizontal
+                    GradientStop {
+                        position: 0
+                        color: "#9FB8FF"
+                    }
+                    GradientStop {
+                        position: 1
+                        color: "#F2A7D8"
+                    }
+                }
 
                 ThemedText {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -236,7 +289,7 @@ ModuleBase {
                     label: true
                     text: I18n.locale.dayName(parent.day.getDay(), Locale.NarrowFormat)
                     font.pixelSize: strip.m.t4
-                    color: parent.today ? strip.m.theme.color.onAccent : strip.m.theme.color.soft
+                    color: parent.look === "facade" ? (parent.today ? "#030505" : Qt.alpha(strip.m.theme.color.ink, 0.6)) : parent.today ? strip.m.theme.color.onAccent : strip.m.theme.color.soft
                 }
 
                 ThemedText {
@@ -247,7 +300,7 @@ ModuleBase {
                     font.pixelSize: Math.min(strip.m.t2 * 1.2, parent.width * 0.42, parent.height * 0.4)
                     font.weight: Font.DemiBold
                     font.features: ({ "tnum": 1 })
-                    color: parent.today ? strip.m.theme.color.onAccent : strip.m.theme.color.ink
+                    color: parent.look === "facade" ? (parent.today ? "#030505" : strip.m.theme.color.ink) : parent.today ? strip.m.theme.color.onAccent : strip.m.theme.color.ink
                 }
             }
         }
