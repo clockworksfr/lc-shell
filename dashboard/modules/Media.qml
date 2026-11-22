@@ -13,8 +13,7 @@ import qs.theme
 //   tiny   track, progress, play + a small spectrum
 //   narrow cover / track, spectrum filling, progress, play
 //   wide   cover left; track, spectrum filling, progress, transport under
-//          (strips tall enough too)
-//   strip  (low) one line: cover, track over the progress, spectrum, transport
+//   strip  one line: cover, track over the progress, spectrum, transport
 //   box / tall  cover on top, track, spectrum filling, progress, transport
 // Themes without cover art (facade, modulaire) show the track in their
 // display (VFD, amber LCD).
@@ -29,9 +28,9 @@ ModuleBase {
     readonly property real buttonSize: Math.max(theme.hit, Math.min(72, m * (shape === "tiny" ? 0.34 : 0.24)))
     // Matrix keys are pills (1.5 × as wide as tall).
     readonly property real keyAspect: theme.style.module === "matrix" ? 1.5 : 1
-    // Controls go under the track (design), on one line only in very
-    // low strips.
-    readonly property bool stacked: shape === "wide" || (shape === "strip" && ch >= 110)
+    // Controls go under the track in wide cells (design); strips keep one
+    // line (cover, track, spectrum, controls).
+    readonly property bool stacked: shape === "wide"
 
     function time(seconds: real): string {
         const s = Math.max(0, Math.round(seconds));
@@ -303,8 +302,8 @@ ModuleBase {
         }
     }
 
-    // wide (and strips tall enough): cover left; track, spectrum, progress,
-    // transport under one another.
+    // wide: cover left; track, spectrum, progress, transport under one
+    // another.
     RowLayout {
         visible: !!root.player && root.stacked
         anchors.fill: parent
@@ -364,7 +363,7 @@ ModuleBase {
         }
     }
 
-    // low strip: one line.
+    // strip: one line.
     RowLayout {
         visible: !!root.player && root.shape === "strip" && !root.stacked
         anchors.fill: parent
