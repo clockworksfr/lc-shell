@@ -6,21 +6,23 @@ import qs.panels
 import qs.services
 
 // Network status. Click: network panel (Wi-Fi list, wired state).
-ThemedText {
+TextBlock {
     id: root
 
-    property ShellScreen screen
-    property var options: ({})
+    readonly property string signal: NetworkService.activeWifi ? I18n.percent(NetworkService.activeWifi.signalStrength) : ""
 
-    text: NetworkService.kind === "wired" ? I18n.tr("net.wired")
-        : NetworkService.kind === "wifi" ? `${NetworkService.activeWifi.name} ${I18n.percent(NetworkService.activeWifi.signalStrength)}`
+    fullText: NetworkService.kind === "wired" ? I18n.tr("net.wired")
+        : NetworkService.kind === "wifi" ? `${NetworkService.activeWifi.name} ${signal}`
         : I18n.tr("net.offline")
+    compactText: NetworkService.kind === "wired" ? I18n.tr("bar.v.wired")
+        : NetworkService.kind === "wifi" ? I18n.tr("bar.v.wifi", { value: signal })
+        : I18n.tr("bar.v.offline")
     color: NetworkService.kind === "none" ? theme.color.soft : theme.color.ink
 
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: popup.visible = !popup.visible
+        onClicked: popup.toggle()
     }
 
     BarPopup {

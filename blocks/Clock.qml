@@ -3,17 +3,18 @@ import Quickshell
 import qs.components
 import qs.i18n
 
-// Options: format (Qt date format, default "HH:mm").
-ThemedText {
+// Options: format (Qt date format, default "HH:mm"); on a vertical bar
+// the time is stacked (hours over minutes), `verticalFormat` to change it.
+TextBlock {
     id: root
 
-    property ShellScreen screen
-    property var options: ({})
-
-    readonly property string format: options.format ?? "HH:mm"
+    readonly property string format: vertical ? (options.verticalFormat ?? "HH\nmm") : (options.format ?? "HH:mm")
 
     // Month and day names follow the shell language (I18n.locale).
-    text: I18n.locale.toString(clock.date, format)
+    fullText: I18n.locale.toString(clock.date, format)
+    font.pixelSize: theme.font.sizeM
+    font.weight: vertical ? Font.DemiBold : Font.Normal
+    font.features: ({ "tnum": 1 })
 
     SystemClock {
         id: clock

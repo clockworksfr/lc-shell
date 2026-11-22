@@ -49,7 +49,8 @@ Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md
 - **Modes** : `normal` (barre permanente) ou `modules` (tableau de bord, voir plus bas). La config d'un module (`bar`, `osd`) vient du mode, surchargée clé par clé par le profil ; `null` le désactive.
 - **Thèmes** : un par mode (`appearance.themes`), surchargeable par profil (`"theme": "matrix"`). Disponibles : `classic` (défaut, jetons de la spec), `matrix` (palettes ; polices pas encore embarquées).
 - **Clair/sombre** : `variant` = `dark`, `light` ou `auto` ; en `auto`, `schedule` = horaires fixes (`type: "time"`) ou soleil (`type: "sun"`, `latitude`, `longitude`, calcul local).
-- **Barre** : blocs dans `left`/`center`/`right`. Rendu fourni par le thème, surchargeable : `style` (`full`/`islands`), `floating`, `margin`, `radius`, `opacity`, `border`, `padding`, `spacing`, `height`, `position` (`top`/`bottom`), `screenCorners` (rayon des coins d'écran, 0 = aucun).
+- **Barre** : sur n'importe quel bord, `position` = `top`/`bottom`/`left`/`right`. Blocs dans `left`/`center`/`right` (sur une barre verticale : du haut vers le bas ; `start`/`center`/`end` accepté). Rendu fourni par le thème, surchargeable : `style` (`full`/`islands`), `floating`, `margin`, `radius`, `opacity`, `border`, `padding`, `spacing`, `height` (épaisseur horizontale), `verticalWidth` (épaisseur verticale), `screenCorners` (rayon des coins d'écran, 0 = aucun).
+- **Barre verticale** : blocs empilés et compacts (libellé puis valeur, jamais de texte pivoté), horloge sur deux lignes (`verticalFormat`), espaces de travail et tray en colonne. Les panneaux s'ouvrent vers l'intérieur de l'écran ; notifications et OSD s'écartent de la barre.
 - Blocs :
   - `workspaces`, `clock` (`format`), `media` (`maxWidth`) ;
   - `volume` — clic : panneau audio (volumes, périphériques), clic milieu : muet, molette : volume ;

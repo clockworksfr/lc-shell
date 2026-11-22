@@ -6,23 +6,22 @@ import qs.panels
 import qs.services
 
 // Bluetooth status (hidden without an adapter). Click: devices panel.
-ThemedText {
+TextBlock {
     id: root
 
-    property ShellScreen screen
-    property var options: ({})
-
     readonly property bool shown: BluetoothService.available
+    readonly property int count: BluetoothService.connected.length
 
-    text: !BluetoothService.enabled ? I18n.tr("bar.bluetoothOff")
-        : BluetoothService.connected.length > 0 ? I18n.tr("bar.bluetoothCount", { n: BluetoothService.connected.length })
+    fullText: !BluetoothService.enabled ? I18n.tr("bar.bluetoothOff")
+        : count > 0 ? I18n.tr("bar.bluetoothCount", { n: count })
         : I18n.tr("bar.bluetooth")
-    color: BluetoothService.connected.length > 0 ? theme.color.ink : theme.color.soft
+    compactText: !BluetoothService.enabled ? I18n.tr("bar.v.bluetoothOff") : I18n.tr("bar.v.bluetooth", { n: count })
+    color: count > 0 ? theme.color.ink : theme.color.soft
 
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: popup.visible = !popup.visible
+        onClicked: popup.toggle()
     }
 
     BarPopup {

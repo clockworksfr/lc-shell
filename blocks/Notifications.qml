@@ -7,14 +7,14 @@ import qs.services
 
 // Notifications: unread count, do-not-disturb state.
 // Click: history panel, middle click: toggle do-not-disturb.
-ThemedText {
+TextBlock {
     id: root
 
-    property ShellScreen screen
-    property var options: ({})
-
-    text: NotificationCenter.dnd ? I18n.tr("bar.dnd")
+    fullText: NotificationCenter.dnd ? I18n.tr("bar.dnd")
         : NotificationCenter.unread > 0 ? I18n.tr("bar.notifsCount", { n: NotificationCenter.unread })
+        : I18n.tr("bar.notifs")
+    compactText: NotificationCenter.dnd ? I18n.tr("bar.dnd")
+        : NotificationCenter.unread > 0 ? I18n.tr("bar.v.notifs", { n: NotificationCenter.unread })
         : I18n.tr("bar.notifs")
     color: NotificationCenter.unread > 0 && !NotificationCenter.dnd ? theme.color.accent : theme.color.soft
 
@@ -26,7 +26,7 @@ ThemedText {
             if (mouse.button === Qt.MiddleButton)
                 NotificationCenter.setDnd(!NotificationCenter.dnd);
             else
-                popup.visible = !popup.visible;
+                popup.toggle();
         }
     }
 

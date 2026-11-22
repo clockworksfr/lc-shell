@@ -86,7 +86,12 @@ Singleton {
                 touch: 48
             },
             bar: {
+                // "top" | "bottom" | "left" | "right"
+                position: "top",
+                // Thickness of a horizontal bar.
                 height: 32,
+                // Thickness of a vertical bar.
+                verticalWidth: 48,
                 // "full": one band · "islands": one background per zone
                 style: "full",
                 // Detached from the screen edges by `margin`.

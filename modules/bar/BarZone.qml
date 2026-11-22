@@ -1,8 +1,8 @@
 import QtQuick
 import qs.blocks
 
-// One zone of the bar (left/center/right): a row of blocks.
-// In "islands" style it draws its own background.
+// One zone of the bar: blocks in a row (horizontal bar) or a column
+// (vertical bar). In "islands" style it draws its own background.
 Item {
     id: zone
 
@@ -13,10 +13,12 @@ Item {
     readonly property var look: host.look
     readonly property var theme: host.theme
     readonly property bool islands: host.islands
+    readonly property bool vertical: host.vertical
+    readonly property bool empty: grid.implicitWidth === 0 || grid.implicitHeight === 0
 
-    visible: row.implicitWidth > 0
-    height: parent.height
-    implicitWidth: row.implicitWidth + (islands ? look.padding * 2 : 0)
+    visible: !empty
+    width: vertical ? host.thickness : grid.implicitWidth + (islands ? look.padding * 2 : 0)
+    height: vertical ? grid.implicitHeight + (islands ? look.padding * 2 : 0) : host.thickness
 
     Rectangle {
         anchors.fill: parent
@@ -27,11 +29,15 @@ Item {
         border.color: zone.theme.color.line
     }
 
-    Row {
-        id: row
+    Grid {
+        id: grid
 
         anchors.centerIn: parent
+        // Only `columns` is set: one column, or one per block (a single row).
+        columns: zone.vertical ? 1 : Math.max(1, zone.entries.length)
         spacing: zone.look.spacing
+        horizontalItemAlignment: Grid.AlignHCenter
+        verticalItemAlignment: Grid.AlignVCenter
 
         Repeater {
             model: zone.entries
@@ -40,7 +46,9 @@ Item {
                 required property var modelData
                 entry: modelData
                 screen: zone.host.screen
-                anchors.verticalCenter: parent?.verticalCenter
+                vertical: zone.vertical
+                // Room a block may use across the bar.
+                crossSize: zone.host.thickness - zone.theme.space.s * 2
             }
         }
     }

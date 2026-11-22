@@ -5,21 +5,27 @@ import qs.panels
 import qs.services
 import qs.theme
 
-// Notification popups, top-right of the target screen, below its bar.
+// Notification popups, top-right of the target screen (top-left when the
+// bar is on the right), clear of the bar.
 // Only as large as the stack: the rest of the screen stays clickable.
 PanelWindow {
     id: win
 
     property var theme: Themes.fallback
-    // Distance from the top edge (keeps clear of the bar).
+    // "right" | "left"
+    property string side: "right"
+    // Distances from the edges (keep clear of the bar).
     property int topOffset: 0
+    property int sideOffset: 0
 
     readonly property int maxVisible: 5
 
     anchors.top: true
-    anchors.right: true
+    anchors.right: side === "right"
+    anchors.left: side === "left"
     margins.top: topOffset
-    margins.right: theme.space.l
+    margins.right: side === "right" ? sideOffset : 0
+    margins.left: side === "left" ? sideOffset : 0
 
     implicitWidth: 400
     implicitHeight: stack.implicitHeight

@@ -6,18 +6,22 @@ import qs.theme
 
 // System tray (StatusNotifierItem). Left click: activate (or menu for
 // menu-only items), right click: menu, middle click: secondary action,
-// wheel: scroll. Options: showPassive (default false).
-Row {
+// wheel: scroll. Options: showPassive (default false). Stacks on a
+// vertical bar.
+Grid {
     id: root
 
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
 
     property ShellScreen screen
     property var options: ({})
+    property bool vertical: false
+    property int crossSize: 0
 
     readonly property var items: SystemTray.items.values.filter(item => root.options.showPassive || item.status !== Status.Passive)
     readonly property bool shown: items.length > 0
 
+    columns: vertical ? 1 : Math.max(1, items.length)
     spacing: theme.space.s
 
     Repeater {

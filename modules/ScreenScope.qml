@@ -21,6 +21,15 @@ Scope {
     readonly property var theme: Themes.resolve(profile.theme ?? Themes.themeFor(profile.mode), profile.touch)
     readonly property bool fullscreen: Screens.hasFullscreen(modelData.name)
     readonly property var barLook: Object.assign({}, theme.bar, profile.bar ?? {})
+    readonly property bool hasBar: normal && !!profile.bar && ShellState.barVisible
+    readonly property string barEdge: ["top", "bottom", "left", "right"].includes(barLook.position) ? barLook.position : "top"
+    // Room the bar takes from its edge (0 on the other edges).
+    function barExtent(edge: string): int {
+        if (!hasBar || edge !== barEdge)
+            return 0;
+        const vertical = barEdge === "left" || barEdge === "right";
+        return (vertical ? barLook.verticalWidth : barLook.height) + (barLook.floating ? barLook.margin : 0);
+    }
 
     LazyLoader {
         active: root.normal && !!root.profile.bar && ShellState.barVisible
@@ -60,6 +69,7 @@ Scope {
             screen: root.modelData
             config: root.profile.osd
             theme: root.theme
+            edgeOffset: root.barExtent(config?.position === "top" ? "top" : "bottom")
         }
     }
 
@@ -70,7 +80,10 @@ Scope {
         NotificationPopups {
             screen: root.modelData
             theme: root.theme
-            topOffset: (root.normal && root.profile.bar ? root.barLook.height + (root.barLook.floating ? root.barLook.margin : 0) : 0) + root.theme.space.l
+            // Right side, or left when the bar is on the right; clear of the bar.
+            side: root.barEdge === "right" ? "left" : "right"
+            topOffset: root.barExtent("top") + root.theme.space.l
+            sideOffset: root.barExtent(side) + root.theme.space.l
         }
     }
 

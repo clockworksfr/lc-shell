@@ -57,6 +57,7 @@ Singleton {
             },
             bar: {
                 height: 40,
+                verticalWidth: 56,
                 style: "full",
                 floating: false,
                 margin: 0,

@@ -7,21 +7,19 @@ import qs.services
 
 // Battery level (hidden without a battery). Click: power panel
 // (time left, power profile).
-ThemedText {
+TextBlock {
     id: root
-
-    property ShellScreen screen
-    property var options: ({})
 
     readonly property bool shown: Power.hasBattery
 
-    text: I18n.tr(Power.charging ? "bar.batteryCharging" : "bar.battery", { value: I18n.percent(Power.level) })
+    fullText: I18n.tr(Power.charging ? "bar.batteryCharging" : "bar.battery", { value: I18n.percent(Power.level) })
+    compactText: I18n.tr("bar.v.battery", { value: Math.round(Power.level * 100) })
     color: Power.low ? theme.color.urgent : Power.charging ? theme.color.ok : theme.color.ink
 
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: popup.visible = !popup.visible
+        onClicked: popup.toggle()
     }
 
     BarPopup {

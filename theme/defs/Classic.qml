@@ -63,6 +63,7 @@ Singleton {
             },
             bar: {
                 height: 40,
+                verticalWidth: 56,
                 style: "islands",
                 floating: true,
                 margin: 8,

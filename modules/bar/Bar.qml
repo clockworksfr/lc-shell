@@ -1,15 +1,17 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import qs.blocks
 import qs.theme
 
-// Bar of "normal" screens. Its look comes from the theme (theme.bar) and can
-// be overridden per mode/screen in shell.json, next to the block lists:
-//   position          "top" | "bottom"
-//   left/center/right block entries
+// Bar of "normal" screens, on any edge. Its look comes from the theme
+// (theme.bar) and can be overridden per mode/screen in shell.json, next to
+// the block lists:
+//   position          "top" | "bottom" | "left" | "right"
+//   left/center/right block entries; on a vertical bar: top/middle/bottom
+//                     (also accepted as start/center/end)
 //   style             "full" | "islands"
-//   floating, margin, radius, opacity, border, padding, spacing, height
+//   floating, margin, radius, opacity, border, padding, spacing,
+//   height (horizontal thickness), verticalWidth (vertical thickness)
 PanelWindow {
     id: bar
 
@@ -17,23 +19,29 @@ PanelWindow {
     property var theme: Themes.fallback
 
     readonly property var look: Object.assign({}, theme.bar, config)
-    readonly property bool atBottom: look.position === "bottom"
+    // "top" | "bottom" | "left" | "right"; read by popups to open inward.
+    readonly property string edge: ["top", "bottom", "left", "right"].includes(look.position) ? look.position : "top"
+    readonly property bool vertical: edge === "left" || edge === "right"
     readonly property bool islands: look.style === "islands"
-    readonly property int edge: look.floating ? look.margin : 0
+    readonly property int thickness: vertical ? look.verticalWidth : look.height
+    readonly property int gap: look.floating ? look.margin : 0
+    // Space taken from the screen edge (what popups must clear).
+    readonly property int extent: thickness + gap
 
     anchors {
-        top: !atBottom
-        bottom: atBottom
-        left: true
-        right: true
+        top: edge !== "bottom"
+        bottom: edge !== "top"
+        left: edge !== "right"
+        right: edge !== "left"
     }
     margins {
-        top: atBottom ? 0 : edge
-        bottom: atBottom ? edge : 0
-        left: edge
-        right: edge
+        top: edge === "bottom" ? 0 : gap
+        bottom: edge === "top" ? 0 : gap
+        left: edge === "right" ? 0 : gap
+        right: edge === "left" ? 0 : gap
     }
-    implicitHeight: look.height
+    implicitHeight: vertical ? 0 : thickness
+    implicitWidth: vertical ? thickness : 0
     color: "transparent"
     WlrLayershell.namespace: "lc-bar"
 
@@ -48,31 +56,33 @@ PanelWindow {
 
         Rectangle {
             visible: !bar.look.floating && bar.look.border > 0
-            anchors.left: parent.left
-            anchors.right: parent.right
-            y: bar.atBottom ? 0 : parent.height - height
-            height: bar.look.border
             color: bar.theme.color.line
+            x: bar.edge === "left" ? parent.width - width : 0
+            y: bar.edge === "top" ? parent.height - height : 0
+            width: bar.vertical ? bar.look.border : parent.width
+            height: bar.vertical ? parent.height : bar.look.border
         }
     }
 
+    // Start / center / end zones, along the bar.
     BarZone {
-        anchors.left: parent.left
-        anchors.leftMargin: bar.islands ? 0 : bar.look.padding
         host: bar
-        entries: bar.look.left ?? []
+        entries: bar.look.start ?? bar.look.top ?? bar.look.left ?? []
+        x: bar.vertical ? 0 : (bar.islands ? 0 : bar.look.padding)
+        y: bar.vertical ? (bar.islands ? 0 : bar.look.padding) : 0
     }
 
     BarZone {
-        anchors.horizontalCenter: parent.horizontalCenter
         host: bar
-        entries: bar.look.center ?? []
+        entries: bar.look.center ?? bar.look.middle ?? []
+        x: bar.vertical ? 0 : (bar.width - width) / 2
+        y: bar.vertical ? (bar.height - height) / 2 : 0
     }
 
     BarZone {
-        anchors.right: parent.right
-        anchors.rightMargin: bar.islands ? 0 : bar.look.padding
         host: bar
-        entries: bar.look.right ?? []
+        entries: bar.look.end ?? (bar.vertical ? bar.look.bottom : undefined) ?? bar.look.right ?? []
+        x: bar.vertical ? 0 : bar.width - width - (bar.islands ? 0 : bar.look.padding)
+        y: bar.vertical ? bar.height - height - (bar.islands ? 0 : bar.look.padding) : 0
     }
 }

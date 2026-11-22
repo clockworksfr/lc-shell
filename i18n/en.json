@@ -80,5 +80,13 @@
   "bar.dnd": "dnd",
   "time.now": "just now",
   "time.minutesAgo": "{n} min ago",
-  "format.dateShort": "MMM d HH:mm"
+  "format.dateShort": "MMM d HH:mm",
+  "bar.v.volume": "vol\n{value}",
+  "bar.v.wired": "eth",
+  "bar.v.wifi": "wifi\n{value}",
+  "bar.v.offline": "off",
+  "bar.v.bluetooth": "bt\n{n}",
+  "bar.v.bluetoothOff": "bt\noff",
+  "bar.v.battery": "bat\n{value}",
+  "bar.v.notifs": "notif\n{n}"
 }

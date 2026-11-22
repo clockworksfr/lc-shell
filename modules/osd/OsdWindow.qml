@@ -14,6 +14,8 @@ PanelWindow {
     property var theme: Themes.fallback
 
     property var config: ({})
+    // Extra distance when the bar sits on the same edge.
+    property int edgeOffset: 0
 
     readonly property bool atTop: config.position === "top"
     readonly property string title: Osd.kind ? I18n.tr(`osd.${Osd.kind}`) : ""
@@ -21,8 +23,8 @@ PanelWindow {
     // Only one edge anchored: layer shell centers the window horizontally.
     anchors.top: atTop
     anchors.bottom: !atTop
-    margins.top: atTop ? (config.margin ?? 80) : 0
-    margins.bottom: atTop ? 0 : (config.margin ?? 80)
+    margins.top: atTop ? (config.margin ?? 80) + edgeOffset : 0
+    margins.bottom: atTop ? 0 : (config.margin ?? 80) + edgeOffset
 
     implicitWidth: 360
     implicitHeight: content.implicitHeight + win.theme.space.m * 2

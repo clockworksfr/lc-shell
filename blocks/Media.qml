@@ -2,25 +2,23 @@ import QtQuick
 import Quickshell
 import qs.components
 import qs.services
-import qs.theme
 
 // Active MPRIS player. Hidden when there is none.
 // Left click: play/pause, right click: next, middle click: switch player.
-// Options: maxWidth (px, default 400).
-ThemedText {
+// Options: maxWidth (px, default 400). On a vertical bar: state glyph only.
+TextBlock {
     id: root
-
-    property ShellScreen screen
-    property var options: ({})
 
     readonly property var player: Players.active
     readonly property bool shown: player !== null
 
+    readonly property string glyph: player?.isPlaying ? "▶" : "⏸"
     readonly property string track: [player?.trackArtist, player?.trackTitle].filter(s => !!s).join(" — ") || player?.identity || ""
 
-    width: Math.min(implicitWidth, options.maxWidth ?? 400)
-    elide: Text.ElideRight
-    text: `${player?.isPlaying ? "▶" : "⏸"}  ${track}`
+    fullText: `${glyph}  ${track}`
+    compactText: glyph
+    width: vertical ? crossSize : Math.min(implicitWidth, options.maxWidth ?? 400)
+    horizontalAlignment: vertical ? Text.AlignHCenter : Text.AlignLeft
     color: player?.isPlaying ? theme.color.ink : theme.color.soft
 
     MouseArea {
