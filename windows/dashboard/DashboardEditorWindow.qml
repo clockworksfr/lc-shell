@@ -23,7 +23,7 @@ PanelWindow {
     readonly property real barHeight: 88
     // Pointer target size (bigger on touch screens).
     readonly property real handle: Math.max(28, theme.hit)
-    readonly property var types: Object.keys(Registry.modules).filter(t => t !== "window")
+    readonly property var types: Object.keys(Registry.modules).filter(t => t !== "window" && t !== "notificationSample")
     property bool palette: false
 
     function cellSize(): var {

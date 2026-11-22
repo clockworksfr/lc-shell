@@ -11,6 +11,7 @@ Singleton {
             lyrics: "Lyrics.qml",
             media: "Media.qml",
             network: "Network.qml",
+            notificationSample: "NotificationSample.qml",
             showcase: "ShowcaseButton.qml",
             system: "System.qml",
             themeSwitch: "ThemeSwitch.qml",

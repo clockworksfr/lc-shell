@@ -31,7 +31,9 @@ Rectangle {
     property bool popup: false
 
     readonly property var notification: NotificationCenter.live[entry.uid] ?? null
-    readonly property var actions: (notification?.actions ?? []).filter(a => a.identifier !== "default")
+    // Reviews (showcase): actions shown without a live notification.
+    property var sampleActions: []
+    readonly property var actions: notification ? (notification.actions ?? []).filter(a => a.identifier !== "default") : sampleActions
     readonly property bool critical: entry.urgency === NotificationUrgency.Critical
     readonly property string app: entry.appName || I18n.tr("notifications.app")
     readonly property string clock: entry.time ? I18n.locale.toString(new Date(entry.time), "HH:mm") : ""
