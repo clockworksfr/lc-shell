@@ -163,14 +163,32 @@ PanelWindow {
             clip: true
             boundsBehavior: Flickable.StopAtBounds
 
-            // Wheel: ~90 px a notch (Qt's default steps are short); touchpads
-            // follow the fingers.
-            WheelHandler {
-                target: null
-                onWheel: event => {
-                    const dy = event.pixelDelta.y !== 0 ? event.pixelDelta.y : event.angleDelta.y / 120 * 90;
-                    flick.contentY = Math.max(0, Math.min(flick.contentHeight - flick.height, flick.contentY - dy));
+            // Wheel scrolling (see the MouseArea over it): notches add up to
+            // a target the content glides to.
+            property real target: 0
+            readonly property real maxY: Math.max(0, contentHeight - height)
+
+            function scrollBy(dy: real, smooth: bool): void {
+                // From the target while gliding (fast spins add up), from
+                // where it is otherwise.
+                const from = glide.running ? target : contentY;
+                target = Math.max(0, Math.min(maxY, from + dy));
+                if (smooth) {
+                    glide.from = contentY;
+                    glide.to = target;
+                    glide.restart();
+                } else {
+                    glide.stop();
+                    contentY = target;
                 }
+            }
+
+            NumberAnimation {
+                id: glide
+                target: flick
+                property: "contentY"
+                duration: 160
+                easing.type: Easing.OutCubic
             }
 
             Loader {
@@ -206,6 +224,21 @@ PanelWindow {
                         easing.type: Easing.OutCubic
                     }
                 }
+            }
+        }
+
+        // The wheel over the pages, ahead of Flickable's own short steps:
+        // ~100 px a notch, gliding (a free-spinning wheel goes fast and
+        // smooth both ways); touchpads follow the fingers. Clicks pass.
+        MouseArea {
+            anchors.fill: flick
+            acceptedButtons: Qt.NoButton
+            onWheel: wheel => {
+                if (wheel.pixelDelta.y !== 0)
+                    flick.scrollBy(-wheel.pixelDelta.y, false);
+                else
+                    flick.scrollBy(-wheel.angleDelta.y / 120 * 100, true);
+                wheel.accepted = true;
             }
         }
 
