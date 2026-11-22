@@ -704,5 +704,11 @@
   "settings.lockPamHint": "File in /etc/pam.d checking the password.",
   "settings.lockNever": "Never",
   "settings.lockSeconds": "{n} s",
-  "settings.lockHours": "{n} h"
+  "settings.lockHours": "{n} h",
+  "hue.roomsTitle": "Rooms",
+  "hue.lightsOf": "Lights · {name}",
+  "hue.brightness": "Brightness",
+  "hue.color": "Color",
+  "hue.scenesCount": "Scenes · {n}",
+  "hue.lampCount": "{n} lights"
 }

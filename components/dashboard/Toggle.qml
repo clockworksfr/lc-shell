@@ -208,17 +208,35 @@ Item {
                 color: root.on ? root.theme.color.bg : root.theme.color.ink
             }
 
-            ThemedText {
+            // Name, and its state under it when the pill is tall enough
+            // (two lines of data: "SALON / 70 %").
+            Column {
                 anchors.verticalCenter: parent.verticalCenter
-                width: Math.min(implicitWidth, pill.width - pill.height * 0.6 - pillIcon.width - parent.spacing)
-                elide: Text.ElideRight
-                fontSizeMode: Text.HorizontalFit
-                minimumPixelSize: 11
-                text: root.label
-                font.family: root.theme.font.mono
-                font.capitalization: Font.AllUppercase
-                font.pixelSize: root.labelSize
-                color: root.on ? root.theme.color.bg : root.theme.color.ink
+                width: Math.min(Math.max(pillLabel.implicitWidth, pillSub.visible ? pillSub.implicitWidth : 0), pill.width - pill.height * 0.6 - pillIcon.width - parent.parent.spacing)
+
+                ThemedText {
+                    id: pillLabel
+                    width: parent.width
+                    elide: Text.ElideRight
+                    fontSizeMode: Text.HorizontalFit
+                    minimumPixelSize: 11
+                    text: root.label
+                    font.family: root.theme.font.mono
+                    font.capitalization: Font.AllUppercase
+                    font.pixelSize: root.labelSize
+                    color: root.on ? root.theme.color.bg : root.theme.color.ink
+                }
+
+                ThemedText {
+                    id: pillSub
+                    visible: !!root.sub && pill.height >= 50
+                    width: parent.width
+                    elide: Text.ElideRight
+                    text: root.sub
+                    font.family: root.theme.font.mono
+                    font.pixelSize: Math.max(10, root.labelSize * 0.72)
+                    color: root.on ? Qt.alpha(root.theme.color.bg, 0.7) : root.theme.color.soft
+                }
             }
         }
     }

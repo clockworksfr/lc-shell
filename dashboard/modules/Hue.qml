@@ -362,7 +362,7 @@ ModuleBase {
         Column {
             id: lampColumn
             width: lamps.width
-            spacing: 4
+            spacing: 6
 
             Repeater {
                 model: lamps.ids
@@ -374,7 +374,7 @@ ModuleBase {
                     readonly property var light: HueBridge.lights[modelData] ?? null
 
                     width: lampColumn.width
-                    height: lamps.m.hit
+                    height: Math.max(lamps.m.hit, lamps.m.t3 + lamps.m.t4 + 22)
                     opacity: lamp.light?.reachable ? 1 : 0.45
 
                     Rectangle {
@@ -487,36 +487,336 @@ ModuleBase {
         }
     }
 
-    // Roomy, panel, drawer: rooms, the room, its lights.
+    // Roomy, panel, drawer: three columns with their titles. Rooms as a
+    // list (the one shown in the middle is highlighted, an accent bar on
+    // its left; the switch toggles), the room's sections (brightness,
+    // color, scenes, scrolling), its lights.
+    component SectionLabel: ThemedText {
+        property var m
+        label: true
+        font.pixelSize: m.t4
+        font.letterSpacing: 1
+        font.capitalization: Font.AllUppercase
+        color: m.theme.color.soft
+    }
+
+    component RoomList: Flickable {
+        id: roomList
+
+        property var m
+        readonly property real rowH: Math.max(roomList.m.hit, 58)
+
+        clip: true
+        contentHeight: roomColumn.implicitHeight
+        boundsBehavior: Flickable.StopAtBounds
+
+        Column {
+            id: roomColumn
+            width: roomList.width
+            spacing: 8
+
+            SectionLabel {
+                m: roomList.m
+                text: I18n.tr("hue.roomsTitle")
+                bottomPadding: 4
+            }
+
+            Repeater {
+                model: HueBridge.rooms.map(r => r.id).join(",").split(",").filter(id => id)
+
+                Rectangle {
+                    id: roomRow
+
+                    required property string modelData
+                    readonly property var room: HueBridge.room(modelData)
+                    readonly property bool selected: roomList.m.selected?.id === modelData
+
+                    width: roomColumn.width
+                    height: roomList.rowH
+                    radius: roomList.m.theme.radius.control * 1.5
+                    color: selected ? roomList.m.theme.color.surface2 : rowArea.containsMouse ? Qt.alpha(roomList.m.theme.color.surface2, 0.5) : "transparent"
+                    border.width: selected ? 1 : 0
+                    border.color: roomList.m.theme.color.line
+
+                    // Shown in the middle.
+                    Rectangle {
+                        visible: roomRow.selected
+                        x: 0
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 3
+                        height: parent.height * 0.6
+                        radius: 1.5
+                        color: roomList.m.theme.color.accent
+                    }
+
+                    Rectangle {
+                        id: roomBadge
+                        x: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 36
+                        height: 36
+                        radius: 18
+                        color: roomRow.room?.on ? Qt.alpha(roomRow.room.color || "#FFE9D2", 0.25) : roomList.m.theme.color.surface3
+
+                        Icon {
+                            anchors.centerIn: parent
+                            name: HueBridge.roomIcon(roomRow.room?.cls ?? "")
+                            size: 20
+                            color: roomRow.room?.on ? (roomRow.room.color || roomList.m.theme.color.ink) : roomList.m.theme.color.soft
+                        }
+                    }
+
+                    Column {
+                        anchors.left: roomBadge.right
+                        anchors.leftMargin: 12
+                        anchors.right: roomSwitch.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 2
+
+                        ThemedText {
+                            width: parent.width
+                            elide: Text.ElideRight
+                            text: roomRow.room?.name ?? ""
+                            font.pixelSize: roomList.m.t3
+                            font.weight: roomRow.selected ? Font.DemiBold : Font.Normal
+                        }
+
+                        ThemedText {
+                            width: parent.width
+                            elide: Text.ElideRight
+                            text: roomRow.room ? `${roomRow.room.on ? I18n.percent(roomRow.room.brightness / 100) : I18n.tr("hue.off")} · ${I18n.tr("hue.lampCount", { n: roomRow.room.lights.length })}` : ""
+                            font.pixelSize: roomList.m.t4
+                            color: roomList.m.theme.color.soft
+                        }
+                    }
+
+                    MouseArea {
+                        id: rowArea
+                        anchors.fill: parent
+                        anchors.rightMargin: roomSwitch.width
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: roomList.m.selectedId = roomRow.modelData
+                    }
+
+                    HueParts.Switch {
+                        id: roomSwitch
+                        anchors.right: parent.right
+                        anchors.rightMargin: 4
+                        anchors.verticalCenter: parent.verticalCenter
+                        on: !!roomRow.room?.on
+                        onToggled: Qt.callLater(HueBridge.toggleRoom, roomRow.modelData)
+                    }
+                }
+            }
+
+            HueParts.Key {
+                visible: HueBridge.roomsOn > 0
+                width: roomColumn.width
+                height: Math.max(40, roomList.m.hit * 0.7)
+                text: I18n.tr("hue.allOff")
+                icon: "power_settings_new"
+                textSize: roomList.m.t4 * 1.1
+                onTapped: Qt.callLater(HueBridge.allOff)
+            }
+        }
+    }
+
+    component RoomSections: Flickable {
+        id: sections
+
+        property var m
+        readonly property var room: sections.m.selected
+        readonly property real row: Math.max(sections.m.hit, 44)
+        readonly property int sceneCols: width >= 420 ? 3 : 2
+        readonly property var scenes: {
+            const all = (room?.scenes ?? []).slice();
+            const active = HueBridge.activeScene[room?.id ?? ""];
+            all.sort((a, b) => (b.id === active) - (a.id === active));
+            return all;
+        }
+
+        clip: true
+        contentHeight: sectionColumn.implicitHeight
+        boundsBehavior: Flickable.StopAtBounds
+
+        Column {
+            id: sectionColumn
+            width: sections.width
+            spacing: sections.m.gap
+
+            // The room, its lights on on the right (design: HHEAD).
+            Item {
+                width: parent.width
+                height: roomTitle.implicitHeight
+
+                ThemedText {
+                    id: roomTitle
+                    width: parent.width - lampsCount.width - 10
+                    elide: Text.ElideRight
+                    text: sections.room?.name ?? ""
+                    font.pixelSize: sections.m.t2
+                    font.weight: Font.DemiBold
+                }
+
+                ThemedText {
+                    id: lampsCount
+                    anchors.right: parent.right
+                    anchors.baseline: roomTitle.baseline
+                    text: sections.room ? I18n.tr("hue.lamps", { on: sections.room.lights.filter(id => HueBridge.lights[id]?.on).length, total: sections.room.lights.length }) : ""
+                    font.pixelSize: sections.m.t4
+                    color: sections.m.theme.color.soft
+                }
+            }
+
+            SectionLabel {
+                m: sections.m
+                text: I18n.tr("hue.brightness")
+            }
+
+            Item {
+                width: parent.width
+                height: sections.row
+
+                Slider {
+                    anchors.left: parent.left
+                    anchors.right: briText.left
+                    anchors.rightMargin: sections.m.gap
+                    anchors.verticalCenter: parent.verticalCenter
+                    value: (sections.room?.brightness ?? 0) / 100
+                    dimmed: !sections.room?.on
+                    onMoved: value => HueBridge.setRoomBrightness(sections.room.id, Math.max(1, Math.round(value * 100)))
+                }
+
+                ThemedText {
+                    id: briText
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: sections.m.t3 * 3.4
+                    horizontalAlignment: Text.AlignRight
+                    text: sections.room?.on ? I18n.percent(sections.room.brightness / 100) : I18n.tr("hue.off")
+                    font.pixelSize: sections.m.t3
+                    font.features: ({ "tnum": 1 })
+                }
+            }
+
+            SectionLabel {
+                m: sections.m
+                text: I18n.tr("hue.color")
+            }
+
+            Flow {
+                width: parent.width
+                spacing: 12
+
+                HueParts.Swatch {
+                    size: 44
+                    swatchColor: sections.room?.color || "#FFE9D2"
+                    onTapped: sections.m.openPicker("room", sections.room.id, sections.room.name)
+
+                    Icon {
+                        anchors.centerIn: parent
+                        name: "palette"
+                        size: 20
+                        color: "#99000000"
+                    }
+                }
+
+                Repeater {
+                    model: HueBridge.favorites
+
+                    HueParts.Swatch {
+                        required property var modelData
+                        size: 36
+                        y: 4
+                        swatchColor: modelData.color
+                        onTapped: HueBridge.setRoomColor(sections.room.id, modelData.color)
+                    }
+                }
+            }
+
+            SectionLabel {
+                m: sections.m
+                visible: sections.scenes.length > 0
+                text: I18n.tr("hue.scenesCount", { n: sections.scenes.length })
+            }
+
+            Grid {
+                width: parent.width
+                columns: sections.sceneCols
+                spacing: 8
+
+                Repeater {
+                    model: sections.scenes
+
+                    HueParts.Key {
+                        required property var modelData
+                        width: (parent.width - (sections.sceneCols - 1) * 8) / sections.sceneCols
+                        height: Math.max(40, sections.m.hit * 0.7)
+                        text: modelData.name
+                        active: HueBridge.activeScene[sections.room?.id ?? ""] === modelData.id
+                        textSize: Math.min(sections.m.t3, 15)
+                        onTapped: {
+                            const room = sections.room?.id ?? "", scene = modelData.id;
+                            Qt.callLater(HueBridge.startScene, room, scene);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     Row {
         visible: root.mode === "three"
         anchors.fill: parent
-        spacing: root.gap * 1.5
+        anchors.topMargin: root.full ? 8 : 0
+        spacing: root.gap * 2
 
-        Rooms {
+        RoomList {
             id: threeRooms
             m: root
-            width: Math.min(340, parent.width * 0.27)
+            width: Math.min(320, parent.width * 0.3)
             height: parent.height
-            cols: 1
-            withMore: false
-            selecting: true
         }
 
-        Detail {
+        Rectangle {
+            width: 1
+            height: parent.height
+            color: root.theme.color.line
+        }
+
+        RoomSections {
             id: threeDetail
             m: root
-            width: (parent.width - threeRooms.width - parent.spacing * 2) * 0.55
+            width: (parent.width - threeRooms.width - 2 - parent.spacing * 4) * 0.58
             height: parent.height
-            withMore: !root.full && !root.drawer
         }
 
-        // Under the close button of the panels.
-        Lamps {
-            m: root
-            y: root.full ? 44 : 0
-            width: parent.width - threeRooms.width - threeDetail.width - parent.spacing * 2
-            height: parent.height - y
+        Rectangle {
+            width: 1
+            height: parent.height
+            color: root.theme.color.line
+        }
+
+        // Its lights (under the close button of the panels).
+        Column {
+            width: parent.width - threeRooms.width - threeDetail.width - 2 - parent.spacing * 4
+            height: parent.height
+            spacing: 8
+
+            SectionLabel {
+                m: root
+                width: parent.width
+                elide: Text.ElideRight
+                text: I18n.tr("hue.lightsOf", { name: root.selected?.name ?? "" })
+                bottomPadding: 4
+            }
+
+            Lamps {
+                m: root
+                width: parent.width
+                height: parent.height - y
+            }
         }
     }
 }

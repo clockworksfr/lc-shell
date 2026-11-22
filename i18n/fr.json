@@ -704,5 +704,11 @@
   "settings.lockPamHint": "Fichier de /etc/pam.d qui vérifie le mot de passe.",
   "settings.lockNever": "Jamais",
   "settings.lockSeconds": "{n} s",
-  "settings.lockHours": "{n} h"
+  "settings.lockHours": "{n} h",
+  "hue.roomsTitle": "Pièces",
+  "hue.lightsOf": "Lampes · {name}",
+  "hue.brightness": "Luminosité",
+  "hue.color": "Couleur",
+  "hue.scenesCount": "Scènes · {n}",
+  "hue.lampCount": "{n} lampes"
 }
