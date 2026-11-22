@@ -9,7 +9,8 @@ TextWidget {
     id: root
 
     // Themes whose bar clock is a figure (Matrix: Doto, the time alone).
-    readonly property bool figure: theme.style.barClock === "display" && !vertical && size !== "extended"
+    // Extended there: the date in the theme's mono capitals before it.
+    readonly property bool figure: theme.style.barClock === "display" && !vertical
     readonly property string format: vertical ? (options.verticalFormat ?? "HH\nmm")
         : figure ? (options.format ?? "HH:mm")
         : size === "compact" ? "HH:mm"
@@ -25,6 +26,20 @@ TextWidget {
     font.weight: figure ? (theme.font.displayWeight ?? Font.Normal) : vertical ? Font.DemiBold : Font.Normal
     font.letterSpacing: figure ? figureSize * 0.02 : 0
     font.features: ({ "tnum": 1 })
+
+    leftPadding: figure && size === "extended" ? dateLabel.implicitWidth + figureSize * 0.5 : 0
+
+    ThemedText {
+        id: dateLabel
+        visible: root.figure && root.size === "extended"
+        anchors.verticalCenter: parent.verticalCenter
+        text: I18n.locale.toString(clock.date, I18n.tr("format.dateLong"))
+        font.family: root.theme.font.mono
+        font.capitalization: Font.AllUppercase
+        font.letterSpacing: 0.6
+        font.pixelSize: Math.round(root.figureSize * 0.45)
+        color: root.theme.color.soft
+    }
 
     SystemClock {
         id: clock
