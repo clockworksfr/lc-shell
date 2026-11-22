@@ -109,9 +109,14 @@ ModuleBase {
     // Fixed counts (the labels depend on the columns, which depend on them).
     readonly property int total: 6
     readonly property int levels: 2
+    // Strips, wide and narrow cells: compact rows (52 px, a comfortable
+    // touch target), so even a one-unit-high cell holds two rows of buttons.
+    readonly property bool compact: shape === "strip" || shape === "wide" || shape === "narrow"
+    readonly property real compactRow: 52
+    readonly property int rowsFit: Math.max(1, Math.floor((tilesHeight + gap) / (compactRow + gap)))
+    readonly property int colsFit: Math.max(1, Math.floor((tilesWidth + gap) / ((look === "matrix" ? 120 : 140) + gap)))
     readonly property int cols: shape === "tiny" || shape === "narrow" ? 1
-        : shape === "strip" ? Math.max(1, Math.min(total, Math.floor((tilesWidth + gap) / ((look === "matrix" ? 120 : 140) + gap))))
-        : shape === "wide" ? Math.max(1, Math.min(Math.ceil(total / (ch > 250 ? 2 : 1)), Math.floor((tilesWidth + gap) / ((look === "matrix" ? 120 : 140) + gap))))
+        : compact ? Math.max(1, Math.min(colsFit, Math.ceil(total / rowsFit)))
         : shape === "tall" ? 2
         : cw / 3 >= 160 ? 3 : 2
     // Rows never under the touch target size (72 px on the modules screen).
@@ -126,9 +131,9 @@ ModuleBase {
     // tiles still get their minimum rows above them.
     readonly property bool sliders: sideSliders || full || ((shape === "box" || shape === "tall") && ch - sliderBlock >= Math.ceil(total / cols) * (minRow + gap) - gap)
     readonly property real tilesHeight: sliders && !sideSliders ? ch - sliderBlock : ch
-    readonly property int rows: shape === "tiny" || shape === "strip" ? 1
+    readonly property int rows: shape === "tiny" ? 1
         : full ? Math.ceil(total / cols)
-        : shape === "wide" ? (ch > 250 ? 2 : 1)
+        : compact ? Math.max(1, Math.min(rowsFit, Math.ceil(total / cols)))
         : Math.max(1, Math.min(Math.ceil(total / cols), Math.floor((tilesHeight + gap) / (minRow + gap))))
     readonly property int capacity: shape === "tiny" ? 1 : cols * rows
     // Everything in view, or the first tiles and More in the last slot.

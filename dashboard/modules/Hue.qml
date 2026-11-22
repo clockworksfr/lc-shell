@@ -98,7 +98,10 @@ ModuleBase {
         property bool withMore: true
         // Tiles select (B shown) rather than toggle.
         property bool selecting: false
-        readonly property int capacity: Math.max(1, cols * Math.max(1, Math.floor((height + spacing) / (rooms.m.hit + spacing))))
+        // Compact rows (52 px) where the room isn't shown beside: two rows
+        // of rooms even in a one-unit-high cell.
+        readonly property real rowMin: selecting ? rooms.m.hit : 52
+        readonly property int capacity: Math.max(1, cols * Math.max(1, Math.floor((height + spacing) / (rowMin + spacing))))
         // More last: always when the room isn't shown beside (it's the only
         // way to the rest), else only when the rooms overflow.
         // Ids only: toggling a room doesn't rebuild the tile being tapped.
@@ -130,7 +133,7 @@ ModuleBase {
                 readonly property bool isSelected: rooms.selecting && !isMore && rooms.m.selected?.id === modelData
 
                 width: (rooms.width - (rooms.cols - 1) * rooms.spacing) / rooms.cols
-                height: Math.max(rooms.m.hit, (rooms.height - (rooms.lines - 1) * rooms.spacing) / rooms.lines)
+                height: Math.max(rooms.rowMin, (rooms.height - (rooms.lines - 1) * rooms.spacing) / rooms.lines)
 
                 // Dual tiles leave the switch its own room on the right.
                 Toggle {
