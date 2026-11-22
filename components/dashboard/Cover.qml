@@ -91,7 +91,7 @@ Item {
             color: level > 0.75 ? (root.theme.color.signal ?? root.theme.color.ink) : root.theme.color.ink
             opacity: 0.45 + level * 0.55
 
-            Behavior on d {
+            Behavior on width {
                 NumberAnimation {
                     duration: 60
                 }
