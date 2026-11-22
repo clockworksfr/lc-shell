@@ -12,8 +12,9 @@ Singleton {
     readonly property PwNode source: Pipewire.defaultAudioSource
 
     // Hardware devices (streams and sink monitors excluded).
-    readonly property list<PwNode> sinks: Pipewire.nodes.values.filter(n => n.audio && n.isSink && !n.isStream)
-    readonly property list<PwNode> sources: Pipewire.nodes.values.filter(n => n.audio && !n.isSink && !n.isStream)
+    // Stable order (by node id) so lists don't reshuffle between openings.
+    readonly property list<PwNode> sinks: Pipewire.nodes.values.filter(n => n.audio && n.isSink && !n.isStream).sort((a, b) => a.id - b.id)
+    readonly property list<PwNode> sources: Pipewire.nodes.values.filter(n => n.audio && !n.isSink && !n.isStream).sort((a, b) => a.id - b.id)
 
     // Playback streams of applications (bound below, so their audio and
     // properties are populated). Filter only on properties that don't change
@@ -44,8 +45,10 @@ Singleton {
     signal sinkTouched
     signal sourceTouched
 
+    // Short, distinguishable device name: the nickname (often the device
+    // itself, e.g. the monitor on an HDMI output) before the long description.
     function nodeName(node: PwNode): string {
-        return node?.description || node?.nickname || node?.name || "";
+        return node?.nickname || node?.description || node?.name || "";
     }
 
     function setDefaultSink(node: PwNode): void {

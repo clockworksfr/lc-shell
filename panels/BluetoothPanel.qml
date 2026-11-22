@@ -36,7 +36,7 @@ Column {
         ListRow {
             required property var modelData
 
-            title: modelData.name || modelData.address
+            title: modelData.name || I18n.tr("bt.unnamed")
             subtitle: modelData.pairing ? I18n.tr("bt.pairing")
                 : modelData.state === BluetoothDeviceState.Connecting ? I18n.tr("bt.connecting")
                 : modelData.connected ? I18n.tr("bt.connected")

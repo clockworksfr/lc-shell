@@ -106,14 +106,15 @@ Singleton {
             const now = Date.now();
             const rx = Number(rxFile.text());
             const tx = Number(text());
-            if (root.lastBytes) {
+            // The first delta after a (re)start covers an unknown span: skip it.
+            if (root.lastBytes && root.lastBytes.iface === root.iface && root.lastBytes.count++ >= 1) {
                 const seconds = Math.max(0.001, (now - root.lastBytes.time) / 1000);
                 root.rxRate = Math.max(0, (rx - root.lastBytes.rx) / seconds);
                 root.txRate = Math.max(0, (tx - root.lastBytes.tx) / seconds);
                 root.rxHistory = [...root.rxHistory, root.rxRate].slice(-60);
                 root.txHistory = [...root.txHistory, root.txRate].slice(-60);
             }
-            root.lastBytes = { time: now, rx: rx, tx: tx };
+            root.lastBytes = { time: now, rx: rx, tx: tx, iface: root.iface, count: root.lastBytes?.count ?? 0 };
         }
     }
 

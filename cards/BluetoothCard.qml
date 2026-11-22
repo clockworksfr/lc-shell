@@ -46,7 +46,7 @@ Column {
 
                 ThemedText {
                     width: parent.width
-                    text: parent.parent.modelData.name || parent.parent.modelData.address
+                    text: parent.parent.modelData.name || I18n.tr("bt.unnamed")
                     color: parent.parent.modelData.connected ? root.theme.color.ink : root.theme.color.soft
                     elide: Text.ElideRight
                 }

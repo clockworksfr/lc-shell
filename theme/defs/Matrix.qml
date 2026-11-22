@@ -24,9 +24,9 @@ Singleton {
                     accent: "#F2F2F2",
                     onAccent: "#0B0B0B",
                     urgent: "#E5323A",
-                    warn: "#D71921",
+                    warn: "#A6A6A6",
                     ok: "#8FCB9F",
-                    accent2: "#D71921"
+                    accent2: "#8C8C8C"
                 },
                 light: {
                     bg: "#E4E4E2",
@@ -39,9 +39,9 @@ Singleton {
                     accent: "#111111",
                     onAccent: "#F2F2F0",
                     urgent: "#D71921",
-                    warn: "#D71921",
+                    warn: "#5C5C5A",
                     ok: "#3E7D52",
-                    accent2: "#D71921"
+                    accent2: "#7A7A78"
                 }
             },
             font: {

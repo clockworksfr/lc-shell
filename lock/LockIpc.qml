@@ -14,6 +14,9 @@ IpcHandler {
         Lock.status = "";
         Lock.previewing = true;
     }
+    function closePreview(): void {
+        Lock.previewing = false;
+    }
     function isLocked(): bool {
         return Lock.locked;
     }

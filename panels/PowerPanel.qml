@@ -33,14 +33,9 @@ Column {
         color: root.theme.color.soft
     }
 
-    Repeater {
-        model: Power.profiles
-
-        ListRow {
-            required property int modelData
-            title: I18n.tr(`power.profile.${Power.profileKey(modelData)}`)
-            selected: Power.profile === modelData
-            onClicked: Power.setProfile(modelData)
-        }
+    Choice {
+        model: Power.profiles.map(p => ({ value: p, label: I18n.tr(`power.profile.${Power.profileKey(p)}`) }))
+        value: Power.profile
+        onPicked: value => Power.setProfile(value)
     }
 }

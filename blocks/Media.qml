@@ -12,7 +12,8 @@ TextBlock {
     readonly property var player: Players.active
     readonly property bool shown: player !== null
 
-    readonly property string glyph: player?.isPlaying ? "▶" : "⏸"
+    // "❚❚" rather than U+23F8, which renders as a color emoji.
+    readonly property string glyph: player?.isPlaying ? "▶" : "❚❚"
     readonly property string track: [player?.trackArtist, player?.trackTitle].filter(s => !!s).join(" — ") || player?.identity || ""
 
     fullText: size === "compact" ? glyph : `${glyph}  ${track}`

@@ -50,15 +50,6 @@ Singleton {
             run: () => Quickshell.execDetached(["systemctl", "poweroff"])
         },
         {
-            key: "action:lockPreview",
-            titleKey: "action.lockPreview",
-            icon: "system-lock-screen",
-            run: () => {
-                Lock.status = "";
-                Lock.previewing = true;
-            }
-        },
-        {
             key: "action:settings",
             titleKey: "action.settings",
             icon: "preferences-system",
@@ -69,6 +60,15 @@ Singleton {
             titleKey: "action.reload",
             icon: "view-refresh",
             run: () => Quickshell.reload(true)
+        },
+        {
+            key: "action:lockPreview",
+            titleKey: "action.lockPreview",
+            icon: "system-lock-screen",
+            run: () => {
+                Lock.status = "";
+                Lock.previewing = true;
+            }
         }
     ]
 
@@ -100,7 +100,8 @@ Singleton {
         if (Launcher.modeId === "all" && !query)
             return [];
         const out = [];
-        for (const action of [...staticActions, ...audioActions]) {
+        const all = [...staticActions, ...audioActions];
+        for (const [order, action] of all.entries()) {
             const title = I18n.tr(action.titleKey, { name: action.name ?? "" });
             // Keywords of every language: "veille" and "sleep" both find it.
             const keywords = Search.normalize(`${I18n.all(action.titleKey)} ${I18n.all(action.titleKey + ".keywords")}`);
@@ -117,7 +118,8 @@ Singleton {
                 confirm: action.confirm ?? false,
                 // Slightly below apps with the same match; audio devices below
                 // session actions.
-                score: score * (action.key.startsWith("action:sink") || action.key.startsWith("action:source") ? 0.75 : 0.95) + Launcher.usageBonus(action.key),
+                // Defined order breaks ties (lock, suspend… before previews).
+                score: score * (action.key.startsWith("action:sink") || action.key.startsWith("action:source") ? 0.75 : 0.95) + Launcher.usageBonus(action.key) - order * 0.001,
                 activate: action.run
             });
         }

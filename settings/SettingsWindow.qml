@@ -1,96 +1,123 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Wayland
 import qs.components
 import qs.i18n
 import qs.theme
 
-// Settings app: a regular window (tiled or floated by Hyprland like any
-// other), sidebar of pages on the left. Every change is applied live and
-// written to the user settings.
-FloatingWindow {
+// Settings app: a centered panel on the focused screen (layer surface, so
+// Hyprland never tiles it over the user's windows), sidebar of pages on the
+// left. Every change is applied live and written to the user settings.
+// Close: the × button, Escape, or `settings close`. Clicking elsewhere keeps
+// it open (to watch a change apply).
+PanelWindow {
     id: win
 
-    // Normal-screen theme: the window lives among the user's windows.
     property var theme: Themes.resolve(Themes.themeFor("normal"), false, "normal")
 
-    // The "lc-shell · " prefix lets Hyprland rules (and the float below) find it.
-    title: `lc-shell · ${I18n.tr("settings.title")}`
-    implicitWidth: 980
-    implicitHeight: 720
-    color: theme.color.bg
+    // Screen chosen at opening (not following focus afterwards).
+    screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
+    implicitWidth: Math.min(980, (screen?.width ?? 1200) - 64)
+    implicitHeight: Math.min(720, (screen?.height ?? 900) - 96)
+    color: "transparent"
+    exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.layer: WlrLayer.Top
+    WlrLayershell.namespace: "lc-settings"
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
-    onVisibleChanged: {
-        if (!visible)
-            Settings.opened = false;
-        else
-            floatIt.restart();
-    }
-
-    // Float it, sized and centered, rather than tiling it over the user's
-    // windows (Hyprland tiles new windows by default).
-    Timer {
-        id: floatIt
-        interval: 150
-        onTriggered: {
-            const target = `window = "title:^lc-shell · "`;
-            Hyprland.dispatch(`hl.dsp.window.float({ action = "set", ${target} })`);
-            Hyprland.dispatch(`hl.dsp.window.resize({ x = ${win.implicitWidth}, y = ${win.implicitHeight}, ${target} })`);
-            Hyprland.dispatch(`hl.dsp.window.center({ ${target} })`);
-        }
-    }
+    Component.onCompleted: screen = screen // freeze the binding
 
     Rectangle {
-        id: sidebar
+        id: frame
 
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        width: 220
-        color: win.theme.color.surface
+        anchors.fill: parent
+        radius: win.theme.radius.panel
+        color: win.theme.color.bg
+        border.width: 1
+        border.color: win.theme.color.line
+        clip: true
 
-        Column {
-            anchors.fill: parent
-            anchors.margins: win.theme.space.m
-            spacing: win.theme.space.xs
+        Keys.onEscapePressed: Settings.opened = false
+        focus: true
 
-            ThemedText {
-                text: I18n.tr("settings.title")
-                font.pixelSize: win.theme.font.sizeL
-                font.weight: Font.DemiBold
-                bottomPadding: win.theme.space.m
-            }
+        Rectangle {
+            id: sidebar
 
-            Repeater {
-                model: Settings.pages
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            width: 220
+            color: win.theme.color.surface
 
-                ListRow {
-                    required property string modelData
-                    title: I18n.tr(`settings.page.${modelData}`)
-                    selected: Settings.page === modelData
-                    onClicked: Settings.page = modelData
+            Column {
+                anchors.fill: parent
+                anchors.margins: win.theme.space.m
+                spacing: win.theme.space.xs
+
+                ThemedText {
+                    text: I18n.tr("settings.title")
+                    font.pixelSize: win.theme.font.sizeL
+                    font.weight: Font.DemiBold
+                    bottomPadding: win.theme.space.m
+                }
+
+                Repeater {
+                    model: Settings.pages
+
+                    ListRow {
+                        required property string modelData
+                        title: I18n.tr(`settings.page.${modelData}`)
+                        selected: Settings.page === modelData
+                        onClicked: Settings.page = modelData
+                    }
                 }
             }
         }
-    }
 
-    Flickable {
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.left: sidebar.right
-        anchors.right: parent.right
-        contentHeight: page.implicitHeight + win.theme.space.xl * 2
-        clip: true
-        boundsBehavior: Flickable.StopAtBounds
+        Flickable {
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.left: sidebar.right
+            anchors.right: parent.right
+            contentHeight: page.implicitHeight + win.theme.space.xl * 2
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
 
-        Loader {
-            id: page
+            Loader {
+                id: page
 
-            x: win.theme.space.xl
-            y: win.theme.space.xl
-            // Readable line length even in a very wide window.
-            width: Math.min(parent.width - win.theme.space.xl * 2, 900)
-            source: `${Settings.page[0].toUpperCase()}${Settings.page.slice(1)}Page.qml`
+                x: win.theme.space.xl
+                y: win.theme.space.xl
+                // Readable line length even in a very wide window.
+                width: Math.min(parent.width - win.theme.space.xl * 2, 900)
+                source: `${Settings.page[0].toUpperCase()}${Settings.page.slice(1)}Page.qml`
+            }
+        }
+
+        // Close.
+        Rectangle {
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.margins: win.theme.space.s
+            width: 32
+            height: 32
+            radius: 16
+            color: closeArea.containsMouse ? win.theme.color.surface3 : "transparent"
+
+            Icon {
+                anchors.centerIn: parent
+                name: "close"
+                size: 20
+            }
+
+            MouseArea {
+                id: closeArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: Settings.opened = false
+            }
         }
     }
 }

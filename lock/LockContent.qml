@@ -132,5 +132,7 @@ Item {
         onClicked: password.forceActiveFocus()
     }
 
-    Component.onCompleted: password.forceActiveFocus()
+    // The real lock gets the keyboard: focus the field. The preview waits
+    // for a click (no stray keystrokes to PAM).
+    Component.onCompleted: if (!preview) password.forceActiveFocus()
 }

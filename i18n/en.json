@@ -211,5 +211,6 @@
   "launcher.calcHint": "e.g. 2+2*3, 10 EUR to USD, 5 km to mi",
   "system.gpuIntegrated": "iGPU",
   "system.gpuDiscrete": "GPU",
-  "block.window": "Active window"
+  "block.window": "Active window",
+  "bt.unnamed": "Unnamed device"
 }

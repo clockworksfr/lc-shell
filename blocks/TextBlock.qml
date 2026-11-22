@@ -13,7 +13,8 @@ ThemedText {
     property int crossSize: 0
 
     // "compact" | "normal" | "extended" (edit mode, options.size).
-    readonly property string size: options.size ?? "normal"
+    // Extended doesn't fit across a vertical bar: shown as normal there.
+    readonly property string size: vertical && options.size === "extended" ? "normal" : (options.size ?? "normal")
 
     property string fullText
     property string compactText: fullText
@@ -25,10 +26,14 @@ ThemedText {
     property bool iconFilled: false
     readonly property bool useIcon: !!icon && theme.style.statusIcons !== false
 
-    text: useIcon ? iconText : vertical ? compactText : fullText
+    // Text mode: compact = label over value (e.g. VOL / 64), like vertical.
+    readonly property bool stacked: !useIcon && (vertical || size === "compact")
+    label: stacked
+    text: useIcon ? iconText : stacked ? compactText : fullText
     leftPadding: useIcon && !vertical ? iconItem.width + (iconText ? 6 : 0) : 0
     topPadding: useIcon && vertical ? iconItem.height + (iconText ? 2 : 0) : 0
-    font.pixelSize: vertical ? theme.font.sizeS : theme.font.sizeM
+    font.pixelSize: vertical || stacked ? theme.font.sizeS : theme.font.sizeM
+    lineHeight: stacked ? 0.95 : 1
     horizontalAlignment: Text.AlignHCenter
     width: vertical && crossSize > 0 ? crossSize : implicitWidth
     elide: Text.ElideRight

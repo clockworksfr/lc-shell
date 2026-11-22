@@ -1,42 +1,66 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Wayland
+import qs.components
 import qs.i18n
 import qs.theme
 
-// The lock screen in a regular window: check its look and the PAM
-// password check without locking anything.
-FloatingWindow {
+// The lock screen in a centered panel: check its look and the PAM password
+// check without locking anything. The keyboard goes to it only when the
+// password field is clicked (no stray keystrokes sent to PAM).
+// Close: ×, Escape (once focused), or `lock closePreview`.
+PanelWindow {
     id: win
 
     property var theme: Themes.resolve(Themes.themeFor("normal"), false, "normal")
 
-    title: `lc-shell · ${I18n.tr("lock.previewTitle")}`
-    implicitWidth: 1280
-    implicitHeight: 800
-    color: theme.color.bg
+    screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
+    implicitWidth: Math.min(1280, (screen?.width ?? 1400) - 64)
+    implicitHeight: Math.min(800, (screen?.height ?? 900) - 96)
+    color: "transparent"
+    exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.layer: WlrLayer.Top
+    WlrLayershell.namespace: "lc-lock-preview"
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
-    onVisibleChanged: {
-        if (!visible)
-            Lock.previewing = false;
-        else
-            floatIt.restart();
-    }
+    Component.onCompleted: screen = screen
 
-    Timer {
-        id: floatIt
-        interval: 150
-        onTriggered: {
-            const target = `window = "title:^lc-shell · "`;
-            Hyprland.dispatch(`hl.dsp.window.float({ action = "set", ${target} })`);
-            Hyprland.dispatch(`hl.dsp.window.resize({ x = ${win.implicitWidth}, y = ${win.implicitHeight}, ${target} })`);
-            Hyprland.dispatch(`hl.dsp.window.center({ ${target} })`);
-        }
-    }
-
-    LockContent {
+    Rectangle {
         anchors.fill: parent
-        screen: win.screen
-        preview: true
+        radius: win.theme.radius.panel
+        color: win.theme.color.bg
+        clip: true
+        Keys.onEscapePressed: Lock.previewing = false
+
+        LockContent {
+            anchors.fill: parent
+            screen: win.screen
+            preview: true
+        }
+
+        Rectangle {
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.margins: win.theme.space.s
+            width: 32
+            height: 32
+            radius: 16
+            color: closeArea.containsMouse ? win.theme.color.surface3 : win.theme.color.surface
+
+            Icon {
+                anchors.centerIn: parent
+                name: "close"
+                size: 20
+            }
+
+            MouseArea {
+                id: closeArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: Lock.previewing = false
+            }
+        }
     }
 }

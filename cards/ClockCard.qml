@@ -26,7 +26,9 @@ Column {
     readonly property date shownMonth: new Date(clock.date.getFullYear(), clock.date.getMonth() + monthOffset, 1)
     // Weeks of the shown month: [{ week, days: [{ date, inMonth, today }] }]
     readonly property var weeks: {
-        const first = I18n.locale.firstDayOfWeek % 7; // Qt: 1 = Monday … 7 = Sunday
+        // Weeks start on Monday: the ISO week numbers shown beside each row
+        // only make sense that way (whatever the locale's first day).
+        const first = 1;
         const start = new Date(shownMonth);
         start.setDate(1 - ((start.getDay() - first + 7) % 7));
         const today = clock.date.toDateString();
@@ -121,7 +123,7 @@ Column {
                 required property int index
                 width: calendar.cell
                 horizontalAlignment: Text.AlignHCenter
-                text: I18n.locale.dayName((I18n.locale.firstDayOfWeek + index) % 7, Locale.NarrowFormat)
+                text: I18n.locale.dayName((1 + index) % 7, Locale.NarrowFormat)
                 label: true
                 color: root.theme.color.soft
             }
