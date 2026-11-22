@@ -142,9 +142,9 @@ ModuleBase {
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.bottom: parent.bottom
                         width: Math.min(parent.width * 0.35, 12)
-                        height: Math.max(3, parent.height * 0.28 * modelData.rain / 100)
+                        height: Math.max(3, parent.height * 0.18 * modelData.rain / 100)
                         radius: 2
-                        color: modelData.rain >= 50 ? hours.ink : Qt.alpha(hours.ink, 0.4)
+                        color: Qt.alpha(hours.ink, modelData.rain >= 50 ? 0.7 : 0.35)
                     }
                 }
             }

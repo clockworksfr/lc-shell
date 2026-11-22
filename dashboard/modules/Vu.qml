@@ -80,7 +80,7 @@ ModuleBase {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: root.theme.radius.control
+                    radius: Math.min(root.theme.radius.control, 6)
                     color: root.theme.color.surface2
                 }
 
@@ -90,7 +90,7 @@ ModuleBase {
                     y: root.horizontal ? 0 : parent.height * (1 - amount)
                     width: root.horizontal ? parent.width * amount : parent.width
                     height: root.horizontal ? parent.height : parent.height * amount
-                    radius: root.theme.radius.control
+                    radius: Math.min(root.theme.radius.control, 6)
                     color: meter.smooth > 46 / 48 ? root.theme.color.urgent : meter.smooth > 42 / 48 ? root.theme.color.warn : root.theme.color.accent
                 }
 

@@ -87,7 +87,7 @@ ModuleBase {
             anchors.verticalCenter: parent.verticalCenter
             text: root.time
             tubes: true
-            pixelSize: root.figure(0.62, root.shape === "strip" ? 0.2 : 0.5 * root.perChar(root.time.length) * 1.6)
+            pixelSize: root.figure(0.62, (root.shape === "strip" ? 0.3 : 0.55) * root.perChar(root.time.length))
         }
 
         Column {
@@ -124,7 +124,7 @@ ModuleBase {
             WeekStrip {
 
                 m: root
-                visible: root.shape === "wide" && root.ch >= 240
+                visible: root.shape === "wide" && root.ch >= 240 && wideDate.width >= 230
                 width: parent.width
                 height: Math.min(root.ch * 0.4, 90)
             }

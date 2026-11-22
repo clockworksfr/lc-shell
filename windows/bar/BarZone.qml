@@ -124,7 +124,8 @@ Item {
 
                     anchors.centerIn: parent
                     columns: zone.vertical ? 1 : Math.max(1, group.modelData.length)
-                    spacing: zone.look.spacing
+                    // Editing: room for each widget's badges.
+                    spacing: zone.look.spacing + (zone.editing ? 14 : 0)
                     horizontalItemAlignment: Grid.AlignHCenter
                     verticalItemAlignment: Grid.AlignVCenter
 

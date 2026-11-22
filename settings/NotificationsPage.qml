@@ -25,7 +25,7 @@ Column {
             Rectangle {
                 width: 180
                 height: 104
-                radius: root.theme.radius.control
+                radius: Math.min(root.theme.radius.control, 10)
                 color: root.theme.color.surface
                 border.width: 1
                 border.color: root.theme.color.line

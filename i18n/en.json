@@ -358,5 +358,7 @@
   "tray.menu": "Menu",
   "widget.dynamicIsland": "Dynamic island",
   "island.sharing": "Screen shared",
-  "island.mic": "Mic · {app}"
+  "island.mic": "Mic · {app}",
+  "format.clockNormal": "ddd d  HH:mm",
+  "card.historyWaiting": "Collecting the history (a point every few minutes)…"
 }

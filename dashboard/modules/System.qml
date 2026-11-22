@@ -158,6 +158,7 @@ ModuleBase {
 
                 // Knob: value and label under it, on a small LCD.
                 Display {
+                    id: lcd
                     visible: root.theme.style.ring === "knob"
                     anchors.bottom: parent.bottom
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -170,7 +171,7 @@ ModuleBase {
                         text: `${modelData.label} ${I18n.percent(modelData.value)}`
                         font.family: root.theme.font.lcd ?? root.theme.font.mono
                         font.pixelSize: Math.min(root.t3, parent.height * 0.6)
-                        color: parent.ink
+                        color: lcd.ink
                     }
                 }
             }

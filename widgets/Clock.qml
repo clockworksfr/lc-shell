@@ -11,7 +11,7 @@ TextWidget {
     readonly property string format: vertical ? (options.verticalFormat ?? "HH\nmm")
         : size === "compact" ? "HH:mm"
         : size === "extended" ? `${I18n.tr("format.dateLong")}  HH:mm`
-        : (options.format ?? "HH:mm")
+        : (options.format ?? I18n.tr("format.clockNormal"))
 
     // Month and day names follow the shell language (I18n.locale).
     fullText: I18n.locale.toString(clock.date, format)

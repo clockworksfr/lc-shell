@@ -48,8 +48,9 @@ Item {
         return Math.max(1, Math.min(max, Math.floor((ch + gap) / (h + gap))));
     }
 
-    // Columns × rows maximizing size × √n for up to `nMax` square items of
-    // at least `minSize`: { n, columns, rows, size }.
+    // Columns × rows showing as many of `nMax` square items as fit at
+    // `minSize` or more, as big as possible (score size × n, ties go to
+    // more items): { n, columns, rows, size }.
     function bestGrid(nMax: int, minSize: real): var {
         let best = { n: 1, columns: 1, rows: 1, size: Math.min(cw, ch) };
         let score = 0;
@@ -59,8 +60,8 @@ Item {
                 const size = Math.min((cw - (c - 1) * gap) / c, (ch - (r - 1) * gap) / r);
                 if (size < minSize)
                     continue;
-                const s = size * Math.sqrt(n);
-                if (s > score) {
+                const s = size * n;
+                if (s >= score) {
                     score = s;
                     best = { n: n, columns: c, rows: r, size: size };
                 }

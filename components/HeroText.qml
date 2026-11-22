@@ -15,12 +15,15 @@ Item {
 
     property string text
     property real pixelSize: 48
-    property color color: theme.color.ink
+    // Modulaire's figures are Nixie orange.
+    property color color: theme.color.nixie ?? theme.color.ink
     property int horizontalAlignment: Text.AlignLeft
     readonly property bool glows: Qt.color(theme.color.glow ?? "#00000000").a > 0
 
     implicitWidth: label.implicitWidth
     implicitHeight: label.implicitHeight
+    // Text-like baseline (anchors.baseline: smaller figures beside it).
+    baselineOffset: label.baselineOffset
 
     Text {
         anchors.fill: label

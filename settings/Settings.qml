@@ -33,8 +33,10 @@ Singleton {
     function open(target: string): void {
         // Older page names.
         const name = target === "general" ? "system" : target;
-        if (pages.includes(name))
+        if (pages.includes(name)) {
             page = name;
+            query = "";
+        }
         opened = true;
     }
 

@@ -47,6 +47,15 @@ Column {
         }
     }
 
+    ThemedText {
+        visible: Power.hasBattery && Power.history.length < 2
+        width: parent.width
+        wrapMode: Text.WordWrap
+        text: I18n.tr("card.historyWaiting")
+        color: root.theme.color.soft
+        font.pixelSize: root.theme.font.sizeS
+    }
+
     Column {
         visible: Power.history.length >= 2
         width: parent.width
