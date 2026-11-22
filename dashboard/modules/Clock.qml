@@ -95,7 +95,8 @@ ModuleBase {
 
             anchors.left: wideTime.right
             anchors.leftMargin: root.gap * 1.5
-            anchors.right: parent.right
+            // strip: natural width, the week fills the rest of the line.
+            width: root.shape === "strip" ? Math.min(root.cw * 0.2, 300) : parent.width - x
             anchors.verticalCenter: parent.verticalCenter
             spacing: 2
 
@@ -130,7 +131,18 @@ ModuleBase {
                 height: Math.min(root.ch * 0.4, (width - 6 * spacing) / 7 * 1.3)
             }
         }
+        // strip: the week on the rest of the line.
+        WeekStrip {
+            m: root
+            visible: root.shape === "strip" && width >= 200
+            anchors.left: wideDate.right
+            anchors.leftMargin: root.gap * 1.5
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            height: Math.min(root.ch * 0.8, (width - 6 * spacing) / 7 * 1.3)
+        }
     }
+
 
     // box / tall: time, date, the week (or the month when roomy).
     Column {
