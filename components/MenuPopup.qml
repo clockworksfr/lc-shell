@@ -27,6 +27,12 @@ PanelWindow {
 
     signal picked(string id)
 
+    // Text and icons in proportion to the rows: touch screens (the modules
+    // screen: 72 px targets) get big rows, so big text too.
+    readonly property real rowHeight: Math.max(34, theme.hit + 10)
+    readonly property real textSize: Math.max(theme.font.sizeM, Math.min(24, rowHeight * 0.3))
+    readonly property real iconSize: Math.max(18, Math.round(textSize * 1.3))
+
     // Point it opens from, on its screen.
     property point origin
 
@@ -76,7 +82,7 @@ PanelWindow {
     }
     visible: false
     color: "transparent"
-    implicitWidth: 280
+    implicitWidth: Math.min(480, 280 * textSize / theme.font.sizeM)
     implicitHeight: column.implicitHeight + theme.space.xs * 2
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
@@ -176,7 +182,7 @@ PanelWindow {
         signal clicked
 
         width: parent?.width ?? 0
-        height: separator ? 9 : Math.max(34, theme.hit + 10)
+        height: separator ? 9 : root.rowHeight
 
         Rectangle {
             visible: row.separator
@@ -207,7 +213,7 @@ PanelWindow {
                 visible: !!row.check
                 name: row.check === "radio" ? (row.checked ? "radio_button_checked" : "radio_button_unchecked") : (row.checked ? "check_box" : "check_box_outline_blank")
                 filled: row.checked
-                size: 18
+                size: root.iconSize
                 color: row.checked ? row.theme.color.accent : row.theme.color.soft
             }
 
@@ -215,22 +221,23 @@ PanelWindow {
                 anchors.verticalCenter: parent.verticalCenter
                 visible: !!row.iconName
                 name: row.iconName
-                size: 18
+                size: root.iconSize
                 color: row.theme.color.soft
             }
 
             IconImage {
                 anchors.verticalCenter: parent.verticalCenter
                 visible: !!row.iconSource
-                implicitSize: 18
+                implicitSize: root.iconSize
                 source: row.iconSource
             }
 
             ThemedText {
                 anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - x - (row.submenu ? 24 : 0)
+                width: parent.width - x - (row.submenu ? root.iconSize + 6 : 0)
                 elide: Text.ElideRight
                 text: row.text.replace(/_(?!_)/g, "")
+                font.pixelSize: root.textSize
                 color: row.soft ? row.theme.color.soft : row.theme.color.ink
             }
         }
@@ -241,7 +248,7 @@ PanelWindow {
             anchors.right: parent.right
             anchors.rightMargin: row.theme.space.s
             name: "chevron_right"
-            size: 18
+            size: root.iconSize
             color: row.theme.color.soft
         }
 
