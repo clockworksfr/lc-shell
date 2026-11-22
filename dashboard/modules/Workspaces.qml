@@ -57,7 +57,7 @@ ModuleBase {
                 width: (grid.width - grid.spacing * (grid.columns - 1)) / grid.columns
                 height: (grid.height - grid.spacing * (Math.ceil(root.count / grid.columns) - 1)) / Math.ceil(root.count / grid.columns)
                 radius: root.theme.radius.tile
-                color: modelData.active ? (root.theme.color.signal ?? root.theme.color.accent) : root.theme.color.surface2
+                color: modelData.active ? root.theme.color.accent : root.theme.color.surface2
 
                 Figure {
                     anchors.centerIn: parent

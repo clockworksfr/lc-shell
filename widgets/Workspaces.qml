@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Hyprland
 import qs.components
@@ -41,7 +42,7 @@ Grid {
             required property HyprlandWorkspace modelData
 
             readonly property color dotColor: modelData.urgent ? root.theme.color.urgent
-                : modelData.active ? (root.theme.color.signal ?? root.theme.color.accent)
+                : modelData.active ? root.theme.color.accent
                 : root.theme.color.soft
             readonly property int pill: modelData.active ? 27 : 8
 
@@ -51,6 +52,18 @@ Grid {
             implicitHeight: star ? 16 : root.dots ? (root.vertical ? pill : 8) : Math.min(root.cell, 32)
             radius: root.dots ? root.theme.radius.full : root.theme.radius.control
             color: star ? "transparent" : root.dots ? dotColor : modelData.active ? root.theme.color.surface2 : "transparent"
+
+            // The active dot glows where the theme glows (Matrix in dark).
+            layer.enabled: root.dots && modelData.active && Qt.color(root.theme.color.glow ?? "#00000000").a > 0
+            layer.effect: MultiEffect {
+                autoPaddingEnabled: true
+                shadowEnabled: true
+                shadowColor: root.theme.color.glow ?? "transparent"
+                shadowBlur: 0.7
+                blurMax: 12
+                shadowHorizontalOffset: 0
+                shadowVerticalOffset: 0
+            }
 
             // Four-pointed star for the active workspace ("stars" style).
             ThemedText {
