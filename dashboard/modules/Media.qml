@@ -338,19 +338,14 @@ ModuleBase {
                 Layout.fillWidth: true
             }
 
+            // The sound between the track and the progress, in every theme
+            // (even where the cover's ring shows it too).
             AudioSpectrum {
-
-                visible: !root.spectrumInside && !root.ringShowsSound
+                visible: !root.spectrumInside
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.minimumHeight: 12
                 count: Math.max(12, Math.min(32, Math.floor(width / 18)))
-            }
-
-            // The ring shows the sound: the room left stays between the blocks.
-            Item {
-                visible: !root.spectrumInside && root.ringShowsSound
-                Layout.fillHeight: true
             }
 
             Progress {
