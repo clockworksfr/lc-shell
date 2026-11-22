@@ -106,8 +106,11 @@ ModuleBase {
             width: parent.width
             horizontalAlignment: details.align
             visible: !!details.m.today
+            // Compact, shrinking a little before eliding: both ends stay.
+            fontSizeMode: Text.HorizontalFit
+            minimumPixelSize: 10
             elide: Text.ElideRight
-            text: details.m.today ? `↑ ${Weather.temp(details.m.today.max)}  ↓ ${Weather.temp(details.m.today.min)}` : ""
+            text: details.m.today ? `↑${Weather.temp(details.m.today.max)}  ↓${Weather.temp(details.m.today.min)}` : ""
             font.family: details.m.screenText ? details.m.screenFont : details.m.theme.font.family
             font.pixelSize: details.m.t3
             font.features: ({ "tnum": 1 })
