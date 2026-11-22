@@ -252,11 +252,16 @@ ModuleBase {
         anchors.fill: parent
         spacing: root.gap / 1.5
 
+        // The cover takes what the title, progress and keys leave (never
+        // pushing the keys out of the cell); hidden when too small.
         Cover {
+            readonly property real reserved: root.t2 * 2.4 + root.t3 * 1.4 + root.t4 * 2.2 + Math.min(root.buttonSize, root.ch * 0.2) + root.gap * 5
+            readonly property real room: Math.min(root.cw * (root.shape === "narrow" ? 0.9 : 0.7), root.ch * 0.4, root.ch - reserved)
+            visible: shown && room >= 48
             Layout.alignment: Qt.AlignHCenter
             source: root.player?.trackArtUrl ?? ""
             playing: root.playing
-            size: Math.min(root.cw * (root.shape === "narrow" ? 0.9 : 0.7), root.ch * 0.4)
+            size: Math.max(0, room)
         }
 
         Track {
