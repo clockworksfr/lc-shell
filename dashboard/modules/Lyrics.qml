@@ -60,6 +60,8 @@ ModuleBase {
         model: root.shown
 
         Item {
+            id: measured
+
             required property var modelData
             readonly property real advance: tm.advanceWidth
 
@@ -68,10 +70,10 @@ ModuleBase {
 
             TextMetrics {
                 id: tm
-                text: parent.modelData.text
+                text: measured.modelData.text
                 font.family: root.theme.font.lyric ?? root.theme.font.family
                 font.capitalization: root.theme.font.lyricCaps ? Font.AllUppercase : Font.MixedCase
-                font.weight: parent.modelData.index === root.current ? Font.DemiBold : Font.Normal
+                font.weight: measured.modelData.index === root.current ? Font.DemiBold : Font.Normal
                 font.pixelSize: 100
             }
         }
