@@ -79,17 +79,21 @@ Item {
     Canvas {
         anchors.fill: parent
         anchors.margins: 14
+        // Visible without competing with the content.
+        readonly property color dot: Qt.alpha(root.theme.color.ink, root.theme.variant === "light" ? 0.2 : 0.17)
+
         visible: root.look === "matrix"
         onWidthChanged: requestPaint()
         onHeightChanged: requestPaint()
+        onDotChanged: requestPaint()
         onPaint: {
             const ctx = getContext("2d");
             ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = Qt.alpha(root.theme.color.ink, 0.07);
+            ctx.fillStyle = dot;
             for (let y = 0; y <= height; y += 16)
                 for (let x = 0; x <= width; x += 16) {
                     ctx.beginPath();
-                    ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+                    ctx.arc(x, y, 1.4, 0, Math.PI * 2);
                     ctx.fill();
                 }
         }
