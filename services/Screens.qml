@@ -22,6 +22,19 @@ Singleton {
         return Hyprland.toplevels.values.some(t => t.workspace === workspace && ((t.lastIpcObject?.fullscreen ?? 0) & 2));
     }
 
+    // A screen share / recording is running (Hyprland "screencast" event:
+    // "1,<owner>" starts, "0,<owner>" stops). Window titles are hidden then.
+    property bool sharing: false
+
+    Connections {
+        target: Hyprland
+
+        function onRawEvent(event: HyprlandEvent): void {
+            if (event.name === "screencast")
+                root.sharing = event.data.startsWith("1");
+        }
+    }
+
     // Where an automatic popup (OSD, notification) may appear.
     // Nothing automatic is ever drawn over a fullscreen window: the popup
     // goes to a "modules" screen instead, or nowhere ("").

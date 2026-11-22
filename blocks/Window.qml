@@ -4,6 +4,7 @@ import Quickshell.Hyprland
 import Quickshell.Widgets
 import qs.components
 import qs.i18n
+import qs.services
 
 // Active window of this screen: app icon and window title.
 // Sizes: compact = app name, normal = title, extended = app — title.
@@ -66,7 +67,9 @@ Item {
             visible: !root.vertical
             width: Math.min(implicitWidth, root.maxWidth - 26)
             elide: Text.ElideRight
-            text: root.size === "compact" ? root.appName
+            // Titles can be private (mail subjects, chats): app name only
+            // while the screen is shared.
+            text: root.size === "compact" || Screens.sharing ? root.appName
                 : root.size === "extended" ? [root.appName, root.title].filter(s => !!s).join(" — ")
                 : root.title || root.appName
             color: root.theme?.color.soft ?? color

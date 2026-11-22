@@ -52,6 +52,8 @@ Spécification issue de l'étude de design (artifact « lc-shell rendus », ongl
 10. **Système** (`/proc`, amdgpu sysfs/hwmon, sans réveiller l'eGPU) : tuiles CPU / GPU (valeur, température, courbe 60 s) ; barres RAM et VRAM ; 3 processus les plus gourmands ; ventilateurs ; clic = btop.
 11. **Météo** (open-meteo, en cache) : grand chiffre, condition, ressenti, vent ; 6 prochaines heures + probabilité de pluie ; source et heure du relevé ; hors ligne : dernière donnée datée.
 
+12. **Fenêtre active** (Hyprland toplevels) : icône, appli, espace de travail et écran ; titre complet ; autres fenêtres de l'appli (clic : y aller) ; actions Flottante, Plein écran, Épingler, Fermer (second clic pour confirmer) ; « Déplacer vers » un espace de travail. Pendant un partage d'écran (évènement Hyprland `screencast`), titres masqués dans la barre et la carte.
+
 ### Déclinaison par thème
 
 | Thème | Progression | Grands chiffres | Labels |

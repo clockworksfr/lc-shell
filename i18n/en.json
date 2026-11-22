@@ -212,5 +212,14 @@
   "system.gpuIntegrated": "iGPU",
   "system.gpuDiscrete": "GPU",
   "block.window": "Active window",
-  "bt.unnamed": "Unnamed device"
+  "bt.unnamed": "Unnamed device",
+  "card.titleHidden": "Title hidden while the screen is shared",
+  "card.otherWindows.one": "{n} other window",
+  "card.otherWindows.other": "{n} other windows",
+  "card.float": "Float",
+  "card.fullscreen": "Fullscreen",
+  "card.pin": "Pin",
+  "card.close": "Close",
+  "card.closeConfirm": "Click again to close",
+  "card.moveTo": "Move to:"
 }
