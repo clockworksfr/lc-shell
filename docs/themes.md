@@ -57,27 +57,34 @@ Issue de l'étude de design du 22/11/2026 (maquettes : artifact « lc-shell rend
   - Notifications : panneau de rayon 20, groupées par appli.
   - Tiroirs : sortent de leur îlot.
 
-## 2. Ligne
+## 2. Constellation (remplace Ligne, étude v4)
 
-| Rôle | Sombre | Clair |
+Concept inspiré de Nebula (github.com/LilaccFlowerr/Nebula, **AGPL-3.0** : concept seulement, aucun code repris) : îlots flottants à rôle fixe, popups reliés à leur îlot par un col concave, verre teinté sans flou, univers spatial. Différences : palette fixe (pas de matugen), constellation et étoiles, comète, orbites, Outfit au lieu d'Inter.
+
+| Rôle | Nuit | Aube |
 |---|---|---|
-| bg | #16181A | #F3F4F2 |
-| surface (barre, 90 %) | #101213 | #FBFBFA |
-| surface2 | #202326 | #FFFFFF |
-| surface3 | #2A2E32 | #E8EBE9 |
-| ink | #E7E7E3 | #1B1E20 |
-| soft | #9CA1A3 | #5E6568 |
-| line | #FFFFFF14 | #0000001A |
-| accent | #9CC3D5 | #2F6F8C |
-| onAccent | #0E1A20 | #FFFFFF |
-| urgent | #EF6B5F | #B8392E |
-| warn | #E6B450 | #8F6400 |
-| ok | #8FCB9F | #3E7D52 |
+| bg | #0B0E1A | #EEF0F8 |
+| surface (86 % nuit, 90 % aube) | #141A2B | #FFFFFF |
+| surface2 | #1C2338 | #F3F4FB |
+| surface3 | #262E47 | #E4E7F4 |
+| ink | #E6E9F5 | #171B2E |
+| soft | #9AA3BF | #5A6180 |
+| line | #2A3350 | #D8DCEC |
+| accent | #9FB8FF | #4255C8 |
+| accent2 | #F2A7D8 | #C2408F |
+| onAccent | #0E1430 | #FFFFFF |
+| urgent | #FF7A8A | #C93A4E |
+| warn | #FFD27A | #956400 |
+| ok | #7EE0B5 | #23805B |
+| glass (reflet haut) | #FFFFFF14 | #FFFFFF99 |
+| star | #FFFFFFB0 | #3A46808A |
 
-- **Polices** : IBM Plex Sans 400/500/600, IBM Plex Mono 400/500 (OFL, github.com/IBM/plex).
-- **Formes** : rayons contrôle 10, panneau 16, carte Xeneon 26, pilule. Bordure 1 px (barre : bas seulement). Espacements 4/8/12/16/24. Ombre panneaux seulement, 0 20 60 #00000099. Fondu 120–160 ms.
-- **Barre** : complète, collée, hauteur 32, rayon 0, opacité 90 %, bordure basse 1, pas de coins d'écran ; contenu dans la colonne centrale (2528 px sur DP-1).
-- **Composants** : espaces en chiffres Plex Mono, actif souligné 2 px accent, urgent en `warn` ; états en mots courts (« Wi-Fi », « BT 2 », « 64 % ») ; curseurs piste 8 px ; progression 4 px ; interrupteurs en tuiles texte, actif = accent 20 % + liseré.
+- **Polices** : Outfit 200/300/400/500/600 (OFL, github.com/Outfitio/Outfit-Fonts) · Geist Mono 400/500 (OFL, github.com/vercel/geist-font) · Material Symbols Rounded FILL 1 wght 400 opsz 24.
+- **Formes** : îlots, boutons, curseurs en pilule ; cartes 24 ; tuiles 22–28 ; contrôles internes 16. Bordure 1 px accent 16–22 % ; urgent = liseré 3 px + halo rose. Col 64×12 (deux arcs concaves r 12). Espacements 6/10/14/20/28. Ombre 0 6 26 #00000080 (nuit) / #2A3A8A26 (aube). Mouvement 200–260 ms OutQuint.
+- **Barre** : îlots flottants, marge 10, hauteur 44, rayon 22, opacité 86 %, contour 1, groupes nus, coins d'écran 18. Cadre (off) : épaisseur 8, rayon intérieur 22, coins extérieurs 30. Verticale : 52 px, heure sur deux lignes Outfit 300.
+- **Textures** : verre = surface 86 % + reflet blanc 8 % sur les 58 % hauts, sans flou ; champ d'étoiles en Canvas peint une fois (réseaux 140 et 97 px), optionnel, jamais redessiné en jeu ; halos (≤ 16 px) limités à l'étoile active, la comète, la pochette.
+- **Composants** : espaces = constellation (vide : cercle 1,5 px ; occupé : point ; actif : étoile 4 branches accent avec halo ; urgent : point rose annelé ; fil lumineux en dégradé) ; horloge Outfit 300 (200 en grand) ; progression = comète (trait 2 px, traînée accent2 → accent, tête 10 px) ; curseurs pilules en dégradé ; bouton principal en dégradé 135° ; monitoring en orbites (planète à valeur × 360°) ; cartes et tiroirs reliés par un col.
+- **Xeneon** : média (pochette ronde avec halo, paroles, comète, boutons 110–130 px), orbites CPU/GPU/RAM, horloge Outfit 200 + météo + agenda, tuiles ne pas déranger / micro / replay / minuteur, carte urgente au liseré rose.
 
 ## 3. Façade (ampli hi-fi, afficheur VFD)
 
@@ -180,7 +187,7 @@ Alerte = rouge avec texte #FFFFFF.
 | Thème | Cadre | Épaisseur | Rayon intérieur | Opacité | Contour | Coins ext. | Largeur verticale |
 |---|---|---|---|---|---|---|---|
 | Classique moderne | non | 8 | 18 | 100 | 1 | 26 | 56 |
-| Ligne | non | 4 | 10 | 90 | 1 | 14 | 44 |
+| Constellation | non | 8 | 22 | 86 | 1 | 30 | 52 |
 | Façade | non | 12 | 6 | 100 | 2 | 18 | 64 |
 | Modulaire | non | 14 | 4 | 100 | 0 | 18 | 72 |
 | Matrix | **oui** | 10 | 24 | 100 | 0 | 32 | 56 |
