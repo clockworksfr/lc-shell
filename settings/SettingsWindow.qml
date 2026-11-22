@@ -78,7 +78,23 @@ PanelWindow {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             width: 240
-            color: win.theme.color.surface
+            // The frame's rounded corners on the left (clip doesn't round):
+            // a rounded fill, squared on its right side.
+            color: "transparent"
+
+            Rectangle {
+                anchors.fill: parent
+                radius: win.theme.radius.panel
+                color: win.theme.color.surface
+            }
+
+            Rectangle {
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                width: win.theme.radius.panel
+                color: win.theme.color.surface
+            }
 
             Column {
                 anchors.fill: parent
@@ -137,19 +153,31 @@ PanelWindow {
         Flickable {
             id: flick
 
+            // Under a header band: the content never passes under the ×.
             anchors.top: parent.top
+            anchors.topMargin: win.theme.space.s * 2 + 32
             anchors.bottom: parent.bottom
             anchors.left: sidebar.right
             anchors.right: parent.right
-            contentHeight: page.implicitHeight + win.theme.space.xl * 2
+            contentHeight: page.implicitHeight + win.theme.space.s + win.theme.space.xl
             clip: true
             boundsBehavior: Flickable.StopAtBounds
+
+            // Wheel: ~90 px a notch (Qt's default steps are short); touchpads
+            // follow the fingers.
+            WheelHandler {
+                target: null
+                onWheel: event => {
+                    const dy = event.pixelDelta.y !== 0 ? event.pixelDelta.y : event.angleDelta.y / 120 * 90;
+                    flick.contentY = Math.max(0, Math.min(flick.contentHeight - flick.height, flick.contentY - dy));
+                }
+            }
 
             Loader {
                 id: page
 
                 x: win.theme.space.xl
-                y: win.theme.space.xl
+                y: win.theme.space.s
                 // Readable line length even in a very wide window.
                 width: Math.min(parent.width - win.theme.space.xl * 2, 900)
                 source: `${Settings.page[0].toUpperCase()}${Settings.page.slice(1)}Page.qml`
@@ -157,7 +185,7 @@ PanelWindow {
                 // Page change: fade in with a small rise.
                 onLoaded: {
                     opacity = 0;
-                    pageShift.from = win.theme.space.xl + Motion.travel(8);
+                    pageShift.from = win.theme.space.s + Motion.travel(8);
                     pageEnter.start();
                 }
 
@@ -173,12 +201,21 @@ PanelWindow {
                         id: pageShift
                         target: page
                         property: "y"
-                        to: win.theme.space.xl
+                        to: win.theme.space.s
                         duration: Motion.ms(win.theme, "base", "")
                         easing.type: Easing.OutCubic
                     }
                 }
             }
+        }
+
+        // The border, over the sidebar.
+        Rectangle {
+            anchors.fill: parent
+            radius: win.theme.radius.panel
+            color: "transparent"
+            border.width: 1
+            border.color: win.theme.color.line
         }
 
         // Close.
