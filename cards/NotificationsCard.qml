@@ -12,6 +12,10 @@ Column {
     property var block
     property ShellScreen screen
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
+    // The notifications' language (as their cards): mono capitals label
+    // (Matrix: a red dot), spaced capitals (Constellation).
+    readonly property string look: theme.style.module ?? "classic"
+    readonly property bool capsLabel: look !== "classic"
 
     // Latest per app, with how many that app sent: [{ entry, count }]
     readonly property var groups: {
@@ -55,8 +59,10 @@ Column {
 
             width: root.width
             implicitHeight: texts.implicitHeight + root.theme.space.s * 2
-            radius: root.theme.radius.control
-            color: root.theme.color.surface2
+            radius: root.look === "matrix" ? 16 : root.theme.radius.control
+            color: root.look === "constellation" ? Qt.alpha(root.theme.color.accent, 0.08) : root.theme.color.surface2
+            border.width: root.look === "matrix" ? 1 : 0
+            border.color: root.theme.color.line
 
             Column {
                 id: texts
@@ -66,12 +72,29 @@ Column {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins: root.theme.space.s
 
-                ThemedText {
+                Row {
                     width: parent.width
-                    text: [parent.parent.modelData.entry.appName, parent.parent.modelData.count > 1 ? `×${parent.parent.modelData.count}` : "", I18n.relativeTime(parent.parent.modelData.entry.time)].filter(s => !!s).join(" · ")
-                    color: root.theme.color.soft
-                    font.pixelSize: root.theme.font.sizeS
-                    elide: Text.ElideRight
+                    spacing: 6
+
+                    Rectangle {
+                        visible: root.look === "matrix"
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 7
+                        height: 7
+                        radius: 3.5
+                        color: root.theme.color.signal ?? root.theme.color.urgent
+                    }
+
+                    ThemedText {
+                        width: parent.width - (root.look === "matrix" ? 13 : 0)
+                        text: [parent.parent.parent.modelData.entry.appName, parent.parent.parent.modelData.count > 1 ? `×${parent.parent.parent.modelData.count}` : "", I18n.relativeTime(parent.parent.parent.modelData.entry.time)].filter(s => !!s).join(" · ")
+                        color: root.theme.color.soft
+                        font.family: root.capsLabel && root.look !== "constellation" ? root.theme.font.mono : root.theme.font.family
+                        font.capitalization: root.capsLabel ? Font.AllUppercase : Font.MixedCase
+                        font.letterSpacing: root.look === "constellation" ? 1.4 : root.capsLabel ? 0.5 : 0
+                        font.pixelSize: root.theme.font.sizeS
+                        elide: Text.ElideRight
+                    }
                 }
 
                 ThemedText {
