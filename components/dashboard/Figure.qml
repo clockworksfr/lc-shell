@@ -48,8 +48,9 @@ Item {
             id: lcdText
             anchors.centerIn: parent
             text: root.text
-            color: window.ink
-            font.family: root.theme.font.lcd ?? root.theme.font.mono
+            // Big figures: the theme's display font (Nixie One), amber.
+            color: root.theme.color.nixie ?? window.ink
+            font.family: root.theme.font.display
             font.pixelSize: root.pixelSize * 0.82
             font.features: ({ "tnum": 1 })
         }

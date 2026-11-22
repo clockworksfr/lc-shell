@@ -22,15 +22,15 @@ Item {
     // case; outside one, the theme's text (or lyric) font.
     readonly property string textFont: kind === "none" ? (theme.font.lyric ?? theme.font.family) : (theme.font.lcd ?? theme.font.mono)
     readonly property int caps: kind === "none" || !theme.font.lyricCaps ? Font.MixedCase : Font.AllUppercase
-    // VFD phosphor and amber LCD glow; the green LCD doesn't.
-    readonly property bool glows: (kind === "vfd" && Qt.color(theme.color.glow ?? "#00000000").a > 0) || (kind === "lcd" && tint === "amber")
+    // VFD phosphor and both LCDs (dark screens, luminous ink) glow.
+    readonly property bool glows: (kind === "vfd" && Qt.color(theme.color.glow ?? "#00000000").a > 0) || kind === "lcd"
     default property alias content: inner.data
 
     Rectangle {
         anchors.fill: parent
         visible: root.kind !== "none"
         radius: 4
-        color: root.kind === "lcd" ? (root.tint === "amber" ? (root.theme.color.lcdAmber ?? "#FFB547") : (root.theme.color.lcd ?? "#C6F37A")) : "#030505"
+        color: root.kind === "lcd" ? (root.tint === "amber" ? (root.theme.color.lcdAmber ?? "#2A1606") : (root.theme.color.lcd ?? "#1A2410")) : "#030505"
         border.width: 2
         border.color: Qt.alpha("black", 0.6)
 
@@ -60,7 +60,7 @@ Item {
         layer.effect: MultiEffect {
             autoPaddingEnabled: true
             shadowEnabled: true
-            shadowColor: root.kind === "vfd" ? (root.theme.color.glow ?? "transparent") : "#99FF8A2A"
+            shadowColor: root.kind === "vfd" ? (root.theme.color.glow ?? "transparent") : root.tint === "amber" ? "#77FF8A2A" : "#66C6F37A"
             shadowBlur: root.kind === "vfd" ? 0.35 : 0.5
             blurMax: 12
             shadowHorizontalOffset: 0

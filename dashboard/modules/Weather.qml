@@ -74,9 +74,10 @@ ModuleBase {
             visible: current.m.onLcd
             anchors.verticalCenter: parent.verticalCenter
             text: current.m.now ? Weather.temp(current.m.now.temp) : ""
-            color: current.m.inkColor
-            font.family: current.m.screenFont
-            font.pixelSize: current.size * 0.9
+            // Big figure: Nixie One in amber, on the screen.
+            color: current.m.theme.color.nixie ?? current.m.inkColor
+            font.family: current.m.theme.font.display
+            font.pixelSize: current.size
         }
     }
 
