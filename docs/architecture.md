@@ -17,7 +17,7 @@ Un **profil** associe un écran à :
 
 ## Thèmes
 
-- Thèmes prévus : **Classique moderne** (défaut et base), **Ligne**, **Façade**, **Modulaire**, **Matrix**. Spécification : [`themes.md`](themes.md). Décision du 22/11 : on part sur les propositions de design telles quelles, Classique moderne partout pour commencer (écrans normaux et modules), on peaufine ensuite.
+- Thèmes prévus : **Classique moderne** (défaut et base), **Constellation** (remplace Ligne, inspiré de Nebula), **Façade**, **Modulaire**, **Matrix**. Spécification : [`themes.md`](themes.md). Décision du 22/11 : on part sur les propositions de design telles quelles, Classique moderne partout pour commencer (écrans normaux et modules), on peaufine ensuite.
 - Chaque thème a une variante **claire** et **sombre**. Bascule : manuelle, horaires fixes, ou lever/coucher du soleil (calcul local, sans réseau). IPC pour les binds. Réglage dans l'app de paramètres (fin du projet) ; par défaut identique sur tous les écrans, réglable par écran ensuite.
 - Thème choisi par mode (`normal` → Classique, `modules` → Façade par défaut), surchargeable par profil d'écran.
 - Un thème = des tokens (palette par variante, polices statiques, rayons, bordures, espacements) + des **axes de style** pour les composants (forme des curseurs, des jauges, des espaces de travail, de l'horloge…) + les **valeurs par défaut de la barre**. Aucun composant ne teste le nom d'un thème : il lit des tokens et des axes.
