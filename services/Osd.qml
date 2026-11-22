@@ -2,7 +2,6 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Hyprland
 
 // What the on-screen display shows. It reacts to changes rather than to
 // key presses, so it also works when keys are bound to wpctl/brightnessctl.
@@ -31,7 +30,11 @@ Singleton {
     function show(kind: string, monitor: BrightnessMonitor): void {
         root.kind = kind;
         root.monitor = monitor;
-        root.screenName = monitor?.name ?? Hyprland.focusedMonitor?.name ?? "";
+        // Never over a fullscreen window: elsewhere or not at all.
+        const target = Screens.popupTarget(monitor?.name ?? "");
+        if (!target)
+            return;
+        root.screenName = target;
         root.shown = true;
         hide.restart();
     }

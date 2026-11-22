@@ -11,5 +11,5 @@ ThemedText {
     property string type
 
     text: `?${type}`
-    color: Theme.color.urgent
+    color: theme.color.urgent
 }

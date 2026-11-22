@@ -4,6 +4,7 @@ import Quickshell
 import qs.launcher
 import qs.modules
 import qs.services
+import qs.theme
 
 ShellRoot {
     // One scope per screen. Screens come and go at runtime (eGPU hotplug),
@@ -16,4 +17,5 @@ ShellRoot {
 
     Ipc {}
     LauncherIpc {}
+    ThemeIpc {}
 }

@@ -10,6 +10,8 @@ import qs.theme
 PanelWindow {
     id: win
 
+    property var theme: Themes.fallback
+
     property var config: ({})
 
     readonly property bool atTop: config.position === "top"
@@ -26,7 +28,7 @@ PanelWindow {
     margins.bottom: atTop ? 0 : (config.margin ?? 80)
 
     implicitWidth: 360
-    implicitHeight: content.implicitHeight + Theme.space.m * 2
+    implicitHeight: content.implicitHeight + win.theme.space.m * 2
     color: "transparent"
 
     exclusionMode: ExclusionMode.Ignore
@@ -38,15 +40,15 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        radius: Theme.radius.m
-        color: Theme.color.surface
+        radius: win.theme.radius.m
+        color: win.theme.color.surface
 
         Column {
             id: content
 
             anchors.fill: parent
-            anchors.margins: Theme.space.m
-            spacing: Theme.space.s
+            anchors.margins: win.theme.space.m
+            spacing: win.theme.space.s
 
             Item {
                 width: parent.width
@@ -61,7 +63,7 @@ PanelWindow {
                 ThemedText {
                     anchors.right: parent.right
                     text: Osd.muted ? "muet" : `${Math.round(Osd.value * 100)} %`
-                    color: Osd.muted ? Theme.color.fgMuted : Theme.color.fg
+                    color: Osd.muted ? win.theme.color.fgMuted : win.theme.color.fg
                 }
             }
 
@@ -69,14 +71,14 @@ PanelWindow {
             Rectangle {
                 width: parent.width
                 height: 6
-                radius: Theme.radius.s
-                color: Theme.color.bg
+                radius: win.theme.radius.s
+                color: win.theme.color.bg
 
                 Rectangle {
                     width: parent.width * Math.min(Osd.value, 1)
                     height: parent.height
                     radius: parent.radius
-                    color: Osd.muted ? Theme.color.fgMuted : Osd.value > 1 ? Theme.color.urgent : Theme.color.accent
+                    color: Osd.muted ? win.theme.color.fgMuted : Osd.value > 1 ? win.theme.color.urgent : win.theme.color.accent
 
                     Behavior on width {
                         NumberAnimation {
@@ -89,8 +91,8 @@ PanelWindow {
             ThemedText {
                 width: parent.width
                 text: Osd.label
-                color: Theme.color.fgMuted
-                font.pixelSize: Theme.font.sizeS
+                color: win.theme.color.fgMuted
+                font.pixelSize: win.theme.font.sizeS
                 elide: Text.ElideRight
             }
         }

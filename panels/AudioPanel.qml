@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import Quickshell.Services.Pipewire
 import qs.components
 import qs.services
@@ -8,8 +9,10 @@ import qs.theme
 Column {
     id: root
 
+    readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
+
     width: 360
-    spacing: Theme.space.s
+    spacing: root.theme.space.s
 
     Section {
         title: "Sortie"
@@ -26,7 +29,7 @@ Column {
     Rectangle {
         width: parent.width
         height: 1
-        color: Theme.color.bg
+        color: root.theme.color.bg
     }
 
     Section {
@@ -44,6 +47,8 @@ Column {
     component Section: Column {
         id: section
 
+        readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
+
         property string title
         property bool muted
         property real volume
@@ -56,7 +61,7 @@ Column {
         signal picked(PwNode node)
 
         width: parent.width
-        spacing: Theme.space.s
+        spacing: section.theme.space.s
 
         Item {
             width: parent.width
@@ -65,14 +70,14 @@ Column {
             ThemedText {
                 id: header
                 text: section.title
-                font.pixelSize: Theme.font.sizeS
-                color: Theme.color.fgMuted
+                font.pixelSize: section.theme.font.sizeS
+                color: section.theme.color.fgMuted
             }
 
             ThemedText {
                 anchors.right: parent.right
                 text: section.muted ? "muet" : `${Math.round(section.volume * 100)} %`
-                color: section.muted ? Theme.color.fgMuted : Theme.color.fg
+                color: section.muted ? section.theme.color.fgMuted : section.theme.color.fg
 
                 MouseArea {
                     anchors.fill: parent
@@ -98,17 +103,17 @@ Column {
                 readonly property bool selected: modelData === section.current
 
                 width: section.width
-                implicitHeight: deviceName.implicitHeight + Theme.space.s * 2
-                radius: Theme.radius.s
-                color: hover.containsMouse ? Theme.color.bg : "transparent"
+                implicitHeight: deviceName.implicitHeight + section.theme.space.s * 2
+                radius: section.theme.radius.s
+                color: hover.containsMouse ? section.theme.color.bg : "transparent"
 
                 ThemedText {
                     id: deviceName
                     anchors.fill: parent
-                    anchors.leftMargin: Theme.space.s
-                    anchors.rightMargin: Theme.space.s
+                    anchors.leftMargin: section.theme.space.s
+                    anchors.rightMargin: section.theme.space.s
                     text: `${parent.selected ? "●" : "○"}  ${Audio.nodeName(parent.modelData)}`
-                    color: parent.selected ? Theme.color.fg : Theme.color.fgMuted
+                    color: parent.selected ? section.theme.color.fg : section.theme.color.fgMuted
                     elide: Text.ElideRight
                 }
 

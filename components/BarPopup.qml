@@ -8,32 +8,35 @@ import qs.theme
 PopupWindow {
     id: root
 
+    // Same theme as the bar it opens from.
+    readonly property var theme: anchorItem?.QsWindow.window?.theme ?? Themes.fallback
+
     required property Item anchorItem
     default property alias content: column.data
 
     anchor.item: anchorItem
     // From the block down to just below the bar.
     anchor.rect.width: anchorItem.width
-    anchor.rect.height: anchorItem.height + (Theme.bar.height - anchorItem.height) / 2 + Theme.space.xs
+    anchor.rect.height: anchorItem.height + (root.theme.bar.height - anchorItem.height) / 2 + root.theme.space.xs
     anchor.edges: Edges.Bottom
     anchor.gravity: Edges.Bottom
 
     grabFocus: true
     color: "transparent"
-    implicitWidth: column.implicitWidth + Theme.space.m * 2
-    implicitHeight: column.implicitHeight + Theme.space.m * 2
+    implicitWidth: column.implicitWidth + root.theme.space.m * 2
+    implicitHeight: column.implicitHeight + root.theme.space.m * 2
 
     Rectangle {
         anchors.fill: parent
-        radius: Theme.radius.m
-        color: Theme.color.surface
+        radius: root.theme.radius.m
+        color: root.theme.color.surface
 
         Column {
             id: column
 
             anchors.fill: parent
-            anchors.margins: Theme.space.m
-            spacing: Theme.space.s
+            anchors.margins: root.theme.space.m
+            spacing: root.theme.space.s
         }
     }
 }

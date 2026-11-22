@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import qs.theme
 
 // Horizontal slider. `value` is not written by the slider itself:
@@ -6,6 +7,8 @@ import qs.theme
 // flows back through the binding.
 Item {
     id: root
+
+    readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
 
     property real value: 0
     property real from: 0
@@ -30,14 +33,14 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width
         height: 6
-        radius: Theme.radius.s
-        color: Theme.color.bg
+        radius: root.theme.radius.s
+        color: root.theme.color.bg
 
         Rectangle {
             width: parent.width * root.ratio
             height: parent.height
             radius: parent.radius
-            color: root.dimmed ? Theme.color.fgMuted : Theme.color.accent
+            color: root.dimmed ? root.theme.color.fgMuted : root.theme.color.accent
         }
     }
 
@@ -46,8 +49,8 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: 12
         height: 12
-        radius: Theme.radius.full
-        color: root.dimmed ? Theme.color.fgMuted : Theme.color.fg
+        radius: root.theme.radius.full
+        color: root.dimmed ? root.theme.color.fgMuted : root.theme.color.fg
     }
 
     MouseArea {

@@ -1,0 +1,36 @@
+{
+  "appearance": {
+    "variant": "auto",
+    "schedule": { "type": "time", "light": "07:30", "dark": "19:30" },
+    "themes": { "normal": "classic", "modules": "matrix" }
+  },
+  "modes": {
+    "normal": {
+      "bar": {
+        "left": ["workspaces"],
+        "center": ["clock"],
+        "right": ["media", "volume"]
+      },
+      "osd": { "position": "bottom", "margin": 80 }
+    },
+    "modules": {
+      "osd": { "position": "bottom", "margin": 40 }
+    }
+  },
+  "screens": [
+    {
+      "match": { "model": "DELL U4025QW" },
+      "mode": "normal",
+      "bar": { "center": [{ "type": "clock", "format": "dddd d MMMM  HH:mm" }] }
+    },
+    {
+      "match": { "model": "XENEON EDGE" },
+      "mode": "modules",
+      "touch": true
+    },
+    {
+      "match": { "name": "eDP-*" },
+      "mode": "normal"
+    }
+  ]
+}

@@ -12,6 +12,8 @@ import qs.theme
 PanelWindow {
     id: win
 
+    property var theme: Themes.fallback
+
     anchors {
         top: true
         bottom: true
@@ -38,9 +40,9 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height * 0.2
         width: 640
-        height: column.implicitHeight + Theme.space.m * 2
-        radius: Theme.radius.m
-        color: Theme.color.surface
+        height: column.implicitHeight + win.theme.space.m * 2
+        radius: win.theme.radius.m
+        color: win.theme.color.surface
 
         // Swallow clicks so they don't reach the close area.
         MouseArea {
@@ -51,8 +53,8 @@ PanelWindow {
             id: column
 
             anchors.fill: parent
-            anchors.margins: Theme.space.m
-            spacing: Theme.space.s
+            anchors.margins: win.theme.space.m
+            spacing: win.theme.space.s
 
             TextInput {
                 id: input
@@ -60,18 +62,18 @@ PanelWindow {
                 width: parent.width
                 focus: true
                 text: Launcher.text
-                color: Theme.color.fg
-                selectionColor: Theme.color.accent
-                selectedTextColor: Theme.color.bg
-                font.family: Theme.font.family
-                font.pixelSize: Theme.font.sizeL
+                color: win.theme.color.fg
+                selectionColor: win.theme.color.accent
+                selectedTextColor: win.theme.color.bg
+                font.family: win.theme.font.family
+                font.pixelSize: win.theme.font.sizeL
                 onTextEdited: Launcher.text = text
 
                 ThemedText {
                     visible: !input.text
                     text: "Rechercher…"
-                    color: Theme.color.fgMuted
-                    font.pixelSize: Theme.font.sizeL
+                    color: win.theme.color.fgMuted
+                    font.pixelSize: win.theme.font.sizeL
                 }
 
                 Keys.onPressed: event => {
@@ -101,7 +103,7 @@ PanelWindow {
             Row {
                 id: modes
 
-                spacing: Theme.space.m
+                spacing: win.theme.space.m
 
                 function next(): void {
                     const all = [null, ...Launcher.modes];
@@ -116,8 +118,8 @@ PanelWindow {
                     ThemedText {
                         required property var modelData
                         text: modelData.prefix ? `${modelData.prefix} ${modelData.label}` : modelData.label
-                        font.pixelSize: Theme.font.sizeS
-                        color: Launcher.modeId === modelData.id ? Theme.color.fg : Theme.color.fgMuted
+                        font.pixelSize: win.theme.font.sizeS
+                        color: Launcher.modeId === modelData.id ? win.theme.color.fg : win.theme.color.fgMuted
 
                         MouseArea {
                             anchors.fill: parent
@@ -153,14 +155,14 @@ PanelWindow {
 
                     width: list.width
                     height: win.rowHeight
-                    radius: Theme.radius.s
-                    color: current ? Theme.color.bg : "transparent"
+                    radius: win.theme.radius.s
+                    color: current ? win.theme.color.bg : "transparent"
 
                     Item {
                         id: iconBox
 
                         anchors.left: parent.left
-                        anchors.leftMargin: Theme.space.s
+                        anchors.leftMargin: win.theme.space.s
                         anchors.verticalCenter: parent.verticalCenter
                         width: 28
                         height: 28
@@ -181,9 +183,9 @@ PanelWindow {
 
                     Column {
                         anchors.left: iconBox.right
-                        anchors.leftMargin: Theme.space.m
+                        anchors.leftMargin: win.theme.space.m
                         anchors.right: parent.right
-                        anchors.rightMargin: Theme.space.s
+                        anchors.rightMargin: win.theme.space.s
                         anchors.verticalCenter: parent.verticalCenter
 
                         ThemedText {
@@ -196,8 +198,8 @@ PanelWindow {
                             width: parent.width
                             visible: !!row.modelData.subtitle
                             text: row.modelData.subtitle ?? ""
-                            font.pixelSize: Theme.font.sizeS
-                            color: row.modelData.urgent ? Theme.color.urgent : Theme.color.fgMuted
+                            font.pixelSize: win.theme.font.sizeS
+                            color: row.modelData.urgent ? win.theme.color.urgent : win.theme.color.fgMuted
                             elide: Text.ElideRight
                         }
                     }
@@ -216,8 +218,8 @@ PanelWindow {
             ThemedText {
                 visible: list.count === 0
                 text: Launcher.modeId === "files" && Launcher.term.length < 2 ? "Tape au moins 2 caractères" : "Aucun résultat"
-                color: Theme.color.fgMuted
-                font.pixelSize: Theme.font.sizeS
+                color: win.theme.color.fgMuted
+                font.pixelSize: win.theme.font.sizeS
             }
         }
     }
