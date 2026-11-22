@@ -6,7 +6,8 @@ import qs.i18n
 import qs.services
 import qs.theme
 
-// Output device and volume, per-application volumes, microphone level.
+// Output device (pickable) and volume, per-application volumes, input
+// device (pickable) and its live level.
 Column {
     id: root
 
@@ -16,25 +17,15 @@ Column {
 
     spacing: theme.space.m
 
-    Item {
+    // Output: current device (tap to pick another), volume.
+    DevicePicker {
         width: parent.width
-        implicitHeight: device.implicitHeight
-
-        ThemedText {
-            id: device
-            width: parent.width - value.width - root.theme.space.s
-            text: Audio.sinkName
-            font.weight: Font.DemiBold
-            elide: Text.ElideRight
-        }
-
-        ThemedText {
-            id: value
-            anchors.right: parent.right
-            text: Audio.muted ? I18n.tr("common.muted") : I18n.percent(Audio.volume)
-            color: Audio.muted ? root.theme.color.soft : root.theme.color.ink
-            font.features: ({ "tnum": 1 })
-        }
+        icon: "speaker"
+        devices: Audio.sinks
+        current: Audio.sink
+        trailing: Audio.muted ? I18n.tr("common.muted") : I18n.percent(Audio.volume)
+        trailingColor: Audio.muted ? root.theme.color.soft : root.theme.color.ink
+        onPicked: node => Audio.setDefaultSink(node)
     }
 
     Slider {
@@ -93,38 +84,33 @@ Column {
         color: root.theme.color.soft
     }
 
-    Row {
+    // Input: current device (tap to pick another), live level.
+    DevicePicker {
         width: parent.width
-        spacing: root.theme.space.s
+        icon: Audio.sourceMuted ? "mic_off" : "mic"
+        devices: Audio.sources
+        current: Audio.source
+        trailing: Audio.sourceMuted ? I18n.tr("common.muted") : I18n.percent(Audio.sourceVolume)
+        trailingColor: Audio.sourceMuted ? root.theme.color.soft : root.theme.color.ink
+        onPicked: node => Audio.setDefaultSource(node)
+    }
 
-        ThemedText {
-            width: parent.width * 0.38
-            anchors.verticalCenter: parent.verticalCenter
-            text: Audio.sourceMuted ? I18n.tr("common.muted") : Audio.sourceName
-            color: Audio.sourceMuted ? root.theme.color.soft : root.theme.color.ink
-            font.pixelSize: root.theme.font.sizeS
-            elide: Text.ElideRight
-        }
+    Rectangle {
+        width: parent.width
+        height: 6
+        radius: root.theme.radius.full
+        color: root.theme.color.surface2
 
-        // Live input level.
         Rectangle {
-            width: parent.width * 0.62 - parent.spacing
-            height: 6
-            anchors.verticalCenter: parent.verticalCenter
-            radius: root.theme.radius.full
-            color: root.theme.color.surface2
+            readonly property real peak: mic.peak > 0 ? Math.max(0, Math.min(1, (20 * Math.log10(mic.peak) + 60) / 60)) : 0
+            width: parent.width * peak
+            height: parent.height
+            radius: parent.radius
+            color: root.theme.color.ok
 
-            Rectangle {
-                readonly property real peak: mic.peak > 0 ? Math.max(0, Math.min(1, (20 * Math.log10(mic.peak) + 60) / 60)) : 0
-                width: parent.width * peak
-                height: parent.height
-                radius: parent.radius
-                color: root.theme.color.ok
-
-                Behavior on width {
-                    NumberAnimation {
-                        duration: 80
-                    }
+            Behavior on width {
+                NumberAnimation {
+                    duration: 80
                 }
             }
         }
