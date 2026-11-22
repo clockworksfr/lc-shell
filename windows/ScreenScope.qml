@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import qs.dashboard
 import qs.launcher
 import qs.windows.bar
 import qs.windows.dashboard
@@ -122,6 +123,16 @@ Scope {
         DashboardWindow {
             screen: root.modelData
             config: root.profile.dashboard
+            theme: root.theme
+        }
+    }
+
+    // Dashboard editor (opened explicitly: allowed over a fullscreen window).
+    LazyLoader {
+        active: DashboardEditor.editing && DashboardEditor.screenName === root.modelData.name
+
+        DashboardEditorWindow {
+            screen: root.modelData
             theme: root.theme
         }
     }

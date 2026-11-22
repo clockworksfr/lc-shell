@@ -38,7 +38,7 @@ Singleton {
     // Material Symbols name for a WMO weather code.
     function icon(code: int, isDay: bool): string {
         if (code === 0)
-            return isDay ? "sunny" : "clear_night";
+            return isDay ? "sunny" : "bedtime";
         if (code <= 2)
             return isDay ? "partly_cloudy_day" : "partly_cloudy_night";
         if (code === 3)

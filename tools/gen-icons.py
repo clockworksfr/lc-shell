@@ -10,10 +10,10 @@ with an installed Material Symbols:
     assets/fonts/symbols/icons.json              { name: codepoint }
 
 Needs fontTools. Usage:
-    gen-icons.py "MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf" \\
-        "MaterialSymbolsRounded[FILL,GRAD,opsz,wght].codepoints"
-The codepoints file comes from github.com/google/material-design-icons
-(variablefont/).
+    gen-icons.py "MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf" [codepoints]
+Codepoints are read from the font's glyph names; the optional codepoints
+file (github.com/google/material-design-icons, variablefont/) only fills
+names the font doesn't carry.
 """
 
 import json
@@ -46,12 +46,18 @@ def rename(font, family):
 
 
 def main():
-    variable_path, codepoints_path = sys.argv[1:3]
+    variable_path = sys.argv[1]
+    # Codepoints from the font itself (its glyphs are named after the
+    # icons): a codepoints file of another release can disagree with it.
     table = {}
-    with open(codepoints_path, encoding="utf-8") as f:
-        for line in f:
-            name, code = line.split()
-            table.setdefault(name, int(code, 16))
+    for code, glyph in TTFont(variable_path).getBestCmap().items():
+        table.setdefault(glyph, code)
+    # Optional codepoints file: names the font's glyphs don't carry.
+    if len(sys.argv) > 2:
+        with open(sys.argv[2], encoding="utf-8") as f:
+            for line in f:
+                name, code = line.split()
+                table.setdefault(name, int(code, 16))
     names = read_names()
     missing = [n for n in names if n not in table]
     if missing:

@@ -216,7 +216,7 @@ Column {
             label: I18n.tr("settings.sunFromWeather")
             hint: Weather.location?.name ?? ""
             Button {
-                icon: "location_on"
+                icon: "pin_drop"
                 text: I18n.tr("settings.useWeatherPlace")
                 onClicked: {
                     Config.set("appearance.schedule.latitude", Math.round(Weather.location.latitude * 100) / 100);

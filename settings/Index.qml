@@ -48,6 +48,7 @@ Singleton {
         { page: "screens", key: "settings.barPosition", hint: "" },
         { page: "screens", key: "settings.frame", hint: "settings.frameHint" },
         { page: "dashboard", key: "settings.dashboard", hint: "" },
+        { page: "dashboard", key: "settings.dashboardEdit", hint: "settings.dashboardEditHint" },
         { page: "dashboard", key: "settings.dashboardWindows", hint: "settings.dashboardWindowsHint" },
         { page: "wallpaper", key: "settings.wallpaper", hint: "" },
         { page: "wallpaper", key: "settings.wallpaperEnabled", hint: "settings.wallpaperEnabledHint" },

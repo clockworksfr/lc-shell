@@ -87,10 +87,10 @@ rainy
 rainy_light
 weather_snowy
 thunderstorm
-clear_night
+bedtime
 air
 water_drop
-location_on
+pin_drop
 chevron_right
 chevron_left
 radio_button_checked
@@ -104,3 +104,4 @@ settings_accessibility
 content_copy
 folder_open
 toolbar
+open_in_full

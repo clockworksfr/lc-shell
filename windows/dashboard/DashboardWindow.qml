@@ -31,6 +31,16 @@ PanelWindow {
     WlrLayershell.namespace: "lc-dashboard"
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
+    // Long press anywhere on the dashboard: edit it.
+    Item {
+        anchors.fill: parent
+
+        TapHandler {
+            longPressThreshold: 0.6
+            onLongPressed: DashboardEditor.start(win.screen.name)
+        }
+    }
+
     Repeater {
         model: win.cells
 

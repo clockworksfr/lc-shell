@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs.components
+import qs.dashboard
 import qs.i18n
 import qs.services
 import qs.theme
@@ -15,6 +16,21 @@ Column {
 
     Section {
         title: I18n.tr("settings.dashboard")
+
+        Field {
+            label: I18n.tr("settings.dashboardEdit")
+            hint: I18n.tr("settings.dashboardEditHint")
+            Button {
+                primary: true
+                icon: "edit"
+                enabled: Quickshell.screens.some(s => Config.forScreen(s).mode === "modules")
+                text: I18n.tr("settings.dashboardEditButton")
+                onClicked: {
+                    Settings.opened = false;
+                    DashboardEditor.start("");
+                }
+            }
+        }
 
         Field {
             label: I18n.tr("settings.dashboardWindows")

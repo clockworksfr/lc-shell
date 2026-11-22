@@ -24,6 +24,7 @@ ShellRoot {
 
     Ipc {}
     LauncherIpc {}
+    DashboardIpc {}
     Shortcuts {}
     ThemeIpc {}
     I18nIpc {}
