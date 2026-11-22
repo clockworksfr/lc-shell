@@ -518,5 +518,7 @@
   "settings.clipKey.pauseHint": "Pause / reprise de l'enregistrement",
   "clip.kinds": "Types",
   "settings.windowBorders": "Bordures des fenêtres au thème",
-  "settings.windowBordersHint": "Les bordures des fenêtres d'Hyprland (active / inactives) prennent les couleurs du thème des écrans normaux"
+  "settings.windowBordersHint": "Les bordures des fenêtres d'Hyprland (active / inactives) prennent les couleurs du thème des écrans normaux",
+  "dashboard.menu.edit": "Modifier le tableau de bord",
+  "dashboard.menu.settings": "Réglages du tableau de bord"
 }

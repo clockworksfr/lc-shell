@@ -518,5 +518,7 @@
   "settings.clipKey.pauseHint": "Pause / resume recording",
   "clip.kinds": "Kinds",
   "settings.windowBorders": "Window borders follow the theme",
-  "settings.windowBordersHint": "Hyprland's active / inactive window borders take the colors of the normal screens' theme"
+  "settings.windowBordersHint": "Hyprland's active / inactive window borders take the colors of the normal screens' theme",
+  "dashboard.menu.edit": "Edit the dashboard",
+  "dashboard.menu.settings": "Dashboard settings"
 }

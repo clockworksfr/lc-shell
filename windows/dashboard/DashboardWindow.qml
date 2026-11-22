@@ -5,6 +5,9 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.dashboard
 import qs.dashboard.modules
+import qs.components
+import qs.i18n
+import qs.settings
 
 // Dashboard of a "modules" screen: the page of its active workspace, drawn
 // on the bottom layer (under windows, which CellTiler floats into the
@@ -40,13 +43,42 @@ PanelWindow {
         }
     }
 
-    // Long press anywhere on the dashboard: edit it.
+    // Long press anywhere on the dashboard: edit it. Right click on an
+    // empty spot or between modules: a menu (edit, settings).
     Item {
         anchors.fill: parent
 
         TapHandler {
             longPressThreshold: 0.6
             onLongPressed: DashboardEditor.start(win.screen.name)
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: mouse => {
+                if (!DashboardEditor.editing)
+                    menu.openAt(mouse.x, mouse.y);
+            }
+        }
+    }
+
+    MenuPopup {
+        id: menu
+
+        host: win
+        actions: [
+            { id: "edit", icon: "edit", text: I18n.tr("dashboard.menu.edit") },
+            { id: "dashboard", icon: "tune", text: I18n.tr("dashboard.menu.settings") },
+            { id: "settings", icon: "settings", text: I18n.tr("bar.menu.settings") }
+        ]
+        onPicked: id => {
+            if (id === "edit")
+                DashboardEditor.start(win.screen.name);
+            else if (id === "dashboard")
+                Settings.open("dashboard");
+            else
+                Settings.open("appearance");
         }
     }
 
