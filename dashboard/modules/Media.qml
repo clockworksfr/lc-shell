@@ -177,7 +177,8 @@ ModuleBase {
                 text: track.m.player?.trackTitle || track.m.player?.identity || ""
                 font.family: track.textFont
                 font.capitalization: track.caps
-                font.pixelSize: track.m.t2 * (track.big ? 1.15 : 0.9)
+                // A bit smaller: more of the title fits before the ellipsis.
+                font.pixelSize: track.m.t2 * (track.big ? 0.98 : 0.8)
                 font.weight: Font.DemiBold
                 color: track.ink
             }
