@@ -19,7 +19,7 @@ import qs.theme
 ModuleBase {
     id: root
 
-    readonly property bool narrowLabels: cw / Math.max(1, cols) < (look === "matrix" || look === "facade" ? 300 : 200)
+    readonly property bool narrowLabels: cw / Math.max(1, cols) < (look === "matrix" || look === "facade" || look === "modulaire" ? 300 : 200)
     readonly property string look: theme.style.module ?? "classic"
     readonly property var brightness: Brightness.forScreen(Hyprland.focusedMonitor?.name ?? "")
 
