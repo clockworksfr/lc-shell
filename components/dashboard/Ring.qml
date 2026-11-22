@@ -96,7 +96,8 @@ Item {
             radius: width / 2
             x: root.width / 2 + Math.cos(angle) * r - width / 2
             y: root.height / 2 + Math.sin(angle) * r - height / 2
-            color: lit ? root.color : Qt.alpha(root.theme.color.ink, 0.12)
+            // Beyond 90 %: the signal color (Matrix red).
+            color: lit ? (index / 35 > 0.9 ? (root.theme.color.signal ?? root.color) : root.color) : Qt.alpha(root.theme.color.ink, 0.12)
         }
     }
 
