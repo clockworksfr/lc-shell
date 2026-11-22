@@ -206,3 +206,7 @@ hl.bind("SUPER + Space", hl.dsp.global("lc:launcher"))
 
 Les mêmes actions existent en IPC : `qs -c lc ipc call launcher toggle`, `settings toggle`, `bar edit`, etc.
 
+Autres raccourcis globaux : `lc:clipboard` (historique du presse-papier, préfixe « + » du lanceur), `lc:screenshot` (capture d'une zone, écrans figés), `lc:screenshotScreen`, `lc:notifications`, `lc:media`, `lc:toggleVariant`, `lc:nextTheme`, `lc:lock`.
+
+`contrib/hypr/` : la reprise des raccourcis de la config Caelestia de simon (`shell.lua`, `lock-and-dpms.sh` avec repli sur hyprlock) et `install.sh`, qui les installe dans `~/.config/hypr` en gardant les versions Caelestia à côté (`shell-caelestia.lua`, `lock-and-dpms-caelestia.sh`).
+
