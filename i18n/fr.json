@@ -533,5 +533,9 @@
   "toggles.auto": "Automatique",
   "media.source.auto": "Automatique (suit le lecteur qui démarre)",
   "media.source.title": "Source",
-  "media.source.autoShort": "Auto"
+  "media.source.autoShort": "Auto",
+  "toggles.record": "Enregistrer",
+  "toggles.soon": "Bientôt",
+  "toggles.all": "Réglages",
+  "toggles.more": "Plus"
 }

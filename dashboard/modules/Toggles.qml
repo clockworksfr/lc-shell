@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Wayland
 import qs.components
 import qs.components.dashboard
 import qs.i18n
@@ -8,22 +9,33 @@ import qs.services
 import qs.theme
 
 // Quick settings (design study 9): do not disturb, microphone, Wi-Fi,
-// Bluetooth, dark mode, as theme tiles (Toggle) filling the cell:
-//   tiny    the first tile
+// Bluetooth, dark mode, screen recording (placeholder), as theme tiles
+// (Toggle), plus volume and brightness sliders. Every size reaches every
+// setting: what doesn't fit goes behind a "More" tile (last slot) that
+// opens all of them in a panel over the screen. Tiles fill the cell:
+//   tiny    one tile (More: everything in the panel)
 //   narrow  one column
-//   strip   one row, up to 6 tiles of 220 px or more
+//   strip   one row, tiles of 220 px or more
 //   wide    2 rows above 250 px
 //   box     2 or 3 columns, rows of 120 px or more
 //   tall    2 columns
-// Room left under the grid (box, tall): volume and brightness sliders.
+// Sliders under the tiles when there is room (always in the panel).
 ModuleBase {
     id: root
 
-    readonly property bool narrowLabels: cw / Math.max(1, cols) < (look === "matrix" || look === "facade" || look === "modulaire" ? 300 : 200)
-    readonly property string look: theme.style.module ?? "classic"
-    readonly property var brightness: Brightness.forScreen(Hyprland.focusedMonitor?.name ?? "")
+    // In the panel: everything, sliders included.
+    property bool full: false
+    property bool panelOpen: false
 
-    readonly property var toggles: [
+    readonly property string look: theme.style.module ?? "classic"
+    readonly property bool narrowLabels: cw / Math.max(1, cols) < (look === "matrix" || look === "facade" || look === "modulaire" ? 300 : 200)
+    // The focused screen's brightness, else the first screen that has one.
+    readonly property var brightness: {
+        const focused = Brightness.forScreen(Hyprland.focusedMonitor?.name ?? "");
+        return focused?.available ? focused : Brightness.monitors.find(m => m.available) ?? null;
+    }
+
+    readonly property var tiles: [
         {
             id: "dnd",
             icon: "do_not_disturb_on",
@@ -58,8 +70,17 @@ ModuleBase {
             label: I18n.tr("toggles.dark"),
             sub: Themes.variantMode === "auto" ? I18n.tr("toggles.auto") : "",
             on: Themes.variant === "dark"
+        },
+        {
+            id: "record",
+            icon: "screen_record",
+            label: I18n.tr("toggles.record"),
+            sub: I18n.tr("toggles.soon"),
+            on: false,
+            placeholder: true
         }
     ]
+    readonly property var more: ({ id: "more", icon: shape === "tiny" ? "tune" : "more_horiz", label: I18n.tr(shape === "tiny" ? "toggles.all" : "toggles.more"), sub: "", on: false })
 
     function activate(id: string): void {
         switch (id) {
@@ -78,44 +99,57 @@ ModuleBase {
         case "dark":
             Themes.toggleVariant();
             break;
+        case "more":
+            panelOpen = true;
+            break;
         }
     }
 
-    // Fixed count (the labels depend on the columns, which depend on it).
-    readonly property int total: 5
+    // Fixed counts (the labels depend on the columns, which depend on them).
+    readonly property int total: 6
+    readonly property int levels: 2
     readonly property int cols: shape === "tiny" || shape === "narrow" ? 1
-        : shape === "strip" ? Math.max(1, Math.min(total, 6, Math.floor((cw + gap) / (220 + gap))))
+        : shape === "strip" ? Math.max(1, Math.min(total, Math.floor((cw + gap) / (220 + gap))))
         : shape === "wide" ? Math.ceil(total / (ch > 250 ? 2 : 1))
         : shape === "tall" ? 2
         : cw / 3 >= 160 ? 3 : 2
-    readonly property real minRow: look === "matrix" ? 56 : shape === "narrow" ? 72 : 120
+    readonly property real minRow: look === "matrix" ? 56 : shape === "narrow" ? 72 : 110
+    readonly property real sliderRow: Math.max(48, theme.hit * 0.75)
+    readonly property real sliderBlock: levels * sliderRow + levels * gap
+    // Sliders: always in the panel; in the cell when the tiles still get
+    // their minimum rows above them.
+    readonly property bool sliders: full || ((shape === "box" || shape === "tall" || shape === "wide") && ch - sliderBlock >= Math.ceil(total / cols) * (minRow + gap) - gap)
+    readonly property real tilesHeight: sliders ? ch - sliderBlock : ch
     readonly property int rows: shape === "tiny" || shape === "strip" ? 1
+        : full ? Math.ceil(total / cols)
         : shape === "wide" ? (ch > 250 ? 2 : 1)
-        : Math.max(1, Math.min(Math.ceil(total / cols), Math.floor((ch + gap) / (minRow + gap))))
-    readonly property int count: shape === "tiny" ? 1 : Math.min(total, cols * rows)
-    // Sliders under the grid when the cell is tall enough (box, tall).
-    readonly property bool sliders: (shape === "box" || shape === "tall") && ch - gridHeight >= 110
-    readonly property real gridHeight: (shape === "box" || shape === "tall") ? Math.min(ch, Math.ceil(count / cols) * (look === "matrix" ? 80 : 150) + (Math.ceil(count / cols) - 1) * gap) : ch
+        : Math.max(1, Math.min(Math.ceil(total / cols), Math.floor((tilesHeight + gap) / (minRow + gap))))
+    readonly property int capacity: shape === "tiny" ? 1 : cols * rows
+    // Everything in view, or the first tiles and More in the last slot.
+    readonly property bool complete: full || (capacity >= total && sliders)
+    readonly property var shown: complete ? tiles : [...tiles.slice(0, Math.max(0, Math.min(total, capacity) - 1)), more]
 
     Grid {
         id: grid
 
+        readonly property int lines: Math.ceil(root.shown.length / columns)
         readonly property real cellW: (width - (columns - 1) * spacing) / columns
-        readonly property real cellH: (height - (Math.ceil(root.count / columns) - 1) * spacing) / Math.ceil(root.count / columns)
+        readonly property real cellH: (height - (lines - 1) * spacing) / lines
 
         width: parent.width
-        height: root.sliders ? root.gridHeight : parent.height
-        columns: root.cols
+        height: root.tilesHeight
+        columns: Math.min(root.cols, root.shown.length)
         spacing: root.gap
 
         Repeater {
-            model: root.toggles.slice(0, root.count)
+            model: root.shown
 
             Toggle {
                 required property var modelData
 
                 width: grid.cellW
                 height: grid.cellH
+                opacity: modelData.placeholder ? 0.5 : 1
                 icon: modelData.icon
                 label: modelData.label
                 sub: modelData.sub
@@ -125,42 +159,114 @@ ModuleBase {
         }
     }
 
-    // Volume and brightness, under the grid.
+    // Volume (the icon mutes) and brightness, under the tiles.
     Column {
         visible: root.sliders
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.top: grid.bottom
-        anchors.topMargin: root.gap
         spacing: root.gap
 
         Repeater {
             model: [
-                { icon: Audio.muted ? "volume_off" : "volume_up", value: Audio.volume, to: Audio.maxVolume, kind: "volume" },
-                ...(root.brightness?.available ? [{ icon: "light_mode", value: root.brightness.brightness, to: 1, kind: "brightness" }] : [])
+                { icon: Audio.muted ? "volume_off" : "volume_up", value: Audio.volume, to: Audio.maxVolume, kind: "volume", text: Audio.muted ? I18n.tr("common.muted") : I18n.percent(Audio.volume), enabled: true },
+                { icon: "light_mode", value: root.brightness?.brightness ?? 0, to: 1, kind: "brightness", text: root.brightness ? I18n.percent(root.brightness.brightness) : "—", enabled: !!root.brightness }
             ]
 
-            Row {
+            Item {
+                id: level
+
                 required property var modelData
 
                 width: parent.width
-                spacing: root.gap
+                height: root.sliderRow
+                opacity: modelData.enabled ? 1 : 0.45
 
                 Icon {
-                    id: sliderIcon
+                    id: levelIcon
                     anchors.verticalCenter: parent.verticalCenter
-                    name: parent.modelData.icon
-                    size: Math.max(22, root.t2)
+                    width: root.sliderRow
+                    name: level.modelData.icon
+                    size: Math.max(22, Math.min(32, root.sliderRow * 0.55))
                     color: root.theme.color.soft
+
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: level.modelData.kind === "volume"
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Audio.toggleMute()
+                    }
                 }
 
                 Slider {
+                    anchors.left: levelIcon.right
+                    anchors.right: levelValue.left
+                    anchors.rightMargin: root.gap
                     anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width - sliderIcon.width - parent.spacing
-                    value: parent.modelData.value
-                    to: parent.modelData.to
-                    onMoved: value => parent.modelData.kind === "volume" ? Audio.setVolume(value) : root.brightness.setBrightness(value)
+                    enabled: level.modelData.enabled
+                    value: level.modelData.value
+                    to: level.modelData.to
+                    dimmed: level.modelData.kind === "volume" && Audio.muted
+                    onMoved: value => level.modelData.kind === "volume" ? Audio.setVolume(value) : root.brightness?.setBrightness(value)
+                }
+
+                ThemedText {
+                    id: levelValue
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: root.t3 * 3.4
+                    horizontalAlignment: Text.AlignRight
+                    text: level.modelData.text
+                    font.pixelSize: root.t3
+                    font.features: ({ "tnum": 1 })
+                    color: root.theme.color.ink
+                }
+            }
+        }
+    }
+
+    // Everything, in a panel over the screen (More tile).
+    LazyLoader {
+        active: root.panelOpen && !root.full
+
+        PanelWindow {
+            id: panel
+
+            readonly property var theme: root.theme
+
+            screen: root.QsWindow.window?.screen ?? null
+            implicitWidth: Math.min((screen?.width ?? 1200) - 80, 1100)
+            implicitHeight: Math.min((screen?.height ?? 700) - 40, 640)
+            color: "transparent"
+            exclusionMode: ExclusionMode.Ignore
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.namespace: "lc-quicksettings"
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+
+            HyprlandFocusGrab {
+                active: true
+                windows: [panel]
+                onCleared: root.panelOpen = false
+            }
+
+            Item {
+                anchors.fill: parent
+                focus: true
+                Keys.onEscapePressed: root.panelOpen = false
+
+                // By url: a type can't name itself.
+                Loader {
+                    anchors.fill: parent
+                    Component.onCompleted: setSource(Qt.resolvedUrl("Toggles.qml"), { full: true, options: { type: "toggles" } })
+                }
+
+                ModuleButton {
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.margins: 10
+                    icon: "close"
+                    size: 44
+                    onTapped: root.panelOpen = false
                 }
             }
         }

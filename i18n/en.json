@@ -533,5 +533,9 @@
   "toggles.auto": "Automatic",
   "media.source.auto": "Automatic (follows the player that starts)",
   "media.source.title": "Source",
-  "media.source.autoShort": "Auto"
+  "media.source.autoShort": "Auto",
+  "toggles.record": "Record",
+  "toggles.soon": "Coming soon",
+  "toggles.all": "Settings",
+  "toggles.more": "More"
 }
