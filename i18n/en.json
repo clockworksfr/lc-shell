@@ -648,5 +648,8 @@
   "hue.noRooms": "No rooms on the bridge",
   "hue.loading": "Loading the lights…",
   "bar.lightsOn": "{n} on",
-  "bar.lightsOff": "Lights off"
+  "bar.lightsOff": "Lights off",
+  "settings.wallpaperTheme": "Theme wallpaper by default",
+  "settings.wallpaperThemeHint": "Without a chosen image, each screen shows its theme's wallpaper (light or dark); off: the plain background color",
+  "settings.wallpaperUseTheme": "Back to the themes' wallpapers"
 }

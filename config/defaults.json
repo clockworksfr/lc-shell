@@ -1,6 +1,6 @@
 {
   "language": "auto",
-  "wallpaper": { "enabled": true, "directory": "~/Pictures/Wallpapers" },
+  "wallpaper": { "enabled": true, "directory": "~/Pictures/Wallpapers", "themeDefaults": true },
   "notifications": { "position": "top-right" },
   "clipboard": {
     "enabled": true,

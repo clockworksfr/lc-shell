@@ -66,7 +66,7 @@ Scope {
         WallpaperWindow {
             screen: root.modelData
             theme: root.theme
-            source: Wallpaper.pathFor(root.modelData)
+            source: Wallpaper.sourceFor(root.modelData, root.theme)
         }
     }
 

@@ -648,5 +648,8 @@
   "hue.noRooms": "Aucune pièce sur le pont",
   "hue.loading": "Chargement des lumières…",
   "bar.lightsOn": "{n} allumées",
-  "bar.lightsOff": "Lumières éteintes"
+  "bar.lightsOff": "Lumières éteintes",
+  "settings.wallpaperTheme": "Fond du thème par défaut",
+  "settings.wallpaperThemeHint": "Sans image choisie, chaque écran affiche le fond de son thème (clair ou sombre) ; désactivé : la couleur de fond unie",
+  "settings.wallpaperUseTheme": "Revenir aux fonds des thèmes"
 }

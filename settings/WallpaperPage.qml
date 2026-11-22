@@ -38,6 +38,22 @@ Column {
             }
         }
 
+        Field {
+            label: I18n.tr("settings.wallpaperTheme")
+            hint: I18n.tr("settings.wallpaperThemeHint")
+            Switch {
+                width: 60
+                checked: Wallpaper.themeDefaults
+                onToggled: Config.set("wallpaper.themeDefaults", !checked)
+            }
+        }
+
+        ListRow {
+            visible: Wallpaper.themeDefaults && (!!Wallpaper.state.all || Object.keys(Wallpaper.state.screens ?? {}).length > 0)
+            title: I18n.tr("settings.wallpaperUseTheme")
+            onClicked: Wallpaper.useThemes()
+        }
+
         ListRow {
             title: I18n.tr("settings.wallpaperRandom")
             onClicked: Wallpaper.random(null)

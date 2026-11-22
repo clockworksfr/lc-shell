@@ -54,6 +54,8 @@ Singleton {
         { page: "wallpaper", key: "settings.wallpaper", hint: "" },
         { page: "wallpaper", key: "settings.wallpaperEnabled", hint: "settings.wallpaperEnabledHint" },
         { page: "wallpaper", key: "settings.wallpaperDirectory", hint: "settings.wallpaperCount" },
+        { page: "wallpaper", key: "settings.wallpaperTheme", hint: "settings.wallpaperThemeHint" },
+        { page: "wallpaper", key: "settings.wallpaperUseTheme", hint: "" },
         { page: "wallpaper", key: "settings.wallpaperRandom", hint: "" },
         { page: "notifications", key: "notif.title", hint: "" },
         { page: "notifications", key: "settings.notifPosition", hint: "" },

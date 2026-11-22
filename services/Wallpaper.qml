@@ -9,7 +9,9 @@ import Quickshell.Io
 //
 // settings:
 //   "wallpaper": { "enabled": true, "directory": "~/Images/Wallpapers" }
-// Without a chosen image, screens show the theme background color.
+// Without a chosen image, screens show their theme's wallpaper
+// (assets/wallpapers/<theme>-<variant>.svg; "themeDefaults": false for the
+// plain background color).
 Singleton {
     id: root
 
@@ -17,6 +19,8 @@ Singleton {
     readonly property bool enabled: config.enabled ?? true
     readonly property string home: Quickshell.env("HOME")
     readonly property string directory: expand(config.directory ?? "~/Pictures/Wallpapers")
+    readonly property bool themeDefaults: config.themeDefaults ?? true
+    readonly property string assets: Qt.resolvedUrl("../assets/wallpapers").toString().replace(/^file:\/\//, "")
 
     // { all: path, screens: { "<model or name>": path } }
     property var state: ({})
@@ -33,6 +37,21 @@ Singleton {
 
     function pathFor(screen: ShellScreen): string {
         return (state.screens ?? {})[keyOf(screen)] ?? state.all ?? "";
+    }
+
+    // The theme's own wallpaper (light / dark).
+    function themePath(theme: var): string {
+        return themeDefaults && theme?.id ? `${assets}/${theme.id}-${theme.variant === "light" ? "light" : "dark"}.svg` : "";
+    }
+
+    // What a screen shows: the chosen image, else its theme's wallpaper.
+    function sourceFor(screen: ShellScreen, theme: var): string {
+        return pathFor(screen) || themePath(theme);
+    }
+
+    // Back to the themes' wallpapers (forgets every choice).
+    function useThemes(): void {
+        save({});
     }
 
     // screen null: every screen (and forget per-screen choices).
