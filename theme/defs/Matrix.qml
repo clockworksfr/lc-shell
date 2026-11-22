@@ -77,6 +77,8 @@ Singleton {
             },
             style: {
                 labelCase: "upper",
+                // Matrix statuses are text (label over value), no icons.
+                statusIcons: false,
                 workspaces: "dots"
             }
         })

@@ -17,6 +17,10 @@ TextBlock {
     compactText: Audio.muted ? I18n.tr("common.muted") : I18n.tr("bar.v.volume", { value: Math.round(Audio.volume * 100) })
     color: Audio.muted ? theme.color.soft : theme.color.ink
 
+    icon: Audio.muted ? "volume_off" : Audio.volume > 0.66 ? "volume_up" : Audio.volume > 0.01 ? "volume_down" : "volume_mute"
+    iconFilled: true
+    iconText: Audio.muted || size === "compact" ? "" : size === "extended" ? `${Audio.sinkName} · ${I18n.percent(Audio.volume)}` : I18n.percent(Audio.volume)
+
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor

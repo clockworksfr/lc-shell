@@ -22,7 +22,9 @@ Singleton {
         "outfit/Outfit-Medium.ttf",
         "outfit/Outfit-SemiBold.ttf",
         "geist-mono/GeistMono-Regular.ttf",
-        "geist-mono/GeistMono-Medium.ttf"
+        "geist-mono/GeistMono-Medium.ttf",
+        "symbols/lcSymbols-Outlined.ttf",
+        "symbols/lcSymbols-Filled.ttf"
     ]
 
     Instantiator {

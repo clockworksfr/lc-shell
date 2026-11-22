@@ -21,6 +21,10 @@ TextBlock {
     horizontalAlignment: vertical ? Text.AlignHCenter : Text.AlignLeft
     color: player?.isPlaying ? theme.color.ink : theme.color.soft
 
+    icon: player?.isPlaying ? "pause" : "play_arrow"
+    iconFilled: true
+    iconText: size === "compact" || vertical ? "" : track
+
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor

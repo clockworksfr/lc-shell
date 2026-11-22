@@ -19,6 +19,10 @@ TextBlock {
         : I18n.tr("bar.notifs")
     color: NotificationCenter.unread > 0 && !NotificationCenter.dnd ? theme.color.accent : theme.color.soft
 
+    icon: NotificationCenter.dnd ? "notifications_off" : NotificationCenter.unread > 0 ? "notifications_active" : "notifications"
+    iconFilled: NotificationCenter.unread > 0
+    iconText: NotificationCenter.unread > 0 && !NotificationCenter.dnd ? `${NotificationCenter.unread}` : ""
+
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor

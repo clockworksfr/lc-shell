@@ -136,7 +136,9 @@ Singleton {
                 // Workspaces indicator: "labels" | "dots" | "stars"
                 workspaces: "labels",
                 // Glass highlight over the top of islands and panels.
-                glass: false
+                glass: false,
+                // Status blocks as icon + value (false: text labels).
+                statusIcons: true
             }
         })
 }

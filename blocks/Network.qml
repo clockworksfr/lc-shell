@@ -25,6 +25,15 @@ TextBlock {
         : I18n.tr("bar.v.offline")
     color: NetworkService.kind === "none" ? theme.color.soft : theme.color.ink
 
+    readonly property real strength: NetworkService.activeWifi?.signalStrength ?? 0
+    icon: NetworkService.kind === "wired" ? "lan"
+        : NetworkService.kind === "wifi" ? (strength > 0.66 ? "wifi" : strength > 0.33 ? "wifi_2_bar" : "wifi_1_bar")
+        : "signal_wifi_off"
+    iconText: size === "compact" ? ""
+        : size === "extended" && NetworkService.kind !== "none" ? `${NetworkService.kind === "wifi" ? NetworkService.activeWifi.name + " · " : ""}↓ ${I18n.bytes(NetworkService.rxRate, true)}`
+        : NetworkService.kind === "wifi" && !vertical ? NetworkService.activeWifi.name
+        : ""
+
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor

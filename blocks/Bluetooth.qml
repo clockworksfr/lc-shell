@@ -20,6 +20,11 @@ TextBlock {
     compactText: !BluetoothService.enabled ? I18n.tr("bar.v.bluetoothOff") : I18n.tr("bar.v.bluetooth", { n: count })
     color: count > 0 ? theme.color.ink : theme.color.soft
 
+    icon: !BluetoothService.enabled ? "bluetooth_disabled" : count > 0 ? "bluetooth_connected" : "bluetooth"
+    iconText: !BluetoothService.enabled || count === 0 || size === "compact" ? ""
+        : size === "extended" && !vertical ? BluetoothService.connected.map(d => d.name).join(", ")
+        : `${count}`
+
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
