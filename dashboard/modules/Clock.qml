@@ -228,7 +228,7 @@ ModuleBase {
                 width: (strip.width - strip.spacing * 6) / 7
                 height: strip.height
                 radius: strip.m.theme.radius.tile
-                color: today ? strip.m.theme.color.accent : strip.m.theme.color.surface2
+                color: today ? (strip.m.theme.color.signal ?? strip.m.theme.color.accent) : strip.m.theme.color.surface2
 
                 ThemedText {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -287,7 +287,7 @@ ModuleBase {
                     width: Math.min(parent.width, parent.height) * 0.86
                     height: width
                     radius: month.m.theme.radius.full
-                    color: month.m.theme.color.accent
+                    color: month.m.theme.color.signal ?? month.m.theme.color.accent
                 }
 
                 ThemedText {

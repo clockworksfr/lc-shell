@@ -43,6 +43,7 @@ Item {
         color: root.color
         font.family: root.theme.font.display
         font.weight: root.theme.font.displayWeight
+        font.italic: !!root.theme.font.displayItalic
         font.pixelSize: root.pixelSize
         font.features: ({ "tnum": 1 })
         visible: !root.glows

@@ -60,6 +60,8 @@ Singleton {
                 mono: "IBM Plex Mono",
                 display: "DSEG7 Classic",
                 displayWeight: 700,
+                // Slanted segments, like the theme's presentation tab.
+                displayItalic: true,
                 heroScale: 0.74,
                 sizeS: 12,
                 sizeM: 14,

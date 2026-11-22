@@ -50,7 +50,8 @@ Item {
         width: 12
         height: 12
         radius: root.theme.radius.full
-        color: root.dimmed ? root.theme.color.soft : root.theme.color.ink
+        // The handle: the theme's signal color (Matrix red), else ink.
+        color: root.dimmed ? root.theme.color.soft : root.theme.color.signal ?? root.theme.color.ink
     }
 
     MouseArea {

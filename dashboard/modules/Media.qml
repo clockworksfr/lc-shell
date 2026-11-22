@@ -10,7 +10,8 @@ import qs.theme
 // play; wide / strip = cover, title / artist, progress, transport; box /
 // tall = cover on top, title, transport. Themes without cover art (facade,
 // modulaire) show the track in their display (VFD, amber LCD). Progress
-// and times only for a real length (not streams).
+// and times only for a real length (not streams). A live spectrum (cava)
+// fills the room left while playing.
 ModuleBase {
     id: root
 
@@ -171,12 +172,25 @@ ModuleBase {
                 anchors.verticalCenter: root.shape === "strip" ? parent.verticalCenter : undefined
             }
 
+            // What's playing, live (cava): fills the room left.
+            Spectrum {
+                visible: root.shape === "wide" && height >= 24 && (root.player?.isPlaying ?? false)
+                anchors.top: wideTrack.bottom
+                anchors.topMargin: root.gap
+                anchors.bottom: wideGauge.visible ? wideGauge.top : wideTransport.top
+                anchors.bottomMargin: root.gap
+                width: parent.width
+                count: Math.max(12, Math.min(32, Math.floor(width / 18)))
+            }
+
             Gauge {
+                id: wideGauge
                 visible: root.timed && root.shape !== "strip"
                 anchors.bottom: wideTransport.top
                 anchors.bottomMargin: root.gap
                 width: parent.width
                 value: root.position / Math.max(1, root.length)
+                color: root.theme.color.signal ?? root.theme.color.accent
                 alarm: 2
             }
 
@@ -209,10 +223,18 @@ ModuleBase {
             width: parent.width
         }
 
+        Spectrum {
+            visible: root.ch >= 360 && (root.player?.isPlaying ?? false)
+            width: parent.width
+            height: Math.min(root.ch * 0.16, 90)
+            count: Math.max(12, Math.min(32, Math.floor(width / 18)))
+        }
+
         Gauge {
             visible: root.timed
             width: parent.width
             value: root.position / Math.max(1, root.length)
+            color: root.theme.color.signal ?? root.theme.color.accent
             alarm: 2
         }
 

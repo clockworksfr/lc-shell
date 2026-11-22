@@ -155,7 +155,7 @@ ModuleBase {
     Column {
         visible: Weather.ready && (root.shape === "tiny" || root.shape === "narrow")
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: root.shape === "tiny" ? parent.verticalCenter : undefined
+        anchors.verticalCenter: parent.verticalCenter
         width: parent.width
         spacing: root.gap
 

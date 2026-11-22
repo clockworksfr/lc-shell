@@ -41,7 +41,7 @@ Grid {
             required property HyprlandWorkspace modelData
 
             readonly property color dotColor: modelData.urgent ? root.theme.color.urgent
-                : modelData.active ? root.theme.color.accent
+                : modelData.active ? (root.theme.color.signal ?? root.theme.color.accent)
                 : root.theme.color.soft
             readonly property int pill: modelData.active ? 27 : 8
 

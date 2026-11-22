@@ -36,7 +36,7 @@ Item {
         gradient: root.look === "constellation" && root.primary ? starGradient : null
 
         readonly property color fill: root.primary
-            ? (root.look === "facade" ? root.theme.color.surface3 : root.look === "matrix" ? root.theme.color.ink : root.theme.color.accent)
+            ? (root.look === "facade" ? root.theme.color.surface3 : root.theme.color.signal ?? root.theme.color.accent)
             : (root.look === "facade" || root.look === "modulaire" ? root.theme.color.surface3 : "transparent")
 
         Gradient {
