@@ -17,6 +17,22 @@ ModuleBase {
     readonly property var now: Weather.current
     readonly property var today: Weather.daily[0] ?? null
     readonly property real hourWidth: Math.max(56, t3 * 3.4)
+    // modulaire: everything on its green LCD; facade: the current block in
+    // its VFD (the hours are in one too). Text there: screen font, caps.
+    readonly property bool onLcd: theme.style.module === "modulaire"
+    readonly property bool vfdBlock: (theme.style.display ?? "none") === "vfd"
+    readonly property color inkColor: onLcd ? (theme.color.lcdInk ?? "#1A2410") : theme.color.ink
+    readonly property color softColor: onLcd ? Qt.alpha(theme.color.lcdInk ?? "#1A2410", 0.65) : theme.color.soft
+    readonly property string screenFont: theme.font.lcd ?? theme.font.mono
+    readonly property bool screenText: onLcd || vfdBlock
+
+    // modulaire: the green LCD under everything.
+    Display {
+        visible: root.onLcd && Weather.ready
+        anchors.fill: parent
+        anchors.margins: -4
+        tint: "green"
+    }
 
     ThemedText {
         anchors.centerIn: parent
@@ -43,13 +59,24 @@ ModuleBase {
             name: current.m.now ? Weather.icon(current.m.now.code, current.m.now.isDay) : ""
             filled: true
             size: current.size * 0.85
-            color: current.m.theme.color.accent
+            color: current.m.onLcd ? current.m.inkColor : current.m.theme.color.accent
         }
 
         Figure {
+            visible: !current.m.onLcd
             anchors.verticalCenter: parent.verticalCenter
             text: current.m.now ? Weather.temp(current.m.now.temp) : ""
             pixelSize: current.size
+        }
+
+        // On the LCD: the figure in the LCD font.
+        Text {
+            visible: current.m.onLcd
+            anchors.verticalCenter: parent.verticalCenter
+            text: current.m.now ? Weather.temp(current.m.now.temp) : ""
+            color: current.m.inkColor
+            font.family: current.m.screenFont
+            font.pixelSize: current.size * 0.9
         }
     }
 
@@ -67,8 +94,11 @@ ModuleBase {
             horizontalAlignment: details.align
             elide: Text.ElideRight
             text: details.m.now ? I18n.tr(Weather.condition(details.m.now.code)) : ""
+            font.family: details.m.screenText ? details.m.screenFont : details.m.theme.font.family
+            font.capitalization: details.m.screenText ? Font.AllUppercase : Font.MixedCase
             font.pixelSize: details.m.t2
             font.weight: Font.DemiBold
+            color: details.m.inkColor
         }
 
         ThemedText {
@@ -76,9 +106,10 @@ ModuleBase {
             horizontalAlignment: details.align
             visible: !!details.m.today
             text: details.m.today ? `↑ ${Weather.temp(details.m.today.max)}  ↓ ${Weather.temp(details.m.today.min)}` : ""
+            font.family: details.m.screenText ? details.m.screenFont : details.m.theme.font.family
             font.pixelSize: details.m.t3
             font.features: ({ "tnum": 1 })
-            color: details.m.theme.color.soft
+            color: details.m.softColor
         }
 
         ThemedText {
@@ -86,8 +117,10 @@ ModuleBase {
             horizontalAlignment: details.align
             elide: Text.ElideRight
             text: Weather.location?.name ?? ""
+            font.family: details.m.screenText ? details.m.screenFont : details.m.theme.font.family
+            font.capitalization: details.m.screenText ? Font.AllUppercase : Font.MixedCase
             font.pixelSize: details.m.t4
-            color: details.m.theme.color.soft
+            color: details.m.softColor
         }
     }
 
@@ -96,6 +129,8 @@ ModuleBase {
         id: hours
 
         property var m
+        // On modulaire's LCD already: no window of its own.
+        screen: !m.onLcd
         property int count: 6
         readonly property var list: Weather.hourly.slice(0, count)
 
@@ -119,14 +154,14 @@ ModuleBase {
                             label: true
                             text: I18n.locale.toString(new Date(modelData.time), "HH")
                             font.pixelSize: hours.m.t4
-                            color: hours.soft
+                            color: hours.m.onLcd ? hours.m.softColor : hours.soft
                         }
 
                         Icon {
                             anchors.horizontalCenter: parent.horizontalCenter
                             name: Weather.icon(modelData.code, modelData.isDay)
                             size: hours.m.t2 * 1.3
-                            color: hours.ink
+                            color: hours.m.onLcd ? hours.m.inkColor : hours.ink
                         }
 
                         ThemedText {
@@ -134,17 +169,26 @@ ModuleBase {
                             text: Weather.temp(modelData.temp)
                             font.pixelSize: hours.m.t3
                             font.features: ({ "tnum": 1 })
-                            color: hours.ink
+                            color: hours.m.onLcd ? hours.m.inkColor : hours.ink
                         }
                     }
 
+                    // Rain probability: a 4 px bar filled to it.
                     Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.bottom: parent.bottom
-                        width: Math.min(parent.width * 0.35, 12)
-                        height: Math.max(3, parent.height * 0.18 * modelData.rain / 100)
+                        anchors.bottomMargin: 2
+                        width: parent.width * 0.4
+                        height: 4
                         radius: 2
-                        color: Qt.alpha(hours.ink, modelData.rain >= 50 ? 0.7 : 0.35)
+                        color: Qt.alpha(hours.m.onLcd ? hours.m.inkColor : hours.ink, 0.15)
+
+                        Rectangle {
+                            width: parent.width * modelData.rain / 100
+                            height: parent.height
+                            radius: 2
+                            color: hours.kind !== "none" || hours.m.onLcd ? (hours.m.onLcd ? hours.m.inkColor : hours.ink) : (hours.m.theme.color.accent2 ?? hours.m.theme.color.accent)
+                        }
                     }
                 }
             }
@@ -209,6 +253,15 @@ ModuleBase {
         visible: Weather.ready && (root.shape === "wide" || root.shape === "strip")
         anchors.fill: parent
 
+        // facade: the current block in its VFD.
+        Display {
+            visible: root.vfdBlock
+            x: wideCurrent.x - 10
+            y: Math.min(wideCurrent.y, wideDetails.y) - 10
+            width: wideDetails.x + wideDetails.width - wideCurrent.x + 20
+            height: Math.max(wideCurrent.height, wideDetails.height) + 20
+        }
+
         Current {
             id: wideCurrent
             m: root
@@ -242,8 +295,20 @@ ModuleBase {
         spacing: root.gap
 
         Row {
+            id: boxTop
+
             width: parent.width
             spacing: root.gap
+
+            // facade: the current block in its VFD.
+            Display {
+                visible: root.vfdBlock
+                x: -8
+                y: -8
+                width: boxTop.width + 16
+                height: boxTop.height + 16
+                z: -1
+            }
 
             Current {
                 id: boxCurrent
