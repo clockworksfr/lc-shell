@@ -18,10 +18,12 @@ TextWidget {
 
     // Month and day names follow the shell language (I18n.locale).
     fullText: I18n.locale.toString(clock.date, format)
+    readonly property int figureSize: Math.round(Math.max(18, (crossSize || theme.bar.height) * 0.68))
+
     font.family: figure ? theme.font.display : theme.font.family
-    font.pixelSize: figure ? Math.round(Math.max(18, (crossSize || theme.bar.height) * 0.68)) : theme.font.sizeM
+    font.pixelSize: figure ? figureSize : theme.font.sizeM
     font.weight: figure ? (theme.font.displayWeight ?? Font.Normal) : vertical ? Font.DemiBold : Font.Normal
-    font.letterSpacing: figure ? font.pixelSize * 0.02 : 0
+    font.letterSpacing: figure ? figureSize * 0.02 : 0
     font.features: ({ "tnum": 1 })
 
     SystemClock {
