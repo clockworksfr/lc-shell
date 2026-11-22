@@ -129,8 +129,13 @@ ModuleBase {
                 width: (rooms.width - (rooms.cols - 1) * rooms.spacing) / rooms.cols
                 height: Math.max(rooms.m.hit, (rooms.height - (rooms.lines - 1) * rooms.spacing) / rooms.lines)
 
+                // Dual tiles leave the switch its own room on the right.
                 Toggle {
-                    anchors.fill: parent
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.right: slot.dual ? sw.left : parent.right
+                    anchors.rightMargin: slot.dual ? 4 : 0
                     icon: slot.isMore ? "more_horiz" : HueBridge.roomIcon(slot.modelData.cls)
                     label: slot.isMore ? I18n.tr("hue.more") : slot.modelData.name
                     sub: slot.isMore ? I18n.tr("hue.moreSub") : slot.modelData.on ? I18n.percent(slot.modelData.brightness / 100) : I18n.tr("hue.off")
@@ -163,8 +168,8 @@ ModuleBase {
                 // The room's color while it's on.
                 Rectangle {
                     visible: !slot.isMore && slot.modelData.on && !!slot.modelData.color
-                    x: slot.dual ? parent.width - sw.width - width - 4 : parent.width - width - 12
-                    y: slot.dual ? (parent.height - height) / 2 : 12
+                    x: slot.dual ? parent.width - sw.width - width - 14 : parent.width - width - 12
+                    y: 12
                     width: 12
                     height: 12
                     radius: 6
@@ -493,10 +498,12 @@ ModuleBase {
             withMore: !root.full && !root.drawer
         }
 
+        // Under the close button of the panels.
         Lamps {
             m: root
+            y: root.full ? 44 : 0
             width: parent.width - threeRooms.width - threeDetail.width - parent.spacing * 2
-            height: parent.height
+            height: parent.height - y
         }
     }
 
