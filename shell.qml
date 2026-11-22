@@ -1,5 +1,7 @@
 // lc-shell entry point. Launch with: qs -c lc
 //@ pragma IconTheme Papirus-Dark
+// Tray menus are platform menus: they need a QApplication.
+//@ pragma UseQApplication
 import QtQuick
 import Quickshell
 import qs.dashboard

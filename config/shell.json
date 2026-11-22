@@ -10,7 +10,7 @@
       "bar": {
         "left": ["workspaces"],
         "center": ["clock"],
-        "right": ["media", "volume"]
+        "right": ["tray", "media", "network", "bluetooth", "battery", "volume"]
       },
       "osd": { "position": "bottom", "margin": 80 }
     },

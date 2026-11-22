@@ -18,8 +18,8 @@ Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md
 | `blocks/` | Blocs de barre + `Registry` nom → fichier |
 | `i18n/` | Langue de l'interface : `I18n` + `en.json`, `fr.json` |
 | `launcher/` | Lanceur : état, recherche, fournisseurs (applis, emoji, fichiers, calcul, actions) |
-| `panels/` | Contenus de popups (`AudioPanel`) |
-| `services/` | Singletons : `Config`, `Screens`, `Audio`, `Players`, `Brightness`, `Osd`, IPC… |
+| `panels/` | Contenus de popups : audio, réseau, Bluetooth, énergie |
+| `services/` | Singletons : `Config`, `Screens`, `Audio`, `Players`, `Brightness`, `Osd`, `NetworkService`, `BluetoothService`, `Power`, `SystemStats`, IPC… |
 | `assets/fonts/` | Polices statiques embarquées (OFL) : Figtree, JetBrains Mono |
 | `theme/` | `Themes` (registre, clair/sombre, programmation), `defs/` (un fichier par thème) |
 | `components/` | Composants de base, qui lisent le thème de leur fenêtre |
@@ -50,7 +50,13 @@ Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md
 - **Thèmes** : un par mode (`appearance.themes`), surchargeable par profil (`"theme": "matrix"`). Disponibles : `classic` (défaut, jetons de la spec), `matrix` (palettes ; polices pas encore embarquées).
 - **Clair/sombre** : `variant` = `dark`, `light` ou `auto` ; en `auto`, `schedule` = horaires fixes (`type: "time"`) ou soleil (`type: "sun"`, `latitude`, `longitude`, calcul local).
 - **Barre** : blocs dans `left`/`center`/`right`. Rendu fourni par le thème, surchargeable : `style` (`full`/`islands`), `floating`, `margin`, `radius`, `opacity`, `border`, `padding`, `spacing`, `height`, `position` (`top`/`bottom`), `screenCorners` (rayon des coins d'écran, 0 = aucun).
-- Blocs : `workspaces`, `clock` (`format`), `media` (`maxWidth`), `volume` (clic : panneau audio, clic milieu : muet, molette : volume). Un nom inconnu s'affiche `?nom` en rouge. Ajouter un bloc : `blocks/Xxx.qml` (propriétés `screen`, `options`) + `blocks/Registry.qml`.
+- Blocs :
+  - `workspaces`, `clock` (`format`), `media` (`maxWidth`) ;
+  - `volume` — clic : panneau audio (volumes, périphériques), clic milieu : muet, molette : volume ;
+  - `tray` — clic : activer, clic droit : menu, clic milieu : action secondaire (`showPassive`) ;
+  - `network` — clic : panneau (filaire, interrupteur Wi-Fi, réseaux, mot de passe à la volée) ;
+  - `bluetooth` — clic : panneau (interrupteur, appareils ; un nouvel appareil est appairé, approuvé et connecté) ; masqué sans adaptateur ;
+  - `battery` — clic : panneau (autonomie, profil d'énergie) ; masqué sans batterie. Un nom inconnu s'affiche `?nom` en rouge. Ajouter un bloc : `blocks/Xxx.qml` (propriétés `screen`, `options`) + `blocks/Registry.qml`.
 - **Plein écran** : rien d'automatique (OSD, bientôt notifications) ne s'affiche au-dessus ; c'est redirigé vers un écran `modules` ou retenu. Le lanceur, appelé explicitement, reste autorisé.
 
 ## Langues

@@ -8,8 +8,12 @@ import Quickshell
 // and block-specific options ({ "type": "clock", "format": "HH:mm" }).
 Singleton {
     readonly property var blocks: ({
+            battery: "Battery.qml",
+            bluetooth: "Bluetooth.qml",
             clock: "Clock.qml",
             media: "Media.qml",
+            network: "Network.qml",
+            tray: "Tray.qml",
             volume: "Volume.qml",
             workspaces: "Workspaces.qml"
         })
