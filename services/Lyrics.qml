@@ -27,6 +27,22 @@ Singleton {
     property var lines: []
     property string plainText
     property real position: 0
+    // Sample lines (reviews, screenshots): the player no longer moves them.
+    property bool demo: false
+
+    // Sample synced lyrics, current line `line` (< 0: back to the track's).
+    function setDemo(line: int): void {
+        if (line < 0) {
+            demo = false;
+            fetch();
+            return;
+        }
+        demo = true;
+        const sample = ["Under the neon of a sleepless town", "we keep on walking", "where the night goes on and on without a single word to say", "♪", "Short line", "and a very long line that never seems to end, wrapping over and over across the cell", "till the morning comes", "the last line"];
+        lines = sample.map((text, i) => ({ time: i * 4, text: text === "♪" ? "" : text }));
+        status = "found";
+        position = Math.min(line, sample.length - 1) * 4 + 1;
+    }
     readonly property int index: {
         let current = -1;
         for (let i = 0; i < lines.length && lines[i].time <= position + 0.2; i++)
@@ -71,6 +87,8 @@ Singleton {
     }
 
     function fetch(): void {
+        if (demo)
+            return;
         lines = [];
         plainText = "";
         if (!key) {
@@ -148,7 +166,7 @@ Singleton {
     Timer {
         interval: 250
         repeat: true
-        running: root.refCount > 0 && (root.player?.isPlaying ?? false) && root.lines.length > 0
+        running: root.refCount > 0 && !root.demo && (root.player?.isPlaying ?? false) && root.lines.length > 0
         onTriggered: {
             root.player.positionChanged();
             root.position = root.player.position;
@@ -159,7 +177,8 @@ Singleton {
     Connections {
         target: root.player
         function onPositionChanged(): void {
-            root.position = root.player.position;
+            if (!root.demo)
+                root.position = root.player.position;
         }
     }
 

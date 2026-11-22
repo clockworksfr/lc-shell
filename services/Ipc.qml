@@ -185,6 +185,10 @@ Scope {
         function current(): string {
             return Lyrics.lines[Lyrics.index]?.text ?? "";
         }
+        // Sample synced lyrics on line n (reviews, screenshots); -1: off.
+        function demo(line: int): void {
+            Lyrics.setDemo(line);
+        }
     }
 
     IpcHandler {
