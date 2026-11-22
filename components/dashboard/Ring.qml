@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Shapes
 import Quickshell
 import qs.theme
@@ -21,6 +22,18 @@ Item {
     readonly property real size: Math.min(width, height)
     readonly property real stroke: Math.max(3, size * (look === "orbit" ? 0.025 : 0.08))
     default property alias content: center.data
+
+    // Lit dots glow where the theme glows (Matrix in the dark).
+    layer.enabled: look === "dots" && Qt.color(theme.color.glow ?? "#00000000").a > 0
+    layer.effect: MultiEffect {
+        autoPaddingEnabled: true
+        shadowEnabled: true
+        shadowColor: root.theme.color.glow ?? "transparent"
+        shadowBlur: 0.5
+        blurMax: 12
+        shadowHorizontalOffset: 0
+        shadowVerticalOffset: 0
+    }
 
     // Arc / orbit / vu: track and value.
     Shape {

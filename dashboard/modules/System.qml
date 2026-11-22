@@ -38,9 +38,38 @@ ModuleBase {
         : "rows"
     readonly property var grid: bestGrid(stats.length, look === "modulaire" ? 70 : 90)
 
+    // tiny, dot / orbit themes: CPU in its ring, value and label inside.
+    Ring {
+        visible: root.layout === "tiny" && (root.look === "matrix" || root.look === "constellation")
+        anchors.centerIn: parent
+        width: Math.min(parent.width, parent.height)
+        height: width
+        value: SystemStats.cpu
+        color: root.theme.color.ink
+
+        Column {
+            anchors.centerIn: parent
+
+            Figure {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: `${Math.round(SystemStats.cpu * 100)}`
+                pixelSize: Math.min(root.cw, root.ch) * 0.26
+                color: SystemStats.cpu > 0.9 ? (root.theme.color.signal ?? root.theme.color.urgent) : root.theme.color.ink
+            }
+
+            ThemedText {
+                anchors.horizontalCenter: parent.horizontalCenter
+                label: true
+                text: "CPU %"
+                font.pixelSize: root.t4
+                color: root.theme.color.soft
+            }
+        }
+    }
+
     // tiny: CPU.
     ColumnLayout {
-        visible: root.layout === "tiny"
+        visible: root.layout === "tiny" && root.look !== "matrix" && root.look !== "constellation"
         anchors.fill: parent
         spacing: root.gap / 2
 

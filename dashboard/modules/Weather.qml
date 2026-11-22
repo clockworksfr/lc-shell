@@ -146,53 +146,68 @@ ModuleBase {
                 model: hours.list
 
                 Item {
+                    id: hour
+
                     required property var modelData
+                    required property int index
+                    // The coming hour stands out (signal: Matrix red).
+                    readonly property bool now: index === 0
+                    readonly property bool wet: modelData.rain >= 50
+                    readonly property color ink: hours.m.onLcd ? hours.m.inkColor : hours.ink
+                    readonly property color signal: hours.kind === "none" && !hours.m.onLcd ? (hours.m.theme.color.signal ?? hours.m.theme.color.accent) : ink
+
                     width: parent.width / Math.max(1, hours.list.length)
                     height: parent.height
 
+                    // Compact: hour, sky, temperature, rain chance — centered.
                     Column {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        spacing: hours.m.gap / 3
+                        anchors.centerIn: parent
+                        spacing: hours.m.gap / 4
 
                         ThemedText {
                             anchors.horizontalCenter: parent.horizontalCenter
                             label: true
-                            text: I18n.locale.toString(new Date(modelData.time), "HH")
+                            text: I18n.locale.toString(new Date(hour.modelData.time), "HH")
                             font.pixelSize: hours.m.t4
-                            color: hours.m.onLcd ? hours.m.softColor : hours.soft
+                            font.weight: hour.now ? Font.Bold : Font.Normal
+                            color: hour.now ? hour.signal : (hours.m.onLcd ? hours.m.softColor : hours.soft)
                         }
 
                         Icon {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            name: Weather.icon(modelData.code, modelData.isDay)
-                            size: hours.m.t2 * 1.3
-                            color: hours.m.onLcd ? hours.m.inkColor : hours.ink
+                            name: Weather.icon(hour.modelData.code, hour.modelData.isDay)
+                            size: hours.m.t2 * 1.15
+                            color: hour.ink
                         }
 
                         ThemedText {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: Weather.temp(modelData.temp)
+                            text: Weather.temp(hour.modelData.temp)
                             font.pixelSize: hours.m.t3
                             font.features: ({ "tnum": 1 })
-                            color: hours.m.onLcd ? hours.m.inkColor : hours.ink
+                            color: hour.ink
                         }
-                    }
 
-                    // Rain probability: a 4 px bar filled to it.
-                    Rectangle {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 2
-                        width: parent.width * 0.4
-                        height: 4
-                        radius: 2
-                        color: Qt.alpha(hours.m.onLcd ? hours.m.inkColor : hours.ink, 0.15)
+                        // Chance of rain, spelled out (a drop and "40 %").
+                        Row {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            visible: hour.modelData.rain > 0
+                            spacing: 2
 
-                        Rectangle {
-                            width: parent.width * modelData.rain / 100
-                            height: parent.height
-                            radius: 2
-                            color: hours.kind !== "none" || hours.m.onLcd ? (hours.m.onLcd ? hours.m.inkColor : hours.ink) : (hours.m.theme.color.accent2 ?? hours.m.theme.color.accent)
+                            Icon {
+                                anchors.verticalCenter: parent.verticalCenter
+                                name: "water_drop"
+                                filled: hour.wet
+                                size: hours.m.t4 * 1.1
+                                color: hour.wet ? hour.signal : (hours.m.onLcd ? hours.m.softColor : hours.soft)
+                            }
+
+                            ThemedText {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: I18n.percent(hour.modelData.rain / 100)
+                                font.pixelSize: hours.m.t4
+                                color: hour.wet ? hour.signal : (hours.m.onLcd ? hours.m.softColor : hours.soft)
+                            }
                         }
                     }
                 }
