@@ -124,7 +124,8 @@ ModuleBase {
     // touch target), so even a one-unit-high cell holds two rows of buttons.
     readonly property bool compact: shape === "strip" || shape === "wide" || shape === "narrow"
     readonly property real compactRow: 52
-    readonly property int rowsFit: Math.max(1, Math.floor((tilesHeight + gap) / (compactRow + gap)))
+    // (From the cell's height: compact shapes have no sliders under.)
+    readonly property int rowsFit: Math.max(1, Math.floor((ch + gap) / (compactRow + gap)))
     readonly property int colsFit: Math.max(1, Math.floor((tilesWidth + gap) / ((look === "matrix" ? 120 : 140) + gap)))
     readonly property int cols: shape === "tiny" || shape === "narrow" ? 1
         : compact ? Math.max(1, Math.min(colsFit, Math.ceil(total / rowsFit)))

@@ -52,9 +52,9 @@ Singleton {
         command: ["sh", "-c", `
             a=$(hyprctl activewindow -j | jq -r '.address // empty')
             [ -n "$a" ] || exit 0
-            w=$(hyprctl getoption cursor:no_warps -j | jq -r '.int // 0')
+            w=$(hyprctl getoption cursor:no_warps -j | jq -r '.bool')
             hyprctl eval 'hl.config({ cursor = { no_warps = true } })' >/dev/null
             hyprctl dispatch "hl.dsp.focus({ window = 'address:$a' })" >/dev/null
-            [ "$w" = 1 ] || hyprctl eval 'hl.config({ cursor = { no_warps = false } })' >/dev/null`]
+            [ "$w" = true ] || hyprctl eval 'hl.config({ cursor = { no_warps = false } })' >/dev/null`]
     }
 }
