@@ -26,7 +26,7 @@ TextWidget {
     fullText: figure && datePart
         ? `<span style="font-family:'${theme.font.mono}'; font-size:${Math.round(figureSize * 0.45)}px; letter-spacing:0.6px; color:${theme.color.soft}">${I18n.locale.toString(clock.date, datePart).toUpperCase()}</span>&nbsp;&nbsp;${I18n.locale.toString(clock.date, format)}`
         : I18n.locale.toString(clock.date, format)
-    textFormat: figure && datePart ? Text.StyledText : Text.PlainText
+    textFormat: figure && datePart ? Text.RichText : Text.PlainText
     // ~2/3 of the bar's thickness (27 px in a 40 px bar, the mockup).
     readonly property int figureSize: Math.round(Math.max(18, theme.bar.height * 0.68))
 
