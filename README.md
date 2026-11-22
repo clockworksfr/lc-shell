@@ -168,6 +168,31 @@ Gestionnaire d'historique façon Paste / Copyous : **Super+Maj+V** (raccourci gl
 
 `position` : `bottom` / `top` (bande de cartes), `left` / `right` (colonne), `center` (liste + grand aperçu), `pointer` (colonne compacte sous la souris). `maxItems` et `maxDays` (0 = sans limite) ne touchent jamais les éléments épinglés (ni les tagués avec `keepTagged`). Le mode `+` du lanceur lit le même historique. Tests : `LC_CLIPBOARD_DIR=<dossier>` (autre stockage), `LC_CLIPBOARD_CAPTURE=0` (sans capture).
 
+## Captures d'écran
+
+**Impr. écran** (`lc:screenshot`) fige tous les écrans (une image `grim` de chacun) et ouvre l'éditeur par-dessus :
+
+- **Sélection** : glisser pour une zone, cliquer pour la fenêtre sous le pointeur (mise en avant au survol, d'après `hyprctl clients`), Ctrl+A pour tout l'écran. Loupe avec les coordonnées en pixels réels. Poignées et flèches (Maj : ×10, Alt : redimensionner) pour ajuster ; clic droit pour recommencer.
+- **Annotation sur place** : zone (V), crayon (P), surligneur (H), ligne (L), flèche (A), rectangle (R), ellipse (E), texte (T), numéros qui s'incrémentent (N), pixellisation (M). 8 couleurs (1…8), 3 épaisseurs ([ ], molette), remplissage (F), Maj pour les angles de 45° et les carrés, Ctrl+Z / Ctrl+Maj+Z.
+- **Résultat** : la zone et ses annotations, rendues à la résolution réelle de l'écran. Entrée copie (ou enregistre, selon `enterAction`), Ctrl+C copie, Ctrl+S enregistre (et copie avec `copyOnSave`), Échap ferme. Une notification propose ensuite Annoter (rouvre l'image dans l'éditeur), Enregistrer ou Ouvrir / Dossier.
+- **Directes** : Maj+Impr. écran (`lc:screenshotScreen`, l'écran actif) et Ctrl+Impr. écran (`lc:screenshotWindow`, la fenêtre active) copient tout de suite, avec la même notification.
+- IPC : `qs -c lc ipc call shell screenshot`, `screenshotScreen`, `screenshotWindow`, `screenshotEdit <fichier>` (annoter une image existante).
+- Réglages (Paramètres › Captures d'écran, ou `settings.json`) :
+
+```json
+"screenshot": {
+  "dir": "",
+  "fileName": "screenshot_{date}_{time}",
+  "enterAction": "copy",
+  "copyOnSave": true,
+  "notify": true,
+  "pickWindows": true,
+  "magnifier": true
+}
+```
+
+`dir` vide = `Images/Screenshots` (dossier XDG des images) ; `enterAction` : `copy`, `save` ou `both`. Les images figées et les captures copiées restent dans `~/.cache/quickshell/…/screenshots/`.
+
 ## Fond d'écran
 
 `"wallpaper": { "enabled": true, "directory": "~/Images/Wallpapers" }`. Une image par écran (repéré par son modèle) ou une pour tous, gardée dans `…/wallpaper.json` ; sans image, la couleur de fond du thème. Changement en fondu enchaîné, image décodée à la taille de l'écran. Choix dans le lanceur (`@`) ou par IPC. Tant que Caelestia dessine aussi son fond, `"enabled": false` évite la superposition.
@@ -240,7 +265,7 @@ hl.bind("SUPER + Space", hl.dsp.global("lc:launcher"))
 
 Les mêmes actions existent en IPC : `qs -c lc ipc call launcher toggle`, `settings toggle`, `bar edit`, etc.
 
-Autres raccourcis globaux : `lc:screenshot` (capture d'une zone, écrans figés), `lc:screenshotScreen`, `lc:notifications`, `lc:media`, `lc:toggleVariant`, `lc:nextTheme`, `lc:lock`.
+Autres raccourcis globaux : `lc:screenshot` (zone ou fenêtre puis annotation, écrans figés), `lc:screenshotScreen`, `lc:screenshotWindow`, `lc:notifications`, `lc:media`, `lc:toggleVariant`, `lc:nextTheme`, `lc:lock`.
 
 `contrib/hypr/` : la reprise des raccourcis de la config Caelestia de simon (`shell.lua`, `lock-and-dpms.sh` avec repli sur hyprlock) et `install.sh`, qui les installe dans `~/.config/hypr` en gardant les versions Caelestia à côté (`shell-caelestia.lua`, `lock-and-dpms-caelestia.sh`).
 

@@ -79,7 +79,7 @@ Scope {
     GlobalShortcut {
         appid: "lc"
         name: "screenshot"
-        description: "Screenshot of a zone (screens frozen)"
+        description: "Screenshot: pick a zone or a window on the frozen screens, then annotate"
         onPressed: Screenshot.region()
     }
 
@@ -88,6 +88,13 @@ Scope {
         name: "screenshotScreen"
         description: "Screenshot of the focused screen"
         onPressed: Screenshot.screen()
+    }
+
+    GlobalShortcut {
+        appid: "lc"
+        name: "screenshotWindow"
+        description: "Screenshot of the active window"
+        onPressed: Screenshot.window()
     }
 
     GlobalShortcut {

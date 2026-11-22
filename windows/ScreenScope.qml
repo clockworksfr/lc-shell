@@ -131,12 +131,14 @@ Scope {
         }
     }
 
-    // Screenshot of a zone: the screen shows a still of itself meanwhile.
+    // Screenshot editor: every screen frozen (a zone or a window to pick),
+    // or an image file to annotate on the focused screen.
     LazyLoader {
-        active: Screenshot.freezing
+        active: Screenshot.mode === "freeze" || (Screenshot.mode === "file" && Screenshot.screenName === root.modelData.name)
 
-        FreezeWindow {
+        ShotWindow {
             screen: root.modelData
+            theme: root.theme
         }
     }
 

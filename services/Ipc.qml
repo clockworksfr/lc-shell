@@ -194,12 +194,19 @@ Scope {
     IpcHandler {
         target: "shell"
 
-        // Screenshots: a zone (screens frozen) or the focused screen.
+        // Screenshots: a zone or a window (screens frozen, then the
+        // editor), the focused screen, the active window; annotate a file.
         function screenshot(): void {
             Screenshot.region();
         }
         function screenshotScreen(): void {
             Screenshot.screen();
+        }
+        function screenshotWindow(): void {
+            Screenshot.window();
+        }
+        function screenshotEdit(path: string): void {
+            Screenshot.edit(path);
         }
 
         // Full reload; also picks up .js changes, which hot reload ignores.

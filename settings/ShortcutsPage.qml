@@ -21,6 +21,7 @@ Column {
         { name: "files", keys: "SUPER + SHIFT + F" },
         { name: "screenshot", keys: "Print" },
         { name: "screenshotScreen", keys: "SHIFT + Print" },
+        { name: "screenshotWindow", keys: "CTRL + Print" },
         { name: "notifications", keys: "SUPER + S" },
         { name: "media", keys: "SUPER + comma" },
         { name: "settings", keys: "SUPER + I" },
