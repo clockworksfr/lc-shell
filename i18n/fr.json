@@ -368,5 +368,7 @@
   "media.live": "En direct",
   "media.prev": "PRÉC.",
   "media.play": "LECTURE",
-  "media.next": "SUIV."
+  "media.next": "SUIV.",
+  "vu.left": "G",
+  "vu.right": "D"
 }

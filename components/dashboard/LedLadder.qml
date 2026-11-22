@@ -1,0 +1,56 @@
+import QtQuick
+import Quickshell
+import qs.theme
+
+// A ladder of round LEDs (modulaire), lit up to `value` (0..1): green,
+// yellow from 70 %, red from 85 %, each with a halo; unlit #2A2A2A.
+// Vertical by default (bottom to top).
+Item {
+    id: root
+
+    readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
+    property real value: 0
+    property bool vertical: true
+    property int count: Math.max(8, Math.min(16, Math.floor((vertical ? height : width) / 18)))
+
+    Grid {
+        anchors.centerIn: parent
+        columns: root.vertical ? 1 : root.count
+        spacing: Math.max(3, ((root.vertical ? root.height : root.width) - root.count * led.size) / Math.max(1, root.count - 1))
+
+        Repeater {
+            model: root.count
+
+            Item {
+                id: led
+
+                required property int index
+                readonly property real size: Math.min(root.vertical ? root.width : root.height, 18) * 0.8
+                // Vertical ladders fill from the bottom.
+                readonly property real at: ((root.vertical ? root.count - 1 - index : index) + 0.5) / root.count
+                readonly property bool lit: at <= root.value
+                readonly property color tone: at >= 0.85 ? "#D2332B" : at >= 0.7 ? "#E5C230" : "#46C46A"
+
+                width: size
+                height: size
+
+                Rectangle {
+                    visible: led.lit
+                    anchors.centerIn: parent
+                    width: led.size * 1.8
+                    height: width
+                    radius: width / 2
+                    color: Qt.alpha(led.tone, 0.25)
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: led.lit ? led.tone : "#2A2A2A"
+                    border.width: 1
+                    border.color: Qt.alpha("black", 0.5)
+                }
+            }
+        }
+    }
+}
