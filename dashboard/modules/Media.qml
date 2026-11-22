@@ -173,7 +173,7 @@ ModuleBase {
             }
 
             // What's playing, live (cava): fills the room left.
-            Spectrum {
+            AudioSpectrum {
                 visible: root.shape === "wide" && height >= 24 && (root.player?.isPlaying ?? false)
                 anchors.top: wideTrack.bottom
                 anchors.topMargin: root.gap
@@ -223,7 +223,7 @@ ModuleBase {
             width: parent.width
         }
 
-        Spectrum {
+        AudioSpectrum {
             visible: root.ch >= 360 && (root.player?.isPlaying ?? false)
             width: parent.width
             height: Math.min(root.ch * 0.16, 90)
