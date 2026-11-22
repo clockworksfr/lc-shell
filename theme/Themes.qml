@@ -48,6 +48,7 @@ Singleton {
             space: merged.space,
             radius: merged.radius,
             border: merged.border,
+            motion: merged.motion,
             hit: touch ? merged.hit.touch : merged.hit.pointer,
             bar: merged.bar,
             style: merged.style

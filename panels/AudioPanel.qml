@@ -72,13 +72,13 @@ Column {
                 id: header
                 text: section.title
                 font.pixelSize: section.theme.font.sizeS
-                color: section.theme.color.fgMuted
+                color: section.theme.color.soft
             }
 
             ThemedText {
                 anchors.right: parent.right
                 text: section.muted ? I18n.tr("common.muted") : I18n.percent(section.volume)
-                color: section.muted ? section.theme.color.fgMuted : section.theme.color.fg
+                color: section.muted ? section.theme.color.soft : section.theme.color.ink
 
                 MouseArea {
                     anchors.fill: parent
@@ -105,7 +105,7 @@ Column {
 
                 width: section.width
                 implicitHeight: deviceName.implicitHeight + section.theme.space.s * 2
-                radius: section.theme.radius.s
+                radius: section.theme.radius.control
                 color: hover.containsMouse ? section.theme.color.bg : "transparent"
 
                 ThemedText {
@@ -114,7 +114,7 @@ Column {
                     anchors.leftMargin: section.theme.space.s
                     anchors.rightMargin: section.theme.space.s
                     text: `${parent.selected ? "●" : "○"}  ${Audio.nodeName(parent.modelData)}`
-                    color: parent.selected ? section.theme.color.fg : section.theme.color.fgMuted
+                    color: parent.selected ? section.theme.color.ink : section.theme.color.soft
                     elide: Text.ElideRight
                 }
 

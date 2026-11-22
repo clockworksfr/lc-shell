@@ -4,15 +4,18 @@ import QtQuick
 import Quickshell
 
 // Tokens every theme starts from. A theme definition only lists what it
-// changes; Themes.resolve() deep-merges it over this.
+// changes; Themes.resolve() deep-merges it over this. Role names follow
+// docs/themes.md.
 //
 // Shape of a resolved theme (what components read):
-//   color   bg, surface, surfaceAlt, fg, fgMuted, line, accent, onAccent, urgent
+//   color   bg, surface, surface2, surface3, ink, soft, line,
+//           accent, onAccent, urgent, warn, ok
 //   font    family, mono, display, sizeS/M/L/XL
-//   space   xs, s, m, l, xl
-//   radius  none, s, m, l, full
+//   space   xs, s, m, l, xl, xxl
+//   radius  none, control, tile, panel, card, full
 //   border  width
-//   hit     minimum size of a touch/click target (bigger on touch screens)
+//   motion  duration (ms)
+//   hit     minimum size of a click/touch target (bigger on touch screens)
 //   bar     default bar look, overridable per screen in shell.json
 //   style   component variants ("axes"); components never test theme ids
 Singleton {
@@ -20,25 +23,31 @@ Singleton {
             palettes: {
                 dark: {
                     bg: "#1c1c1c",
-                    surface: "#2a2a2a",
-                    surfaceAlt: "#333333",
-                    fg: "#e6e6e6",
-                    fgMuted: "#8c8c8c",
+                    surface: "#262626",
+                    surface2: "#303030",
+                    surface3: "#3a3a3a",
+                    ink: "#e6e6e6",
+                    soft: "#8c8c8c",
                     line: "#3a3a3a",
                     accent: "#d0d0d0",
                     onAccent: "#1c1c1c",
-                    urgent: "#e06c5a"
+                    urgent: "#e06c5a",
+                    warn: "#e0b050",
+                    ok: "#8cc87c"
                 },
                 light: {
-                    bg: "#f2f2f2",
+                    bg: "#ececec",
                     surface: "#ffffff",
-                    surfaceAlt: "#e8e8e8",
-                    fg: "#1c1c1c",
-                    fgMuted: "#707070",
+                    surface2: "#f2f2f2",
+                    surface3: "#e4e4e4",
+                    ink: "#1c1c1c",
+                    soft: "#707070",
                     line: "#d6d6d6",
                     accent: "#303030",
                     onAccent: "#ffffff",
-                    urgent: "#c0392b"
+                    urgent: "#c0392b",
+                    warn: "#9a6a00",
+                    ok: "#2e7d3a"
                 }
             },
             font: {
@@ -55,17 +64,22 @@ Singleton {
                 s: 8,
                 m: 12,
                 l: 16,
-                xl: 24
+                xl: 24,
+                xxl: 32
             },
             radius: {
                 none: 0,
-                s: 4,
-                m: 8,
-                l: 12,
+                control: 6,
+                tile: 10,
+                panel: 12,
+                card: 16,
                 full: 999
             },
             border: {
                 width: 0
+            },
+            motion: {
+                duration: 180
             },
             hit: {
                 pointer: 24,

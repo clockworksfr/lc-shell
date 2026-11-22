@@ -28,7 +28,7 @@ PopupWindow {
 
     Rectangle {
         anchors.fill: parent
-        radius: root.theme.radius.m
+        radius: root.theme.radius.panel
         color: root.theme.color.surface
 
         Column {

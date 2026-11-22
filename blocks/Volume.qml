@@ -15,7 +15,7 @@ ThemedText {
     property var options: ({})
 
     text: Audio.muted ? I18n.tr("common.muted") : I18n.tr("bar.volume", { value: Math.round(Audio.volume * 100) })
-    color: Audio.muted ? theme.color.fgMuted : theme.color.fg
+    color: Audio.muted ? theme.color.soft : theme.color.ink
 
     MouseArea {
         anchors.fill: parent

@@ -9,7 +9,7 @@ Text {
     // Small label: follows the theme's label case (e.g. upper in Matrix).
     property bool label: false
 
-    color: theme.color.fg
+    color: theme.color.ink
     font.family: label ? theme.font.mono : theme.font.family
     font.pixelSize: label ? theme.font.sizeS : theme.font.sizeM
     font.capitalization: label && theme.style.labelCase === "upper" ? Font.AllUppercase : Font.MixedCase

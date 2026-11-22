@@ -23,6 +23,9 @@ ShellRoot {
     ThemeIpc {}
     I18nIpc {}
 
-    // Singletons are lazy: touch the window placer so it starts.
-    Component.onCompleted: CellTiler.managed
+    // Singletons are lazy: touch the ones that must run from the start.
+    Component.onCompleted: {
+        CellTiler.managed;
+        Fonts.files;
+    }
 }

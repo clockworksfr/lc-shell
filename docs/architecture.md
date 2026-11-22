@@ -17,8 +17,8 @@ Un **profil** associe un écran à :
 
 ## Thèmes
 
-- Thèmes prévus : **Classique moderne** (défaut et base), **Ligne**, **Façade**, **Modulaire**, **Matrix**. Spécifications visuelles : artifact de design.
-- Chaque thème a une variante **claire** et **sombre**. Bascule : manuelle, horaires fixes, ou lever/coucher du soleil (calcul local, sans réseau). IPC pour les binds.
+- Thèmes prévus : **Classique moderne** (défaut et base), **Ligne**, **Façade**, **Modulaire**, **Matrix**. Spécification : [`themes.md`](themes.md). Décision du 22/11 : on part sur les propositions de design telles quelles, Classique moderne partout pour commencer (écrans normaux et modules), on peaufine ensuite.
+- Chaque thème a une variante **claire** et **sombre**. Bascule : manuelle, horaires fixes, ou lever/coucher du soleil (calcul local, sans réseau). IPC pour les binds. Réglage dans l'app de paramètres (fin du projet) ; par défaut identique sur tous les écrans, réglable par écran ensuite.
 - Thème choisi par mode (`normal` → Classique, `modules` → Façade par défaut), surchargeable par profil d'écran.
 - Un thème = des tokens (palette par variante, polices statiques, rayons, bordures, espacements) + des **axes de style** pour les composants (forme des curseurs, des jauges, des espaces de travail, de l'horloge…) + les **valeurs par défaut de la barre**. Aucun composant ne teste le nom d'un thème : il lit des tokens et des axes.
 - Portée : chaque fenêtre porte le thème de son écran (`window.theme`) ; les composants le retrouvent par `QsWindow.window`. Un même composant peut donc s'afficher en Classique sur DP-1 et en Façade sur le Xeneon.
@@ -48,7 +48,7 @@ Rien d'**automatique** ne s'affiche au-dessus d'un jeu en plein écran (`Hyprlan
 
 ## Phases
 
-Fait : socle (1), premier jet du mode modules (3 : grille, pages, cases fenêtre, tuiles horloge/média/système/espaces de travail). En attente : spécification des thèmes (2).
+Fait : socle (1), jetons du thème Classique (2, partiel), premier jet du mode modules (3), langues EN/FR. Priorité actuelle : **fonctionnalités brutes** ; le design se peaufine après.
 
 
 1. **Socle** — profils d'écran par modèle, registre de thèmes avec clair/sombre programmable, thème par fenêtre, styles de barre, politique plein écran, indicateur tactile.

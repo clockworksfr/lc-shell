@@ -43,7 +43,7 @@ Item {
                         id: name
                         label: true
                         text: modelData.label
-                        color: root.theme.color.fgMuted
+                        color: root.theme.color.soft
                     }
 
                     ThemedText {
@@ -56,8 +56,8 @@ Item {
                 Rectangle {
                     width: parent.width
                     height: 6
-                    radius: root.theme.radius.s
-                    color: root.theme.color.surfaceAlt
+                    radius: root.theme.radius.full
+                    color: root.theme.color.surface2
 
                     Rectangle {
                         width: parent.width * Math.min(1, modelData.value)

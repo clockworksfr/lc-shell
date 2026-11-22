@@ -26,13 +26,13 @@ Item {
 
                 width: Math.max(root.theme.hit, 44)
                 height: width
-                radius: root.theme.radius.m
-                color: modelData.active ? root.theme.color.accent : root.theme.color.surfaceAlt
+                radius: root.theme.radius.control
+                color: modelData.active ? root.theme.color.accent : root.theme.color.surface2
 
                 ThemedText {
                     anchors.centerIn: parent
                     text: parent.modelData.name
-                    color: parent.modelData.active ? root.theme.color.onAccent : root.theme.color.fg
+                    color: parent.modelData.active ? root.theme.color.onAccent : root.theme.color.ink
                 }
 
                 MouseArea {

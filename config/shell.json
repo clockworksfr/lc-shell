@@ -3,7 +3,7 @@
   "appearance": {
     "variant": "auto",
     "schedule": { "type": "time", "light": "07:30", "dark": "19:30" },
-    "themes": { "normal": "classic", "modules": "matrix" }
+    "themes": { "normal": "classic", "modules": "classic" }
   },
   "modes": {
     "normal": {

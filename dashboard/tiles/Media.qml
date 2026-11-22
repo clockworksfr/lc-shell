@@ -27,7 +27,7 @@ Item {
         anchors.centerIn: parent
         visible: !root.player
         text: I18n.tr("media.noPlayer")
-        color: root.theme.color.fgMuted
+        color: root.theme.color.soft
     }
 
     Row {
@@ -39,8 +39,8 @@ Item {
             id: cover
             width: parent.height
             height: parent.height
-            radius: root.theme.radius.m
-            color: root.theme.color.surfaceAlt
+            radius: root.theme.radius.tile
+            color: root.theme.color.surface2
             clip: true
 
             Image {
@@ -66,15 +66,15 @@ Item {
             ThemedText {
                 width: parent.width
                 text: root.player?.trackArtist ?? ""
-                color: root.theme.color.fgMuted
+                color: root.theme.color.soft
                 elide: Text.ElideRight
             }
 
             Rectangle {
                 width: parent.width
                 height: 4
-                radius: root.theme.radius.s
-                color: root.theme.color.surfaceAlt
+                radius: root.theme.radius.full
+                color: root.theme.color.surface2
                 visible: root.player?.lengthSupported ?? false
 
                 Rectangle {
@@ -115,7 +115,7 @@ Item {
         width: Math.max(theme.hit, 36)
         height: width
         radius: theme.radius.full
-        color: area.pressed ? theme.color.surfaceAlt : "transparent"
+        color: area.pressed ? theme.color.surface2 : "transparent"
         border.width: 1
         border.color: theme.color.line
 

@@ -21,7 +21,7 @@ ThemedText {
     width: Math.min(implicitWidth, options.maxWidth ?? 400)
     elide: Text.ElideRight
     text: `${player?.isPlaying ? "▶" : "⏸"}  ${track}`
-    color: player?.isPlaying ? theme.color.fg : theme.color.fgMuted
+    color: player?.isPlaying ? theme.color.ink : theme.color.soft
 
     MouseArea {
         anchors.fill: parent

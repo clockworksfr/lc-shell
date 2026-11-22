@@ -42,7 +42,7 @@ PanelWindow {
         y: parent.height * 0.2
         width: 640
         height: column.implicitHeight + win.theme.space.m * 2
-        radius: win.theme.radius.m
+        radius: win.theme.radius.panel
         color: win.theme.color.surface
 
         // Swallow clicks so they don't reach the close area.
@@ -63,7 +63,7 @@ PanelWindow {
                 width: parent.width
                 focus: true
                 text: Launcher.text
-                color: win.theme.color.fg
+                color: win.theme.color.ink
                 selectionColor: win.theme.color.accent
                 selectedTextColor: win.theme.color.bg
                 font.family: win.theme.font.family
@@ -73,7 +73,7 @@ PanelWindow {
                 ThemedText {
                     visible: !input.text
                     text: I18n.tr("launcher.placeholder")
-                    color: win.theme.color.fgMuted
+                    color: win.theme.color.soft
                     font.pixelSize: win.theme.font.sizeL
                 }
 
@@ -120,7 +120,7 @@ PanelWindow {
                         required property var modelData
                         text: (modelData.prefix ? `${modelData.prefix} ` : "") + I18n.tr(`launcher.mode.${modelData.id}`)
                         font.pixelSize: win.theme.font.sizeS
-                        color: Launcher.modeId === modelData.id ? win.theme.color.fg : win.theme.color.fgMuted
+                        color: Launcher.modeId === modelData.id ? win.theme.color.ink : win.theme.color.soft
 
                         MouseArea {
                             anchors.fill: parent
@@ -156,7 +156,7 @@ PanelWindow {
 
                     width: list.width
                     height: win.rowHeight
-                    radius: win.theme.radius.s
+                    radius: win.theme.radius.control
                     color: current ? win.theme.color.bg : "transparent"
 
                     Item {
@@ -200,7 +200,7 @@ PanelWindow {
                             visible: !!row.modelData.subtitle
                             text: row.modelData.subtitle ?? ""
                             font.pixelSize: win.theme.font.sizeS
-                            color: row.modelData.urgent ? win.theme.color.urgent : win.theme.color.fgMuted
+                            color: row.modelData.urgent ? win.theme.color.urgent : win.theme.color.soft
                             elide: Text.ElideRight
                         }
                     }
@@ -219,7 +219,7 @@ PanelWindow {
             ThemedText {
                 visible: list.count === 0
                 text: Launcher.modeId === "files" && Launcher.term.length < 2 ? I18n.tr("launcher.minChars", { n: 2 }) : I18n.tr("launcher.noResults")
-                color: win.theme.color.fgMuted
+                color: win.theme.color.soft
                 font.pixelSize: win.theme.font.sizeS
             }
         }

@@ -48,7 +48,7 @@ PanelWindow {
             Rectangle {
                 anchors.fill: parent
                 visible: cell.framed
-                radius: win.theme.radius.l
+                radius: win.theme.radius.card
                 color: win.theme.color.surface
                 border.width: win.theme.border.width
                 border.color: win.theme.color.line

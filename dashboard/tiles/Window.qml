@@ -15,7 +15,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: root.theme.radius.l
+        radius: root.theme.radius.card
         color: "transparent"
         border.width: 1
         border.color: root.theme.color.line
@@ -25,6 +25,6 @@ Item {
         anchors.centerIn: parent
         label: true
         text: I18n.tr("tile.window")
-        color: root.theme.color.fgMuted
+        color: root.theme.color.soft
     }
 }

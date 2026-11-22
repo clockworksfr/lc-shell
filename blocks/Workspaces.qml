@@ -30,12 +30,12 @@ Row {
 
             readonly property color dotColor: modelData.urgent ? root.theme.color.urgent
                 : modelData.active ? root.theme.color.accent
-                : root.theme.color.fgMuted
+                : root.theme.color.soft
 
             implicitWidth: root.dots ? (modelData.active ? 20 : 8) : Math.max(root.theme.bar.height - root.theme.space.s, label.implicitWidth + root.theme.space.s * 2)
             implicitHeight: root.dots ? 8 : root.theme.bar.height - root.theme.space.s
             anchors.verticalCenter: parent?.verticalCenter
-            radius: root.dots ? root.theme.radius.full : root.theme.radius.s
+            radius: root.dots ? root.theme.radius.full : root.theme.radius.control
             color: root.dots ? dotColor : modelData.active ? root.theme.color.surface : "transparent"
 
             Behavior on implicitWidth {
@@ -50,8 +50,8 @@ Row {
                 anchors.centerIn: parent
                 text: parent.modelData.name
                 color: parent.modelData.urgent ? root.theme.color.urgent
-                     : parent.modelData.active ? root.theme.color.fg
-                     : root.theme.color.fgMuted
+                     : parent.modelData.active ? root.theme.color.ink
+                     : root.theme.color.soft
             }
 
             MouseArea {

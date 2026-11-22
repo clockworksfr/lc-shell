@@ -37,7 +37,7 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        radius: win.theme.radius.m
+        radius: win.theme.radius.panel
         color: win.theme.color.surface
 
         Column {
@@ -60,7 +60,7 @@ PanelWindow {
                 ThemedText {
                     anchors.right: parent.right
                     text: Osd.muted ? I18n.tr("common.muted") : I18n.percent(Osd.value)
-                    color: Osd.muted ? win.theme.color.fgMuted : win.theme.color.fg
+                    color: Osd.muted ? win.theme.color.soft : win.theme.color.ink
                 }
             }
 
@@ -68,14 +68,14 @@ PanelWindow {
             Rectangle {
                 width: parent.width
                 height: 6
-                radius: win.theme.radius.s
+                radius: win.theme.radius.full
                 color: win.theme.color.bg
 
                 Rectangle {
                     width: parent.width * Math.min(Osd.value, 1)
                     height: parent.height
                     radius: parent.radius
-                    color: Osd.muted ? win.theme.color.fgMuted : Osd.value > 1 ? win.theme.color.urgent : win.theme.color.accent
+                    color: Osd.muted ? win.theme.color.soft : Osd.value > 1 ? win.theme.color.urgent : win.theme.color.accent
 
                     Behavior on width {
                         NumberAnimation {
@@ -88,7 +88,7 @@ PanelWindow {
             ThemedText {
                 width: parent.width
                 text: Osd.label
-                color: win.theme.color.fgMuted
+                color: win.theme.color.soft
                 font.pixelSize: win.theme.font.sizeS
                 elide: Text.ElideRight
             }

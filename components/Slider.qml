@@ -33,14 +33,14 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width
         height: 6
-        radius: root.theme.radius.s
+        radius: root.theme.radius.full
         color: root.theme.color.bg
 
         Rectangle {
             width: parent.width * root.ratio
             height: parent.height
             radius: parent.radius
-            color: root.dimmed ? root.theme.color.fgMuted : root.theme.color.accent
+            color: root.dimmed ? root.theme.color.soft : root.theme.color.accent
         }
     }
 
@@ -50,7 +50,7 @@ Item {
         width: 12
         height: 12
         radius: root.theme.radius.full
-        color: root.dimmed ? root.theme.color.fgMuted : root.theme.color.fg
+        color: root.dimmed ? root.theme.color.soft : root.theme.color.ink
     }
 
     MouseArea {

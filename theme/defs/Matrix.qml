@@ -4,35 +4,41 @@ import QtQuick
 import Quickshell
 
 // Matrix: monochrome, dot-matrix numerals, a single red accent
-// (Nothing Phone spirit). Palettes from simon's own DA.
-// Fonts (Doto, Space Grotesk, Space Mono) arrive with the theme phase;
-// until then the families fall back to the system defaults.
+// (Nothing Phone spirit). simon's own DA, docs/themes.md section 5.
+// Fonts (Doto, Space Grotesk, Space Mono) are not bundled yet: the
+// families fall back to the system defaults.
 Singleton {
     readonly property var definition: ({
             id: "matrix",
             name: "Matrix",
             palettes: {
                 dark: {
-                    bg: "#0B0B0B",
-                    surface: "#121212",
-                    surfaceAlt: "#1A1A1A",
-                    fg: "#F2F2F2",
-                    fgMuted: "#8C8C8C",
+                    bg: "#080808",
+                    surface: "#0B0B0B",
+                    surface2: "#121212",
+                    surface3: "#1A1A1A",
+                    ink: "#F2F2F2",
+                    soft: "#8C8C8C",
                     line: "#262626",
                     accent: "#D71921",
-                    onAccent: "#F2F2F2",
-                    urgent: "#E5323A"
+                    onAccent: "#FFFFFF",
+                    urgent: "#E5323A",
+                    warn: "#D71921",
+                    ok: "#8FCB9F"
                 },
                 light: {
-                    bg: "#F2F2F0",
-                    surface: "#FFFFFF",
-                    surfaceAlt: "#ECECEA",
-                    fg: "#111111",
-                    fgMuted: "#7A7A78",
+                    bg: "#E4E4E2",
+                    surface: "#F2F2F0",
+                    surface2: "#FFFFFF",
+                    surface3: "#ECECEA",
+                    ink: "#111111",
+                    soft: "#7A7A78",
                     line: "#DCDCD9",
                     accent: "#D71921",
                     onAccent: "#FFFFFF",
-                    urgent: "#D71921"
+                    urgent: "#D71921",
+                    warn: "#D71921",
+                    ok: "#3E7D52"
                 }
             },
             font: {
@@ -41,21 +47,23 @@ Singleton {
                 display: "Doto"
             },
             radius: {
-                s: 999,
-                m: 12,
-                l: 16
+                control: 999,
+                tile: 28,
+                panel: 28,
+                card: 28
             },
             border: {
                 width: 1
             },
             bar: {
-                height: 34,
+                height: 40,
                 style: "full",
                 floating: false,
                 margin: 0,
                 radius: 0,
                 opacity: 1,
-                border: 1
+                border: 0,
+                screenCorners: 20
             },
             style: {
                 labelCase: "upper",

@@ -32,7 +32,7 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             label: true
             text: I18n.locale.toString(clock.date, I18n.tr("format.dateLong"))
-            color: root.theme.color.fgMuted
+            color: root.theme.color.soft
         }
     }
 }
