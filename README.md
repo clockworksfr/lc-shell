@@ -23,9 +23,16 @@ Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md
 | `assets/fonts/` | Polices statiques embarquées (OFL) : Figtree, JetBrains Mono |
 | `theme/` | `Themes` (registre, clair/sombre, programmation), `defs/` (un fichier par thème) |
 | `components/` | Composants de base, qui lisent le thème de leur fenêtre |
-| `config/shell.json` | Configuration, rechargée à chaud |
+| `config/defaults.json` | Valeurs par défaut (génériques), rechargées à chaud |
 
-## Configuration (`config/shell.json`)
+## Configuration
+
+Deux couches, rechargées à chaud :
+
+- `config/defaults.json` (repo) : valeurs par défaut génériques ;
+- `~/.config/lc/settings.json` (`$XDG_CONFIG_HOME`) : **tes réglages**, superposés aux défauts. Écrit aussi par le shell (IPC, app de paramètres). Les objets se fusionnent clé par clé ; les listes (blocs, écrans, pages) remplacent.
+
+Exemple de réglages :
 
 ```json
 {
@@ -64,7 +71,7 @@ Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md
 
 ## Langues
 
-Interface en anglais et en français. `"language"` dans `shell.json` : `auto` (suit la locale du système), `en` ou `fr` ; `"locale"` pour forcer le format des dates et nombres (ex. `en_GB`). Bascule à chaud : `qs -c lc ipc call i18n set en|fr|auto`.
+Interface en anglais et en français. `"language"` dans `settings.json` : `auto` (suit la locale du système), `en` ou `fr` ; `"locale"` pour forcer le format des dates et nombres (ex. `en_GB`). Bascule à chaud : `qs -c lc ipc call i18n set en|fr|auto`.
 
 - Textes : `i18n/<langue>.json`, clés plates (`"osd.volume": "Volume"`) avec `{paramètres}`, rechargés à chaud. Clé manquante : repli sur l'anglais, puis sur la clé elle-même.
 - Dans le code : `I18n.tr("clé", { n: 2 })`, `I18n.percent(0.42)`, `I18n.number(x, 1)`, `I18n.locale` pour les dates. Aucun texte visible en dur.
@@ -109,7 +116,7 @@ Interface en anglais et en français. `"language"` dans `shell.json` : `auto` (s
 
 Tab change de mode. Les actions destructrices demandent une seconde validation. Verrouillage et veille passent par logind (`loginctl lock-session`, `systemctl suspend`) : ils marchent avec l'écran de verrouillage qui écoute logind, quel qu'il soit. L'historique d'usage (classement) est dans `~/.local/state/quickshell/…/launcher-usage.json`.
 
-Les choix faits à l'exécution (thème, variante via IPC) sont gardés dans `…/appearance.json` et priment sur `shell.json`.
+Les choix faits par IPC (thème, variante, langue) sont écrits dans `settings.json`.
 
 ## Fond d'écran
 

@@ -7,7 +7,7 @@ import Quickshell.Io
 // Wallpapers: one image per screen (keyed by screen model, stable across
 // connector changes) or one for all, kept in the state dir.
 //
-// shell.json:
+// settings:
 //   "wallpaper": { "enabled": true, "directory": "~/Images/Wallpapers" }
 // Without a chosen image, screens show the theme background color.
 Singleton {

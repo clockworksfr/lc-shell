@@ -4,8 +4,12 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Reads config/shell.json (watched: saving it updates the shell live).
+// Configuration = config/defaults.json (repo, generic) with the user's
+// settings layered on top: $XDG_CONFIG_HOME/lc/settings.json (written by
+// the shell: settings app, IPC). Both are watched: edits apply live.
+// Objects merge key by key; arrays (block lists, screens, pages) replace.
 //
+//   language, wallpaper, notifications…
 //   appearance  theme per screen mode, light/dark variant and its schedule
 //   modes       per-mode module config: modes.normal.bar, modes.modules.osd...
 //   screens     profiles, first match wins:
@@ -18,9 +22,47 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    property var data: ({})
+    property var defaults: ({})
+    property var user: ({})
+    readonly property var data: merge(defaults, user)
 
     readonly property var appearance: data.appearance ?? {}
+
+    readonly property string configHome: Quickshell.env("XDG_CONFIG_HOME") || `${Quickshell.env("HOME")}/.config`
+    readonly property string userPath: `${configHome}/lc/settings.json`
+
+    function merge(base: var, over: var): var {
+        if (!isObject(base) || !isObject(over))
+            return over === undefined ? base : over;
+        const out = Object.assign({}, base);
+        for (const key in over)
+            out[key] = merge(base[key], over[key]);
+        return out;
+    }
+
+    // Value at a dotted path of the merged config ("appearance.variant").
+    function get(path: string): var {
+        return path.split(".").reduce((o, k) => o?.[k], data);
+    }
+
+    // Writes a user setting; `undefined` removes it (back to the default).
+    function set(path: string, value: var): void {
+        const next = JSON.parse(JSON.stringify(user));
+        const keys = path.split(".");
+        let node = next;
+        for (const key of keys.slice(0, -1)) {
+            if (!isObject(node[key]))
+                node[key] = {};
+            node = node[key];
+        }
+        const last = keys[keys.length - 1];
+        if (value === undefined)
+            delete node[last];
+        else
+            node[last] = value;
+        user = next;
+        mkdir.running = true;
+    }
 
     function matches(match: var, screen: ShellScreen): bool {
         if (!match || (!match.model && !match.name))
@@ -75,18 +117,39 @@ Singleton {
     }
 
     FileView {
-        path: Quickshell.shellDir + "/config/shell.json"
+        path: Quickshell.shellDir + "/config/defaults.json"
         watchChanges: true
         onFileChanged: reload()
-
         onLoaded: {
             try {
-                root.data = JSON.parse(text());
+                root.defaults = JSON.parse(text());
             } catch (e) {
                 // Keep the previous config so a typo doesn't wipe the screen.
-                console.warn(`shell.json: invalid JSON, keeping previous config (${e})`);
+                console.warn(`defaults.json: invalid JSON, keeping previous config (${e})`);
             }
         }
-        onLoadFailed: error => console.warn(`shell.json: cannot load (error ${error})`)
+        onLoadFailed: error => console.warn(`defaults.json: cannot load (error ${error})`)
+    }
+
+    FileView {
+        id: userFile
+        path: root.userPath
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: {
+            try {
+                root.user = JSON.parse(text());
+            } catch (e) {
+                console.warn(`${root.userPath}: invalid JSON, keeping previous settings (${e})`);
+            }
+        }
+    }
+
+    // The settings directory may not exist yet: create it, then write.
+    Process {
+        id: mkdir
+        command: ["mkdir", "-p", `${root.configHome}/lc`]
+        onExited: userFile.setText(JSON.stringify(root.user, null, 2) + "\n")
     }
 }

@@ -1,6 +1,6 @@
 {
   "language": "auto",
-  "wallpaper": { "enabled": true, "directory": "~/Images/Wallpapers" },
+  "wallpaper": { "enabled": true, "directory": "~/Pictures/Wallpapers" },
   "appearance": {
     "variant": "auto",
     "schedule": { "type": "time", "light": "07:30", "dark": "19:30" },
@@ -35,19 +35,6 @@
     }
   },
   "screens": [
-    {
-      "match": { "model": "DELL U4025QW" },
-      "mode": "normal",
-      "bar": { "center": [{ "type": "clock", "format": "dddd d MMMM  HH:mm" }] }
-    },
-    {
-      "match": { "model": "XENEON EDGE" },
-      "mode": "modules",
-      "touch": true
-    },
-    {
-      "match": { "name": "eDP-*" },
-      "mode": "normal"
-    }
+    { "match": { "name": "eDP-*" }, "mode": "normal" }
   ]
 }

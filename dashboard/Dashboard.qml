@@ -6,7 +6,7 @@ import qs.services
 
 // Geometry of "modules" screens (the dashboard).
 //
-// Config (shell.json, modes.modules.dashboard, overridable per screen):
+// Config (settings, modes.modules.dashboard, overridable per screen):
 //   grid     { columns, rows, gap, margin }
 //   pages    { "default": [cells], "<workspace name>": [cells] }
 //            Each Hyprland workspace of the screen is a page; a workspace

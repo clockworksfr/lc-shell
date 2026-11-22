@@ -16,7 +16,7 @@ import Quickshell
 //   border  width
 //   motion  duration (ms)
 //   hit     minimum size of a click/touch target (bigger on touch screens)
-//   bar     default bar look, overridable per screen in shell.json
+//   bar     default bar look, overridable per screen in settings
 //   style   component variants ("axes"); components never test theme ids
 Singleton {
     readonly property var definition: ({
@@ -107,7 +107,7 @@ Singleton {
                 // Rounded screen corners radius, 0 = none.
                 screenCorners: 0,
                 // Frame around the screen, the bar being its thick side
-                // (docs/themes.md, "Cadre"). `frame: true` in shell.json is
+                // (docs/themes.md, "Cadre"). `frame: true` in settings is
                 // a shorthand for { enabled: true }.
                 frame: {
                     enabled: false,

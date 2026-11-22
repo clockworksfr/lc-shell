@@ -11,20 +11,19 @@ import qs.services
 // {placeholders}. Files are watched: edits show up live. A missing key
 // falls back to English, then to the key itself (visible, easy to spot).
 //
-// Language: shell.json "language" ("auto" | "en" | "fr"), overridden at
-// runtime by `qs -c lc ipc call i18n set <code>` (kept in the state dir).
+// Language: setting "language" ("auto" | "en" | "fr"), also set by
+// `qs -c lc ipc call i18n set <code>` and the settings app.
 // "auto" follows the system locale. Dates and numbers use `locale`
-// (shell.json "locale" to force one, e.g. "en_GB").
+// (settings "locale" to force one, e.g. "en_GB").
 Singleton {
     id: root
 
     readonly property var languages: ["en", "fr"]
 
-    property var state: ({})
     // language -> { key: text }
     property var tables: ({})
 
-    readonly property string setting: state.language ?? Config.data.language ?? "auto"
+    readonly property string setting: Config.data.language ?? "auto"
     readonly property string systemLanguage: {
         const code = Qt.locale().name.split("_")[0];
         return languages.includes(code) ? code : "en";
@@ -70,8 +69,7 @@ Singleton {
     function setLanguage(code: string): bool {
         if (code !== "auto" && !languages.includes(code))
             return false;
-        state = Object.assign({}, state, { language: code });
-        stateFile.setText(JSON.stringify(state, null, 2));
+        Config.set("language", code);
         return true;
     }
 
@@ -92,19 +90,6 @@ Singleton {
                 } catch (e) {
                     console.warn(`i18n/${modelData}.json: invalid JSON, keeping previous strings (${e})`);
                 }
-            }
-        }
-    }
-
-    FileView {
-        id: stateFile
-        path: Quickshell.statePath("i18n.json")
-        printErrors: false
-        onLoaded: {
-            try {
-                root.state = JSON.parse(text());
-            } catch (e) {
-                root.state = {};
             }
         }
     }

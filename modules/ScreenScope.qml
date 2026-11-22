@@ -26,7 +26,7 @@ Scope {
     readonly property string barEdge: ["top", "bottom", "left", "right"].includes(barLook.position) ? barLook.position : "top"
     readonly property int barThickness: barEdge === "left" || barEdge === "right" ? barLook.verticalWidth : barLook.height
 
-    // Frame: theme defaults, overridden in shell.json by `frame: true|false`
+    // Frame: theme defaults, overridden in settings by `frame: true|false`
     // or an object. The bar is its thick side.
     readonly property var frame: {
         const base = theme.bar.frame ?? {};

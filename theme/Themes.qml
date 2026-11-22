@@ -10,8 +10,8 @@ import qs.theme.defs
 //
 // Each screen gets its own resolved theme (see ScreenScope): the theme of
 // its mode ("normal" / "modules"), unless its profile names one.
-// Runtime choices (IPC, future settings UI) are kept in the state dir and
-// win over config/shell.json.
+// Choices (IPC, settings app) are written to the user settings
+// (Config.set), like any other setting.
 Singleton {
     id: root
 
@@ -20,18 +20,15 @@ Singleton {
             matrix: Matrix.definition
         })
 
-    // Persisted runtime choices: { variant, themes: { normal, modules } }.
-    property var state: ({})
-
     // "dark" | "light" | "auto" (follows appearance.schedule).
-    readonly property string variantMode: state.variant ?? Config.appearance.variant ?? "dark"
+    readonly property string variantMode: Config.appearance.variant ?? "dark"
     property string scheduledVariant: "dark"
     readonly property string variant: variantMode === "auto" ? scheduledVariant : variantMode
 
     readonly property var fallback: resolve("classic", false)
 
     function themeFor(mode: string): string {
-        const id = (state.themes ?? {})[mode] ?? (Config.appearance.themes ?? {})[mode] ?? "classic";
+        const id = (Config.appearance.themes ?? {})[mode] ?? "classic";
         return definitions[id] ? id : "classic";
     }
 
@@ -71,40 +68,20 @@ Singleton {
     function setTheme(mode: string, id: string): bool {
         if (!definitions[id])
             return false;
-        const themes = Object.assign({}, state.themes ?? {});
-        themes[mode] = id;
-        saveState(Object.assign({}, state, { themes: themes }));
+        Config.set(`appearance.themes.${mode}`, id);
         return true;
     }
 
     function setVariant(mode: string): bool {
         if (!["dark", "light", "auto"].includes(mode))
             return false;
-        saveState(Object.assign({}, state, { variant: mode }));
+        Config.set("appearance.variant", mode);
         return true;
     }
 
     // Flips the current look and leaves automatic mode.
     function toggleVariant(): void {
         setVariant(variant === "dark" ? "light" : "dark");
-    }
-
-    function saveState(next: var): void {
-        state = next;
-        stateFile.setText(JSON.stringify(next, null, 2));
-    }
-
-    FileView {
-        id: stateFile
-        path: Quickshell.statePath("appearance.json")
-        printErrors: false
-        onLoaded: {
-            try {
-                root.state = JSON.parse(text());
-            } catch (e) {
-                root.state = {};
-            }
-        }
     }
 
     // --- Schedule ---

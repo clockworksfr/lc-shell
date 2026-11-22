@@ -4,7 +4,7 @@ import Quickshell.Wayland
 import qs.theme
 
 // Bar of "normal" screens, on any edge. Its look comes from the theme
-// (theme.bar) and can be overridden per mode/screen in shell.json, next to
+// (theme.bar) and can be overridden per mode/screen in settings, next to
 // the block lists:
 //   position          "top" | "bottom" | "left" | "right"
 //   left/center/right block entries; on a vertical bar: top/middle/bottom
