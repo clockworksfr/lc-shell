@@ -19,8 +19,10 @@ Singleton {
 
     // { temp, feels, code, wind, isDay } of the last reading.
     property var current: null
-    // Next 6 hours: [{ time (ms), temp, rain (%), code, isDay }].
+    // Next 12 hours: [{ time (ms), temp, rain (%), code, isDay }].
     property var hourly: []
+    // Today and the next 5 days: [{ time (ms), max, min, code, rain (%) }].
+    property var daily: []
     // When the reading was taken (ms since epoch), 0 = none.
     property real updated: 0
     property bool failed: false
@@ -88,7 +90,7 @@ Singleton {
             return;
         const p = location;
         const units = imperial ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : "";
-        fetch.command = ["curl", "-fsS", "--max-time", "15", `https://api.open-meteo.com/v1/forecast?latitude=${p.latitude}&longitude=${p.longitude}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&forecast_hours=7&timeformat=unixtime&timezone=auto${units}`];
+        fetch.command = ["curl", "-fsS", "--max-time", "15", `https://api.open-meteo.com/v1/forecast?latitude=${p.latitude}&longitude=${p.longitude}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&forecast_hours=13&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&forecast_days=6&timeformat=unixtime&timezone=auto${units}`];
         fetch.running = true;
     }
 
@@ -108,6 +110,7 @@ Singleton {
         results = [];
         current = null;
         hourly = [];
+        daily = [];
         updated = 0;
         Qt.callLater(refresh);
     }
@@ -119,12 +122,17 @@ Singleton {
         const h = d.hourly;
         const now = Date.now() / 1000;
         const hours = [];
-        for (let i = 0; i < h.time.length && hours.length < 6; i++) {
+        for (let i = 0; i < h.time.length && hours.length < 12; i++) {
             if (h.time[i] + 3600 <= now)
                 continue;
             hours.push({ time: h.time[i] * 1000, temp: h.temperature_2m[i], rain: h.precipitation_probability[i] ?? 0, code: h.weather_code[i], isDay: !!h.is_day[i] });
         }
         hourly = hours;
+        const d6 = d.daily ?? { time: [] };
+        const days = [];
+        for (let i = 0; i < d6.time.length; i++)
+            days.push({ time: d6.time[i] * 1000, max: d6.temperature_2m_max[i], min: d6.temperature_2m_min[i], code: d6.weather_code[i], rain: d6.precipitation_probability_max?.[i] ?? 0 });
+        daily = days;
     }
 
     onEnabledChanged: if (enabled) refresh()
@@ -139,7 +147,7 @@ Singleton {
                     root.parse(text);
                     root.updated = Date.now();
                     root.failed = false;
-                    cache.setText(JSON.stringify({ updated: root.updated, location: root.location, current: root.current, hourly: root.hourly }));
+                    cache.setText(JSON.stringify({ updated: root.updated, location: root.location, current: root.current, hourly: root.hourly, daily: root.daily }));
                 } catch (e) {
                     root.failed = true;
                 }
@@ -178,6 +186,7 @@ Singleton {
                 if (root.location && d.location?.latitude === root.location.latitude && d.location?.longitude === root.location.longitude && !root.current) {
                     root.current = d.current;
                     root.hourly = (d.hourly ?? []).filter(h => h.time + 3600 * 1000 > Date.now());
+                    root.daily = d.daily ?? [];
                     root.updated = d.updated;
                 }
             } catch (e) {}

@@ -9,14 +9,10 @@ import qs.theme
 // ticks every 12 dB; warn above -6 dB, red above -2 dB),
 // with a falling peak marker. Bars run along the tile's longer side.
 // Options: channels ("all" default, or "stereo" to keep only 2).
-Item {
+ModuleBase {
     id: root
 
-    property ShellScreen screen
-    property var options: ({})
-    readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
-
-    readonly property bool horizontal: width >= height
+    readonly property bool horizontal: inner.width >= inner.height
     readonly property var levels: monitor.peaks.slice(0, root.options.channels === "all" || !root.options.channels ? 8 : 2)
 
     function toMeter(peak: real): real {
@@ -47,8 +43,8 @@ Item {
                 property real smooth: 0
                 property real hold: 0
 
-                width: root.horizontal ? root.width : (root.width - root.theme.space.s * (root.levels.length - 1)) / root.levels.length
-                height: root.horizontal ? (root.height - root.theme.space.s * (root.levels.length - 1)) / root.levels.length : root.height
+                width: root.horizontal ? root.inner.width : (root.inner.width - root.theme.space.s * (root.levels.length - 1)) / root.levels.length
+                height: root.horizontal ? (root.inner.height - root.theme.space.s * (root.levels.length - 1)) / root.levels.length : root.inner.height
 
                 // Fast attack, slower release; the peak marker falls slowly.
                 onLevelChanged: {

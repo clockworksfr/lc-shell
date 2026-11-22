@@ -64,6 +64,9 @@ Singleton {
                 display: "sans-serif",
                 // Weight of big numerals (clocks, gauges).
                 displayWeight: 600,
+                // Width correction of big numerals (dashboard modules):
+                // wide display fonts get smaller.
+                heroScale: 1,
                 sizeS: 11,
                 sizeM: 13,
                 sizeL: 16,

@@ -4,41 +4,68 @@ import Quickshell.Hyprland
 import qs.components
 import qs.theme
 
-// Pages of this screen (its Hyprland workspaces), as large buttons.
-Item {
+// Pages of this screen (its Hyprland workspaces): equal cells filling the
+// module (one row in S, a grid in M / L), number and window count.
+ModuleBase {
     id: root
 
-    property ShellScreen screen
-    property var options: ({})
-    readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
-
     readonly property var workspaces: Hyprland.workspaces.values.filter(ws => ws.id > 0 && ws.monitor?.name === root.screen?.name).sort((a, b) => a.id - b.id)
+    readonly property int count: Math.max(1, workspaces.length)
+    readonly property int columns: tier === "S" || rows < 2 ? count : Math.ceil(count / (tier === "L" ? 2 : 2))
 
-    Row {
-        anchors.centerIn: parent
-        spacing: root.theme.space.s
+    Grid {
+        id: grid
+
+        anchors.fill: parent
+        columns: root.columns
+        spacing: root.gap / 1.5
 
         Repeater {
             model: root.workspaces
 
             Rectangle {
-                required property HyprlandWorkspace modelData
+                id: ws
 
-                width: Math.max(root.theme.hit, 44)
-                height: width
-                radius: root.theme.radius.control
+                required property HyprlandWorkspace modelData
+                readonly property int windows: Hyprland.toplevels.values.filter(t => t.workspace?.id === modelData.id).length
+
+                width: (grid.width - grid.spacing * (grid.columns - 1)) / grid.columns
+                height: (grid.height - grid.spacing * (Math.ceil(root.count / grid.columns) - 1)) / Math.ceil(root.count / grid.columns)
+                radius: root.theme.radius.tile
                 color: modelData.active ? root.theme.color.accent : root.theme.color.surface2
 
                 ThemedText {
                     anchors.centerIn: parent
-                    text: parent.modelData.name
-                    color: parent.modelData.active ? root.theme.color.onAccent : root.theme.color.ink
+                    text: ws.modelData.name
+                    font.family: root.theme.font.display
+                    font.weight: root.theme.font.displayWeight
+                    font.pixelSize: Math.min(ws.height * 0.5, ws.width * 0.5) * root.hk
+                    color: ws.modelData.active ? root.theme.color.onAccent : root.theme.color.ink
+                }
+
+                // One dot per window.
+                Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: ws.height * 0.1
+                    spacing: 4
+
+                    Repeater {
+                        model: Math.min(ws.windows, 6)
+
+                        Rectangle {
+                            width: Math.max(5, ws.height * 0.05)
+                            height: width
+                            radius: width / 2
+                            color: ws.modelData.active ? root.theme.color.onAccent : root.theme.color.soft
+                        }
+                    }
                 }
 
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: Hyprland.dispatch(`hl.dsp.focus({ workspace = ${parent.modelData.id} })`)
+                    onClicked: Hyprland.dispatch(`hl.dsp.focus({ workspace = ${ws.modelData.id} })`)
                 }
             }
         }

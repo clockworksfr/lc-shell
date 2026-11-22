@@ -48,6 +48,7 @@ Singleton {
                 family: "Space Grotesk",
                 mono: "Space Mono",
                 display: "Doto Matrix",
+                heroScale: 0.8,
                 displayWeight: 400
             },
             radius: {

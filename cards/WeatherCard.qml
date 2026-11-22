@@ -68,11 +68,11 @@ Column {
         width: parent.width
 
         Repeater {
-            model: Weather.hourly
+            model: Weather.hourly.slice(0, 6)
 
             Column {
                 required property var modelData
-                width: parent.width / Math.max(1, Weather.hourly.length)
+                width: parent.width / Math.max(1, Math.min(6, Weather.hourly.length))
                 spacing: root.theme.space.xs
 
                 ThemedText {

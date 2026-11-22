@@ -131,7 +131,7 @@ PanelWindow {
                 // The module itself (live), not interactive here.
                 Loader {
                     anchors.fill: parent
-                    anchors.margins: cell.frameless ? 0 : win.theme.space.l
+                    anchors.margins: 0
                     enabled: false
                     active: !cell.frameless
                     source: Registry.url(cell.modelData.type)

@@ -85,7 +85,8 @@ PanelWindow {
 
             Loader {
                 anchors.fill: parent
-                anchors.margins: cell.framed ? win.theme.space.l : 0
+                // Modules pad themselves (ModuleBase: in proportion to the cell).
+                anchors.margins: 0
                 source: Registry.url(cell.modelData.type)
                 onLoaded: {
                     item.screen = Qt.binding(() => win.screen);

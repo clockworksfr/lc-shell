@@ -51,6 +51,7 @@ Singleton {
                 family: "Outfit",
                 mono: "Geist Mono",
                 display: "Outfit",
+                heroScale: 1.04,
                 displayWeight: 300,
                 sizeS: 12,
                 sizeM: 14,

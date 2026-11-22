@@ -338,5 +338,7 @@
   "module.weather": "Weather",
   "settings.dashboardEdit": "Modules and pages",
   "settings.dashboardEditHint": "Place, resize, add or remove modules, right on the modules screen. Also: long press on the dashboard.",
-  "settings.dashboardEditButton": "Edit on the screen"
+  "settings.dashboardEditButton": "Edit on the screen",
+  "format.dateNoDay": "MMMM d, yyyy",
+  "clock.week": "Week {n}"
 }
