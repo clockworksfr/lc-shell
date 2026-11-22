@@ -437,8 +437,21 @@ Singleton {
 
     // One capture per selection change. Runs while paused too (events are
     // dropped): resuming doesn't record what was copied meanwhile.
-    readonly property bool watching: loaded && enabled && captureAllowed
-    readonly property var watchCommand: ["wl-paste", "--watch", "python3", "-I", `${Quickshell.shellDir}/clipboard/capture.py`, dir, String(images ? Math.round(maxImageMB * 1000 * 1000) : 0), ignoreSensitive ? "1" : "0"]
+    readonly property bool watching: loaded && swept && enabled && captureAllowed
+    readonly property string capturePath: `${Quickshell.shellDir}/clipboard/capture.py`
+    // setpriv: the watcher dies with the shell (a killed shell, e.g. by its
+    // restart loop, would otherwise leave it running, orphaned).
+    readonly property var watchCommand: ["setpriv", "--pdeathsig", "TERM", "wl-paste", "--watch", "python3", "-I", capturePath, dir, String(images ? Math.round(maxImageMB * 1000 * 1000) : 0), ignoreSensitive ? "1" : "0"]
+
+    // Watchers of this store left by an earlier shell: stopped before ours
+    // starts.
+    property bool swept: false
+
+    Process {
+        running: true
+        command: ["pkill", "-f", `^wl-paste --watch python3 -I ${root.capturePath} ${root.dir} `]
+        onExited: root.swept = true
+    }
 
     onWatchingChanged: watcher.running = watching
     // New options: restart with them (onExited starts it again).
