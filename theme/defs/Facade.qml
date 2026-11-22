@@ -106,7 +106,12 @@ Singleton {
                 workspaces: "segments",
                 glass: false,
                 ghostDigits: true,
-                scanlines: true
+                scanlines: true,
+                module: "facade",
+                cover: "none",
+                ring: "vu",
+                display: "vfd",
+                screws: true
             }
         })
 }

@@ -74,15 +74,7 @@ PanelWindow {
                 }
             }
 
-            Rectangle {
-                anchors.fill: parent
-                visible: cell.framed
-                radius: win.theme.radius.card
-                color: win.theme.color.surface
-                border.width: win.theme.border.width
-                border.color: win.theme.color.line
-            }
-
+            // Modules draw their own frame (ModuleBase / ModulePanel).
             Loader {
                 anchors.fill: parent
                 // Modules pad themselves (ModuleBase: in proportion to the cell).

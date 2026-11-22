@@ -1,20 +1,22 @@
 import QtQuick
 import Quickshell
 import qs.components
+import qs.components.dashboard
 import qs.i18n
 import qs.services
 import qs.theme
 
-// Weather. S: icon, temperature, condition and today's min / max; M: +
-// the next 6 hours in full-height columns with a rain bar; L: current
-// details, next 12 hours and 5 days with their min-max range.
+// Weather by shape: tiny = icon + temperature; narrow = + hours as rows;
+// wide = current conditions left, hour columns right (as many as fit);
+// box / tall = current on top, hour columns filling the rest (and the
+// next days when tall); strip = one line. Hours sit in the theme's display
+// (VFD, green LCD) where it has one.
 ModuleBase {
     id: root
 
     readonly property var now: Weather.current
     readonly property var today: Weather.daily[0] ?? null
-    readonly property var hours: Weather.hourly.slice(0, tier === "L" ? 12 : 6)
-    readonly property var days: Weather.daily.slice(1, 6)
+    readonly property real hourWidth: Math.max(56, t3 * 3.4)
 
     ThemedText {
         anchors.centerIn: parent
@@ -27,226 +29,272 @@ ModuleBase {
         color: root.theme.color.soft
     }
 
-    // Current conditions.
-    Item {
+    // Icon + temperature.
+    component Current: Row {
         id: current
 
-        visible: Weather.ready
-        width: root.tier === "S" ? parent.width : parent.width * (root.tier === "L" ? 0.3 : 0.38)
-        height: root.tier === "L" ? parent.height * 0.55 : parent.height
+        property var m
+        property real size: 64
 
-        Row {
-            id: big
+        spacing: current.size * 0.12
 
-            anchors.left: parent.left
-            anchors.verticalCenter: root.tier === "S" ? parent.verticalCenter : undefined
-            anchors.top: root.tier === "S" ? undefined : parent.top
-            spacing: root.gap / 2
-            // L: the block holds the figure and two lines under it.
-            readonly property real figure: root.tier === "L" ? Math.min(root.t1, current.height * 0.5) : root.t1
-
-            Icon {
-                anchors.verticalCenter: parent.verticalCenter
-                name: root.now ? Weather.icon(root.now.code, root.now.isDay) : ""
-                filled: true
-                size: big.figure * 0.9
-                color: root.theme.color.accent
-            }
-
-            HeroText {
-                anchors.verticalCenter: parent.verticalCenter
-                text: root.now ? Weather.temp(root.now.temp) : ""
-                pixelSize: big.figure
-            }
+        Icon {
+            anchors.verticalCenter: parent.verticalCenter
+            name: current.m.now ? Weather.icon(current.m.now.code, current.m.now.isDay) : ""
+            filled: true
+            size: current.size * 0.85
+            color: current.m.theme.color.accent
         }
 
-        Column {
-            anchors.right: root.tier === "S" ? parent.right : undefined
-            anchors.left: root.tier === "S" ? undefined : parent.left
-            anchors.verticalCenter: root.tier === "S" ? parent.verticalCenter : undefined
-            anchors.top: root.tier === "S" ? undefined : big.bottom
-            anchors.topMargin: root.tier === "S" ? 0 : root.gap / 2
-            width: root.tier === "S" ? parent.width - big.width - root.gap : parent.width
-            spacing: 2
+        Figure {
+            anchors.verticalCenter: parent.verticalCenter
+            text: current.m.now ? Weather.temp(current.m.now.temp) : ""
+            pixelSize: current.size
+        }
+    }
 
-            ThemedText {
-                width: parent.width
-                horizontalAlignment: root.tier === "S" ? Text.AlignRight : Text.AlignLeft
-                elide: Text.ElideRight
-                text: root.now ? I18n.tr(Weather.condition(root.now.code)) : ""
-                font.pixelSize: root.t2
-                font.weight: Font.DemiBold
-            }
+    // Condition, min / max, place.
+    component Details: Column {
+        id: details
 
-            ThemedText {
-                width: parent.width
-                horizontalAlignment: root.tier === "S" ? Text.AlignRight : Text.AlignLeft
-                visible: !!root.today
-                text: root.today ? `↑ ${Weather.temp(root.today.max)}  ↓ ${Weather.temp(root.today.min)}` : ""
-                font.pixelSize: root.t3
-                font.features: ({ "tnum": 1 })
-                color: root.theme.color.soft
-            }
+        property var m
+        property int align: Text.AlignLeft
 
-            ThemedText {
-                width: parent.width
-                horizontalAlignment: root.tier === "S" ? Text.AlignRight : Text.AlignLeft
-                elide: Text.ElideRight
-                visible: root.tier === "M"
-                text: root.tier === "L" && root.now
-                    ? I18n.tr("weather.feels", { value: Weather.temp(root.now.feels), wind: Math.round(root.now.wind), unit: Weather.windUnit })
-                    : (Weather.location?.name ?? "")
-                font.pixelSize: root.t3
-                color: root.theme.color.soft
-            }
+        spacing: 2
 
-            ThemedText {
-                visible: root.tier === "L"
-                width: parent.width
-                elide: Text.ElideRight
-                text: root.now ? `${Weather.location?.name ?? ""} · ${I18n.tr("weather.feels", { value: Weather.temp(root.now.feels), wind: Math.round(root.now.wind), unit: Weather.windUnit })}` : ""
-                font.pixelSize: root.t4
-                color: root.theme.color.soft
+        ThemedText {
+            width: parent.width
+            horizontalAlignment: details.align
+            elide: Text.ElideRight
+            text: details.m.now ? I18n.tr(Weather.condition(details.m.now.code)) : ""
+            font.pixelSize: details.m.t2
+            font.weight: Font.DemiBold
+        }
+
+        ThemedText {
+            width: parent.width
+            horizontalAlignment: details.align
+            visible: !!details.m.today
+            text: details.m.today ? `↑ ${Weather.temp(details.m.today.max)}  ↓ ${Weather.temp(details.m.today.min)}` : ""
+            font.pixelSize: details.m.t3
+            font.features: ({ "tnum": 1 })
+            color: details.m.theme.color.soft
+        }
+
+        ThemedText {
+            width: parent.width
+            horizontalAlignment: details.align
+            elide: Text.ElideRight
+            text: Weather.location?.name ?? ""
+            font.pixelSize: details.m.t4
+            color: details.m.theme.color.soft
+        }
+    }
+
+    // Hour columns filling their area (rain bar at the bottom).
+    component Hours: Display {
+        id: hours
+
+        property var m
+        property int count: 6
+        readonly property var list: Weather.hourly.slice(0, count)
+
+        Row {
+            anchors.fill: parent
+
+            Repeater {
+                model: hours.list
+
+                Item {
+                    required property var modelData
+                    width: parent.width / Math.max(1, hours.list.length)
+                    height: parent.height
+
+                    Column {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: hours.m.gap / 3
+
+                        ThemedText {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            label: true
+                            text: I18n.locale.toString(new Date(modelData.time), "HH")
+                            font.pixelSize: hours.m.t4
+                            color: hours.soft
+                        }
+
+                        Icon {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            name: Weather.icon(modelData.code, modelData.isDay)
+                            size: hours.m.t2 * 1.3
+                            color: hours.ink
+                        }
+
+                        ThemedText {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: Weather.temp(modelData.temp)
+                            font.pixelSize: hours.m.t3
+                            font.features: ({ "tnum": 1 })
+                            color: hours.ink
+                        }
+                    }
+
+                    Rectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: parent.bottom
+                        width: Math.min(parent.width * 0.35, 12)
+                        height: Math.max(3, parent.height * 0.28 * modelData.rain / 100)
+                        radius: 2
+                        color: modelData.rain >= 50 ? hours.ink : Qt.alpha(hours.ink, 0.4)
+                    }
+                }
             }
         }
     }
 
-    // M / L: next hours, columns filling the height (rain bar at the bottom).
-    Row {
-        id: hourRow
+    // tiny / narrow.
+    Column {
+        visible: Weather.ready && (root.shape === "tiny" || root.shape === "narrow")
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: root.shape === "tiny" ? parent.verticalCenter : undefined
+        width: parent.width
+        spacing: root.gap
 
-        visible: Weather.ready && root.tier !== "S"
-        anchors.right: parent.right
-        width: parent.width - current.width - root.gap
-        height: root.tier === "L" ? parent.height * 0.55 : parent.height
+        Current {
+            m: root
+            anchors.horizontalCenter: parent.horizontalCenter
+            size: Math.min(root.ch * (root.shape === "tiny" ? 0.5 : 0.18), root.cw * 0.3) * root.hk
+        }
 
+        Details {
+            m: root
+            visible: root.shape === "narrow"
+            width: parent.width
+            align: Text.AlignHCenter
+        }
+
+        // Hours as rows.
         Repeater {
-            model: root.hours
+            model: root.shape === "narrow" ? Weather.hourly.slice(0, root.fit(root.t3 * 1.8, 8) - 3) : []
 
             Item {
                 required property var modelData
-                width: hourRow.width / Math.max(1, root.hours.length)
-                height: hourRow.height
-
-                Column {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: root.gap / 3
-
-                    ThemedText {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        label: true
-                        text: I18n.locale.toString(new Date(modelData.time), "HH")
-                        font.pixelSize: root.t4
-                        color: root.theme.color.soft
-                    }
-
-                    Icon {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        name: Weather.icon(modelData.code, modelData.isDay)
-                        size: root.t2 * 1.5
-                    }
-
-                    ThemedText {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: Weather.temp(modelData.temp)
-                        font.pixelSize: root.t3
-                        font.features: ({ "tnum": 1 })
-                    }
-                }
-
-                // Rain probability.
-                Rectangle {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.bottom: parent.bottom
-                    width: Math.min(parent.width * 0.4, 14)
-                    height: Math.max(3, parent.height * 0.3 * modelData.rain / 100)
-                    radius: root.theme.radius.control / 2
-                    color: modelData.rain >= 50 ? root.theme.color.accent : Qt.alpha(root.theme.color.accent, 0.4)
-                }
-            }
-        }
-    }
-
-    // L: next 5 days, min-max range on a shared scale.
-    Row {
-        id: dayRow
-
-        readonly property real lo: Math.min(...root.days.map(d => d.min))
-        readonly property real hi: Math.max(...root.days.map(d => d.max))
-
-        visible: Weather.ready && root.tier === "L" && root.days.length > 0
-        anchors.bottom: parent.bottom
-        width: parent.width
-        height: parent.height * 0.4
-        spacing: root.gap
-
-        Repeater {
-            model: root.days
-
-            Rectangle {
-                required property var modelData
-                width: (dayRow.width - dayRow.spacing * (root.days.length - 1)) / root.days.length
-                height: dayRow.height
-                radius: root.theme.radius.tile
-                color: root.theme.color.surface2
+                width: parent.width
+                height: root.t3 * 1.8
 
                 ThemedText {
-                    x: root.gap
-                    y: root.gap / 2
-                    label: true
-                    text: I18n.locale.dayName(new Date(modelData.time).getDay(), Locale.ShortFormat)
-                    font.pixelSize: root.t4
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: I18n.locale.toString(new Date(modelData.time), "HH")
+                    font.pixelSize: root.t3
                     color: root.theme.color.soft
                 }
 
                 Icon {
-                    anchors.right: parent.right
-                    anchors.rightMargin: root.gap
-                    y: root.gap / 2
-                    name: Weather.icon(modelData.code, true)
-                    size: root.t2 * 1.4
+                    anchors.centerIn: parent
+                    name: Weather.icon(modelData.code, modelData.isDay)
+                    size: root.t3 * 1.4
                 }
 
-                // Range bar.
-                Item {
-                    anchors.left: parent.left
+                ThemedText {
                     anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    anchors.margins: root.gap
-                    height: root.t3 * 1.6
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Weather.temp(modelData.temp)
+                    font.pixelSize: root.t3
+                }
+            }
+        }
+    }
 
-                    ThemedText {
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        text: Weather.temp(modelData.min)
-                        font.pixelSize: root.t3
-                        color: root.theme.color.soft
-                    }
+    // wide / strip: current left, hours right.
+    Item {
+        visible: Weather.ready && (root.shape === "wide" || root.shape === "strip")
+        anchors.fill: parent
 
-                    ThemedText {
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        text: Weather.temp(modelData.max)
-                        font.pixelSize: root.t3
-                        font.weight: Font.DemiBold
-                    }
+        Current {
+            id: wideCurrent
+            m: root
+            anchors.verticalCenter: parent.verticalCenter
+            size: root.figure(root.shape === "strip" ? 0.7 : 0.5, 0.16)
+        }
 
-                    Rectangle {
-                        anchors.bottom: parent.bottom
-                        width: parent.width
-                        height: 5
-                        radius: 3
-                        color: root.theme.color.surface3
+        Details {
+            id: wideDetails
+            m: root
+            anchors.left: wideCurrent.right
+            anchors.leftMargin: root.gap
+            anchors.verticalCenter: parent.verticalCenter
+            width: Math.min(root.cw * 0.22, 260)
+        }
 
-                        Rectangle {
-                            readonly property real span: Math.max(1, dayRow.hi - dayRow.lo)
-                            x: parent.width * (modelData.min - dayRow.lo) / span
-                            width: Math.max(6, parent.width * (modelData.max - modelData.min) / span)
-                            height: parent.height
-                            radius: parent.radius
-                            color: root.theme.color.accent
-                        }
-                    }
+        Hours {
+            m: root
+            anchors.left: wideDetails.right
+            anchors.leftMargin: root.gap
+            anchors.right: parent.right
+            height: parent.height
+            count: Math.max(1, Math.min(12, Math.floor(width / root.hourWidth)))
+        }
+    }
+
+    // box / tall: current on top, hours under, days when tall.
+    Column {
+        visible: Weather.ready && (root.shape === "box" || root.shape === "tall")
+        anchors.fill: parent
+        spacing: root.gap
+
+        Row {
+            width: parent.width
+            spacing: root.gap
+
+            Current {
+                id: boxCurrent
+                m: root
+                size: root.figure(0.24, 0.22)
+            }
+
+            Details {
+                m: root
+                width: parent.width - boxCurrent.width - root.gap
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
+        Hours {
+            m: root
+            width: parent.width
+            height: root.shape === "tall" ? root.inner.height * 0.36 : root.inner.height - y
+            count: Math.max(3, Math.min(8, Math.floor(width / root.hourWidth)))
+        }
+
+        // Next days (tall).
+        Repeater {
+            model: root.shape === "tall" ? Weather.daily.slice(1, 1 + root.fit(root.t3 * 2.2, 5)) : []
+
+            Item {
+                required property var modelData
+                width: parent.width
+                height: root.t3 * 2
+
+                ThemedText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width * 0.3
+                    text: I18n.locale.dayName(new Date(modelData.time).getDay(), Locale.ShortFormat)
+                    font.pixelSize: root.t3
+                    color: root.theme.color.soft
+                }
+
+                Icon {
+                    anchors.verticalCenter: parent.verticalCenter
+                    x: parent.width * 0.32
+                    name: Weather.icon(modelData.code, true)
+                    size: root.t3 * 1.4
+                }
+
+                ThemedText {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: `${Weather.temp(modelData.min)} / ${Weather.temp(modelData.max)}`
+                    font.pixelSize: root.t3
+                    font.features: ({ "tnum": 1 })
                 }
             }
         }

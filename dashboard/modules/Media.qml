@@ -1,28 +1,30 @@
 import QtQuick
 import Quickshell
 import qs.components
+import qs.components.dashboard
 import qs.i18n
 import qs.services
 import qs.theme
 
-// Active player. S: cover, title / artist, play-pause, progress on the
-// bottom edge; M: + source, elapsed / remaining time, previous / next;
-// L: + output device and volume.
+// Active player by shape: tiny = cover + play; narrow = cover, title,
+// play; wide / strip = cover, title / artist, progress, transport; box /
+// tall = cover on top, title, transport. Themes without cover art (facade,
+// modulaire) show the track in their display (VFD, amber LCD). Progress
+// and times only for a real length (not streams).
 ModuleBase {
     id: root
 
     readonly property var player: Players.active
     readonly property real length: player?.length ?? 0
-    // Streams report no length (or a bogus one): no times, no progress.
-    readonly property bool timed: (player?.lengthSupported ?? false) && length > 0 && length < 86400 && position <= length + 2
     readonly property real position: player?.position ?? 0
+    readonly property bool timed: (player?.lengthSupported ?? false) && length > 0 && length < 86400 && position <= length + 2
+    readonly property bool art: theme.style.cover !== "none"
 
     function time(seconds: real): string {
         const s = Math.max(0, Math.round(seconds));
         return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
     }
 
-    // MPRIS doesn't push position updates: poll while playing.
     Timer {
         interval: 1000
         repeat: true
@@ -38,201 +40,186 @@ ModuleBase {
         color: root.theme.color.soft
     }
 
-    Rectangle {
-        id: cover
+    // Title, artist (in the theme's display when it has no cover art).
+    component Track: Display {
+        id: track
 
-        visible: !!root.player
-        width: Math.min(parent.height, parent.width * 0.42)
-        height: width
-        anchors.verticalCenter: parent.verticalCenter
-        radius: root.theme.radius.tile
-        color: root.theme.color.surface2
-        clip: true
+        property var m
+        property bool big: false
 
-        Image {
-            anchors.fill: parent
-            source: root.player?.trackArtUrl ?? ""
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-        }
-    }
-
-    Item {
-        id: info
-
-        visible: !!root.player
-        anchors.left: cover.right
-        anchors.leftMargin: root.gap
-        anchors.right: parent.right
-        height: parent.height
+        tint: "amber"
+        implicitHeight: col.implicitHeight + inset * 2
 
         Column {
+            id: col
             width: parent.width
             spacing: 2
 
             ThemedText {
-                visible: root.tier !== "S"
                 width: parent.width
                 elide: Text.ElideRight
-                label: true
-                text: root.player?.identity ?? ""
-                font.pixelSize: root.t4
-                color: root.theme.color.soft
-            }
-
-            ThemedText {
-                width: parent.width
-                elide: Text.ElideRight
-                maximumLineCount: root.tier === "L" ? 2 : 1
-                wrapMode: Text.Wrap
-                text: root.player?.trackTitle || root.player?.identity || ""
-                font.pixelSize: root.t2 * (root.tier === "S" ? 1 : 1.25)
+                text: track.m.player?.trackTitle || track.m.player?.identity || ""
+                font.pixelSize: track.m.t2 * (track.big ? 1.2 : 1)
                 font.weight: Font.DemiBold
+                color: track.ink
             }
 
             ThemedText {
                 width: parent.width
                 elide: Text.ElideRight
-                text: [root.player?.trackArtist ?? "", root.tier === "L" ? root.player?.trackAlbum ?? "" : ""].filter(s => !!s).join(" · ")
-                font.pixelSize: root.t3
-                color: root.theme.color.soft
-            }
-        }
-
-        // Controls (bottom), progress with times above them (M / L).
-        Column {
-            anchors.bottom: parent.bottom
-            width: parent.width
-            spacing: root.gap / 2
-
-            Item {
-                visible: root.tier !== "S" && root.timed
-                width: parent.width
-                height: root.t4 * 1.4
-
-                ThemedText {
-                    text: root.time(root.position)
-                    font.pixelSize: root.t4
-                    font.features: ({ "tnum": 1 })
-                    color: root.theme.color.soft
-                }
-
-                ThemedText {
-                    anchors.right: parent.right
-                    text: `−${root.time(root.length - root.position)}`
-                    font.pixelSize: root.t4
-                    font.features: ({ "tnum": 1 })
-                    color: root.theme.color.soft
-                }
+                text: track.m.player?.trackArtist ?? ""
+                font.pixelSize: track.m.t3
+                color: track.soft
             }
 
-            Rectangle {
-                visible: root.tier !== "S" && root.timed
-                width: parent.width
-                height: Math.max(4, root.t4 * 0.35)
-                radius: height / 2
-                color: root.theme.color.surface3
-
-                Rectangle {
-                    width: parent.width * Math.min(1, root.position / Math.max(1, root.length))
-                    height: parent.height
-                    radius: parent.radius
-                    color: root.theme.color.accent
-                }
-            }
-
-            Row {
-                spacing: root.gap
-
-                Control {
-                    visible: root.tier !== "S"
-                    m: root
-                    icon: "skip_previous"
-                    onTapped: Players.previous()
-                }
-                Control {
-                    m: root
-                    icon: root.player?.isPlaying ? "pause" : "play_arrow"
-                    primary: true
-                    onTapped: Players.togglePlaying()
-                }
-                Control {
-                    m: root
-                    icon: "skip_next"
-                    onTapped: Players.next()
-                }
-
-                // L: output volume.
-                Row {
-                    visible: root.tier === "L"
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: root.gap / 2
-
-                    Icon {
-                        anchors.verticalCenter: parent.verticalCenter
-                        name: "volume_up"
-                        size: root.t3 * 1.3
-                        color: root.theme.color.soft
-                    }
-
-                    Slider {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: Math.max(80, info.width - x - 4 * root.t2 * 2.6)
-                        value: Audio.sink?.audio?.volume ?? 0
-                        onMoved: value => Audio.setVolume(value)
-                    }
-                }
+            ThemedText {
+                visible: track.m.timed && track.big
+                text: `${track.m.time(track.m.position)} / ${track.m.time(track.m.length)}`
+                font.pixelSize: track.m.t4
+                font.features: ({ "tnum": 1 })
+                color: track.soft
             }
         }
     }
 
-    // S: progress on the module's bottom edge.
-    Rectangle {
-        visible: !!root.player && root.tier === "S" && root.timed
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: -root.pad * 0.6
-        x: cover.width + root.gap
-        width: parent.width - x
-        height: 3
-        radius: 2
-        color: root.theme.color.surface3
-
-        Rectangle {
-            width: parent.width * Math.min(1, root.position / Math.max(1, root.length))
-            height: parent.height
-            radius: parent.radius
-            color: root.theme.color.accent
-        }
-    }
-
-    component Control: Rectangle {
-        id: control
+    component Transport: Row {
+        id: transport
 
         property var m
-        property string icon
-        property bool primary: false
-        signal tapped
+        property real size: 56
+        property bool full: true
 
-        width: Math.max(control.m.theme.hit, control.m.t2 * (primary ? 2.6 : 2.1))
-        height: width
-        radius: control.m.theme.radius.full
-        color: primary ? control.m.theme.color.accent : area.pressed ? control.m.theme.color.surface2 : "transparent"
-        border.width: primary ? 0 : 1
-        border.color: control.m.theme.color.line
+        spacing: transport.size * 0.25
 
-        Icon {
-            anchors.centerIn: parent
-            name: control.icon
-            filled: true
-            size: control.width * 0.5
-            color: control.primary ? control.m.theme.color.onAccent : control.m.theme.color.ink
+        ModuleButton {
+            visible: transport.full
+            icon: "skip_previous"
+            legend: "PREV"
+            size: transport.size * 0.85
+            anchors.verticalCenter: parent.verticalCenter
+            onTapped: Players.previous()
+        }
+        ModuleButton {
+            icon: transport.m.player?.isPlaying ? "pause" : "play_arrow"
+            legend: "PLAY"
+            primary: true
+            size: transport.size
+            anchors.verticalCenter: parent.verticalCenter
+            onTapped: Players.togglePlaying()
+        }
+        ModuleButton {
+            visible: transport.full
+            icon: "skip_next"
+            legend: "NEXT"
+            size: transport.size * 0.85
+            anchors.verticalCenter: parent.verticalCenter
+            onTapped: Players.next()
+        }
+    }
+
+    // tiny / narrow.
+    Column {
+        visible: !!root.player && (root.shape === "tiny" || root.shape === "narrow")
+        anchors.centerIn: parent
+        width: parent.width
+        spacing: root.gap
+
+        Cover {
+            anchors.horizontalCenter: parent.horizontalCenter
+            source: root.player?.trackArtUrl ?? ""
+            size: Math.min(root.cw * 0.8, root.ch * (root.shape === "tiny" ? 0.6 : 0.45))
         }
 
-        MouseArea {
-            id: area
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: control.tapped()
+        Track {
+            m: root
+            visible: root.shape === "narrow" || !root.art
+            width: parent.width
+        }
+
+        Transport {
+            m: root
+            anchors.horizontalCenter: parent.horizontalCenter
+            full: false
+            size: Math.max(root.theme.hit, root.t2 * 2)
+        }
+    }
+
+    // wide / strip.
+    Item {
+        visible: !!root.player && (root.shape === "wide" || root.shape === "strip")
+        anchors.fill: parent
+
+        Cover {
+            id: wideCover
+            anchors.verticalCenter: parent.verticalCenter
+            source: root.player?.trackArtUrl ?? ""
+            size: Math.min(root.ch, root.cw * 0.36)
+        }
+
+        Item {
+            anchors.left: wideCover.right
+            anchors.leftMargin: wideCover.shown ? root.gap : 0
+            anchors.right: parent.right
+            height: parent.height
+
+            Track {
+                id: wideTrack
+                m: root
+                big: true
+                width: root.shape === "strip" ? parent.width - wideTransport.width - root.gap : parent.width
+                anchors.top: root.shape === "strip" ? undefined : parent.top
+                anchors.verticalCenter: root.shape === "strip" ? parent.verticalCenter : undefined
+            }
+
+            Gauge {
+                visible: root.timed && root.shape !== "strip"
+                anchors.bottom: wideTransport.top
+                anchors.bottomMargin: root.gap
+                width: parent.width
+                value: root.position / Math.max(1, root.length)
+                alarm: 2
+            }
+
+            Transport {
+                id: wideTransport
+                m: root
+                anchors.bottom: root.shape === "strip" ? undefined : parent.bottom
+                anchors.right: root.shape === "strip" ? parent.right : undefined
+                anchors.verticalCenter: root.shape === "strip" ? parent.verticalCenter : undefined
+                size: Math.max(root.theme.hit, Math.min(root.ch * (root.shape === "strip" ? 0.7 : 0.3), 72))
+            }
+        }
+    }
+
+    // box / tall: cover on top.
+    Column {
+        visible: !!root.player && (root.shape === "box" || root.shape === "tall")
+        anchors.fill: parent
+        spacing: root.gap
+
+        Cover {
+            anchors.horizontalCenter: parent.horizontalCenter
+            source: root.player?.trackArtUrl ?? ""
+            size: Math.min(root.cw, root.ch * 0.55)
+        }
+
+        Track {
+            m: root
+            big: true
+            width: parent.width
+        }
+
+        Gauge {
+            visible: root.timed
+            width: parent.width
+            value: root.position / Math.max(1, root.length)
+            alarm: 2
+        }
+
+        Transport {
+            m: root
+            anchors.horizontalCenter: parent.horizontalCenter
+            size: Math.max(root.theme.hit, Math.min(root.ch * 0.16, 72))
         }
     }
 }

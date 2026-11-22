@@ -162,6 +162,14 @@ Singleton {
                 workspaces: "labels",
                 // Glass highlight over the top of islands and panels.
                 glass: false,
+                // Dashboard modules' look (components/dashboard): frame,
+                // figures, displays, gauges, rings, buttons, covers.
+                module: "classic",
+                cover: "square",
+                ring: "arc",
+                display: "none",
+                screws: false,
+                scanlines: false,
                 // Status widgets as icon + value (false: text labels).
                 statusIcons: true,
                 // App icons: "native" | "tinted" | "mono" (AppIcon).

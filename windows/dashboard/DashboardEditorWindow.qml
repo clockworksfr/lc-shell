@@ -123,9 +123,11 @@ PanelWindow {
                 Rectangle {
                     anchors.fill: parent
                     radius: win.theme.radius.card
-                    color: cell.frameless ? Qt.alpha(win.theme.color.accent, 0.08) : win.theme.color.surface
-                    border.width: cell.selected ? 2 : win.theme.border.width
-                    border.color: cell.selected ? win.theme.color.accent : win.theme.color.line
+                    // Modules draw their own frame: only the selection here.
+                    z: 3
+                    color: cell.frameless ? Qt.alpha(win.theme.color.accent, 0.08) : "transparent"
+                    border.width: cell.selected ? 3 : 0
+                    border.color: win.theme.color.accent
                 }
 
                 // The module itself (live), not interactive here.

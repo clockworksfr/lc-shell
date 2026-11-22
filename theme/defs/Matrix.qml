@@ -95,7 +95,10 @@ Singleton {
                 // Matrix statuses are text (label over value), no icons.
                 statusIcons: false,
                 appIcons: "mono",
-                workspaces: "dots"
+                workspaces: "dots",
+                module: "matrix",
+                cover: "disc",
+                ring: "dots"
             }
         })
 }

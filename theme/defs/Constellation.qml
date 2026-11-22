@@ -108,6 +108,9 @@ Singleton {
             },
             style: {
                 workspaces: "stars",
+                module: "constellation",
+                cover: "sphere",
+                ring: "orbit",
                 appIcons: "tinted",
                 // Top highlight on islands and panels (theme `glass` color).
                 glass: true

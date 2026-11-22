@@ -6,13 +6,13 @@ import qs.services
 import qs.theme
 
 // Synced lyrics: the current line large, neighbours fading out, scrolling
-// with the song; the line height follows the cell (about 2 lines in S, 3 in
-// M, 5 in L). Plain (unsynced) lyrics scroll freely.
+// with the song; as many lines as the cell's shape holds (1 in a tiny
+// cell, up to 7 in a tall one). Plain (unsynced) lyrics scroll freely.
 ModuleBase {
     id: root
 
-    readonly property int lines: tier === "L" ? 5 : tier === "M" ? 3 : 2
-    readonly property real lineSize: Math.max(16, Math.min(inner.height / lines * 0.42, t2 * 1.4))
+    readonly property int lines: shape === "tiny" ? 1 : shape === "strip" ? 2 : shape === "wide" ? 3 : Math.max(2, Math.min(7, Math.floor(ch / (t2 * 2.4))))
+    readonly property real lineSize: Math.max(15, Math.min(ch / lines * 0.42, t2 * 1.3))
 
     Component.onCompleted: Lyrics.refCount++
     Component.onDestruction: Lyrics.refCount--

@@ -1,12 +1,20 @@
 import QtQuick
 import Quickshell
+import qs.components.dashboard
+import qs.i18n
 import qs.theme
 
-// Common base of dashboard modules (design study 6): the cell's size tier
-// (S 2 × 1, M 4 × 2, L 6 × 3 and up) and a type scale in proportion to the
-// cell's height, so a module fills its cell and reads from afar:
-//   t1 main figure, t2 title, t3 text, t4 label.
-// Children go in `inner` (padded in proportion too).
+// Common base of dashboard modules (design study 7): the theme's frame
+// (ModulePanel, with its title when the cell is tall enough), and the
+// content area's shape, which picks the layout:
+//   tiny   (≤ 220 × 200)  the main figure alone
+//   narrow (≤ 220 wide)   stacked
+//   tall   (ratio < 0.8)  a column: main figure on top, the rest under it
+//   box    (< 1.8)        main figure, then the rest in a grid
+//   wide   (< 4)          main figure left, the rest right
+//   strip  (≥ 4)          one line, items added while they fit
+// Type scale from the content's smaller side: t2 title, t3 text, t4
+// label; the main figure is sized per shape with figure(hk, wk).
 Item {
     id: base
 
@@ -14,31 +22,68 @@ Item {
     // The cell ({ type, x, y, w, h, ...options }).
     property var options: ({})
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
+    property string title: options.type ? I18n.tr(`module.${options.type}`) : ""
+    property bool framed: true
 
-    readonly property int cols: options.w ?? 2
-    readonly property int rows: options.h ?? 1
-    // Tier from the smaller side, in S units (2 × 1): a 2 × 4 cell is S.
-    readonly property real units: Math.min(cols / 2, rows)
-    readonly property string tier: units >= 3 ? "L" : units >= 2 ? "M" : "S"
-    readonly property var k: ({ S: [0.58, 0.17, 0.125, 0.10], M: [0.44, 0.10, 0.076, 0.058], L: [0.36, 0.078, 0.054, 0.042] })[tier]
-    readonly property real hk: theme.font.heroScale ?? 1
-    // Height the scale is computed on: a tall, narrow cell reads like the
-    // tier's own shape (about 2.5 : 1), not like its full height.
-    readonly property real span: Math.min(height, width / 2.5)
-    readonly property real t1: span * k[0] * hk
-    readonly property real t2: Math.max(16, span * k[1])
-    readonly property real t3: Math.max(14, span * k[2])
-    readonly property real t4: Math.max(11, span * k[3])
-    readonly property real pad: tier === "S" ? span * 0.09 : Math.min(span * 0.07, 24)
+    readonly property real pad: Math.max(12, Math.min(24, Math.min(width, height) * 0.07))
     readonly property real gap: Math.max(8, pad * 0.6)
+    readonly property real cw: Math.max(1, width - 2 * pad)
+    readonly property real ch: Math.max(1, height - 2 * pad - panel.titleHeight)
+    readonly property real ratio: cw / ch
+    readonly property string shape: cw <= 220 && ch <= 200 ? "tiny" : cw <= 220 ? "narrow" : ratio < 0.8 ? "tall" : ratio >= 4 ? "strip" : ratio >= 1.8 ? "wide" : "box"
+    readonly property real m: Math.min(cw, ch)
+    readonly property real t2: Math.min(40, Math.max(17, m * 0.11))
+    readonly property real t3: Math.min(24, Math.max(13, m * 0.075))
+    readonly property real t4: Math.min(15, Math.max(10, m * 0.055))
+    readonly property real hk: theme.font.heroScale ?? 1
+
+    // Main figure size: the smaller of a fraction of the height and of
+    // the width (never overflows).
+    function figure(hFraction: real, wFraction: real): real {
+        return Math.min(ch * hFraction, cw * wFraction) * hk;
+    }
+
+    // How many items of height `h` fit (lines, gauges, hours), at most `max`.
+    function fit(h: real, max: int): int {
+        return Math.max(1, Math.min(max, Math.floor((ch + gap) / (h + gap))));
+    }
+
+    // Columns × rows maximizing size × √n for up to `nMax` square items of
+    // at least `minSize`: { n, columns, rows, size }.
+    function bestGrid(nMax: int, minSize: real): var {
+        let best = { n: 1, columns: 1, rows: 1, size: Math.min(cw, ch) };
+        let score = 0;
+        for (let n = 1; n <= nMax; n++)
+            for (let c = 1; c <= n; c++) {
+                const r = Math.ceil(n / c);
+                const size = Math.min((cw - (c - 1) * gap) / c, (ch - (r - 1) * gap) / r);
+                if (size < minSize)
+                    continue;
+                const s = size * Math.sqrt(n);
+                if (s > score) {
+                    score = s;
+                    best = { n: n, columns: c, rows: r, size: size };
+                }
+            }
+        return best;
+    }
 
     default property alias content: inner.data
     readonly property alias inner: inner
 
+    ModulePanel {
+        id: panel
+        anchors.fill: parent
+        visible: base.framed
+        title: base.framed ? base.title : ""
+    }
+
     Item {
         id: inner
 
-        anchors.fill: parent
-        anchors.margins: base.pad
+        x: base.pad
+        y: base.pad + panel.titleHeight
+        width: base.cw
+        height: base.ch
     }
 }

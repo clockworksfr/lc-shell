@@ -31,6 +31,8 @@ Singleton {
                     nixie: "#FF8A2A",
                     lcd: "#C6F37A",
                     lcdInk: "#1A2410",
+                    lcdAmber: "#FFB547",
+                    lcdAmberInk: "#2A1A05",
                     glow: "#CCFF8A2A",
                     glass: "#0DFFFFFF",
                     star: "#00000000"
@@ -53,6 +55,8 @@ Singleton {
                     nixie: "#E8742A",
                     lcd: "#C6F37A",
                     lcdInk: "#1A2410",
+                    lcdAmber: "#FFB547",
+                    lcdAmberInk: "#2A1A05",
                     glow: "#88FF8A2A",
                     glass: "#40FFFFFF",
                     star: "#00000000"
@@ -109,7 +113,11 @@ Singleton {
                 workspaces: "sequencer",
                 glass: false,
                 brushed: true,
-                screws: true
+                screws: true,
+                module: "modulaire",
+                cover: "none",
+                ring: "knob",
+                display: "lcd"
             }
         })
 }
