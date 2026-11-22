@@ -27,16 +27,16 @@ Scope {
         function panelOn(type: string, screen: string): void {
             ShellState.panelRequested(type, screen);
         }
-        // One line per shown block: "screen type x y width height", in
+        // One line per shown widget: "screen type x y width height", in
         // global coordinates (center = where to hover).
-        function blocks(): string {
+        function widgets(): string {
             return ShellState.slots.filter(s => s.visible && s.host).map(s => {
                 const bar = s.host;
                 const p = s.mapToItem(bar.contentItem, 0, 0);
                 const scr = bar.screen;
-                // Bar window origin on its screen, from its edge and margins.
-                const ox = bar.edge === "right" ? scr.width - bar.width - bar.margins.right : bar.margins.left;
-                const oy = bar.edge === "bottom" ? scr.height - bar.height - bar.margins.bottom : bar.margins.top;
+                const o = bar.origin();
+                const ox = o.x;
+                const oy = o.y;
                 return `${scr.name} ${s.type} ${Math.round(scr.x + ox + p.x)} ${Math.round(scr.y + oy + p.y)} ${Math.round(s.width)} ${Math.round(s.height)}`;
             }).join("\n");
         }

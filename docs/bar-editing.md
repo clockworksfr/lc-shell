@@ -6,32 +6,32 @@ Spécification issue de l'étude de design (artifact « lc-shell rendus », ongl
 
 - Zones `start`, `center`, `end` (en vertical : haut, milieu, bas).
 - Une zone = liste de **groupes** ; un groupe = un îlot (disposition îlots) ou une capsule / un séparateur (barre complète, cadre).
-- Bloc : `{ id, type, size, options }` ; `id` stable (type + compteur) ; `size` = `compact` | `normal` | `extended`. Ordre = ordre des tableaux.
+- Widget : `{ id, type, size, options }` ; `id` stable (type + compteur) ; `size` = `compact` | `normal` | `extended`. Ordre = ordre des tableaux.
 - Types : `workspaces`, `window`, `clock`, `media`, `volume`, `network`, `bluetooth`, `battery`, `notifications`, `tray`, `system`, `weather`, `dynamicIsland`.
 - Vertical : `window` forcé compact ; `media`, `notifications`, `clock` limités à `normal` (taille refusée → taille autorisée suivante).
-- Bloc envoyé vers un écran modules : devient une tuile (S = 2×1, M = 4×2, L = 6×3) à la première case libre.
+- Widget envoyé vers un écran modules : devient un module (S = 2×1, M = 4×2, L = 6×3) à la première case libre.
 - Écriture à « Terminé », atomique (fichier temporaire + renommage) ; la config reste rechargée à chaud.
-- Compatibilité : un bloc écrit comme simple chaîne (`"clock"`) reste accepté.
+- Compatibilité : un widget écrit comme simple chaîne (`"clock"`) reste accepté.
 
 ## Mode édition
 
-- **Entrée** : clic droit sur la barre → « Modifier la barre » ; appui long 600 ms sur un bloc (tactile) ; raccourci (proposé : `Super + Alt + E`) ; Paramètres › Barre ; IPC `bar edit`. Toutes les barres passent en édition ; cartes de survol désactivées.
-- **Affichage** : zones en pointillé accent 55 % + fond accent 7 % + étiquette mono 10 px ; chaque bloc a une poignée ⋮⋮, une pastille S/M/L et une croix (20 px, 48 au doigt) ; barre d'outils flottante sous la barre de l'écran actif : Annuler, Rétablir, Palette, Valeurs du thème, Abandonner, Terminé, vignettes d'écrans.
-- **Glisser** : seuil 4 px (souris), 300 ms d'appui (doigt) ; bloc soulevé échelle 1,05, rotation −1,5°, opacité 0,92, fantôme 35 % à sa place ; curseur d'insertion 3 px accent, voisins qui s'écartent en 160 ms ; insertion avant le premier bloc dont le milieu dépasse le pointeur.
-- **Cibles** : entre blocs, tête/fin de zone, « + Nouvel îlot » / « + Groupe », palette (= retirer), vignette d'écran (= déplacer vers cet écran ; pas de glisser entre surfaces layer-shell) ; cible refusée bordée de rouge avec la raison.
+- **Entrée** : clic droit sur la barre → « Modifier la barre » ; appui long 600 ms sur un widget (tactile) ; raccourci (proposé : `Super + Alt + E`) ; Paramètres › Barre ; IPC `bar edit`. Toutes les barres passent en édition ; cartes de survol désactivées.
+- **Affichage** : zones en pointillé accent 55 % + fond accent 7 % + étiquette mono 10 px ; chaque widget a une poignée ⋮⋮, une pastille S/M/L et une croix (20 px, 48 au doigt) ; barre d'outils flottante sous la barre de l'écran actif : Annuler, Rétablir, Palette, Valeurs du thème, Abandonner, Terminé, vignettes d'écrans.
+- **Glisser** : seuil 4 px (souris), 300 ms d'appui (doigt) ; widget soulevé échelle 1,05, rotation −1,5°, opacité 0,92, fantôme 35 % à sa place ; curseur d'insertion 3 px accent, voisins qui s'écartent en 160 ms ; insertion avant le premier widget dont le milieu dépasse le pointeur.
+- **Cibles** : entre widgets, tête/fin de zone, « + Nouvel îlot » / « + Groupe », palette (= retirer), vignette d'écran (= déplacer vers cet écran ; pas de glisser entre surfaces layer-shell) ; cible refusée bordée de rouge avec la raison.
 - **Taille** : pastille S → M → L ; `+` / `−`.
-- **Inspecteur** (clic ; feuille du bas au doigt) : tailles avec aperçu, options du bloc, « Déplacer vers… », « Retirer ».
-- **Palette** : blocs absents, aperçu, recherche ; glisser vers une zone ou « + » puis la zone.
+- **Inspecteur** (clic ; feuille du bas au doigt) : tailles avec aperçu, options du widget, « Déplacer vers… », « Retirer ».
+- **Palette** : widgets absents, aperçu, recherche ; glisser vers une zone ou « + » puis la zone.
 - **Annulation** : 50 instantanés, `Ctrl+Z` / `Ctrl+Maj+Z` ; « Abandonner » restaure l'état d'entrée ; après « Terminé », toast « Annuler » 8 s.
 - **Sortie** : Terminé, Échap, clic hors barre et barre d'outils (changements gardés) ; un plein écran qui démarre ferme l'édition en enregistrant.
-- **Clavier** : Tab choisit un bloc ; ← / → déplacent (et changent de zone en bout de zone) ; Suppr retire ; Entrée ouvre l'inspecteur.
-- **Cadre** : blocs seulement dans le côté de la barre.
+- **Clavier** : Tab choisit un widget ; ← / → déplacent (et changent de zone en bout de zone) ; Suppr retire ; Entrée ouvre l'inspecteur.
+- **Cadre** : widgets seulement dans le côté de la barre.
 
 ## Cartes de survol
 
 ### Règles communes
 
-- Apparition après 350 ms d'immobilité (fondu + échelle 0,96 → 1, 140 ms). Carte ouverte depuis moins de 600 ms : un bloc voisin s'affiche sans attente (glissement 160 ms, contenu en fondu 120 ms). Sortie : grâce 250 ms, puis fondu 120 ms ; le pointeur sur la carte la garde.
+- Apparition après 350 ms d'immobilité (fondu + échelle 0,96 → 1, 140 ms). Carte ouverte depuis moins de 600 ms : un widget voisin s'affiche sans attente (glissement 160 ms, contenu en fondu 120 ms). Sortie : grâce 250 ms, puis fondu 120 ms ; le pointeur sur la carte la garde.
 - Clic : la carte grandit en panneau complet (220 ms). Toucher : 1er appui = carte, 2e / « Ouvrir » = panneau, appui long = édition. Clavier : focus = carte, Entrée = panneau, Échap = fermer. Les contrôles de la carte marchent sans ouvrir le panneau.
 - Jamais en plein écran, en édition, pendant un glisser.
 - 380 px de large (360 sur le portable), ≤ 60 % de la hauteur de l'écran ; marge intérieure 16, écart 12.
@@ -44,12 +44,12 @@ Spécification issue de l'étude de design (artifact « lc-shell rendus », ongl
 2. **Horloge et calendrier** (heure, agenda iCal/CalDAV, second fuseau optionnel) : date longue + semaine, puce du second fuseau ; grande heure, secondes atténuées ; mini-mois (colonne semaines, semaine teintée, jour plein, points d'événements) ; deux prochains événements ; molette = mois.
 3. **Média** (MPRIS, paroles en cache) : pochette 84 px, source « 1/3 », titre, artiste, album ; progression cliquable avec temps écoulé/restant ; trois lignes de paroles ; précédent / lecture (64 px) / suivant ; puces des sources.
 4. **Volume** (PipeWire) : sortie, curseur 28 px avec valeur ; applis avec mini-barres ; micro avec niveau en direct ; puces de sortie ; molette ±2 %, clic milieu = muet.
-5. **Réseau** (NetworkManager, compteurs `/sys/class/net` sur 60 s, VPN) : signal (dBm, bande, canal) ; tuiles réception/envoi avec courbe ; IP locale, latence passerelle ; VPN ; hors ligne : dernier réseau + « Réessayer ».
+5. **Réseau** (NetworkManager, compteurs `/sys/class/net` sur 60 s, VPN) : signal (dBm, bande, canal) ; modules réception/envoi avec courbe ; IP locale, latence passerelle ; VPN ; hors ligne : dernier réseau + « Réessayer ».
 6. **Bluetooth** (BlueZ, UPower) : une ligne par appareil (anneau de batterie, nom, %, autonomie, « bas » < 20 %, « Connecter » si déconnecté).
 7. **Batterie** (UPower, power-profiles-daemon) : grand %, état, autonomie ; courbe 6 h + projection pointillée + repère « maintenant » ; profils ; santé, cycles.
 8. **Notifications** : titre + badge + bascule ne pas déranger ; 3 dernières groupées « ×n » ; « Tout effacer » ; glisser pour ignorer.
 9. **Tray** (StatusNotifierItem) : icône, nom, état, infobulle, puces des actions du menu ; clic = ouvrir, clic droit = menu.
-10. **Système** (`/proc`, amdgpu sysfs/hwmon, sans réveiller l'eGPU) : tuiles CPU / GPU (valeur, température, courbe 60 s) ; barres RAM et VRAM ; 3 processus les plus gourmands ; ventilateurs ; clic = btop.
+10. **Système** (`/proc`, amdgpu sysfs/hwmon, sans réveiller l'eGPU) : modules CPU / GPU (valeur, température, courbe 60 s) ; barres RAM et VRAM ; 3 processus les plus gourmands ; ventilateurs ; clic = btop.
 11. **Météo** (open-meteo, en cache) : grand chiffre, condition, ressenti, vent ; 6 prochaines heures + probabilité de pluie ; source et heure du relevé ; hors ligne : dernière donnée datée.
 
 12. **Fenêtre active** (Hyprland toplevels) : icône, appli, espace de travail et écran ; titre complet ; autres fenêtres de l'appli (clic : y aller) ; actions Flottante, Plein écran, Épingler, Fermer (second clic pour confirmer) ; « Déplacer vers » un espace de travail. Pendant un partage d'écran (évènement Hyprland `screencast`), titres masqués dans la barre et la carte.

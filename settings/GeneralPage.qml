@@ -31,6 +31,15 @@ Column {
         title: I18n.tr("notif.title")
 
         Field {
+            label: I18n.tr("settings.notifPosition")
+            Choice {
+                model: ["top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right"].map(v => ({ value: v, label: I18n.tr(`settings.position.${v}`) }))
+                value: Config.get("notifications.position") ?? "top-right"
+                onPicked: value => Config.set("notifications.position", value)
+            }
+        }
+
+        Field {
             label: I18n.tr("notif.dnd")
             Switch {
                 width: 60

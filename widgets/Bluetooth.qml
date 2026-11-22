@@ -6,7 +6,7 @@ import qs.panels
 import qs.services
 
 // Bluetooth status (hidden without an adapter). Click: devices panel.
-TextBlock {
+TextWidget {
     id: root
 
     readonly property bool shown: BluetoothService.available

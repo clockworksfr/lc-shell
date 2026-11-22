@@ -7,7 +7,7 @@ import qs.services
 
 // Battery level (hidden without a battery). Click: power panel
 // (time left, power profile).
-TextBlock {
+TextWidget {
     id: root
 
     readonly property bool shown: Power.hasBattery

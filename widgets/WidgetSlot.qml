@@ -11,7 +11,7 @@ import qs.services
 //   `togglePanel()`, `panelOpen` for blocks with a click panel
 // A block can hide itself (and its spacing) with `readonly property bool shown`.
 //
-// Hovering a block tells the bar (`host.blockHovered`), which shows the
+// Hovering a block tells the bar (`host.widgetHovered`), which shows the
 // block's hover card (cards/). Passive: the block still gets its clicks.
 Item {
     id: root
@@ -25,9 +25,9 @@ Item {
     // Position in the bar's layout (edit mode).
     property string zoneName
     property int groupIndex: 0
-    property int blockIndex: 0
+    property int widgetIndex: 0
 
-    readonly property var at: ({ screen: screen?.name ?? "", zone: zoneName, group: groupIndex, index: blockIndex })
+    readonly property var at: ({ screen: screen?.name ?? "", zone: zoneName, group: groupIndex, index: widgetIndex })
     readonly property bool editing: ShellState.editing && !!host
     readonly property bool selected: editing && JSON.stringify(BarEditor.selected) === JSON.stringify(at)
     readonly property bool lifted: editing && JSON.stringify(BarEditor.dragging?.at) === JSON.stringify(at)
@@ -42,7 +42,7 @@ Item {
     implicitWidth: Math.max(loader.implicitWidth, editing ? 16 : 0)
     implicitHeight: Math.max(loader.implicitHeight, editing ? 16 : 0)
 
-    onHoveredChanged: if (!editing) host?.blockHovered(root, hovered)
+    onHoveredChanged: if (!editing) host?.widgetHovered(root, hovered)
 
     Component.onCompleted: if (host) ShellState.addSlot(root)
     Component.onDestruction: ShellState.removeSlot(root)

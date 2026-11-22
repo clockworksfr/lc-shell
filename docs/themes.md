@@ -44,7 +44,7 @@ Issue de l'étude de design du 22/11/2026 (maquettes : artifact « lc-shell rend
 | ok | #8BD17C | #2E7D3A |
 
 - **Polices** : Figtree 400/500/600/700 (OFL, github.com/erikdkennedy/figtree) · JetBrains Mono 400/500/600 (OFL) · Material Symbols Rounded, instances FILL 0 et 1, wght 400, opsz 24 (Apache 2.0).
-- **Formes** : rayons îlot 14, contrôle 10, tuile 16, panneau 20, carte Xeneon 28, boutons et curseurs pilule. Bordure 1 px `line` sur îlots et panneaux, 0 sur les cartes ; urgent = liseré intérieur 4 px. Espacements 4/8/12/16/24/32. Ombre 0 4 18 #0000008C (sombre) / #1A2A3A2E (clair), panneaux 0 14 40. Animations 160–220 ms OutCubic, sans rebond.
+- **Formes** : rayons îlot 14, contrôle 10, module 16, panneau 20, carte Xeneon 28, boutons et curseurs pilule. Bordure 1 px `line` sur îlots et panneaux, 0 sur les cartes ; urgent = liseré intérieur 4 px. Espacements 4/8/12/16/24/32. Ombre 0 4 18 #0000008C (sombre) / #1A2A3A2E (clair), panneaux 0 14 40. Animations 160–220 ms OutCubic, sans rebond.
 - **Barre** : îlots flottants, marge 8, hauteur 40, rayon 14, opacité 94 %, bordure 1, groupes nus, coins d'écran 14.
 - **Textures** : aucune ; option : accent tiré du fond d'écran.
 - **Composants** :
@@ -53,7 +53,7 @@ Issue de l'étude de design du 22/11/2026 (maquettes : artifact « lc-shell rend
   - Îlot central dynamique, par priorité : OSD (1,2 s) > enregistrement > minuteur > nouveau titre (3 s) > heure ; largeur animée en 200 ms.
   - Curseurs : pilule 44 px dans les panneaux, 14 px dans les modules, icône et valeur dans la piste.
   - Progression : barre arrondie 6–8 px.
-  - Interrupteurs : tuiles 112 px sur deux lignes, actif = fond accent.
+  - Interrupteurs : modules 112 px sur deux lignes, actif = fond accent.
   - Notifications : panneau de rayon 20, groupées par appli.
   - Tiroirs : sortent de leur îlot.
 
@@ -80,11 +80,11 @@ Concept inspiré de Nebula (github.com/LilaccFlowerr/Nebula, **AGPL-3.0** : conc
 | star | #FFFFFFB0 | #3A46808A |
 
 - **Polices** : Outfit 200/300/400/500/600 (OFL, github.com/Outfitio/Outfit-Fonts) · Geist Mono 400/500 (OFL, github.com/vercel/geist-font) · Material Symbols Rounded FILL 1 wght 400 opsz 24.
-- **Formes** : îlots, boutons, curseurs en pilule ; cartes 24 ; tuiles 22–28 ; contrôles internes 16. Bordure 1 px accent 16–22 % ; urgent = liseré 3 px + halo rose. Col 64×12 (deux arcs concaves r 12). Espacements 6/10/14/20/28. Ombre 0 6 26 #00000080 (nuit) / #2A3A8A26 (aube). Mouvement 200–260 ms OutQuint.
+- **Formes** : îlots, boutons, curseurs en pilule ; cartes 24 ; modules 22–28 ; contrôles internes 16. Bordure 1 px accent 16–22 % ; urgent = liseré 3 px + halo rose. Col 64×12 (deux arcs concaves r 12). Espacements 6/10/14/20/28. Ombre 0 6 26 #00000080 (nuit) / #2A3A8A26 (aube). Mouvement 200–260 ms OutQuint.
 - **Barre** : îlots flottants, marge 10, hauteur 44, rayon 22, opacité 86 %, contour 1, groupes nus, coins d'écran 18. Cadre (off) : épaisseur 8, rayon intérieur 22, coins extérieurs 30. Verticale : 52 px, heure sur deux lignes Outfit 300.
 - **Textures** : verre = surface 86 % + reflet blanc 8 % sur les 58 % hauts, sans flou ; champ d'étoiles en Canvas peint une fois (réseaux 140 et 97 px), optionnel, jamais redessiné en jeu ; halos (≤ 16 px) limités à l'étoile active, la comète, la pochette.
 - **Composants** : espaces = constellation (vide : cercle 1,5 px ; occupé : point ; actif : étoile 4 branches accent avec halo ; urgent : point rose annelé ; fil lumineux en dégradé) ; horloge Outfit 300 (200 en grand) ; progression = comète (trait 2 px, traînée accent2 → accent, tête 10 px) ; curseurs pilules en dégradé ; bouton principal en dégradé 135° ; monitoring en orbites (planète à valeur × 360°) ; cartes et tiroirs reliés par un col.
-- **Xeneon** : média (pochette ronde avec halo, paroles, comète, boutons 110–130 px), orbites CPU/GPU/RAM, horloge Outfit 200 + météo + agenda, tuiles ne pas déranger / micro / replay / minuteur, carte urgente au liseré rose.
+- **Xeneon** : média (pochette ronde avec halo, paroles, comète, boutons 110–130 px), orbites CPU/GPU/RAM, horloge Outfit 200 + météo + agenda, modules ne pas déranger / micro / replay / minuteur, carte urgente au liseré rose.
 
 ## 3. Façade (ampli hi-fi, afficheur VFD)
 
@@ -154,12 +154,12 @@ Communs : LCD #1A2410 sur #C6F37A, Nixie #FF8A2A, audio (accent) #E8742A, systè
 Alerte = rouge avec texte #FFFFFF.
 
 - **Polices** : Doto Matrix = Doto statique wght 900 ROND 100 (OFL) · Space Grotesk 400/500/600 statiques (OFL) · Space Mono Regular/Bold (OFL) · Material Symbols Sharp FILL 0 wght 400 opsz 24.
-- **Formes** : pilule pour tous les contrôles ; cartes rayon 28 ; contour 1 px `line` sur contrôles, cartes, notifications ; boutons tonaux en contour seul. Curseur pilule 46×104 (rayon 23), interrupteur pilule 40 (rayon 20), points 6 px, tuiles séparées de 16.
+- **Formes** : pilule pour tous les contrôles ; cartes rayon 28 ; contour 1 px `line` sur contrôles, cartes, notifications ; boutons tonaux en contour seul. Curseur pilule 46×104 (rayon 23), interrupteur pilule 40 (rayon 20), points 6 px, modules séparées de 16.
 - **Barre** : complète, collée, hauteur 40, opaque (`surface`), groupes nus, sans bordure, coins d'écran 20. Espaces à gauche, horloge au centre, statuts à droite.
 - **Textures** : grille de points (pas 16, rayon 1,1, encre 16 % en clair / 13 % en sombre, sur `surfaceDim`), peinte une fois ; halo de la LED active en sombre seulement (flou 0,8, max 6).
 - **Composants** :
   - Labels Space Mono en majuscules ; chiffres en Doto Matrix ; progression en points.
-  - Tableau en tuiles : horloge, semaine, météo en glyphes de points, anneaux de points, média avec disque et progression en points, curseurs et interrupteurs pilules qui s'inversent.
+  - Tableau en modules : horloge, semaine, météo en glyphes de points, anneaux de points, média avec disque et progression en points, curseurs et interrupteurs pilules qui s'inversent.
   - Visualiseur en anneau de points ; animation de repos en points ; fond en grille de points.
   - États : label à 80 % en `soft` au-dessus de la valeur, valeur rouge si alerte ; échelle 0,68/0,8 sous 900 px de haut.
   - Espaces : LED 6×6 (`line` si vide, encre si occupé), active = barre 14×6, 8 px avant un numéro Space Mono.

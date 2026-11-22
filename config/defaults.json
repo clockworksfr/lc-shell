@@ -1,6 +1,7 @@
 {
   "language": "auto",
   "wallpaper": { "enabled": true, "directory": "~/Pictures/Wallpapers" },
+  "notifications": { "position": "top-right" },
   "idle": { "enabled": true, "lock": 600, "screenOff": 900, "lockedScreenOff": 30, "suspend": 0 },
   "lock": { "pamService": "hyprlock", "beforeSleep": true },
   "appearance": {

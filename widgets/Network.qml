@@ -6,7 +6,7 @@ import qs.panels
 import qs.services
 
 // Network status. Click: network panel (Wi-Fi list, wired state).
-TextBlock {
+TextWidget {
     id: root
 
     readonly property string signal: NetworkService.activeWifi ? I18n.percent(NetworkService.activeWifi.signalStrength) : ""

@@ -43,8 +43,9 @@ PanelWindow {
         const scr = bar.screen;
         const p = anchorItem.mapToItem(bar.contentItem, 0, 0);
         // Bar window origin on its screen.
-        const ox = edge === "right" ? scr.width - bar.width - bar.margins.right : bar.margins.left;
-        const oy = edge === "bottom" ? scr.height - bar.height - bar.margins.bottom : bar.margins.top;
+        const o = bar.origin();
+        const ox = o.x;
+        const oy = o.y;
         const clamp = (v, size, max) => Math.max(gap, Math.min(v, max - size - gap));
         if (sideways) {
             along = clamp(oy + p.y + anchorItem.height / 2 - implicitHeight / 2, implicitHeight, scr.height);

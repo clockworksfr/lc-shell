@@ -16,6 +16,7 @@ import qs.theme
 //   style             "full" | "islands"
 //   floating, margin, radius, opacity, border, padding, spacing,
 //   height (horizontal thickness), verticalWidth (vertical thickness)
+//   length            0 = full width/height, else a centered bar (px)
 PanelWindow {
     id: bar
 
@@ -34,12 +35,28 @@ PanelWindow {
     readonly property int gap: look.floating && !framed ? look.margin : 0
     // Space taken from the screen edge (what popups must clear).
     readonly property int extent: thickness + gap
+    // Fixed length (centered on its edge) instead of full width/height.
+    readonly property int fixedLength: framed ? 0 : Math.max(0, look.length ?? 0)
 
+    // Top-left of the bar window on its screen (popups and IPC need it).
+    function origin(): point {
+        const scr = screen;
+        const x = edge === "right" ? scr.width - width - margins.right
+            : edge === "left" || fixedLength === 0 ? margins.left
+            : (scr.width - width) / 2;
+        const y = edge === "bottom" ? scr.height - height - margins.bottom
+            : edge === "top" || fixedLength === 0 ? margins.top
+            : (scr.height - height) / 2;
+        return Qt.point(x, y);
+    }
+
+    // Full length: anchored to its edge and both neighbours. Fixed length:
+    // its edge only, the compositor centers it.
     anchors {
-        top: edge !== "bottom"
-        bottom: edge !== "top"
-        left: edge !== "right"
-        right: edge !== "left"
+        top: edge === "top" || (fixedLength === 0 && edge !== "bottom")
+        bottom: edge === "bottom" || (fixedLength === 0 && edge !== "top")
+        left: edge === "left" || (fixedLength === 0 && edge !== "right")
+        right: edge === "right" || (fixedLength === 0 && edge !== "left")
     }
     margins {
         top: edge === "bottom" ? 0 : gap
@@ -47,8 +64,8 @@ PanelWindow {
         left: edge === "right" ? 0 : gap
         right: edge === "left" ? 0 : gap
     }
-    implicitHeight: vertical ? 0 : thickness
-    implicitWidth: vertical ? thickness : 0
+    implicitHeight: vertical ? fixedLength : thickness
+    implicitWidth: vertical ? thickness : fixedLength
     color: "transparent"
     WlrLayershell.namespace: "lc-bar"
 
@@ -116,7 +133,7 @@ PanelWindow {
     property Item hoveredSlot: null
     property real cardClosedAt: 0
 
-    function blockHovered(slot: Item, inside: bool): void {
+    function widgetHovered(slot: Item, inside: bool): void {
         if (inside) {
             hoveredSlot = slot;
             hideCard.stop();
@@ -218,14 +235,14 @@ PanelWindow {
             marker.place(axis(p) - 4);
             return;
         }
-        const slots = ShellState.slots.filter(s => s.host === bar && s.zoneName === zone.name && s.visible).sort((a, b) => a.groupIndex - b.groupIndex || a.blockIndex - b.blockIndex);
+        const slots = ShellState.slots.filter(s => s.host === bar && s.zoneName === zone.name && s.visible).sort((a, b) => a.groupIndex - b.groupIndex || a.widgetIndex - b.widgetIndex);
         const half = look.spacing / 2;
         for (const s of slots) {
             const p = s.mapToItem(bar.contentItem, 0, 0);
             const start = axis(p);
             const size = vertical ? s.height : s.width;
             if (pos < start + size / 2) {
-                dropTarget = { zone: zone.name, group: s.groupIndex, index: s.blockIndex };
+                dropTarget = { zone: zone.name, group: s.groupIndex, index: s.widgetIndex };
                 marker.place(start - half);
                 return;
             }
@@ -233,7 +250,7 @@ PanelWindow {
         const last = slots[slots.length - 1];
         if (last) {
             const p = last.mapToItem(bar.contentItem, 0, 0);
-            dropTarget = { zone: zone.name, group: last.groupIndex, index: last.blockIndex + 1 };
+            dropTarget = { zone: zone.name, group: last.groupIndex, index: last.widgetIndex + 1 };
             marker.place(axis(p) + (vertical ? last.height : last.width) + half);
         } else {
             dropTarget = { zone: zone.name, group: 0, index: 0 };
@@ -292,7 +309,7 @@ PanelWindow {
         ThemedText {
             id: ghostText
             anchors.centerIn: parent
-            text: BarEditor.dragging ? I18n.tr(`block.${BarEditor.dragging.type}`) : ""
+            text: BarEditor.dragging ? I18n.tr(`widget.${BarEditor.dragging.type}`) : ""
             font.pixelSize: bar.theme.font.sizeS
         }
     }

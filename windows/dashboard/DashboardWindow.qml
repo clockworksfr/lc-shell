@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.dashboard
-import qs.dashboard.tiles
+import qs.dashboard.modules
 
 // Dashboard of a "modules" screen: the page of its active workspace, drawn
 // on the bottom layer (under windows, which CellTiler floats into the

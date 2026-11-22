@@ -3,9 +3,9 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// Tile types usable in dashboard pages ("type" of a cell).
+// Module types usable in dashboard pages ("type" of a cell).
 Singleton {
-    readonly property var tiles: ({
+    readonly property var modules: ({
             clock: "Clock.qml",
             lyrics: "Lyrics.qml",
             media: "Media.qml",
@@ -15,10 +15,10 @@ Singleton {
             workspaces: "Workspaces.qml"
         })
 
-    // Tiles drawn without a card frame.
+    // Modules drawn without a card frame.
     readonly property var frameless: ["window"]
 
     function url(type: string): url {
-        return Qt.resolvedUrl(tiles[type] ?? "Unknown.qml");
+        return Qt.resolvedUrl(modules[type] ?? "Unknown.qml");
     }
 }

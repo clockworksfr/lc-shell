@@ -1,5 +1,5 @@
 import QtQuick
-import qs.blocks
+import qs.widgets
 import qs.components
 import qs.services
 
@@ -89,7 +89,7 @@ Item {
                     Repeater {
                         model: group.modelData
 
-                        BlockSlot {
+                        WidgetSlot {
                             required property var modelData
                             required property int index
                             entry: modelData
@@ -98,7 +98,7 @@ Item {
                             host: zone.host
                             zoneName: zone.name
                             groupIndex: group.index
-                            blockIndex: index
+                            widgetIndex: index
                             // Room a block may use across the bar.
                             crossSize: zone.host.thickness - zone.theme.space.s * 2
                         }

@@ -12,7 +12,7 @@ PopupWindow {
     id: root
 
     required property var host
-    // BlockSlot the card is shown for.
+    // WidgetSlot the card is shown for.
     property Item slot: null
     readonly property bool hovered: hover.hovered
 

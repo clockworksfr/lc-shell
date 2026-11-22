@@ -7,7 +7,7 @@ import qs.services
 
 // Notifications: unread count, do-not-disturb state.
 // Click: history panel, middle click: toggle do-not-disturb.
-TextBlock {
+TextWidget {
     id: root
 
     fullText: size === "compact" ? (NotificationCenter.dnd ? "∅" : `${NotificationCenter.unread}`)

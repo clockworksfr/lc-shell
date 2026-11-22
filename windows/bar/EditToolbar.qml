@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import qs.blocks
+import qs.widgets
 import qs.components
 import qs.i18n
 import qs.services
@@ -93,7 +93,7 @@ PanelWindow {
 
                 ThemedText {
                     height: 32
-                    text: win.selectedType ? I18n.tr(`block.${win.selectedType}`) : ""
+                    text: win.selectedType ? I18n.tr(`widget.${win.selectedType}`) : ""
                     color: win.theme.color.accent
                     font.weight: Font.DemiBold
                 }
@@ -131,11 +131,11 @@ PanelWindow {
 
                 Repeater {
                     // Only blocks not on this screen's bar yet.
-                    model: Object.keys(Registry.blocks).filter(t => !BarEditor.typesOn(win.screen).includes(t))
+                    model: Object.keys(Registry.widgets).filter(t => !BarEditor.typesOn(win.screen).includes(t))
 
                     ToolButton {
                         required property string modelData
-                        text: `+ ${I18n.tr(`block.${modelData}`)}`
+                        text: `+ ${I18n.tr(`widget.${modelData}`)}`
                         onActivated: BarEditor.add(win.screen.name, modelData, win.selected?.zone ?? "right")
                     }
                 }

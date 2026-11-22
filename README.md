@@ -15,7 +15,7 @@ Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md
 |---|---|
 | `shell.qml` | Point d'entrée : une `ScreenScope` par écran (`Variants` sur `Quickshell.screens`) |
 | `modules/` | Fenêtres par écran (`bar/`, `osd/`, `launcher/`), selon le profil de l'écran |
-| `blocks/` | Blocs de barre + `Registry` nom → fichier |
+| `widgets/` | Widgets de barre + `Registry` nom → fichier |
 | `i18n/` | Langue de l'interface : `I18n` + `en.json`, `fr.json` |
 | `launcher/` | Lanceur : état, recherche, fournisseurs (applis, emoji, fichiers, calcul, actions) |
 | `panels/` | Contenus de popups : audio, réseau, Bluetooth, énergie |
@@ -30,7 +30,7 @@ Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md
 Deux couches, rechargées à chaud :
 
 - `config/defaults.json` (repo) : valeurs par défaut génériques ;
-- `~/.config/lc/settings.json` (`$XDG_CONFIG_HOME`) : **tes réglages**, superposés aux défauts. Écrit aussi par le shell (IPC, app de paramètres). Les objets se fusionnent clé par clé ; les listes (blocs, écrans, pages) remplacent.
+- `~/.config/lc/settings.json` (`$XDG_CONFIG_HOME`) : **tes réglages**, superposés aux défauts. Écrit aussi par le shell (IPC, app de paramètres). Les objets se fusionnent clé par clé ; les listes (widgets, écrans, pages) remplacent.
 
 Exemple de réglages :
 
@@ -56,19 +56,19 @@ Exemple de réglages :
 - **Modes** : `normal` (barre permanente) ou `modules` (tableau de bord, voir plus bas). La config d'un module (`bar`, `osd`) vient du mode, surchargée clé par clé par le profil ; `null` le désactive.
 - **Thèmes** : un par mode (`appearance.themes`), surchargeable par profil (`"theme": "matrix"`). Disponibles : `classic` (défaut, jetons de la spec), `matrix` (palettes ; polices pas encore embarquées).
 - **Clair/sombre** : `variant` = `dark`, `light` ou `auto` ; en `auto`, `schedule` = horaires fixes (`type: "time"`) ou soleil (`type: "sun"`, `latitude`, `longitude`, calcul local).
-- **Barre** : sur n'importe quel bord, `position` = `top`/`bottom`/`left`/`right`. Blocs dans `left`/`center`/`right` (sur une barre verticale : du haut vers le bas ; `start`/`center`/`end` accepté). Rendu fourni par le thème, surchargeable : `style` (`full`/`islands`), `floating`, `margin`, `radius`, `opacity`, `border`, `padding`, `spacing`, `height` (épaisseur horizontale), `verticalWidth` (épaisseur verticale), `screenCorners` (rayon des coins d'écran, 0 = aucun).
+- **Barre** : sur n'importe quel bord, `position` = `top`/`bottom`/`left`/`right`. Widgets dans `left`/`center`/`right` (sur une barre verticale : du haut vers le bas ; `start`/`center`/`end` accepté). Rendu fourni par le thème, surchargeable : `style` (`full`/`islands`), `floating`, `margin`, `radius`, `opacity`, `border`, `padding`, `spacing`, `height` (épaisseur horizontale), `verticalWidth` (épaisseur verticale), `screenCorners` (rayon des coins d'écran, 0 = aucun).
 - **Cadre** : `"frame": true` (ou `{ "enabled": true, "thickness": 8 | { "top": …, "left": … }, "innerRadius": 18, "outline": 1 }`) dans la config de la barre. Un anneau entoure le bureau, la barre en est le côté épais (collée, sans îlots) ; les autres côtés réservent leur épaisseur. Dessiné sous les fenêtres, invisible aux clics, retiré en plein écran. Actif par défaut dans Matrix. Les coins d'écran (noirs, façon bord d'écran) suivent : `screenCorners`, ou automatique avec le cadre.
-- **Mode édition** : clic droit sur la barre (hors blocs) ou `bar edit`. Glisser un bloc (curseur d'insertion), « + » en fin de zone pour un nouvel îlot, clic pour sélectionner (taille S/M/L, zone, retrait), palette d'ajout, annuler / rétablir, abandonner, terminé (Échap). Les changements vont dans le profil de l'écran. Une zone peut contenir plusieurs groupes (îlots) : liste de listes dans `settings.json`.
-- **Cartes de survol** : 350 ms sur un bloc affichent sa carte (horloge et calendrier, média et paroles, volume par appli et micro, débit réseau, Bluetooth et batteries, batterie et historique, notifications, tray, espaces de travail) ; un clic ouvre le panneau complet.
-- **Barre verticale** : blocs empilés et compacts (libellé puis valeur, jamais de texte pivoté), horloge sur deux lignes (`verticalFormat`), espaces de travail et tray en colonne. Les panneaux s'ouvrent vers l'intérieur de l'écran ; notifications et OSD s'écartent de la barre.
-- Blocs (taille `size` : `compact` / `normal` / `extended`) :
+- **Mode édition** : clic droit sur la barre (hors widgets) ou `bar edit`. Glisser un widget (curseur d'insertion), « + » en fin de zone pour un nouvel îlot, clic pour sélectionner (taille S/M/L, zone, retrait), palette d'ajout, annuler / rétablir, abandonner, terminé (Échap). Les changements vont dans le profil de l'écran. Une zone peut contenir plusieurs groupes (îlots) : liste de listes dans `settings.json`.
+- **Cartes de survol** : 350 ms sur un widget affichent sa carte (horloge et calendrier, média et paroles, volume par appli et micro, débit réseau, Bluetooth et batteries, batterie et historique, notifications, tray, espaces de travail) ; un clic ouvre le panneau complet.
+- **Barre verticale** : widgets empilés et compacts (libellé puis valeur, jamais de texte pivoté), horloge sur deux lignes (`verticalFormat`), espaces de travail et tray en colonne. Les panneaux s'ouvrent vers l'intérieur de l'écran ; notifications et OSD s'écartent de la barre.
+- Widgets (taille `size` : `compact` / `normal` / `extended`) :
   - `workspaces`, `clock` (`format`), `media` (`maxWidth`) ;
   - `volume` — clic : panneau audio (volumes, périphériques), clic milieu : muet, molette : volume ;
   - `tray` — clic : activer, clic droit : menu, clic milieu : action secondaire (`showPassive`) ;
   - `network` — clic : panneau (filaire, interrupteur Wi-Fi, réseaux, mot de passe à la volée) ;
   - `bluetooth` — clic : panneau (interrupteur, appareils ; un nouvel appareil est appairé, approuvé et connecté) ; masqué sans adaptateur ;
   - `battery` — clic : panneau (autonomie, profil d'énergie) ; masqué sans batterie ;
-  - `notifications` — non lues ; clic : historique (ne pas déranger, tout effacer), clic milieu : ne pas déranger. Un nom inconnu s'affiche `?nom` en rouge. Ajouter un bloc : `blocks/Xxx.qml` (propriétés `screen`, `options`) + `blocks/Registry.qml`.
+  - `notifications` — non lues ; clic : historique (ne pas déranger, tout effacer), clic milieu : ne pas déranger. Un nom inconnu s'affiche `?nom` en rouge. Ajouter un widget : `widgets/Xxx.qml` (propriétés `screen`, `options`) + `widgets/Registry.qml`.
 - **Plein écran** : rien d'automatique (OSD, bientôt notifications) ne s'affiche au-dessus ; c'est redirigé vers un écran `modules` ou retenu. Le lanceur, appelé explicitement, reste autorisé.
 
 ## Paramètres
@@ -77,7 +77,7 @@ Exemple de réglages :
 
 - **Apparence** : thème des écrans normaux / modules, clair / sombre / automatique, bascule à heures fixes ou au soleil (latitude, longitude) ;
 - **Écrans** : par écran branché — mode, thème, tactile, position de la barre, cadre (profil créé au besoin, repéré par le modèle) ;
-- **Barre** : rendu (style, flottante, opacité, position, cadre) et blocs par zone (monter, descendre, changer de zone, retirer, ajouter) ;
+- **Barre** : rendu (style, flottante, opacité, position, cadre) et widgets par zone (monter, descendre, changer de zone, retirer, ajouter) ;
 - **Fond d'écran** : activation, dossier, grille de choix, au hasard ;
 - **Général** : langue, ne pas déranger, rangement des fenêtres du tableau de bord.
 
@@ -117,7 +117,7 @@ Interface en anglais et en français. `"language"` dans `settings.json` : `auto`
 ```
 
 - Chaque espace de travail Hyprland de l'écran est une **page** : `pages["<nom de l'espace de travail>"]`, sinon `pages.default`.
-- Tuiles : `clock` (`format`), `media`, `system` (CPU, RAM, GPU, températures), `workspaces`, `window`, `lyrics` (paroles synchronisées via lrclib.net — seuls artiste, titre et durée sont envoyés ; cache local), `vu` (VU-mètre de la sortie par défaut, échelle en dB, crête retenue ; barres dans le sens long de la tuile).
+- Modules : `clock` (`format`), `media`, `system` (CPU, RAM, GPU, températures), `workspaces`, `window`, `lyrics` (paroles synchronisées via lrclib.net — seuls artiste, titre et durée sont envoyés ; cache local), `vu` (VU-mètre de la sortie par défaut, échelle en dB, crête retenue ; barres dans le sens long de le module).
 - **Cases fenêtre** (`"type": "window"`) : toute fenêtre arrivant sur un espace de travail de cet écran est rendue flottante et placée dans la première case libre (les suivantes s'empilent dans la dernière). Repartie vers un écran normal, elle redevient tuilée. Les fenêtres plein écran ne sont pas touchées. `windows.ignore` / `only` filtrent par classe.
 - Le tableau de bord est sur la couche `bottom`, sous les fenêtres.
 
@@ -174,7 +174,7 @@ L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non a
 | `qs -c lc ipc call settings toggle` / `openPage <page>` / `close` | Paramètres |
 | `qs -c lc ipc call lock lock` / `preview` / `isLocked` | Verrouillage |
 | `qs -c lc ipc call bar edit` / `done` / `discard` | Mode édition de la barre |
-| `qs -c lc ipc call bar panel <bloc>` / `panelOn <bloc> <écran>` / `showCard <bloc>` / `hideCard` / `blocks` / `card` | Panneaux, cartes, diagnostic |
+| `qs -c lc ipc call bar panel <widget>` / `panelOn <widget> <écran>` / `showCard <widget>` / `hideCard` / `blocks` / `card` | Panneaux, cartes, diagnostic |
 | `qs -c lc ipc call shell reload` | Rechargement complet (nécessaire après modification d'un `.js`) |
 
 ## Développement
@@ -182,6 +182,6 @@ L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non a
 - Quickshell recharge le shell à chaque modification d'un fichier du dossier. Un **nouveau singleton** (`pragma Singleton`) ajouté à un module déjà chargé n'est pas pris en compte par ce rechargement : redémarrer le processus.
 - Tester une configuration via `~/.config/lc/settings.json` (hors du dossier du shell) plutôt qu'en modifiant `config/defaults.json`.
 - Les popups (panneaux, cartes de survol) d'une barre ne s'affichent que si la barre a le pointeur : pour des captures, placer le curseur sur la barre avant `bar panelOn` / `bar showCard`.
-- Diagnostic : `bar blocks` (géométrie des blocs), `bar card` (carte de survol), `media info`, `lyrics status`, `qs log -c lc`.
+- Diagnostic : `bar blocks` (géométrie des widgets), `bar card` (carte de survol), `media info`, `lyrics status`, `qs log -c lc`.
 - PipeWire : ne pas filtrer une liste suivie par `PwObjectTracker` sur des propriétés qui changent une fois le nœud suivi (boucle → plantage du module).
 

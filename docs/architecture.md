@@ -25,7 +25,7 @@ Un **profil** associe un écran à :
 
 ## Barre (écrans normaux)
 
-Toujours présente. Agencement des blocs dans `left` / `center` / `right`, et rendu paramétrable, chaque thème fournissant ses défauts :
+Toujours présente. Agencement des widgets dans `left` / `center` / `right`, et rendu paramétrable, chaque thème fournissant ses défauts :
 
 | Paramètre | Valeurs |
 |---|---|

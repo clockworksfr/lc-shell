@@ -6,7 +6,7 @@ import qs.services
 // Active MPRIS player. Hidden when there is none.
 // Left click: play/pause, right click: next, middle click: switch player.
 // Options: maxWidth (px, default 400). On a vertical bar: state glyph only.
-TextBlock {
+TextWidget {
     id: root
 
     readonly property var player: Players.active

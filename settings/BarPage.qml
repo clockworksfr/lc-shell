@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell
-import qs.blocks
+import qs.widgets
 import qs.components
 import qs.i18n
 import qs.services
@@ -16,7 +16,7 @@ Column {
     readonly property var themeBar: Themes.resolve(Themes.themeFor("normal"), false, "normal").bar
     readonly property var look: Object.assign({}, themeBar, bar)
     readonly property var zones: ["left", "center", "right"]
-    readonly property var blockTypes: Object.keys(Registry.blocks)
+    readonly property var blockTypes: Object.keys(Registry.widgets)
 
     function setLook(key: string, value: var): void {
         Config.set(`modes.normal.bar.${key}`, value);
@@ -88,6 +88,16 @@ Column {
         }
 
         Field {
+            label: I18n.tr("settings.barLength")
+            hint: I18n.tr("settings.barLengthHint")
+            Choice {
+                model: [0, 1600, 2560, 3200].map(v => ({ value: v, label: v ? `${v} px` : I18n.tr("settings.fullWidth") }))
+                value: root.look.length ?? 0
+                onPicked: value => root.setLook("length", value)
+            }
+        }
+
+        Field {
             label: I18n.tr("settings.barPosition")
             Choice {
                 model: ["top", "bottom", "left", "right"].map(v => ({ value: v, label: I18n.tr(`settings.edge.${v}`) }))
@@ -137,7 +147,7 @@ Column {
                         anchors.left: parent.left
                         anchors.leftMargin: root.theme.space.m
                         anchors.verticalCenter: parent.verticalCenter
-                        text: I18n.tr(`block.${entryRow.type}`)
+                        text: I18n.tr(`widget.${entryRow.type}`)
                     }
 
                     Row {
@@ -205,7 +215,7 @@ Column {
                         ThemedText {
                             id: addLabel
                             anchors.centerIn: parent
-                            text: `+ ${I18n.tr(`block.${parent.modelData}`)}`
+                            text: `+ ${I18n.tr(`widget.${parent.modelData}`)}`
                             font.pixelSize: root.theme.font.sizeS
                         }
 

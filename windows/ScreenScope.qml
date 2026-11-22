@@ -1,12 +1,12 @@
 import QtQuick
 import Quickshell
 import qs.launcher
-import qs.modules.bar
-import qs.modules.dashboard
-import qs.modules.launcher
-import qs.modules.notifications
-import qs.modules.osd
-import qs.modules.wallpaper
+import qs.windows.bar
+import qs.windows.dashboard
+import qs.windows.launcher
+import qs.windows.notifications
+import qs.windows.osd
+import qs.windows.wallpaper
 import qs.services
 import qs.theme
 
@@ -155,10 +155,8 @@ Scope {
         NotificationPopups {
             screen: root.modelData
             theme: root.theme
-            // Right side, or left when the bar is on the right; clear of the bar.
-            side: root.barEdge === "right" ? "left" : "right"
-            topOffset: root.barExtent("top") + root.theme.space.l
-            sideOffset: root.barExtent(side) + root.theme.space.l
+            position: Config.get("notifications.position") ?? "top-right"
+            edgeOffsets: ({ top: root.barExtent("top"), bottom: root.barExtent("bottom"), left: root.barExtent("left"), right: root.barExtent("right") })
         }
     }
 

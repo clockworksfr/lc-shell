@@ -5,7 +5,7 @@ import qs.i18n
 
 // Options: format (Qt date format, default "HH:mm"); on a vertical bar
 // the time is stacked (hours over minutes), `verticalFormat` to change it.
-TextBlock {
+TextWidget {
     id: root
 
     readonly property string format: vertical ? (options.verticalFormat ?? "HH\nmm")

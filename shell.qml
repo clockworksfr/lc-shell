@@ -8,7 +8,7 @@ import qs.dashboard
 import qs.i18n
 import qs.launcher
 import qs.lock
-import qs.modules
+import qs.windows
 import qs.services
 import qs.settings
 import qs.theme

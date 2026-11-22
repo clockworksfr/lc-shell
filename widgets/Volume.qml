@@ -7,7 +7,7 @@ import qs.services
 
 // Output volume. Left click: audio panel (volume, devices),
 // middle click: mute, wheel: volume.
-TextBlock {
+TextWidget {
     id: root
 
     fullText: Audio.muted ? I18n.tr("common.muted")

@@ -7,7 +7,7 @@ import Quickshell
 // A layout entry is either a name ("clock") or an object with a "type"
 // and block-specific options ({ "type": "clock", "format": "HH:mm" }).
 Singleton {
-    readonly property var blocks: ({
+    readonly property var widgets: ({
             battery: "Battery.qml",
             bluetooth: "Bluetooth.qml",
             clock: "Clock.qml",
@@ -29,6 +29,6 @@ Singleton {
     }
 
     function url(type: string): url {
-        return Qt.resolvedUrl(blocks[type] ?? "Unknown.qml");
+        return Qt.resolvedUrl(widgets[type] ?? "Unknown.qml");
     }
 }

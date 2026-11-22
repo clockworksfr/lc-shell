@@ -14,7 +14,7 @@ Singleton {
     // empty) to toggle its panel: keyboard binds, scripts, reviews.
     signal panelRequested(string type, string screenName)
 
-    // Bar blocks currently shown (BlockSlot items), for diagnostics/IPC.
+    // Bar blocks currently shown (WidgetSlot items), for diagnostics/IPC.
     property var slots: []
     // Hover card state: { visible, type, screen }.
     property var card: ({ visible: false })

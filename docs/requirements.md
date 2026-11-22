@@ -13,7 +13,7 @@ Ce que simon a demandé et décidé, dans l'ordre où c'est arrivé (22/11/2026)
 ## Règles de fond
 
 1. **Quickshell nu**, écrit de zéro. **Aucun code** de Caelestia (GPL-3), de la config d'outfoxxed (sans licence) ni de Nebula (AGPL-3.0) : on s'en inspire seulement. Licence de lc-shell non choisie (rester libre de publier en MIT).
-2. **Plus de structure imposée** : agencement des blocs libre, par écran.
+2. **Plus de structure imposée** : agencement des widgets libre, par écran.
 3. **Rien au-dessus d'un jeu en plein écran** pour ce qui est automatique (OSD, notifications, coins, cadre) ; ce qui est appelé explicitement (lanceur, panneaux) reste permis.
 4. **Multilingue** dès maintenant : anglais et français pour commencer.
 5. **Tactile** à prévoir (grandes cibles, rien qui ne dépende du survol).
@@ -42,7 +42,7 @@ Ce que simon a demandé et décidé, dans l'ordre où c'est arrivé (22/11/2026)
 - L'écran modules a des **espaces de travail** : grille libre, **cases fenêtre** où n'importe quelle fenêtre Hyprland peut aller (kitty sur l'écran déporté) ; idéalement des espaces de travail de modules (une page par espace de travail).
 - Barre agençable : îlots, barre complète, flottante ou non, arrondis, transparence, bordures, coins… (défauts par thème, surchargeables) ; **mode « cadre »** comme Caelestia ; barre **sur le côté de son choix**.
 - Chaque élément de la barre : **réagençable, redimensionnable, déplaçable** vers un autre endroit ; **détail au survol**, soigné (« assez sympa »).
-- Un bloc **fenêtre active** (titre de la fenêtre) ; l'emplacement par défaut de la date et de l'heure est à revoir en conséquence (l'agencement restant libre).
+- Un widget **fenêtre active** (titre de la fenêtre) ; l'emplacement par défaut de la date et de l'heure est à revoir en conséquence (l'agencement restant libre).
 
 ## Organisation
 
