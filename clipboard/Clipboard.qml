@@ -449,7 +449,7 @@ Singleton {
 
     Process {
         running: true
-        command: ["pkill", "-f", `^wl-paste --watch python3 -I ${root.capturePath} ${root.dir} `]
+        command: ["pkill", "-f", `^[^ ]*wl-paste --watch python3 -I ${root.capturePath} ${root.dir} `]
         onExited: root.swept = true
     }
 
