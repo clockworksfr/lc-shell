@@ -1,0 +1,24 @@
+{
+  "default": {
+    "bar": {
+      "position": "top",
+      "left": ["workspaces"],
+      "center": ["clock"],
+      "right": ["media", "volume"]
+    },
+    "osd": {
+      "position": "bottom",
+      "margin": 80
+    }
+  },
+  "screens": {
+    "DP-1": {
+      "bar": {
+        "center": [{ "type": "clock", "format": "dddd d MMMM  HH:mm" }]
+      }
+    },
+    "HDMI-A-1": {
+      "bar": null
+    }
+  }
+}
