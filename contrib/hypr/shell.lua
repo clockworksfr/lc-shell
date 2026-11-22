@@ -58,11 +58,12 @@ bind(mod .. " + SHIFT + V",        lc("clipboard"),          "Historique du pres
 bind(mod .. " + CTRL + SHIFT + V", lc("clipboardIncognito"), "Presse-papier : pause / reprise")
 bind(mod .. " + period",           lc("emoji"),              "Sélecteur d'emoji")
 
--- Capture d'écran : copiée dans le presse-papier, gardée en cache, puis
--- notification « Ouvrir » (swappy) / « Enregistrer » (~/Images/Screenshots).
--- La zone se choisit sur les écrans figés.
+-- Capture d'écran (outil de lc-shell) : zone ou fenêtre choisie sur les
+-- écrans figés, copiée dans le presse-papier, puis notification Annoter
+-- (éditeur intégré) / Enregistrer / Ouvrir.
 bind("Print",         lc("screenshot"),       "Capture d'une zone")
 bind("SHIFT + Print", lc("screenshotScreen"), "Capture de l'écran ayant le focus")
+bind("CTRL + Print",  lc("screenshotWindow"), "Capture de la fenêtre active")
 
 -- Verrouille, puis éteint tous les écrans 5 s plus tard (le script vérifie
 -- qu'on est toujours verrouillé ; hyprlock si lc-shell ne répond pas).
