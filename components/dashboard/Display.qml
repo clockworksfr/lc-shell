@@ -10,7 +10,9 @@ Item {
     id: root
 
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
-    readonly property string kind: theme.style.display ?? "none"
+    // false: no window here, whatever the theme (children sit on the panel).
+    property bool screen: true
+    readonly property string kind: screen ? (theme.style.display ?? "none") : "none"
     // LCD tint: "green" (system, weather) or "amber" (player, lyrics).
     property string tint: "green"
     readonly property color ink: kind === "lcd" ? (tint === "amber" ? (theme.color.lcdAmberInk ?? "#2A1A05") : (theme.color.lcdInk ?? "#1A2410")) : theme.color.ink

@@ -69,6 +69,8 @@ ModuleBase {
         id: rowsDisplay
 
         visible: root.layout === "rows"
+        // Only the VFD holds the rows (modulaire's LCD is for figures).
+        screen: root.look === "facade"
         anchors.fill: parent
 
         ColumnLayout {
