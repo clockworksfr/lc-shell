@@ -53,7 +53,7 @@ Column {
 
             ThemedText {
                 anchors.verticalCenter: parent.verticalCenter
-                width: head.width - kind.width - value.width - chevron.width - head.spacing * 3
+                width: head.width - kind.width - value.width - (root.choice ? chevron.width + head.spacing : 0) - head.spacing * 2
                 text: Audio.nodeName(root.current)
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
@@ -71,7 +71,6 @@ Column {
                 id: chevron
                 anchors.verticalCenter: parent.verticalCenter
                 visible: root.choice
-                width: visible ? implicitWidth : 0
                 name: "expand_more"
                 size: root.theme.font.sizeL
                 color: root.theme.color.soft
