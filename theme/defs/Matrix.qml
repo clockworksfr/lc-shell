@@ -104,7 +104,10 @@ Singleton {
                 workspaces: "dots",
                 module: "matrix",
                 cover: "disc",
-                ring: "dots"
+                ring: "dots",
+                // The bar's clock: the time alone, in the display font
+                // (Doto, ~2/3 of the bar), as in the mockup.
+                barClock: "display"
             }
         })
 }
