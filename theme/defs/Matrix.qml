@@ -64,7 +64,13 @@ Singleton {
                 radius: 0,
                 opacity: 1,
                 border: 0,
-                screenCorners: 20
+                screenCorners: 32,
+                frame: {
+                    enabled: true,
+                    thickness: 10,
+                    innerRadius: 24,
+                    outline: 0
+                }
             },
             style: {
                 labelCase: "upper",

@@ -17,14 +17,17 @@ PanelWindow {
 
     property var config: ({})
     property var theme: Themes.fallback
+    // Part of a frame (FrameWindow draws the background): docked, no
+    // islands, no own background.
+    property bool framed: false
 
     readonly property var look: Object.assign({}, theme.bar, config)
     // "top" | "bottom" | "left" | "right"; read by popups to open inward.
     readonly property string edge: ["top", "bottom", "left", "right"].includes(look.position) ? look.position : "top"
     readonly property bool vertical: edge === "left" || edge === "right"
-    readonly property bool islands: look.style === "islands"
+    readonly property bool islands: look.style === "islands" && !framed
     readonly property int thickness: vertical ? look.verticalWidth : look.height
-    readonly property int gap: look.floating ? look.margin : 0
+    readonly property int gap: look.floating && !framed ? look.margin : 0
     // Space taken from the screen edge (what popups must clear).
     readonly property int extent: thickness + gap
 
@@ -48,7 +51,7 @@ PanelWindow {
     // "full": one band. Docked, the border is a single line on the inner edge.
     Rectangle {
         anchors.fill: parent
-        visible: !bar.islands
+        visible: !bar.islands && !bar.framed
         radius: bar.look.floating ? bar.look.radius : 0
         color: Qt.alpha(bar.theme.color.bg, bar.look.opacity)
         border.width: bar.look.floating ? bar.look.border : 0

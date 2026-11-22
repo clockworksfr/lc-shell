@@ -23,12 +23,35 @@ Scope {
     readonly property var barLook: Object.assign({}, theme.bar, profile.bar ?? {})
     readonly property bool hasBar: normal && !!profile.bar && ShellState.barVisible
     readonly property string barEdge: ["top", "bottom", "left", "right"].includes(barLook.position) ? barLook.position : "top"
-    // Room the bar takes from its edge (0 on the other edges).
+    readonly property int barThickness: barEdge === "left" || barEdge === "right" ? barLook.verticalWidth : barLook.height
+
+    // Frame: theme defaults, overridden in shell.json by `frame: true|false`
+    // or an object. The bar is its thick side.
+    readonly property var frame: {
+        const base = theme.bar.frame ?? {};
+        const over = profile.bar?.frame;
+        if (over === undefined || over === null)
+            return base;
+        return typeof over === "object" ? Object.assign({}, base, over) : Object.assign({}, base, { enabled: !!over });
+    }
+    readonly property bool framed: hasBar && !!frame.enabled
+    readonly property var frameSides: {
+        const sides = {};
+        for (const edge of ["top", "bottom", "left", "right"]) {
+            const t = frame.thickness;
+            sides[edge] = edge === barEdge ? barThickness : (typeof t === "object" ? (t[edge] ?? 0) : (t ?? 0));
+        }
+        return sides;
+    }
+    readonly property int cornerRadius: barLook.screenCorners > 0 ? barLook.screenCorners : framed ? Math.min(frame.innerRadius + (frame.thickness?.top ?? frame.thickness ?? 0), 32) : 0
+
+    // Room taken from an edge by the bar (and the frame), for popups.
     function barExtent(edge: string): int {
+        if (framed)
+            return frameSides[edge];
         if (!hasBar || edge !== barEdge)
             return 0;
-        const vertical = barEdge === "left" || barEdge === "right";
-        return (vertical ? barLook.verticalWidth : barLook.height) + (barLook.floating ? barLook.margin : 0);
+        return barThickness + (barLook.floating ? barLook.margin : 0);
     }
 
     LazyLoader {
@@ -38,6 +61,35 @@ Scope {
             screen: root.modelData
             config: root.profile.bar
             theme: root.theme
+            framed: root.framed
+        }
+    }
+
+    // Frame: drawing + reservation of the sides other than the bar's.
+    // Gone while a fullscreen window is shown.
+    LazyLoader {
+        active: root.framed && !root.fullscreen
+
+        Scope {
+            FrameWindow {
+                screen: root.modelData
+                theme: root.theme
+                sides: root.frameSides
+                innerRadius: root.frame.innerRadius
+                outline: root.frame.outline
+                fillOpacity: root.barLook.opacity
+            }
+
+            Variants {
+                model: ["top", "bottom", "left", "right"].filter(edge => edge !== root.barEdge && root.frameSides[edge] > 0)
+
+                FrameEdge {
+                    required property string modelData
+                    screen: root.modelData
+                    edge: modelData
+                    thickness: root.frameSides[modelData]
+                }
+            }
         }
     }
 
@@ -52,12 +104,12 @@ Scope {
     }
 
     LazyLoader {
-        active: root.normal && root.barLook.screenCorners > 0 && !root.fullscreen
+        active: root.normal && root.cornerRadius > 0 && !root.fullscreen
 
         ScreenCorners {
             screen: root.modelData
             theme: root.theme
-            radius: root.barLook.screenCorners
+            radius: root.cornerRadius
         }
     }
 

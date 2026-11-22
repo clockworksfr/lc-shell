@@ -11,6 +11,8 @@ PanelWindow {
 
     property var theme: Themes.fallback
     property int radius: 0
+    // Screen bezel color: the corners read as the screen's own edge.
+    property color fill: "black"
 
     anchors {
         top: true
@@ -27,7 +29,7 @@ PanelWindow {
 
     Corner {
         radius: win.radius
-        fill: win.theme.color.bg
+        fill: win.fill
         anchors.top: parent.top
         anchors.left: parent.left
     }

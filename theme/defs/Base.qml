@@ -105,7 +105,18 @@ Singleton {
                 padding: 8,
                 spacing: 12,
                 // Rounded screen corners radius, 0 = none.
-                screenCorners: 0
+                screenCorners: 0,
+                // Frame around the screen, the bar being its thick side
+                // (docs/themes.md, "Cadre"). `frame: true` in shell.json is
+                // a shorthand for { enabled: true }.
+                frame: {
+                    enabled: false,
+                    // Other sides; a number, or { top, bottom, left, right }.
+                    thickness: 8,
+                    innerRadius: 18,
+                    // Line along the inner edge (px, color `line`).
+                    outline: 1
+                }
             },
             style: {
                 // Text case of small labels: "none" | "upper"
