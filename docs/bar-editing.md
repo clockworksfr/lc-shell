@@ -71,3 +71,9 @@ Spécification issue de l'étude de design (artifact « lc-shell rendus », ongl
 - IPC : `bar select <type>`, `bar resize <compact|normal|extended>`, `bar undoSave`.
 - Pas encore : widget soulevé (échelle, rotation), cible refusée avec sa raison, envoi vers un écran modules (en module), hachures du cadre, feuille du bas au doigt.
 
+## Widgets ajoutés
+
+- `system` : CPU (compact), + GPU (normal), + températures et RAM (étendu) ; rouge au-delà de 90 % ; clic = `system.monitorCommand` (par défaut `kitty -e btop`). Carte : CPU et GPU (charge, température, dernière minute), mémoire, 3 processus les plus gourmands.
+- `dynamicIsland` : l'activité la plus importante, sinon l'heure — partage d'écran (rouge), micro utilisé par une appli, morceau en lecture (clic = lecture / pause). Sa carte suit : celle du média pendant la lecture, sinon celle de l'horloge.
+- Tray : une carte par icône survolée (nom, état, info-bulle, premières actions du menu en puces, « Ouvrir », « Menu ») ; sans icône survolée, la liste de toutes.
+

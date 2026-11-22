@@ -29,7 +29,7 @@ TextWidget {
         : clockText
     compactText: activity === "clock" ? clockText : fullText
     color: activity === "sharing" ? theme.color.urgent : theme.color.ink
-    width: Math.min(implicitWidth, size === "extended" ? 520 : size === "compact" ? 180 : 360)
+    width: vertical && crossSize > 0 ? crossSize : Math.min(implicitWidth, size === "extended" ? 520 : size === "compact" ? 180 : 360)
 
     icon: activity === "sharing" ? "screen_share" : activity === "mic" ? "mic" : activity === "media" ? "music_note" : ""
     iconText: fullText
