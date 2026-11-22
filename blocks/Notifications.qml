@@ -30,6 +30,8 @@ TextBlock {
         }
     }
 
+    readonly property bool panelOpen: popup.visible
+
     function togglePanel(): void {
         popup.toggle();
     }

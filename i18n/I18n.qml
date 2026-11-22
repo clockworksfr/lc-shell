@@ -54,6 +54,25 @@ Singleton {
         return Number(value).toLocaleString(locale, "f", decimals);
     }
 
+    // "key.one" / "key.other" by count (French: 0 and 1 are singular).
+    function plural(key: string, n: int): string {
+        const one = language === "fr" ? n <= 1 : n === 1;
+        return tr(`${key}.${one ? "one" : "other"}`, { n: n });
+    }
+
+    // Bytes (or bytes per second with `perSecond`) in a readable unit.
+    function bytes(value: real, perSecond: bool): string {
+        const units = tr("format.byteUnits").split(" ");
+        let unit = 0;
+        let v = Math.max(0, value);
+        while (v >= 1000 && unit < units.length - 1) {
+            v /= 1000;
+            unit++;
+        }
+        const text = `${number(v, v < 10 && unit > 0 ? 1 : 0)}${tr("format.unitSpace")}${units[unit]}`;
+        return perSecond ? tr("format.perSecond", { value: text }) : text;
+    }
+
     // "just now", "5 min ago", "14:32" (today), "22 Nov 14:32".
     function relativeTime(ms: real): string {
         const minutes = Math.floor((Date.now() - ms) / 60000);

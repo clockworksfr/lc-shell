@@ -15,6 +15,10 @@ Singleton {
     readonly property list<PwNode> sinks: Pipewire.nodes.values.filter(n => n.audio && n.isSink && !n.isStream)
     readonly property list<PwNode> sources: Pipewire.nodes.values.filter(n => n.audio && !n.isSink && !n.isStream)
 
+    // Playback streams of applications (bound below, so their audio and
+    // properties are populated).
+    readonly property list<PwNode> streams: Pipewire.nodes.values.filter(n => n.isStream && n.audio && n.isSink === false && (n.properties?.["media.class"] ?? "Stream/Output/Audio").startsWith("Stream/Output"))
+
     readonly property real volume: sink?.audio?.volume ?? 0
     readonly property bool muted: sink?.audio?.muted ?? false
     readonly property string sinkName: nodeName(sink)
@@ -80,6 +84,15 @@ Singleton {
     // Binds the nodes so their audio properties are populated.
     PwObjectTracker {
         objects: [root.sink, root.source]
+    }
+
+    PwObjectTracker {
+        objects: root.streams
+    }
+
+    function streamName(node: PwNode): string {
+        const p = node?.properties ?? {};
+        return p["application.name"] || p["media.name"] || node?.description || node?.name || "";
     }
 
     onSinkChanged: settle.restart()

@@ -27,6 +27,8 @@ TextBlock {
         onWheel: wheel => wheel.angleDelta.y > 0 ? Audio.increment() : Audio.decrement()
     }
 
+    readonly property bool panelOpen: popup.visible
+
     function togglePanel(): void {
         popup.toggle();
     }

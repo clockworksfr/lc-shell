@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import qs.cards
 import qs.components
 import qs.theme
 
@@ -90,5 +91,61 @@ PanelWindow {
         entries: bar.look.end ?? (bar.vertical ? bar.look.bottom : undefined) ?? bar.look.right ?? []
         x: bar.vertical ? 0 : bar.width - width - (bar.islands ? 0 : bar.look.padding)
         y: bar.vertical ? bar.height - height - (bar.islands ? 0 : bar.look.padding) : 0
+    }
+
+    // --- Hover cards (docs/bar-editing.md) ---
+    // 350 ms still on a block shows its card; moving to a neighbour while
+    // a card is open (or just closed) switches at once; leaving keeps it
+    // 250 ms (time to reach the card); the pointer on the card keeps it.
+
+    property Item hoveredSlot: null
+    property real cardClosedAt: 0
+
+    function blockHovered(slot: Item, inside: bool): void {
+        if (inside) {
+            hoveredSlot = slot;
+            hideCard.stop();
+            if (card.visible || Date.now() - cardClosedAt < 600)
+                showCardFor(slot);
+            else
+                showCard.restart();
+        } else if (hoveredSlot === slot) {
+            hoveredSlot = null;
+            showCard.stop();
+            hideCard.restart();
+        }
+    }
+
+    function showCardFor(slot: Item): void {
+        if (!slot || !Registry.has(slot.type) || slot.item?.panelOpen)
+            return;
+        card.showFor(slot);
+    }
+
+    Timer {
+        id: showCard
+        interval: 350
+        onTriggered: bar.showCardFor(bar.hoveredSlot)
+    }
+
+    Timer {
+        id: hideCard
+        interval: 250
+        onTriggered: {
+            if (card.hovered || bar.hoveredSlot)
+                return;
+            card.hide();
+            bar.cardClosedAt = Date.now();
+        }
+    }
+
+    // A click opening the block's panel closes its card.
+    readonly property bool cardSuppressed: card.slot?.item?.panelOpen ?? false
+    onCardSuppressedChanged: if (cardSuppressed) card.hide()
+
+    HoverCard {
+        id: card
+        host: bar
+        onHoveredChanged: if (!hovered && !bar.hoveredSlot) hideCard.restart()
     }
 }

@@ -50,6 +50,7 @@ Item {
                 entry: modelData
                 screen: zone.host.screen
                 vertical: zone.vertical
+                host: zone.host
                 // Room a block may use across the bar.
                 crossSize: zone.host.thickness - zone.theme.space.s * 2
             }

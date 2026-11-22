@@ -22,6 +22,17 @@ Singleton {
     readonly property var profiles: PowerProfiles.hasPerformanceProfile ? [PowerProfile.PowerSaver, PowerProfile.Balanced, PowerProfile.Performance] : [PowerProfile.PowerSaver, PowerProfile.Balanced]
     readonly property int profile: PowerProfiles.profile
 
+    // Battery level over the last 6 h: [{ time (ms), level (0..1), charging }].
+    property var history: []
+
+    Timer {
+        interval: 60000
+        repeat: true
+        running: root.hasBattery
+        triggeredOnStart: true
+        onTriggered: root.history = [...root.history, { time: Date.now(), level: root.level, charging: root.charging }].filter(p => Date.now() - p.time <= 6 * 3600 * 1000)
+    }
+
     function setProfile(value: int): void {
         PowerProfiles.profile = value;
     }
