@@ -153,7 +153,7 @@ Rectangle {
 
     // Time left (popups that expire).
     property real now: Date.now()
-    readonly property real left: root.entry.expiresAt > 0 && root.entry.duration > 0 ? Math.max(0, Math.min(1, (root.entry.expiresAt - now) / root.entry.duration)) : 0
+    readonly property real remaining: root.entry.expiresAt > 0 && root.entry.duration > 0 ? Math.max(0, Math.min(1, (root.entry.expiresAt - now) / root.entry.duration)) : 0
 
     Timer {
         interval: 50
@@ -169,7 +169,7 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Math.max(2, root.border.width)
-        width: (parent.width - root.radius * 2) * (root.critical ? 1 : root.left)
+        width: (parent.width - root.radius * 2) * (root.critical ? 1 : root.remaining)
         height: 3
         radius: 1.5
         color: root.critical ? root.theme.color.urgent : root.theme.color.accent
