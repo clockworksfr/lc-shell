@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 
 // Entry points for Hyprland binds: qs -c lc ipc call <target> <function>
@@ -78,6 +79,25 @@ Scope {
         }
         function markRead(): void {
             NotificationCenter.markRead();
+        }
+    }
+
+    IpcHandler {
+        target: "wallpaper"
+
+        // Every screen; `~` is expanded.
+        function set(path: string): void {
+            Wallpaper.set(path, null);
+        }
+        // Only the focused screen.
+        function setHere(path: string): void {
+            Wallpaper.set(path, Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? null);
+        }
+        function random(): void {
+            Wallpaper.random(null);
+        }
+        function get(): string {
+            return Quickshell.screens.map(s => `${s.name}: ${Wallpaper.pathFor(s) || "-"}`).join("\n");
         }
     }
 

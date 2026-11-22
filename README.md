@@ -105,10 +105,15 @@ Interface en anglais et en français. `"language"` dans `shell.json` : `auto` (s
 | `/` | Fichiers de `~` (`fd`, sans cachés ni ignorés) | ouvrir | ouvrir le dossier |
 | `=` | Calcul `qalc` (unités, devises…) | copier le résultat | |
 | `>` | Actions : verrouiller, veille, quitter, redémarrer, éteindre, recharger, sortie/entrée audio | exécuter | |
+| `@` | Fonds d'écran (miniatures) | tous les écrans | cet écran seulement |
 
 Tab change de mode. Les actions destructrices demandent une seconde validation. Verrouillage et veille passent par logind (`loginctl lock-session`, `systemctl suspend`) : ils marchent avec l'écran de verrouillage qui écoute logind, quel qu'il soit. L'historique d'usage (classement) est dans `~/.local/state/quickshell/…/launcher-usage.json`.
 
 Les choix faits à l'exécution (thème, variante via IPC) sont gardés dans `…/appearance.json` et priment sur `shell.json`.
+
+## Fond d'écran
+
+`"wallpaper": { "enabled": true, "directory": "~/Images/Wallpapers" }`. Une image par écran (repéré par son modèle) ou une pour tous, gardée dans `…/wallpaper.json` ; sans image, la couleur de fond du thème. Changement en fondu enchaîné, image décodée à la taille de l'écran. Choix dans le lanceur (`@`) ou par IPC. Tant que Caelestia dessine aussi son fond, `"enabled": false` évite la superposition.
 
 ## Notifications
 
@@ -137,4 +142,5 @@ L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non a
 | `qs -c lc ipc call theme variant dark\|light\|auto` / `toggleVariant` | Clair / sombre |
 | `qs -c lc ipc call i18n set en\|fr\|auto` / `get` | Langue de l'interface |
 | `qs -c lc ipc call notifs toggleDnd` / `clear` / `markRead` | Notifications |
+| `qs -c lc ipc call wallpaper set <chemin>` / `setHere <chemin>` / `random` / `get` | Fond d'écran (tous / écran actif) |
 | `qs -c lc ipc call shell reload` | Rechargement complet (nécessaire après modification d'un `.js`) |

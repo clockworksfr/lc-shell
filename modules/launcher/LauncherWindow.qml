@@ -168,9 +168,19 @@ PanelWindow {
                         width: 28
                         height: 28
 
+                        Image {
+                            anchors.fill: parent
+                            visible: !!row.modelData.image
+                            source: row.modelData.image ? `file://${row.modelData.image}` : ""
+                            sourceSize.width: 96
+                            sourceSize.height: 96
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                        }
+
                         IconImage {
                             anchors.fill: parent
-                            visible: !row.modelData.glyph
+                            visible: !row.modelData.glyph && !row.modelData.image
                             source: row.modelData.icon ? Quickshell.iconPath(row.modelData.icon, "application-x-executable") : ""
                         }
 

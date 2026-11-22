@@ -6,6 +6,7 @@ import qs.modules.dashboard
 import qs.modules.launcher
 import qs.modules.notifications
 import qs.modules.osd
+import qs.modules.wallpaper
 import qs.services
 import qs.theme
 
@@ -52,6 +53,16 @@ Scope {
         if (!hasBar || edge !== barEdge)
             return 0;
         return barThickness + (barLook.floating ? barLook.margin : 0);
+    }
+
+    LazyLoader {
+        active: Wallpaper.enabled
+
+        WallpaperWindow {
+            screen: root.modelData
+            theme: root.theme
+            source: Wallpaper.pathFor(root.modelData)
+        }
     }
 
     LazyLoader {

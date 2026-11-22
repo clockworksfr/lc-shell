@@ -10,7 +10,8 @@ import Quickshell.Io
 // A result is a plain object:
 //   key       stable id, used for usage ranking and confirmation
 //   title, subtitle
-//   icon      icon theme name, or glyph: text shown instead (emoji...)
+//   icon      icon theme name, or glyph: text shown instead (emoji...),
+//             or image: a local file shown as a thumbnail
 //   score     higher first
 //   confirm   true: first activation only asks for confirmation
 //   activate  function(alt), alt = Shift held
@@ -27,7 +28,8 @@ Singleton {
         { prefix: ":", id: "emoji" },
         { prefix: "/", id: "files" },
         { prefix: "=", id: "calc" },
-        { prefix: ">", id: "actions" }
+        { prefix: ">", id: "actions" },
+        { prefix: "@", id: "wallpapers" }
     ]
     readonly property var mode: modes.find(m => text.startsWith(m.prefix)) ?? null
     readonly property string modeId: mode?.id ?? "all"
@@ -49,6 +51,9 @@ Singleton {
             break;
         case "actions":
             list = ActionsProvider.results;
+            break;
+        case "wallpapers":
+            list = WallpaperProvider.results;
             break;
         default:
             list = [...CalcProvider.results, ...AppsProvider.results, ...ActionsProvider.results];

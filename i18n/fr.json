@@ -88,5 +88,6 @@
   "bar.v.bluetooth": "bt\n{n}",
   "bar.v.bluetoothOff": "bt\nnon",
   "bar.v.battery": "bat\n{value}",
-  "bar.v.notifs": "notif\n{n}"
+  "bar.v.notifs": "notif\n{n}",
+  "launcher.mode.wallpapers": "fonds d'écran"
 }
