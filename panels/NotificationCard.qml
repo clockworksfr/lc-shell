@@ -87,6 +87,18 @@ Rectangle {
     Row {
         id: content
 
+        // The screens' text glows (VFD phosphor, LCD).
+        layer.enabled: root.onScreen
+        layer.effect: MultiEffect {
+            autoPaddingEnabled: true
+            shadowEnabled: true
+            shadowColor: root.look === "facade" ? (root.theme.color.glow ?? Qt.alpha(root.ink, 0.5)) : Qt.alpha(root.ink, 0.4)
+            shadowBlur: 0.45
+            blurMax: 10
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 0
+        }
+
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
@@ -215,6 +227,7 @@ Rectangle {
                         color: filled ? root.theme.color.ink
                             : root.look === "matrix" ? (actionArea.pressed ? Qt.alpha(root.theme.color.ink, 0.12) : "transparent")
                             : root.onScreen ? Qt.alpha(root.ink, actionArea.pressed ? 0.25 : 0.12)
+                            : root.look === "constellation" ? Qt.alpha(root.theme.color.accent, actionArea.pressed ? 0.28 : 0.16)
                             : actionArea.pressed ? root.theme.color.surface3 : root.theme.color.surface2
                         border.width: root.look === "matrix" ? 1 : 0
                         border.color: root.theme.color.line

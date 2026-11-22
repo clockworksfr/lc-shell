@@ -714,5 +714,7 @@
   "hue.lampCount.other": "{n} lampes",
   "toggles.caffeine": "Caféine",
   "toggles.awake": "Reste éveillé",
-  "notifications.app": "Application"
+  "notifications.app": "Application",
+  "module.notificationSample": "Notification (aperçu)",
+  "module.notificationSample.short": "Notification"
 }
