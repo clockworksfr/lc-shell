@@ -20,7 +20,9 @@ Item {
     property int horizontalAlignment: Text.AlignLeft
     // Unlit segments behind (where the theme has them); off for labels.
     property bool ghost: true
-    readonly property bool glows: Qt.color(theme.color.glow ?? "#00000000").a > 0
+    // Off where the figure sits on something glowing already (gauges).
+    property bool glow: true
+    readonly property bool glows: glow && Qt.color(theme.color.glow ?? "#00000000").a > 0
 
     implicitWidth: label.implicitWidth
     implicitHeight: label.implicitHeight
@@ -58,8 +60,9 @@ Item {
         autoPaddingEnabled: true
         shadowEnabled: true
         shadowColor: root.theme.color.glow ?? "transparent"
-        shadowBlur: 0.81
-        blurMax: 24
+        // Halo in proportion to the size: small figures stay sharp.
+        shadowBlur: root.pixelSize < 40 ? 0.45 : 0.81
+        blurMax: Math.round(Math.max(8, Math.min(24, root.pixelSize * 0.3)))
         shadowHorizontalOffset: 0
         shadowVerticalOffset: 0
     }

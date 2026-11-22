@@ -23,18 +23,6 @@ Item {
     readonly property real stroke: Math.max(3, size * (look === "orbit" ? 0.025 : 0.08))
     default property alias content: center.data
 
-    // Lit dots glow where the theme glows (Matrix in the dark).
-    layer.enabled: look === "dots" && Qt.color(theme.color.glow ?? "#00000000").a > 0
-    layer.effect: MultiEffect {
-        autoPaddingEnabled: true
-        shadowEnabled: true
-        shadowColor: root.theme.color.glow ?? "transparent"
-        shadowBlur: 0.68
-        blurMax: 18
-        shadowHorizontalOffset: 0
-        shadowVerticalOffset: 0
-    }
-
     // Arc / orbit / vu: track and value.
     Shape {
         anchors.centerIn: parent
@@ -95,22 +83,38 @@ Item {
         }
     }
 
-    // Dots: 36 around, lit up to the value.
-    Repeater {
-        model: root.look === "dots" ? 36 : 0
+    // Dots: 36 around, lit up to the value; the lit ones glow where the
+    // theme glows (Matrix in the dark), not the figure in the center.
+    Item {
+        anchors.fill: parent
+        visible: root.look === "dots"
+        layer.enabled: visible && Qt.color(root.theme.color.glow ?? "#00000000").a > 0
+        layer.effect: MultiEffect {
+            autoPaddingEnabled: true
+            shadowEnabled: true
+            shadowColor: root.theme.color.glow ?? "transparent"
+            shadowBlur: 0.7
+            blurMax: 16
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 0
+        }
 
-        Rectangle {
-            required property int index
-            readonly property real angle: (135 + 270 * index / 35) * Math.PI / 180
-            readonly property real r: root.size / 2 - width
-            readonly property bool lit: index / 35 <= root.v && root.v > 0
-            width: Math.max(4, root.size * 0.045)
-            height: width
-            radius: width / 2
-            x: root.width / 2 + Math.cos(angle) * r - width / 2
-            y: root.height / 2 + Math.sin(angle) * r - height / 2
-            // Beyond 90 %: the signal color (Matrix red).
-            color: lit ? (index / 35 > 0.9 ? (root.theme.color.signal ?? root.color) : root.color) : Qt.alpha(root.theme.color.ink, 0.12)
+        Repeater {
+            model: root.look === "dots" ? 36 : 0
+
+            Rectangle {
+                required property int index
+                readonly property real angle: (135 + 270 * index / 35) * Math.PI / 180
+                readonly property real r: root.size / 2 - width
+                readonly property bool lit: index / 35 <= root.v && root.v > 0
+                width: Math.max(4, root.size * 0.045)
+                height: width
+                radius: width / 2
+                x: root.width / 2 + Math.cos(angle) * r - width / 2
+                y: root.height / 2 + Math.sin(angle) * r - height / 2
+                // Beyond 90 %: the signal color (Matrix red).
+                color: lit ? (index / 35 > 0.9 ? (root.theme.color.signal ?? root.color) : root.color) : Qt.alpha(root.theme.color.ink, 0.12)
+            }
         }
     }
 

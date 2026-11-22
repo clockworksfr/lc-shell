@@ -32,7 +32,9 @@ ModuleBase {
         { label: "RAM", value: SystemStats.memory, detail: I18n.tr("system.memory", { used: I18n.number(SystemStats.memoryUsedGiB, 1), total: Math.round(SystemStats.memoryTotalGiB) }), color: "#7EE0B5" },
         ...(igpu ? [{ label: "iGPU", value: igpu.busy, detail: igpu.temp ? `${Math.round(igpu.temp)}°` : "", color: "#E6E9F5" }] : [])
     ]
-    readonly property string layout: shape === "tiny" ? "tiny" : shape === "strip" ? "strip"
+    readonly property bool ringLook: look === "modulaire" || look === "matrix"
+    readonly property string layout: shape === "tiny" ? "tiny"
+        : shape === "strip" && !(ringLook && ch >= 150) ? "strip"
         : look === "constellation" && shape !== "narrow" ? "orbits"
         : (look === "modulaire" || look === "matrix") && shape !== "narrow" ? "rings"
         : "rows"
@@ -53,6 +55,7 @@ ModuleBase {
             Figure {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: `${Math.round(SystemStats.cpu * 100)}`
+                glow: false
                 pixelSize: Math.min(root.cw, root.ch) * 0.26
                 color: SystemStats.cpu > 0.9 ? (root.theme.color.signal ?? root.theme.color.urgent) : root.theme.color.ink
             }
@@ -153,6 +156,7 @@ ModuleBase {
                         Figure {
                             anchors.right: parent.right
                             text: I18n.percent(line.modelData.value)
+                            glow: false
                             pixelSize: root.t3 * 1.3
                             color: line.modelData.value > 0.9 ? root.theme.color.urgent : root.theme.color.ink
                         }
@@ -302,64 +306,78 @@ ModuleBase {
         anchors.fill: parent
         spacing: root.gap / 2
 
+        // Even cells over the whole room, each ring centered in its own.
         Grid {
-            readonly property var g: root.bestGrid(root.stats.length, root.look === "modulaire" ? 70 : 90)
+            id: ringGrid
 
-            Layout.alignment: Qt.AlignHCenter
+            readonly property var g: root.bestGrid(root.stats.length, root.look === "modulaire" ? 70 : 90)
+            readonly property real cellW: width / g.columns
+            readonly property real cellH: height / g.rows
+
+            Layout.fillWidth: true
             Layout.fillHeight: true
             columns: g.columns
-            spacing: root.gap
+            spacing: 0
 
             Repeater {
                 model: root.stats.slice(0, parent.g.n)
 
                 Item {
-                    id: knob
+                    width: ringGrid.cellW
+                    height: ringGrid.cellH
 
                     required property var modelData
-                    readonly property real size: Math.min(parent.g.size, (root.ch - (root.look === "modulaire" ? root.t3 * 2.6 : 0)) / parent.g.rows - root.gap)
 
-                    width: size
-                    height: size
+                    Item {
+                        id: knob
 
-                    Ring {
-                        anchors.top: parent.top
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: parent.width * (root.look === "modulaire" ? 0.8 : 1)
-                        height: width
-                        value: knob.modelData.value
-                        color: root.theme.color.ink
+                        readonly property var modelData: parent.modelData
+                        readonly property real size: Math.min(ringGrid.cellW, ringGrid.cellH) - root.gap
 
-                        Column {
-                            visible: root.look === "matrix"
-                            anchors.centerIn: parent
+                        anchors.centerIn: parent
+                        width: size
+                        height: size
 
-                            Figure {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: I18n.percent(knob.modelData.value)
-                                pixelSize: knob.size * 0.16
-                            }
+                        Ring {
+                            anchors.top: parent.top
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: parent.width * (root.look === "modulaire" ? 0.8 : 1)
+                            height: width
+                            value: knob.modelData.value
+                            color: root.theme.color.ink
 
-                            ThemedText {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                label: true
-                                text: knob.modelData.label
-                                font.pixelSize: root.t4
-                                color: root.theme.color.soft
+                            Column {
+                                visible: root.look === "matrix"
+                                anchors.centerIn: parent
+
+                                Figure {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: I18n.percent(knob.modelData.value)
+                                    glow: false
+                                    pixelSize: knob.size * 0.16
+                                }
+
+                                ThemedText {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    label: true
+                                    text: knob.modelData.label
+                                    font.pixelSize: root.t4
+                                    color: root.theme.color.soft
+                                }
                             }
                         }
-                    }
 
-                    // Silk label under the knob.
-                    ThemedText {
-                        visible: root.look === "modulaire"
-                        anchors.bottom: parent.bottom
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        label: true
-                        text: knob.modelData.label
-                        font.family: root.theme.font.mono
-                        font.pixelSize: root.t4
-                        color: root.theme.color.soft
+                        // Silk label under the knob.
+                        ThemedText {
+                            visible: root.look === "modulaire"
+                            anchors.bottom: parent.bottom
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            label: true
+                            text: knob.modelData.label
+                            font.family: root.theme.font.mono
+                            font.pixelSize: root.t4
+                            color: root.theme.color.soft
+                        }
                     }
                 }
             }
@@ -416,6 +434,7 @@ ModuleBase {
 
                     Figure {
                         inDisplay: true
+                        glow: false
                         text: I18n.percent(parent.parent.modelData.value)
                         pixelSize: Math.min(root.ch * 0.42, root.t2 * 1.6)
                         color: parent.parent.modelData.value > 0.9 ? root.theme.color.urgent : root.theme.color.nixie ?? root.theme.color.ink

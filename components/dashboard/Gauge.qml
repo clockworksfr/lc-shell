@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import qs.theme
 
@@ -91,6 +92,17 @@ Item {
         visible: root.look === "facade" || root.look === "modulaire" || root.look === "matrix"
         anchors.fill: parent
         spacing: root.look === "matrix" ? 3 : 2
+        // Matrix: lit dots glow (theme glow, dark only).
+        layer.enabled: root.look === "matrix" && Qt.color(root.theme.color.glow ?? "#00000000").a > 0
+        layer.effect: MultiEffect {
+            autoPaddingEnabled: true
+            shadowEnabled: true
+            shadowColor: root.theme.color.glow ?? "transparent"
+            shadowBlur: 0.5
+            blurMax: 10
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 0
+        }
 
         Repeater {
             id: cells

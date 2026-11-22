@@ -18,6 +18,7 @@ Item {
     property real pixelSize: 64
     property color color: theme.color.nixie ?? theme.color.ink
     property bool inDisplay: false
+    property bool glow: true
 
     implicitWidth: lcd ? lcdText.implicitWidth + window.inset * 2 + pixelSize * 0.3 : vfd ? hero.implicitWidth + pixelSize * 0.28 + 20 : hero.implicitWidth
     implicitHeight: lcd ? lcdText.implicitHeight + window.inset * 2 : vfd ? hero.implicitHeight + pixelSize * 0.12 + 20 : hero.implicitHeight
@@ -35,6 +36,7 @@ Item {
         text: root.text
         pixelSize: root.pixelSize
         color: root.color
+        glow: root.glow
     }
 
     Display {
