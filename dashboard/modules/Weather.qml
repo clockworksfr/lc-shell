@@ -160,6 +160,18 @@ ModuleBase {
             }
         }
 
+        // The hour step by step (when it rains or will, and there's room).
+        RainStrip {
+            visible: details.extended && details.m.ch >= 200 && !!Weather.rainEpisode
+            width: parent.width
+            height: Math.max(30, details.m.t4 * 3)
+            wetColor: details.m.onLcd ? details.m.inkColor : (details.m.theme.color.signal ?? details.m.theme.color.accent)
+            dryColor: Qt.alpha(details.m.onLcd ? details.m.inkColor : details.m.theme.color.ink, 0.25)
+            labelColor: details.m.softColor
+            fontFamily: details.m.screenText ? details.m.screenFont : details.m.theme.font.family
+            labelSize: details.m.t4 * 0.9
+        }
+
         // Place, and the station's reading time when it's live.
         ThemedText {
             width: parent.width

@@ -540,9 +540,7 @@
   "toggles.more": "Plus",
   "weather.gusts": "raf. {value}",
   "weather.rain.dry": "Pas de pluie dans l'heure",
-  "weather.rain.soon": "Pluie vers {time}",
-  "weather.rain.now": "Pluie en cours",
-  "weather.rain.until": "Pluie jusqu'à {time}",
+  "weather.rain.until": "{desc} jusqu'à {end}",
   "weather.stationAt": "station {time}",
   "weather.stationName": "Station {name} · {time}",
   "weather.feelsOnly": "Ressenti {value}",
@@ -558,7 +556,6 @@
   "weather.dir.SW": "SO",
   "weather.dir.W": "O",
   "weather.dir.NW": "NO",
-  "weather.rain.descUntil": "{desc} jusqu'à {time}",
   "shot.savedTo": "Enregistrée dans {path}",
   "shot.failed": "La capture a échoué",
   "shot.copy": "Copier",
@@ -651,5 +648,11 @@
   "bar.lightsOff": "Lumières éteintes",
   "settings.wallpaperTheme": "Fond du thème par défaut",
   "settings.wallpaperThemeHint": "Sans image choisie, chaque écran affiche le fond de son thème (clair ou sombre) ; désactivé : la couleur de fond unie",
-  "settings.wallpaperUseTheme": "Revenir aux fonds des thèmes"
+  "settings.wallpaperUseTheme": "Revenir aux fonds des thèmes",
+  "weather.rain.allHour": "{desc} toute l'heure",
+  "weather.rain.between": "{desc} de {start} à {end}",
+  "weather.rain.from": "{desc} à partir de {start}",
+  "weather.rain.level1": "Pluie faible",
+  "weather.rain.level2": "Pluie modérée",
+  "weather.rain.level3": "Pluie forte"
 }

@@ -540,9 +540,7 @@
   "toggles.more": "More",
   "weather.gusts": "gusts {value}",
   "weather.rain.dry": "No rain within the hour",
-  "weather.rain.soon": "Rain around {time}",
-  "weather.rain.now": "Raining",
-  "weather.rain.until": "Rain until {time}",
+  "weather.rain.until": "{desc} until {end}",
   "weather.stationAt": "station {time}",
   "weather.stationName": "Station {name} · {time}",
   "weather.feelsOnly": "Feels like {value}",
@@ -558,7 +556,6 @@
   "weather.dir.SW": "SW",
   "weather.dir.W": "W",
   "weather.dir.NW": "NW",
-  "weather.rain.descUntil": "{desc} until {time}",
   "shot.savedTo": "Saved to {path}",
   "shot.failed": "The screenshot failed",
   "shot.copy": "Copy",
@@ -651,5 +648,11 @@
   "bar.lightsOff": "Lights off",
   "settings.wallpaperTheme": "Theme wallpaper by default",
   "settings.wallpaperThemeHint": "Without a chosen image, each screen shows its theme's wallpaper (light or dark); off: the plain background color",
-  "settings.wallpaperUseTheme": "Back to the themes' wallpapers"
+  "settings.wallpaperUseTheme": "Back to the themes' wallpapers",
+  "weather.rain.allHour": "{desc} all hour",
+  "weather.rain.between": "{desc} from {start} to {end}",
+  "weather.rain.from": "{desc} from {start}",
+  "weather.rain.level1": "Light rain",
+  "weather.rain.level2": "Moderate rain",
+  "weather.rain.level3": "Heavy rain"
 }

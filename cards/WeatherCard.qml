@@ -65,6 +65,12 @@ Column {
                 font.weight: Weather.rainSoon === "dry" ? Font.Normal : Font.DemiBold
             }
 
+            RainStrip {
+                visible: !!Weather.rainEpisode
+                width: 220
+                height: 30
+            }
+
             ThemedText {
                 visible: !!root.now?.station
                 text: root.now?.station ? I18n.tr("weather.stationName", { name: root.now.station, time: I18n.locale.toString(new Date(root.now.stationTime), "HH:mm") }) : ""

@@ -159,12 +159,33 @@ Singleton {
     }
 
     // "Pas de pluie dans l'heure", "Pluie vers 20:15", "Pluie jusqu'à 20:30".
+    // The next rain episode within the hour: { start, end (0: lasts past
+    // the hour), level (its heaviest), desc }, or null.
+    readonly property var rainEpisode: {
+        const steps = nowcast.filter(q => q.time - Date.now() < 3600 * 1000);
+        const i = steps.findIndex(q => q.level > 0);
+        if (i < 0)
+            return null;
+        let j = i;
+        while (j < steps.length && steps[j].level > 0)
+            j++;
+        const wet = steps.slice(i, j);
+        const top = wet.reduce((a, b) => b.level > a.level ? b : a, wet[0]);
+        return { start: steps[i].time, end: j < steps.length ? steps[j].time : 0, level: top.level, desc: top.desc || I18n.tr(`weather.rain.level${top.level}`) };
+    }
+
+    // "Pas de pluie dans l'heure", "Pluie faible de 21:05 à 21:30",
+    // "Pluie modérée jusqu'à 21:30", "Pluie forte toute l'heure".
     function rainText(): string {
-        const at = rainChange ? I18n.locale.toString(new Date(rainChange), "HH:mm") : "";
-        return rainSoon === "dry" ? I18n.tr("weather.rain.dry")
-            : rainSoon === "soon" ? I18n.tr("weather.rain.soon", { time: at })
-            : rainSoon === "now" ? (nowcast[0].desc ? (at ? I18n.tr("weather.rain.descUntil", { desc: nowcast[0].desc, time: at }) : nowcast[0].desc) : at ? I18n.tr("weather.rain.until", { time: at }) : I18n.tr("weather.rain.now"))
-            : "";
+        if (rainSoon === "dry")
+            return I18n.tr("weather.rain.dry");
+        const e = rainEpisode;
+        if (!e)
+            return "";
+        const t = ms => I18n.locale.toString(new Date(ms), "HH:mm");
+        if (rainSoon === "now")
+            return e.end ? I18n.tr("weather.rain.until", { desc: e.desc, end: t(e.end) }) : I18n.tr("weather.rain.allHour", { desc: e.desc });
+        return e.end ? I18n.tr("weather.rain.between", { desc: e.desc, start: t(e.start), end: t(e.end) }) : I18n.tr("weather.rain.from", { desc: e.desc, start: t(e.start) });
     }
 
     // A Météo-villes home page: the station's "realtimeReport" and the
