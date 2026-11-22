@@ -20,6 +20,8 @@ PopupWindow {
     // A drawer attached to the bar (no gap), with fillets on both ends.
     readonly property int gap: 0
     readonly property real fillet: theme.radius.control
+    // Reaches over the bar's inner border: no line at the junction.
+    readonly property real overlap: Math.max(1, host?.look?.border ?? 0)
     readonly property bool sideways: host?.edge === "left" || host?.edge === "right"
 
     function showFor(target: Item): void {
@@ -62,19 +64,19 @@ PopupWindow {
         let side;
         switch (host.edge) {
         case "bottom":
-            rect = Qt.rect(p.x - fillet, -gap, w + fillet * 2, 0);
+            rect = Qt.rect(p.x - fillet, overlap, w + fillet * 2, 0);
             side = Edges.Top;
             break;
         case "left":
-            rect = Qt.rect(host.width + gap, p.y - fillet, 0, h + fillet * 2);
+            rect = Qt.rect(host.width - overlap, p.y - fillet, 0, h + fillet * 2);
             side = Edges.Right;
             break;
         case "right":
-            rect = Qt.rect(-gap, p.y - fillet, 0, h + fillet * 2);
+            rect = Qt.rect(overlap, p.y - fillet, 0, h + fillet * 2);
             side = Edges.Left;
             break;
         default:
-            rect = Qt.rect(p.x - fillet, host.height + gap, w + fillet * 2, 0);
+            rect = Qt.rect(p.x - fillet, host.height - overlap, w + fillet * 2, 0);
             side = Edges.Bottom;
         }
         anchor.rect.x = rect.x;
@@ -89,8 +91,8 @@ PopupWindow {
     anchor.window: host
     color: "transparent"
     readonly property real bodyHeight: Math.min(loader.implicitHeight + theme.space.l * 2, (host?.screen?.height ?? 1000) * 0.6)
-    implicitWidth: sideways ? 380 : 380 + fillet * 2
-    implicitHeight: sideways ? bodyHeight + fillet * 2 : bodyHeight
+    implicitWidth: sideways ? 380 + overlap : 380 + fillet * 2
+    implicitHeight: sideways ? bodyHeight + fillet * 2 : bodyHeight + overlap
 
     Item {
         id: content
@@ -103,6 +105,9 @@ PopupWindow {
             anchors.fill: parent
             edge: root.host?.edge ?? "top"
             fillet: root.fillet
+            overlap: root.overlap
+            color: root.theme.color.surface
+            lineWidth: root.host?.look?.border ?? 0
 
             Loader {
                 id: loader

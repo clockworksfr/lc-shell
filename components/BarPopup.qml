@@ -21,9 +21,11 @@ PanelWindow {
     readonly property var theme: bar?.theme ?? Themes.fallback
     readonly property string edge: bar?.edge ?? "top"
     readonly property bool sideways: edge === "left" || edge === "right"
-    // Attached to the bar: no gap.
+    // Grows out of the bar: reaches over its inner border (hidden at the
+    // junction), same fill and border as the bar / island.
     readonly property int gap: 0
     readonly property real fillet: theme.radius.control
+    readonly property real overlap: Math.max(1, bar?.look?.border ?? 0)
 
     // Offset along the bar (from the screen's left or top edge).
     property real along: 0
@@ -63,10 +65,10 @@ PanelWindow {
         const clamp = (v, size, max) => Math.max(8, Math.min(v, max - size - 8));
         if (sideways) {
             along = clamp(oy + p.y + anchorItem.height / 2 - implicitHeight / 2, implicitHeight, scr.height);
-            across = edge === "left" ? ox + bar.width + gap : scr.width - ox + gap;
+            across = edge === "left" ? ox + bar.width - overlap : scr.width - ox - overlap;
         } else {
             along = clamp(ox + p.x + anchorItem.width / 2 - implicitWidth / 2, implicitWidth, scr.width);
-            across = edge === "top" ? oy + bar.height + gap : scr.height - oy + gap;
+            across = edge === "top" ? oy + bar.height - overlap : scr.height - oy - overlap;
         }
     }
 
@@ -87,8 +89,8 @@ PanelWindow {
     visible: false
     color: "transparent"
     // The drawer body plus room for the fillets on both ends along the bar.
-    implicitWidth: column.implicitWidth + theme.space.m * 2 + (sideways ? 0 : fillet * 2)
-    implicitHeight: column.implicitHeight + theme.space.m * 2 + (sideways ? fillet * 2 : 0)
+    implicitWidth: column.implicitWidth + theme.space.m * 2 + (sideways ? overlap : fillet * 2)
+    implicitHeight: column.implicitHeight + theme.space.m * 2 + (sideways ? fillet * 2 : overlap)
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "lc-panel"
@@ -120,6 +122,10 @@ PanelWindow {
         anchors.fill: parent
         edge: root.edge
         fillet: root.fillet
+        overlap: root.overlap
+        // Opaque: a panel must stay readable (the island is at most a hair lighter).
+        color: root.theme.color.surface
+        lineWidth: root.bar?.look?.border ?? 0
 
         Column {
             id: column
