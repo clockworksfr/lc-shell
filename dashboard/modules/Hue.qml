@@ -172,8 +172,9 @@ ModuleBase {
                 // The room's color while it's on.
                 Rectangle {
                     visible: !slot.isMore && !!slot.room?.on && !!slot.room?.color
-                    x: slot.dual ? parent.width - sw.width - width - 14 : parent.width - width - 12
-                    y: 12
+                    // Matrix: inside the pill, on its left; else the tile's corner.
+                    x: rooms.m.look === "matrix" ? 16 : slot.dual ? parent.width - sw.width - width - 14 : parent.width - width - 12
+                    y: rooms.m.look === "matrix" ? (parent.height - height) / 2 : 12
                     width: 12
                     height: 12
                     radius: 6
@@ -438,7 +439,7 @@ ModuleBase {
         visible: root.mode === "list" || root.mode === "row" || root.mode === "grid"
         m: root
         anchors.fill: parent
-        cols: root.mode === "list" ? 1 : root.mode === "grid" ? 2 : Math.max(1, Math.min(HueBridge.rooms.length + 1, Math.floor((root.cw + root.gap) / (140 + root.gap))))
+        cols: root.mode === "list" ? 1 : root.mode === "grid" ? 2 : Math.max(1, Math.min(HueBridge.rooms.length + 1, Math.floor((root.cw + root.gap) / ((root.look === "matrix" ? 120 : 140) + root.gap))))
     }
 
     // box / tall: rooms on top, the room under.

@@ -110,8 +110,8 @@ ModuleBase {
     readonly property int total: 6
     readonly property int levels: 2
     readonly property int cols: shape === "tiny" || shape === "narrow" ? 1
-        : shape === "strip" ? Math.max(1, Math.min(total, Math.floor((tilesWidth + gap) / (140 + gap))))
-        : shape === "wide" ? Math.max(1, Math.min(Math.ceil(total / (ch > 250 ? 2 : 1)), Math.floor((tilesWidth + gap) / (140 + gap))))
+        : shape === "strip" ? Math.max(1, Math.min(total, Math.floor((tilesWidth + gap) / ((look === "matrix" ? 120 : 140) + gap))))
+        : shape === "wide" ? Math.max(1, Math.min(Math.ceil(total / (ch > 250 ? 2 : 1)), Math.floor((tilesWidth + gap) / ((look === "matrix" ? 120 : 140) + gap))))
         : shape === "tall" ? 2
         : cw / 3 >= 160 ? 3 : 2
     // Rows never under the touch target size (72 px on the modules screen).
