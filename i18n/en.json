@@ -231,5 +231,11 @@
   "settings.position.bottom-right": "Bottom right",
   "settings.fullWidth": "Full width",
   "settings.barLength": "Bar length",
-  "settings.barLengthHint": "Full width, or a centered bar of fixed length (ignored with the frame)"
+  "settings.barLengthHint": "Full width, or a centered bar of fixed length (ignored with the frame)",
+  "settings.appIcons": "App icons",
+  "settings.appIconsHint": "In the bar and cards: original colors, or recolored to match the theme",
+  "settings.ofTheme": "Theme's",
+  "settings.appIcons.native": "Original",
+  "settings.appIcons.tinted": "Tinted",
+  "settings.appIcons.mono": "Monochrome"
 }

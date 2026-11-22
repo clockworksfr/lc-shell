@@ -24,7 +24,7 @@ PanelWindow {
     // Grows out of the bar: reaches over its inner border (hidden at the
     // junction), same fill and border as the bar / island.
     readonly property int gap: 0
-    readonly property real fillet: theme.radius.control
+    readonly property real fillet: theme.drawer.fillet
     readonly property real overlap: Math.max(1, bar?.look?.border ?? 0)
 
     // Offset along the bar (from the screen's left or top edge).
@@ -70,6 +70,9 @@ PanelWindow {
             along = clamp(ox + p.x + anchorItem.width / 2 - implicitWidth / 2, implicitWidth, scr.width);
             across = edge === "top" ? oy + bar.height - overlap : scr.height - oy - overlap;
         }
+        // Tell the bar where the drawer hangs (its island grows to carry it).
+        const start = along - (sideways ? oy : ox);
+        bar.drawerSpan = { slot: anchorItem.parent?.parent ?? null, start: start, end: start + (sideways ? implicitHeight : implicitWidth) };
     }
 
     screen: bar?.screen ?? null
@@ -113,7 +116,13 @@ PanelWindow {
         property: "progress"
         duration: root.theme.motion.duration + 40
         easing.type: Easing.OutCubic
-        onFinished: if (to === 0) root.visible = false
+        onFinished: {
+            if (to === 0) {
+                root.visible = false;
+                if (root.bar)
+                    root.bar.drawerSpan = null;
+            }
+        }
     }
 
     DrawerFrame {

@@ -40,10 +40,9 @@ Column {
         width: parent.width
         spacing: root.theme.space.m
 
-        IconImage {
+        AppIcon {
             anchors.verticalCenter: parent.verticalCenter
-            width: 36
-            height: 36
+            size: 36
             visible: !!root.block?.entry?.icon
             source: root.block?.entry?.icon ? Quickshell.iconPath(root.block.entry.icon, true) : ""
         }

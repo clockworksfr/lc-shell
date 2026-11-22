@@ -61,7 +61,8 @@ Column {
             Rectangle {
                 anchors.fill: parent
                 anchors.margins: 4
-                radius: root.theme.radius.control
+                // Thumbnails stay rectangular (pill-shaped controls in Matrix).
+                radius: Math.min(root.theme.radius.control, 8)
                 color: root.theme.color.surface2
                 clip: true
                 border.width: Wallpaper.state.all === parent.modelData ? 2 : 0

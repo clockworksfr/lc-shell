@@ -12,9 +12,9 @@ Singleton {
     readonly property PwNode source: Pipewire.defaultAudioSource
 
     // Hardware devices (streams and sink monitors excluded).
-    // Stable order (by node id) so lists don't reshuffle between openings.
-    readonly property list<PwNode> sinks: Pipewire.nodes.values.filter(n => n.audio && n.isSink && !n.isStream).sort((a, b) => a.id - b.id)
-    readonly property list<PwNode> sources: Pipewire.nodes.values.filter(n => n.audio && !n.isSink && !n.isStream).sort((a, b) => a.id - b.id)
+    // Stable, readable order: by name (then node id).
+    readonly property list<PwNode> sinks: Pipewire.nodes.values.filter(n => n.audio && n.isSink && !n.isStream).sort((a, b) => nodeName(a).localeCompare(nodeName(b)) || a.id - b.id)
+    readonly property list<PwNode> sources: Pipewire.nodes.values.filter(n => n.audio && !n.isSink && !n.isStream).sort((a, b) => nodeName(a).localeCompare(nodeName(b)) || a.id - b.id)
 
     // Playback streams of applications (bound below, so their audio and
     // properties are populated). Filter only on properties that don't change

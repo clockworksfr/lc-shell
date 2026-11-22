@@ -231,5 +231,11 @@
   "settings.position.bottom-right": "En bas à droite",
   "settings.fullWidth": "Pleine largeur",
   "settings.barLength": "Longueur de la barre",
-  "settings.barLengthHint": "Pleine largeur, ou barre centrée de longueur fixe (ignoré avec le cadre)"
+  "settings.barLengthHint": "Pleine largeur, ou barre centrée de longueur fixe (ignoré avec le cadre)",
+  "settings.appIcons": "Icônes d'applis",
+  "settings.appIconsHint": "Dans la barre et les cartes : couleurs d'origine, ou recolorées selon le thème",
+  "settings.ofTheme": "Du thème",
+  "settings.appIcons.native": "D'origine",
+  "settings.appIcons.tinted": "Teintées",
+  "settings.appIcons.mono": "Monochromes"
 }

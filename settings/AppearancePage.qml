@@ -40,6 +40,20 @@ Column {
     }
 
     Section {
+        title: I18n.tr("settings.appIcons")
+
+        Field {
+            label: I18n.tr("settings.appIcons")
+            hint: I18n.tr("settings.appIconsHint")
+            Choice {
+                model: [{ value: "", label: I18n.tr("settings.ofTheme") }, ...["native", "tinted", "mono"].map(v => ({ value: v, label: I18n.tr(`settings.appIcons.${v}`) }))]
+                value: Config.get("appearance.appIcons") ?? ""
+                onPicked: value => Config.set("appearance.appIcons", value || undefined)
+            }
+        }
+    }
+
+    Section {
         title: I18n.tr("settings.variant")
 
         Field {

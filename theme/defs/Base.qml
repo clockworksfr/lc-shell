@@ -91,6 +91,10 @@ Singleton {
             motion: {
                 duration: 180
             },
+            drawer: {
+                // Concave fillet joining a drawer to the bar.
+                fillet: 10
+            },
             hit: {
                 pointer: 24,
                 touch: 48,
@@ -140,8 +144,10 @@ Singleton {
                 workspaces: "labels",
                 // Glass highlight over the top of islands and panels.
                 glass: false,
-                // Status blocks as icon + value (false: text labels).
-                statusIcons: true
+                // Status widgets as icon + value (false: text labels).
+                statusIcons: true,
+                // App icons: "native" | "tinted" | "mono" (AppIcon).
+                appIcons: "native"
             }
         })
 }

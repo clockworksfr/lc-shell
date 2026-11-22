@@ -77,6 +77,9 @@ Singleton {
             motion: {
                 duration: 230
             },
+            drawer: {
+                fillet: 14
+            },
             bar: {
                 height: 44,
                 verticalWidth: 52,
@@ -98,6 +101,7 @@ Singleton {
             },
             style: {
                 workspaces: "stars",
+                appIcons: "tinted",
                 // Top highlight on islands and panels (theme `glass` color).
                 glass: true
             }

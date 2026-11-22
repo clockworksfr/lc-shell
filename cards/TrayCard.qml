@@ -31,10 +31,9 @@ Column {
             width: root.width
             spacing: root.theme.space.s
 
-            IconImage {
+            AppIcon {
                 anchors.verticalCenter: parent.verticalCenter
-                width: 20
-                height: 20
+                size: 20
                 source: parent.modelData.icon
             }
 

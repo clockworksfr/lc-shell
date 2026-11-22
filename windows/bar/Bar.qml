@@ -36,7 +36,7 @@ PanelWindow {
     // Space taken from the screen edge (what popups must clear).
     readonly property int extent: thickness + gap
     // Fixed length (centered on its edge) instead of full width/height.
-    readonly property int fixedLength: framed ? 0 : Math.max(0, look.length ?? 0)
+    readonly property int fixedLength: framed ? 0 : Math.max(0, Math.min(look.length ?? 0, (vertical ? (screen?.height ?? 0) : (screen?.width ?? 0)) - 2 * Math.max(gap, 8)))
 
     // Top-left of the bar window on its screen (popups and IPC need it).
     function origin(): point {
@@ -124,6 +124,10 @@ PanelWindow {
         x: bar.vertical ? 0 : bar.width - width - (bar.islands ? 0 : bar.look.padding)
         y: bar.vertical ? bar.height - height - (bar.islands ? 0 : bar.look.padding) : 0
     }
+
+    // Open drawer (panel or card), so its island grows to carry it:
+    // { slot (WidgetSlot), start, end } along the bar, in bar coordinates.
+    property var drawerSpan: null
 
     // --- Hover cards (docs/bar-editing.md) ---
     // 350 ms still on a block shows its card; moving to a neighbour while

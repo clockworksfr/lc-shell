@@ -109,7 +109,7 @@ Item {
 
                 ThemedText {
                     anchors.centerIn: parent
-                    visible: !password.text
+                    visible: !password.text && !password.activeFocus
                     text: Lock.checking ? I18n.tr("lock.checking") : I18n.tr("lock.password")
                     color: root.theme.color.soft
                 }

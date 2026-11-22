@@ -38,6 +38,10 @@ Item {
     readonly property string appClass: current?.lastIpcObject?.class ?? current?.wayland?.appId ?? ""
     readonly property var entry: appClass ? DesktopEntries.heuristicLookup(appClass) : null
     readonly property string appName: entry?.name || appClass
+    // Compact: the app's first word ("Brave Web Browser" -> "Brave").
+    readonly property string shortName: (appName.split(" ")[0] || appName)
+    // Titles often end with the app's name ("… – Brave"): don't repeat it.
+    readonly property string cleanTitle: title.replace(new RegExp(`\\s*[-–—|]\\s*${shortName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[^-–—|]*$`, "i"), "")
     readonly property string title: current?.title ?? ""
 
     readonly property bool shown: valid
@@ -53,13 +57,28 @@ Item {
         anchors.horizontalCenter: root.vertical ? parent.horizontalCenter : undefined
         spacing: 8
 
-        IconImage {
+        AppIcon {
             anchors.verticalCenter: parent.verticalCenter
-            width: 18
-            height: 18
+            size: 18
             visible: !!root.entry?.icon
             source: root.entry?.icon ? Quickshell.iconPath(root.entry.icon, true) : ""
-            asynchronous: true
+        }
+
+        // No icon: the app's initial in a small badge.
+        Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: !root.entry?.icon && !!root.appName
+            width: 18
+            height: 18
+            radius: 5
+            color: root.theme?.color.surface3 ?? "grey"
+
+            ThemedText {
+                anchors.centerIn: parent
+                text: root.appName.charAt(0).toUpperCase()
+                font.pixelSize: 11
+                font.weight: Font.DemiBold
+            }
         }
 
         ThemedText {
@@ -69,8 +88,9 @@ Item {
             elide: Text.ElideRight
             // Titles can be private (mail subjects, chats): app name only
             // while the screen is shared.
-            text: root.size === "compact" || Screens.sharing ? root.appName
-                : root.size === "extended" ? [root.appName, root.title].filter(s => !!s).join(" — ")
+            text: Screens.sharing ? root.shortName
+                : root.size === "compact" ? root.shortName
+                : root.size === "extended" ? [root.shortName, root.cleanTitle].filter(s => !!s).join(" — ")
                 : root.title || root.appName
             color: root.theme?.color.soft ?? color
         }

@@ -91,7 +91,8 @@ Column {
             label: I18n.tr("settings.barLength")
             hint: I18n.tr("settings.barLengthHint")
             Choice {
-                model: [0, 1600, 2560, 3200].map(v => ({ value: v, label: v ? `${v} px` : I18n.tr("settings.fullWidth") }))
+                // Lengths that fit the bar's orientation.
+                model: ((root.look.position === "left" || root.look.position === "right") ? [0, 800, 1200, 1600] : [0, 1600, 2560, 3200]).map(v => ({ value: v, label: v ? `${v} px` : I18n.tr("settings.fullWidth") }))
                 value: root.look.length ?? 0
                 onPicked: value => root.setLook("length", value)
             }
@@ -203,7 +204,8 @@ Column {
                 }
 
                 Repeater {
-                    model: root.blockTypes
+                    // Only widgets not already in the bar.
+                    model: root.blockTypes.filter(t => !root.zones.some(z => BarEditor.groups(root.entries(z)).some(g => g.some(e => Registry.typeOf(e) === t))))
 
                     Rectangle {
                         required property string modelData

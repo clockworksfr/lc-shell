@@ -59,6 +59,9 @@ Singleton {
             border: {
                 width: 1
             },
+            drawer: {
+                fillet: 12
+            },
             bar: {
                 height: 40,
                 verticalWidth: 56,
@@ -80,6 +83,7 @@ Singleton {
                 labelCase: "upper",
                 // Matrix statuses are text (label over value), no icons.
                 statusIcons: false,
+                appIcons: "mono",
                 workspaces: "dots"
             }
         })

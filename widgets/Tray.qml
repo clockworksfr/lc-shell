@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
+import qs.components
 import qs.theme
 
 // System tray (StatusNotifierItem). Left click: activate (or menu for
@@ -36,10 +37,10 @@ Grid {
             implicitWidth: size
             implicitHeight: size
 
-            IconImage {
+            AppIcon {
                 anchors.fill: parent
+                size: slot.size
                 source: slot.modelData.icon
-                asynchronous: true
             }
 
             function openMenu(): void {

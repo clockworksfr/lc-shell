@@ -48,6 +48,7 @@ Singleton {
             radius: merged.radius,
             border: merged.border,
             motion: merged.motion,
+            drawer: merged.drawer,
             hit: touch ? (mode === "modules" ? merged.hit.modules : merged.hit.touch) : merged.hit.pointer,
             bar: merged.bar,
             style: merged.style

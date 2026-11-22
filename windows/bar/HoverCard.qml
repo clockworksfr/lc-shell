@@ -19,9 +19,10 @@ PopupWindow {
     readonly property var theme: host?.theme ?? Themes.fallback
     // A drawer attached to the bar (no gap), with fillets on both ends.
     readonly property int gap: 0
-    readonly property real fillet: theme.radius.control
+    readonly property real fillet: theme.drawer.fillet
     // Reaches over the bar's inner border: no line at the junction.
-    readonly property real overlap: Math.max(1, host?.look?.border ?? 0)
+    // +1: a popup's position is rounded; make sure the border line is covered.
+    readonly property real overlap: Math.max(1, host?.look?.border ?? 0) + 1
     readonly property bool sideways: host?.edge === "left" || host?.edge === "right"
 
     function showFor(target: Item): void {
@@ -50,6 +51,8 @@ PopupWindow {
     function hide(): void {
         visible = false;
         slot = null;
+        if (host && host.drawerSpan?.slot !== undefined)
+            host.drawerSpan = null;
     }
 
     onVisibleChanged: ShellState.card = { visible: visible, type: slot?.type ?? "", screen: host?.screen?.name ?? "" }
@@ -79,6 +82,11 @@ PopupWindow {
             rect = Qt.rect(p.x - fillet, host.height - overlap, w + fillet * 2, 0);
             side = Edges.Bottom;
         }
+        // The popup is centered on the anchor rect: its real extent along
+        // the bar is the card's size around the rect's center.
+        const center = sideways ? rect.y + rect.height / 2 : rect.x + rect.width / 2;
+        const size = sideways ? implicitHeight : implicitWidth;
+        host.drawerSpan = { slot: slot, start: center - size / 2, end: center + size / 2 };
         anchor.rect.x = rect.x;
         anchor.rect.y = rect.y;
         anchor.rect.width = rect.width;

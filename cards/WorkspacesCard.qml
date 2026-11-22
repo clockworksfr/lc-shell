@@ -76,12 +76,11 @@ Column {
                     width: parent.width - 6
                     spacing: 2
 
-                    IconImage {
+                    AppIcon {
                         readonly property var entry: DesktopEntries.heuristicLookup(parent.parent.modelData.info.class ?? "")
                         anchors.horizontalCenter: parent.horizontalCenter
                         visible: !!entry?.icon && parent.parent.height > 40
-                        width: 20
-                        height: 20
+                        size: 20
                         source: entry?.icon ? Quickshell.iconPath(entry.icon, true) : ""
                     }
 
