@@ -23,6 +23,11 @@ Singleton {
     // reviews, screenshots. On `screenName`, or the focused screen.
     signal cardRequested(string type, string screenName)
 
+    // Open a bar menu without a right click (key binds, reviews): "bar"
+    // (the bar's menu) or "tray:N" (the menu of the Nth tray item), on
+    // `screenName` or the focused screen.
+    signal menuRequested(string menu, string screenName)
+
     function addSlot(slot: var): void {
         slots = [...slots, slot];
     }

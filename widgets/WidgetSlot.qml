@@ -132,7 +132,7 @@ Item {
 
     // Edit mode: size pill (S / M / L, click cycles) and remove cross, on
     // opposite corners; bigger for touch screens.
-    readonly property real badge: (host?.theme?.hit?.pointer ?? 24) >= 48 ? 28 : 16
+    readonly property real badge: (host?.theme?.hit ?? 24) >= 48 ? 28 : 16
 
     Rectangle {
         visible: root.editing

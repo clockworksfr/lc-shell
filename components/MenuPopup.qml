@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Wayland
 import Quickshell.Widgets
 import qs.i18n
 import qs.theme
@@ -9,8 +10,11 @@ import qs.theme
 // fixed `actions` ([{ id, icon, text }] → picked(id)) or an app's menu
 // (`menu`, a tray item's QsMenuHandle: entries, separators, check / radio
 // items, submenus opened in place with a "back" row). Closes on pick and
-// on a click outside.
-PopupWindow {
+// on a click outside or Escape.
+//
+// A layer surface (like the panels): a popup only shows while its bar has
+// the pointer, and a click outside it can't be caught reliably.
+PanelWindow {
     id: root
 
     required property var host
@@ -23,17 +27,17 @@ PopupWindow {
 
     signal picked(string id)
 
-    // Opens at (x, y) of the host's content, away from the bar's edge.
+    // Point it opens from, on its screen.
+    property point origin
+
+    // Opens at (x, y) of the host's content, away from the bar's edge,
+    // kept on screen.
     function openAt(x: real, y: real): void {
-        visible = false;
         stack = [];
-        anchor.rect.x = x;
-        anchor.rect.y = y;
-        anchor.rect.width = 1;
-        anchor.rect.height = 1;
-        anchor.edges = edge === "bottom" ? Edges.Top : edge === "left" ? Edges.Right : edge === "right" ? Edges.Left : Edges.Bottom;
-        anchor.gravity = anchor.edges;
-        Qt.callLater(() => root.visible = true);
+        const o = host.origin ? host.origin() : Qt.point(0, 0);
+        origin = Qt.point(o.x + x, o.y + y);
+        visible = true;
+        frame.forceActiveFocus();
     }
 
     function close(): void {
@@ -53,10 +57,31 @@ PopupWindow {
         }
     }
 
-    anchor.window: host
+    screen: host?.screen ?? null
+    anchors {
+        top: true
+        left: true
+    }
+    margins {
+        left: {
+            const w = implicitWidth, sw = screen?.width ?? 0;
+            const x = edge === "left" ? origin.x : edge === "right" ? origin.x - w : origin.x - w / 2;
+            return Math.max(8, Math.min(x, sw - w - 8));
+        }
+        top: {
+            const h = implicitHeight, sh = screen?.height ?? 0;
+            const y = edge === "top" ? origin.y : edge === "bottom" ? origin.y - h : origin.y - h / 2;
+            return Math.max(8, Math.min(y, sh - h - 8));
+        }
+    }
+    visible: false
     color: "transparent"
     implicitWidth: 280
     implicitHeight: column.implicitHeight + theme.space.xs * 2
+    exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.namespace: "lc-menu"
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     HyprlandFocusGrab {
         active: root.visible
@@ -73,6 +98,8 @@ PopupWindow {
         id: frame
 
         anchors.fill: parent
+        focus: true
+        Keys.onEscapePressed: root.stack.length ? root.stack = root.stack.slice(0, -1) : root.close()
         radius: root.theme.radius.card
         color: root.theme.color.surface
         border.width: root.theme.border.width
@@ -113,7 +140,7 @@ PopupWindow {
             }
 
             Repeater {
-                model: root.menu ? opener.children : root.actions
+                model: root.menu ? [...opener.children.values] : root.actions
 
                 MenuRow {
                     required property var modelData
@@ -149,7 +176,7 @@ PopupWindow {
         signal clicked
 
         width: parent?.width ?? 0
-        height: separator ? 9 : Math.max(34, theme.hit.pointer + 10)
+        height: separator ? 9 : Math.max(34, theme.hit + 10)
 
         Rectangle {
             visible: row.separator

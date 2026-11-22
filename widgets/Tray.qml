@@ -2,7 +2,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
+import Quickshell.Hyprland
 import qs.components
+import qs.services
 import qs.theme
 
 // System tray (StatusNotifierItem). Left click: activate (or menu for
@@ -26,6 +28,7 @@ Grid {
     spacing: theme.space.s
 
     Repeater {
+        id: icons
         model: root.items
 
         Item {
@@ -75,5 +78,16 @@ Grid {
     MenuPopup {
         id: menu
         host: QsWindow.window
+    }
+
+    Connections {
+        target: ShellState
+
+        function onMenuRequested(name: string, screenName: string): void {
+            const target = screenName || Hyprland.focusedMonitor?.name || "";
+            const index = name.startsWith("tray:") ? parseInt(name.slice(5)) : -1;
+            if (index >= 0 && target === root.screen?.name)
+                icons.itemAt(index)?.openMenu();
+        }
     }
 }

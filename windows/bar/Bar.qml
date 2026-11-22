@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.cards
 import qs.components
@@ -238,6 +239,15 @@ PanelWindow {
 
     Connections {
         target: ShellState
+
+        function onMenuRequested(menu: string, screenName: string): void {
+            const target = screenName || Hyprland.focusedMonitor?.name || "";
+            if (target !== bar.screen.name || menu !== "bar")
+                return;
+            const slot = ShellState.slots.find(s => s.host === bar && s.type === "clock" && s.visible) ?? null;
+            const p = slot ? slot.mapToItem(bar.contentItem, slot.width / 2, slot.height / 2) : Qt.point(bar.width / 2, bar.height / 2);
+            barMenu.openAt(p.x, bar.vertical ? p.y : (bar.edge === "top" ? bar.height : 0));
+        }
 
         function onCardRequested(type: string, screenName: string): void {
             if (screenName && screenName !== bar.screen.name)

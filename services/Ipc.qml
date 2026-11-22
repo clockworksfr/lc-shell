@@ -51,6 +51,11 @@ Scope {
         function hideCard(): void {
             ShellState.cardRequested("", "");
         }
+        // The bar's right-click menu ("bar") or a tray item's menu
+        // ("tray:0", "tray:1"…), on the focused screen.
+        function menu(name: string): void {
+            ShellState.menuRequested(name || "bar", "");
+        }
         // Edit mode: enter, leave keeping changes, leave restoring them.
         function edit(): void {
             ShellState.editing = true;
