@@ -26,9 +26,6 @@ ModuleBase {
     property bool full: false
     // Drawer of the bar (pointer sizes): everything, no More.
     property bool drawer: false
-    property bool panelOpen: false
-    // { kind: "room" | "light", id, name } while the color panel is open.
-    property var pickerTarget: null
     property string selectedId: ""
 
     readonly property string look: theme.style.module ?? "classic"
@@ -46,12 +43,15 @@ ModuleBase {
     Component.onCompleted: HueBridge.refCount++
     Component.onDestruction: HueBridge.refCount--
 
+    readonly property string screenName: QsWindow.window?.screen?.name ?? ""
+
+    // The lights panel on this screen (one for the shell, HueFallback).
     function more(): void {
-        panelOpen = true;
+        HueBridge.openPanel(screenName);
     }
 
     function openPicker(kind: string, id: string, name: string): void {
-        pickerTarget = { kind: kind, id: id, name: name };
+        HueBridge.picker = { kind: kind, id: id, name: name, screen: screenName };
     }
 
     // States: no binary, bridge silent, nothing yet, no rooms.
@@ -101,12 +101,14 @@ ModuleBase {
         readonly property int capacity: Math.max(1, cols * Math.max(1, Math.floor((height + spacing) / (rooms.m.hit + spacing))))
         // More last: always when the room isn't shown beside (it's the only
         // way to the rest), else only when the rooms overflow.
+        // Ids only: toggling a room doesn't rebuild the tile being tapped.
+        readonly property string idKey: HueBridge.rooms.map(r => r.id).join(",")
         readonly property var list: {
-            const all = HueBridge.rooms;
+            const all = idKey ? idKey.split(",") : [];
             const needMore = withMore && (!selecting || all.length > capacity);
             if (!needMore)
                 return all.slice(0, capacity);
-            return all.slice(0, Math.max(0, capacity - 1)).concat([{ more: true }]);
+            return all.slice(0, Math.max(0, capacity - 1)).concat(["more"]);
         }
         readonly property int lines: Math.max(1, Math.ceil(list.length / cols))
 
@@ -119,12 +121,13 @@ ModuleBase {
             Item {
                 id: slot
 
-                required property var modelData
-                readonly property bool isMore: !!modelData.more
+                required property string modelData
+                readonly property bool isMore: modelData === "more"
+                readonly property var room: isMore ? null : HueBridge.room(modelData)
                 // Modulaire's tile is a lever already: one action (toggle and
                 // select).
                 readonly property bool dual: rooms.selecting && width >= 240 && rooms.m.look !== "modulaire"
-                readonly property bool isSelected: rooms.selecting && !isMore && rooms.m.selected?.id === modelData.id
+                readonly property bool isSelected: rooms.selecting && !isMore && rooms.m.selected?.id === modelData
 
                 width: (rooms.width - (rooms.cols - 1) * rooms.spacing) / rooms.cols
                 height: Math.max(rooms.m.hit, (rooms.height - (rooms.lines - 1) * rooms.spacing) / rooms.lines)
@@ -136,20 +139,21 @@ ModuleBase {
                     anchors.bottom: parent.bottom
                     anchors.right: slot.dual ? sw.left : parent.right
                     anchors.rightMargin: slot.dual ? 4 : 0
-                    icon: slot.isMore ? "more_horiz" : HueBridge.roomIcon(slot.modelData.cls)
-                    label: slot.isMore ? I18n.tr("hue.more") : slot.modelData.name
-                    sub: slot.isMore ? I18n.tr("hue.moreSub") : slot.modelData.on ? I18n.percent(slot.modelData.brightness / 100) : I18n.tr("hue.off")
-                    on: !slot.isMore && slot.modelData.on
+                    icon: slot.isMore ? "more_horiz" : HueBridge.roomIcon(slot.room?.cls ?? "")
+                    label: slot.isMore ? I18n.tr("hue.more") : slot.room?.name ?? ""
+                    sub: slot.isMore ? I18n.tr("hue.moreSub") : slot.room?.on ? I18n.percent(slot.room.brightness / 100) : I18n.tr("hue.off")
+                    on: !slot.isMore && !!slot.room?.on
                     plain: slot.isMore
                     onTapped: {
+                        const m = rooms.m, id = slot.modelData, selecting = rooms.selecting;
                         if (slot.isMore)
-                            rooms.m.more();
+                            m.more();
                         else if (slot.dual)
-                            rooms.m.selectedId = slot.modelData.id;
+                            m.selectedId = id;
                         else {
-                            HueBridge.toggleRoom(slot.modelData.id);
-                            if (rooms.selecting)
-                                rooms.m.selectedId = slot.modelData.id;
+                            if (selecting)
+                                m.selectedId = id;
+                            Qt.callLater(HueBridge.toggleRoom, id);
                         }
                     }
                 }
@@ -167,13 +171,13 @@ ModuleBase {
 
                 // The room's color while it's on.
                 Rectangle {
-                    visible: !slot.isMore && slot.modelData.on && !!slot.modelData.color
+                    visible: !slot.isMore && !!slot.room?.on && !!slot.room?.color
                     x: slot.dual ? parent.width - sw.width - width - 14 : parent.width - width - 12
                     y: 12
                     width: 12
                     height: 12
                     radius: 6
-                    color: slot.modelData.color || "transparent"
+                    color: slot.room?.color || "transparent"
                     border.width: 1
                     border.color: Qt.alpha("black", 0.3)
                 }
@@ -184,9 +188,9 @@ ModuleBase {
                     visible: slot.dual
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    on: !slot.isMore && slot.modelData.on
+                    on: !slot.isMore && !!slot.room?.on
                     onAccent: rooms.m.look === "classic" && on
-                    onToggled: HueBridge.toggleRoom(slot.modelData.id)
+                    onToggled: Qt.callLater(HueBridge.toggleRoom, slot.modelData)
                 }
             }
         }
@@ -329,7 +333,13 @@ ModuleBase {
                     icon: modelData.more ? "more_horiz" : ""
                     active: !modelData.more && HueBridge.activeScene[detail.room?.id ?? ""] === modelData.id
                     textSize: Math.min(detail.m.t3, 18)
-                    onTapped: modelData.more ? detail.m.more() : HueBridge.startScene(detail.room.id, modelData.id)
+                    onTapped: {
+                        const room = detail.room?.id ?? "", scene = modelData.id;
+                        if (modelData.more)
+                            detail.m.more();
+                        else
+                            Qt.callLater(HueBridge.startScene, room, scene);
+                    }
                 }
             }
         }
@@ -416,7 +426,7 @@ ModuleBase {
                         anchors.verticalCenter: parent.verticalCenter
                         on: !!lamp.light?.on
                         enabled: !!lamp.light?.reachable
-                        onToggled: HueBridge.toggleLight(lamp.modelData)
+                        onToggled: Qt.callLater(HueBridge.toggleLight, lamp.modelData)
                     }
                 }
             }
@@ -428,7 +438,7 @@ ModuleBase {
         visible: root.mode === "list" || root.mode === "row" || root.mode === "grid"
         m: root
         anchors.fill: parent
-        cols: root.mode === "list" ? 1 : root.mode === "grid" ? 2 : Math.max(1, Math.min(HueBridge.rooms.length + 1, Math.floor((root.cw + root.gap) / (200 + root.gap))))
+        cols: root.mode === "list" ? 1 : root.mode === "grid" ? 2 : Math.max(1, Math.min(HueBridge.rooms.length + 1, Math.floor((root.cw + root.gap) / (150 + root.gap))))
     }
 
     // box / tall: rooms on top, the room under.
@@ -504,109 +514,6 @@ ModuleBase {
             y: root.full ? 44 : 0
             width: parent.width - threeRooms.width - threeDetail.width - parent.spacing * 2
             height: parent.height - y
-        }
-    }
-
-    // Everything, in a panel over the screen (More).
-    LazyLoader {
-        active: root.panelOpen && !root.full && !root.drawer
-
-        PanelWindow {
-            id: panel
-
-            readonly property var theme: root.theme
-
-            screen: root.QsWindow.window?.screen ?? null
-            implicitWidth: Math.min((screen?.width ?? 1200) - 80, 1100)
-            implicitHeight: Math.min((screen?.height ?? 700) - 40, 640)
-            color: "transparent"
-            exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.namespace: "lc-hue"
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
-
-            HyprlandFocusGrab {
-                active: !root.pickerTarget
-                windows: [panel]
-                onCleared: root.panelOpen = false
-            }
-
-            Item {
-                anchors.fill: parent
-                focus: true
-                Keys.onEscapePressed: root.panelOpen = false
-
-                // By url: a type can't name itself.
-                Loader {
-                    anchors.fill: parent
-                    Component.onCompleted: setSource(Qt.resolvedUrl("HueBridge.qml"), { full: true, options: { type: "hue" }, selectedId: root.selected?.id ?? "" })
-                }
-
-                ModuleButton {
-                    anchors.top: parent.top
-                    anchors.right: parent.right
-                    anchors.margins: 10
-                    icon: "close"
-                    size: 44
-                    onTapped: root.panelOpen = false
-                }
-            }
-        }
-    }
-
-    // The color of a room or a light.
-    LazyLoader {
-        active: !!root.pickerTarget
-
-        PanelWindow {
-            id: pickerWindow
-
-            readonly property var theme: root.theme
-            readonly property var target: root.pickerTarget
-
-            screen: root.QsWindow.window?.screen ?? null
-            implicitWidth: Math.min((screen?.width ?? 1600) - 80, 1100)
-            implicitHeight: Math.min((screen?.height ?? 700) - 40, 520)
-            color: "transparent"
-            exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.namespace: "lc-hue-color"
-            WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
-
-            HyprlandFocusGrab {
-                active: true
-                windows: [pickerWindow]
-                onCleared: root.pickerTarget = null
-            }
-
-            ModulePanel {
-                anchors.fill: parent
-                title: pickerWindow.target ? I18n.tr("hue.colorOf", { name: pickerWindow.target.name }) : ""
-            }
-
-            Item {
-                anchors.fill: parent
-                anchors.topMargin: 30
-                focus: true
-                Keys.onEscapePressed: root.pickerTarget = null
-
-                HueColorPicker {
-                    anchors.fill: parent
-                    title: pickerWindow.target?.name ?? ""
-                    current: pickerWindow.target?.kind === "light" ? (HueBridge.lights[pickerWindow.target.id]?.color || "#FFE9D2") : (HueBridge.room(pickerWindow.target?.id ?? "")?.color || "#FFE9D2")
-                    onColorPicked: hex => pickerWindow.target.kind === "light" ? HueBridge.setLightColor(pickerWindow.target.id, hex) : HueBridge.setRoomColor(pickerWindow.target.id, hex)
-                    onWhitePicked: kelvin => pickerWindow.target.kind === "light" ? HueBridge.setLightWhite(pickerWindow.target.id, kelvin) : HueBridge.setRoomWhite(pickerWindow.target.id, kelvin)
-                }
-            }
-
-            ModuleButton {
-                anchors.top: parent.top
-                anchors.right: parent.right
-                anchors.margins: 10
-                icon: "close"
-                size: 44
-                onTapped: root.pickerTarget = null
-            }
         }
     }
 }

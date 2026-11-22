@@ -29,9 +29,11 @@ PanelWindow {
 
     // Text and icons in proportion to the rows: touch screens (the modules
     // screen: 72 px targets) get big rows, so big text too.
-    readonly property real rowHeight: Math.max(34, theme.hit + 10)
-    readonly property real textSize: Math.max(theme.font.sizeM, Math.min(24, rowHeight * 0.3))
-    readonly property real iconSize: Math.max(18, Math.round(textSize * 1.3))
+    // (touch: 56 px rows, still a comfortable target, text in proportion
+    // with the modules, not bigger).
+    readonly property real rowHeight: theme.hit >= 48 ? Math.round(theme.hit * 0.78) : Math.max(34, theme.hit + 10)
+    readonly property real textSize: Math.max(theme.font.sizeM, Math.min(18, rowHeight * 0.32))
+    readonly property real iconSize: Math.max(18, Math.round(textSize * 1.25))
 
     // Point it opens from, on its screen.
     property point origin
@@ -82,7 +84,7 @@ PanelWindow {
     }
     visible: false
     color: "transparent"
-    implicitWidth: Math.min(480, 280 * textSize / theme.font.sizeM)
+    implicitWidth: Math.min(400, 280 * textSize / theme.font.sizeM)
     implicitHeight: column.implicitHeight + theme.space.xs * 2
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay

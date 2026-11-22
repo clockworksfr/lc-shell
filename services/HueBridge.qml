@@ -24,6 +24,15 @@ Singleton {
     property var rooms: []
     // id → { id, name, on, reachable, brightness, color }
     property var lights: ({})
+    // The color panel's target: { kind: "room" | "light", id, name, screen }.
+    property var picker: null
+
+    // The lights panel on a screen (the drawer where the bar has the
+    // widget, else a centered panel: HueFallback).
+    function openPanel(screenName: string): void {
+        ShellState.panelRequested("lights", screenName);
+    }
+
     // Last scene started per room (the bridge doesn't say), id → scene id.
     property var activeScene: ({})
 

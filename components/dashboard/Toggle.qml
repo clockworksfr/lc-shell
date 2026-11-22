@@ -31,7 +31,10 @@ Item {
     // Matrix pills: from their height (a tall pill gets bigger text).
     readonly property real labelSize: Math.max(15, Math.min(look === "matrix" ? pill.height * 0.22 : m * 0.17, 24))
     readonly property real iconSize: Math.max(22, Math.min(m * 0.3, 46))
-    readonly property bool showSub: !!sub && width >= 150 && height >= 110 && look !== "matrix"
+    // Low wide tiles (narrow columns, strips): icon (or lever) left, labels
+    // right, all vertically centered.
+    readonly property bool inline: look !== "matrix" && height < 110 && width >= height * 1.6
+    readonly property bool showSub: !!sub && look !== "matrix" && (inline ? height >= 64 : width >= 150 && height >= 110)
     readonly property color onInk: look === "classic" || look === "constellation" ? theme.color.bg : theme.color.ink
 
     // The tile (every look but modulaire's switch and matrix's pill).
@@ -89,8 +92,8 @@ Item {
         // facade: centered.
         Icon {
             visible: root.look !== "modulaire" || root.plain
-            x: root.look === "classic" ? root.labelSize * 0.8 : (parent.width - width) / 2
-            y: root.look === "classic" ? root.labelSize * 0.8 : (parent.height - height - labels.height - root.labelSize * 0.4) / 2
+            x: root.inline ? root.labelSize * 0.8 : root.look === "classic" ? root.labelSize * 0.8 : (parent.width - width) / 2
+            y: root.inline ? (parent.height - height) / 2 : root.look === "classic" ? root.labelSize * 0.8 : (parent.height - height - labels.height - root.labelSize * 0.4) / 2
             name: root.icon
             filled: root.on
             size: root.iconSize
@@ -102,9 +105,9 @@ Item {
             id: lever
 
             visible: root.look === "modulaire" && !root.plain
-            anchors.horizontalCenter: parent.horizontalCenter
-            y: (parent.height - height - labels.height - root.labelSize * 0.5) / 2
-            width: Math.min(parent.width * 0.5, root.iconSize * 1.6)
+            x: root.inline ? 14 : (parent.width - width) / 2
+            y: root.inline ? (parent.height - height) / 2 : (parent.height - height - labels.height - root.labelSize * 0.5) / 2
+            width: Math.min(parent.width * (root.inline ? 0.3 : 0.5), root.iconSize * 1.6)
             height: width * 0.48
             radius: height / 2
             color: root.on ? Qt.alpha(root.theme.color.ok, 0.35) : Qt.alpha("black", 0.45)
@@ -140,16 +143,18 @@ Item {
         Column {
             id: labels
 
-            x: root.look === "classic" ? root.labelSize * 0.8 : 0
-            y: root.look === "classic" ? parent.height - height - root.labelSize * 0.7
+            x: root.inline ? (root.look === "modulaire" && !root.plain ? lever.x + lever.width : root.labelSize * 0.8 + root.iconSize) + root.labelSize * 0.6
+                : root.look === "classic" ? root.labelSize * 0.8 : 0
+            y: root.inline ? (parent.height - height) / 2
+                : root.look === "classic" ? parent.height - height - root.labelSize * 0.7
                 : root.look === "modulaire" && !root.plain ? lever.y + lever.height + root.labelSize * 0.5
                 : (parent.height - height - root.iconSize - root.labelSize * 0.4) / 2 + root.iconSize + root.labelSize * 0.4
-            width: parent.width - x * (root.look === "classic" ? 2 : 1)
+            width: root.inline ? parent.width - x - root.labelSize * 0.6 : parent.width - x * (root.look === "classic" ? 2 : 1)
             spacing: 2
 
             ThemedText {
                 width: parent.width
-                horizontalAlignment: root.look === "classic" ? Text.AlignLeft : Text.AlignHCenter
+                horizontalAlignment: root.look === "classic" || root.inline ? Text.AlignLeft : Text.AlignHCenter
                 elide: Text.ElideRight
                 // Shrinks a little before eliding (long names in small tiles).
                 fontSizeMode: Text.HorizontalFit
@@ -165,7 +170,7 @@ Item {
             ThemedText {
                 visible: root.showSub
                 width: parent.width
-                horizontalAlignment: root.look === "classic" ? Text.AlignLeft : Text.AlignHCenter
+                horizontalAlignment: root.look === "classic" || root.inline ? Text.AlignLeft : Text.AlignHCenter
                 elide: Text.ElideRight
                 text: root.sub
                 font.pixelSize: root.labelSize * 0.72
