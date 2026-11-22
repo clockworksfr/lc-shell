@@ -136,6 +136,9 @@ Item {
         id: titleText
 
         visible: root.titled
+        // Never wider than the panel (long titles end with "…").
+        width: Math.min(implicitWidth, parent.width - 36)
+        elide: Text.ElideRight
         x: root.look === "modulaire" ? (parent.width - width) / 2 : 18
         y: 10
         label: true
