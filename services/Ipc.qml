@@ -68,6 +68,20 @@ Scope {
     }
 
     IpcHandler {
+        target: "notifs"
+
+        function toggleDnd(): void {
+            NotificationCenter.setDnd(!NotificationCenter.dnd);
+        }
+        function clear(): void {
+            NotificationCenter.clearAll();
+        }
+        function markRead(): void {
+            NotificationCenter.markRead();
+        }
+    }
+
+    IpcHandler {
         target: "shell"
 
         // Full reload; also picks up .js changes, which hot reload ignores.

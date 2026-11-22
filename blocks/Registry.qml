@@ -13,6 +13,7 @@ Singleton {
             clock: "Clock.qml",
             media: "Media.qml",
             network: "Network.qml",
+            notifications: "Notifications.qml",
             tray: "Tray.qml",
             volume: "Volume.qml",
             workspaces: "Workspaces.qml"

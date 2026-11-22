@@ -71,5 +71,14 @@
   "power.profile.saver": "Économie",
   "power.profile.balanced": "Équilibré",
   "power.profile.performance": "Performance",
-  "format.duration": "{h} h {m}"
+  "format.duration": "{h} h {m}",
+  "notif.dnd": "Ne pas déranger",
+  "notif.clear": "Tout effacer",
+  "notif.empty": "Aucune notification",
+  "bar.notifs": "notif",
+  "bar.notifsCount": "notif {n}",
+  "bar.dnd": "silence",
+  "time.now": "à l'instant",
+  "time.minutesAgo": "il y a {n} min",
+  "format.dateShort": "d MMM HH:mm"
 }

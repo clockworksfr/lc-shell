@@ -4,6 +4,7 @@ import qs.launcher
 import qs.modules.bar
 import qs.modules.dashboard
 import qs.modules.launcher
+import qs.modules.notifications
 import qs.modules.osd
 import qs.services
 import qs.theme
@@ -59,6 +60,17 @@ Scope {
             screen: root.modelData
             config: root.profile.osd
             theme: root.theme
+        }
+    }
+
+    // Automatic popups: same rule as the OSD.
+    LazyLoader {
+        active: NotificationCenter.popups.length > 0 && NotificationCenter.popupScreen === root.modelData.name && !root.fullscreen
+
+        NotificationPopups {
+            screen: root.modelData
+            theme: root.theme
+            topOffset: (root.normal && root.profile.bar ? root.barLook.height + (root.barLook.floating ? root.barLook.margin : 0) : 0) + root.theme.space.l
         }
     }
 

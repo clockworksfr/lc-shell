@@ -29,5 +29,6 @@ ShellRoot {
     Component.onCompleted: {
         CellTiler.managed;
         Fonts.files;
+        NotificationCenter.dnd;
     }
 }

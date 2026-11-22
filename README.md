@@ -56,7 +56,8 @@ Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md
   - `tray` — clic : activer, clic droit : menu, clic milieu : action secondaire (`showPassive`) ;
   - `network` — clic : panneau (filaire, interrupteur Wi-Fi, réseaux, mot de passe à la volée) ;
   - `bluetooth` — clic : panneau (interrupteur, appareils ; un nouvel appareil est appairé, approuvé et connecté) ; masqué sans adaptateur ;
-  - `battery` — clic : panneau (autonomie, profil d'énergie) ; masqué sans batterie. Un nom inconnu s'affiche `?nom` en rouge. Ajouter un bloc : `blocks/Xxx.qml` (propriétés `screen`, `options`) + `blocks/Registry.qml`.
+  - `battery` — clic : panneau (autonomie, profil d'énergie) ; masqué sans batterie ;
+  - `notifications` — non lues ; clic : historique (ne pas déranger, tout effacer), clic milieu : ne pas déranger. Un nom inconnu s'affiche `?nom` en rouge. Ajouter un bloc : `blocks/Xxx.qml` (propriétés `screen`, `options`) + `blocks/Registry.qml`.
 - **Plein écran** : rien d'automatique (OSD, bientôt notifications) ne s'affiche au-dessus ; c'est redirigé vers un écran `modules` ou retenu. Le lanceur, appelé explicitement, reste autorisé.
 
 ## Langues
@@ -107,6 +108,16 @@ Tab change de mode. Les actions destructrices demandent une seconde validation. 
 
 Les choix faits à l'exécution (thème, variante via IPC) sont gardés dans `…/appearance.json` et priment sur `shell.json`.
 
+## Notifications
+
+Serveur `org.freedesktop.Notifications` intégré. Un seul processus peut le détenir : tant que Caelestia tourne, celui de lc-shell attend (avertissement dans le journal) et prend le relais dès que le nom se libère.
+
+- Popups en haut à droite de l'écran actif, sous la barre ; 6 s par défaut (ou le délai demandé par l'appli), en pause au survol ; les critiques restent jusqu'à fermeture.
+- Jamais au-dessus d'un plein écran : redirigées vers un écran `modules`, sinon mises en attente jusqu'à ce qu'un écran se libère.
+- Ne pas déranger : plus de popups (sauf critiques), tout reste dans l'historique.
+- Corps affiché en texte brut (balisage retiré : aucune image distante chargée). Actions de l'appli en boutons, clic sur la carte = action par défaut.
+- Historique (100 max) conservé entre les redémarrages dans `…/notifications.json`.
+
 ## OSD et touches multimédia
 
 L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non aux touches : les binds peuvent rester sur `wpctl`/`brightnessctl` et continuent de marcher shell arrêté. Les écrans externes (DDC/CI) ne passent que par l'IPC `brightness`.
@@ -123,4 +134,5 @@ L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non a
 | `qs -c lc ipc call theme set <id>` / `setModules <id>` / `list` | Thème des écrans normaux / modules |
 | `qs -c lc ipc call theme variant dark\|light\|auto` / `toggleVariant` | Clair / sombre |
 | `qs -c lc ipc call i18n set en\|fr\|auto` / `get` | Langue de l'interface |
+| `qs -c lc ipc call notifs toggleDnd` / `clear` / `markRead` | Notifications |
 | `qs -c lc ipc call shell reload` | Rechargement complet (nécessaire après modification d'un `.js`) |

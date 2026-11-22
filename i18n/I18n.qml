@@ -55,6 +55,18 @@ Singleton {
         return Number(value).toLocaleString(locale, "f", decimals);
     }
 
+    // "just now", "5 min ago", "14:32" (today), "22 Nov 14:32".
+    function relativeTime(ms: real): string {
+        const minutes = Math.floor((Date.now() - ms) / 60000);
+        if (minutes < 1)
+            return tr("time.now");
+        if (minutes < 60)
+            return tr("time.minutesAgo", { n: minutes });
+        const date = new Date(ms);
+        const sameDay = date.toDateString() === new Date().toDateString();
+        return locale.toString(date, sameDay ? "HH:mm" : tr("format.dateShort"));
+    }
+
     function setLanguage(code: string): bool {
         if (code !== "auto" && !languages.includes(code))
             return false;
