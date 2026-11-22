@@ -23,12 +23,9 @@ Column {
     Row {
         spacing: root.theme.space.m
 
-        ThemedText {
+        HeroText {
             text: I18n.percent(Power.level)
-            font.family: root.theme.font.display
-            font.weight: root.theme.font.displayWeight
-            font.pixelSize: 40
-            font.features: ({ "tnum": 1 })
+            pixelSize: 40
             color: Power.low ? root.theme.color.urgent : root.theme.color.ink
         }
 

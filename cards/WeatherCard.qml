@@ -37,13 +37,10 @@ Column {
             color: root.theme.color.accent
         }
 
-        ThemedText {
+        HeroText {
             anchors.verticalCenter: parent.verticalCenter
             text: root.now ? Weather.temp(root.now.temp) : ""
-            font.family: root.theme.font.display
-            font.weight: root.theme.font.displayWeight
-            font.pixelSize: 44
-            font.features: ({ "tnum": 1 })
+            pixelSize: 44
         }
 
         Column {

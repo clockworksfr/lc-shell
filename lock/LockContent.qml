@@ -51,13 +51,10 @@ Item {
         spacing: root.theme.space.l
         width: 360
 
-        ThemedText {
+        HeroText {
             anchors.horizontalCenter: parent.horizontalCenter
             text: I18n.locale.toString(clock.date, "HH:mm")
-            font.family: root.theme.font.display
-            font.pixelSize: 96
-            font.weight: root.theme.font.displayWeight
-            font.features: ({ "tnum": 1 })
+            pixelSize: 96
         }
 
         ThemedText {
