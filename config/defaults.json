@@ -1,6 +1,8 @@
 {
   "language": "auto",
   "wallpaper": { "enabled": true, "directory": "~/Pictures/Wallpapers" },
+  "idle": { "enabled": true, "lock": 600, "screenOff": 900, "lockedScreenOff": 30, "suspend": 0 },
+  "lock": { "pamService": "hyprlock", "beforeSleep": true },
   "appearance": {
     "variant": "auto",
     "schedule": { "type": "time", "light": "07:30", "dark": "19:30" },

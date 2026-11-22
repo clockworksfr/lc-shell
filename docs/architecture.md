@@ -48,7 +48,7 @@ Rien d'**automatique** ne s'affiche au-dessus d'un jeu en plein écran (`Hyprlan
 
 ## Phases
 
-Fait : socle (1), jetons du thème Classique (2, partiel), premier jet du mode modules (3), langues EN/FR. Notifications (5) écrites et testées en essai contrôlé (Caelestia arrêté une minute) ; bascule définitive à décider. Barre sur les 4 bords et mode cadre faits (tiroirs fusionnés au cadre : plus tard, avec le design). Priorité actuelle : **fonctionnalités brutes** ; le design se peaufine après.
+Fait : socle (1), jetons du thème Classique (2, partiel), premier jet du mode modules (3), langues EN/FR. Notifications (5) écrites et testées en essai contrôlé (Caelestia arrêté une minute) ; bascule définitive à décider. Barre sur les 4 bords et mode cadre faits (tiroirs fusionnés au cadre : plus tard, avec le design). Fond d'écran, paroles/VU, config en deux couches, app de paramètres, verrouillage et inactivité écrits (verrouillage réel non testé : nécessite simon). Priorité actuelle : **fonctionnalités brutes** ; le design se peaufine après.
 
 
 1. **Socle** — profils d'écran par modèle, registre de thèmes avec clair/sombre programmable, thème par fenêtre, styles de barre, politique plein écran, indicateur tactile.

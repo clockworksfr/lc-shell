@@ -79,6 +79,14 @@ Exemple de réglages :
 - **Fond d'écran** : activation, dossier, grille de choix, au hasard ;
 - **Général** : langue, ne pas déranger, rangement des fenêtres du tableau de bord.
 
+## Verrouillage et inactivité
+
+- **Verrouillage** (`ext-session-lock`) : une surface par écran (fond flouté, heure, champ mot de passe), authentification PAM (service `lock.pamService`, `hyprlock` par défaut). Déclenché par `loginctl lock-session` (logind, écouté via `gdbus monitor`), l'inactivité, l'IPC `lock lock`, ou avant la mise en veille (verrou « delay » de `systemd-inhibit` relâché une fois l'écran verrouillé affiché).
+- **Aperçu** : `qs -c lc ipc call lock preview` ou « Aperçu du verrouillage » dans le lanceur — même écran dans une fenêtre, vrai contrôle PAM, rien n'est verrouillé. Attention : les échecs comptent pour `pam_faillock` (3 = compte bloqué 10 min).
+- **Inactivité** (`idle`, secondes, 0 = jamais) : `lock` 600, `screenOff` 900, `lockedScreenOff` 30, `suspend` 0. Les inhibiteurs sont respectés (`idle_inhibit fullscreen` de Hyprland, applis).
+- **Sécurité** : si le shell plante verrouillé, Hyprland garde la session verrouillée (écran rouge). Ajouter dans `hyprland.lua`, section `misc` : `allow_session_lock_restore = true,` ; un shell relancé (ou `hyprlock`, gardé en secours) peut alors reprendre la main. Depuis un TTY : `hyprlock` (avec `WAYLAND_DISPLAY` / `HYPRLAND_INSTANCE_SIGNATURE` de la session).
+- **Tant que Caelestia tourne**, il gère aussi inactivité et verrouillage : couper l'un des deux (`"idle": { "enabled": false }`).
+
 ## Langues
 
 Interface en anglais et en français. `"language"` dans `settings.json` : `auto` (suit la locale du système), `en` ou `fr` ; `"locale"` pour forcer le format des dates et nombres (ex. `en_GB`). Bascule à chaud : `qs -c lc ipc call i18n set en|fr|auto`.
@@ -162,4 +170,5 @@ L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non a
 | `qs -c lc ipc call notifs toggleDnd` / `clear` / `markRead` | Notifications |
 | `qs -c lc ipc call wallpaper set <chemin>` / `setHere <chemin>` / `random` / `get` | Fond d'écran (tous / écran actif) |
 | `qs -c lc ipc call settings toggle` / `openPage <page>` / `close` | Paramètres |
+| `qs -c lc ipc call lock lock` / `preview` / `isLocked` | Verrouillage |
 | `qs -c lc ipc call shell reload` | Rechargement complet (nécessaire après modification d'un `.js`) |

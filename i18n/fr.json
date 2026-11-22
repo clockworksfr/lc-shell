@@ -169,5 +169,14 @@
   "settings.language.auto": "Système",
   "settings.dashboard": "Tableau de bord",
   "settings.dashboardWindows": "Ranger les fenêtres dans les cases",
-  "settings.dashboardWindowsHint": "Les fenêtres des écrans modules flottent dans les cases fenêtre de la page"
+  "settings.dashboardWindowsHint": "Les fenêtres des écrans modules flottent dans les cases fenêtre de la page",
+  "lock.password": "Mot de passe",
+  "lock.checking": "Vérification…",
+  "lock.failed": "Mot de passe incorrect",
+  "lock.error": "Erreur d'authentification",
+  "lock.accepted": "Mot de passe accepté (aperçu)",
+  "lock.preview": "Aperçu — rien n'est verrouillé",
+  "lock.previewTitle": "Aperçu de l'écran de verrouillage",
+  "action.lockPreview": "Aperçu du verrouillage",
+  "action.lockPreview.keywords": "verrouillage aperçu test"
 }

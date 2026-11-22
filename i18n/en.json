@@ -169,5 +169,14 @@
   "settings.language.auto": "System",
   "settings.dashboard": "Dashboard",
   "settings.dashboardWindows": "Place windows in window cells",
-  "settings.dashboardWindowsHint": "Windows on module screens float into the page's window cells"
+  "settings.dashboardWindowsHint": "Windows on module screens float into the page's window cells",
+  "lock.password": "Password",
+  "lock.checking": "Checking…",
+  "lock.failed": "Wrong password",
+  "lock.error": "Authentication error",
+  "lock.accepted": "Password accepted (preview)",
+  "lock.preview": "Preview — nothing is locked",
+  "lock.previewTitle": "Lock screen preview",
+  "action.lockPreview": "Lock screen preview",
+  "action.lockPreview.keywords": "lock preview test"
 }

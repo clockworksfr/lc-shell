@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import qs.lock
 import qs.services
 import qs.settings
 import qs.i18n
@@ -47,6 +48,15 @@ Singleton {
             icon: "system-shutdown",
             confirm: true,
             run: () => Quickshell.execDetached(["systemctl", "poweroff"])
+        },
+        {
+            key: "action:lockPreview",
+            titleKey: "action.lockPreview",
+            icon: "system-lock-screen",
+            run: () => {
+                Lock.status = "";
+                Lock.previewing = true;
+            }
         },
         {
             key: "action:settings",

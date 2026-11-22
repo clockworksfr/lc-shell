@@ -7,6 +7,7 @@ import Quickshell
 import qs.dashboard
 import qs.i18n
 import qs.launcher
+import qs.lock
 import qs.modules
 import qs.services
 import qs.settings
@@ -26,6 +27,18 @@ ShellRoot {
     ThemeIpc {}
     I18nIpc {}
     SettingsIpc {}
+    LockIpc {}
+
+    // Locks only when Lock.locked is set (idle, logind, IPC).
+    LockScreen {}
+
+    LazyLoader {
+        active: Lock.previewing
+
+        LockPreview {
+            visible: true
+        }
+    }
 
     LazyLoader {
         active: Settings.opened
@@ -40,5 +53,6 @@ ShellRoot {
         CellTiler.managed;
         Fonts.files;
         NotificationCenter.dnd;
+        Idle.enabled;
     }
 }
