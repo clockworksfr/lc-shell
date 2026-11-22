@@ -201,15 +201,19 @@ Singleton {
         setSize(at, sizes[(current + 1) % sizes.length]);
     }
 
+    // A step can span two screens (sendTo): its second record is `linked`
+    // and goes back (and forth) with the first.
     function undo(): void {
         const last = undoStack[undoStack.length - 1];
         const screen = last ? screenNamed(last.screen) : null;
         if (!screen)
             return;
         undoStack = undoStack.slice(0, -1);
-        redoStack = [...redoStack, { screen: last.screen, zones: zonesOf(screen) }];
+        redoStack = [...redoStack, { screen: last.screen, zones: zonesOf(screen), linked: !!last.linked }];
         write(screen, last.zones, false);
         selected = null;
+        if (last.linked)
+            undo();
     }
 
     function redo(): void {
@@ -218,18 +222,60 @@ Singleton {
         if (!screen)
             return;
         redoStack = redoStack.slice(0, -1);
-        undoStack = [...undoStack, { screen: next.screen, zones: zonesOf(screen) }];
+        undoStack = [...undoStack, { screen: next.screen, zones: zonesOf(screen), linked: !!next.linked }];
         write(screen, next.zones, false);
         selected = null;
+        if (redoStack[redoStack.length - 1]?.linked)
+            redo();
+    }
+
+    // Moves a widget to another screen's bar (end of its right zone).
+    function sendTo(at: var, screenName: string): void {
+        const source = screenNamed(at.screen);
+        const target = screenNamed(screenName);
+        if (!source || !target || source === target)
+            return;
+        const from = copy(zonesOf(source));
+        const [entry] = from[at.zone][at.group].splice(at.index, 1);
+        if (entry === undefined)
+            return;
+        const to = copy(zonesOf(target));
+        to.right[to.right.length - 1].push(entry);
+        write(source, from, true);
+        undoStack = [...undoStack, { screen: target.name, zones: zonesOf(target), linked: true }].slice(-50);
+        write(target, to, false);
+        selected = null;
+    }
+
+    // --- Undo after "done" (toast, 8 s) ---
+
+    // [{ screen (name), bar (profile's bar before saving) }] of the last save.
+    property var lastSave: []
+    // Shown until (ms since epoch); the toast pauses it on hover.
+    property real toastUntil: 0
+
+    function revertSave(): void {
+        for (const item of lastSave) {
+            const screen = screenNamed(item.screen);
+            if (screen)
+                Config.setScreen(screen, "bar", item.bar === null ? undefined : item.bar);
+        }
+        lastSave = [];
+        toastUntil = 0;
     }
 
     // Leave, saving the drafts.
     function done(): void {
+        const before = [];
         for (const name in drafts) {
             const screen = screenNamed(name);
-            if (screen)
-                save(screen, drafts[name]);
+            if (!screen)
+                continue;
+            before.push({ screen: name, bar: copy(Config.profileFor(screen).bar ?? null) });
+            save(screen, drafts[name]);
         }
+        lastSave = before;
+        toastUntil = before.length ? Date.now() + 8000 : 0;
         drafts = {};
         ShellState.editing = false;
     }

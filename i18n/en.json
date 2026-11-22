@@ -342,5 +342,9 @@
   "format.dateNoDay": "MMMM d, yyyy",
   "clock.week": "Week {n}",
   "theme.facade": "Façade",
-  "theme.modulaire": "Modular"
+  "theme.modulaire": "Modular",
+  "edit.sendTo": "To {screen}",
+  "edit.searchWidget": "Find a widget…",
+  "edit.allPlaced": "Every widget is on this bar.",
+  "edit.saved": "Bar saved"
 }

@@ -63,6 +63,21 @@ Scope {
         function done(): void {
             BarEditor.done();
         }
+        // Edit mode: select a widget of the focused screen's bar by type,
+        // resize the selection (compact | normal | extended).
+        function select(type: string): void {
+            const name = Hyprland.focusedMonitor?.name ?? "";
+            const slot = ShellState.slots.find(s => s.type === type && s.screen?.name === name && !!s.host);
+            BarEditor.selected = slot ? slot.at : null;
+        }
+        function resize(size: string): void {
+            if (BarEditor.selected && BarEditor.sizes.includes(size))
+                BarEditor.setSize(BarEditor.selected, size);
+        }
+        // Puts the bars back as before the last "done" (the toast's Undo).
+        function undoSave(): void {
+            BarEditor.revertSave();
+        }
         function discard(): void {
             BarEditor.discard();
         }

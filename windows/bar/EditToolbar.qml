@@ -7,8 +7,10 @@ import qs.i18n
 import qs.services
 import qs.theme
 
-// Edit mode toolbar, next to the bar: the selected block (size, zone,
-// remove), the palette (add a block), undo/redo, discard, done.
+// Edit mode toolbar, next to the bar: actions (undo / redo, discard,
+// done), the selected widget's inspector (sizes as live previews, zone,
+// send to another screen, remove), the palette (widgets not on the bar,
+// with previews and a search).
 // Keys (the toolbar holds the keyboard while editing): Escape = done,
 // Ctrl+Z / Ctrl+Shift+Z = undo / redo, Delete = remove.
 PanelWindow {
@@ -65,7 +67,7 @@ PanelWindow {
             }
         }
 
-        Flow {
+        Column {
             id: content
 
             x: win.theme.space.m
@@ -73,38 +75,110 @@ PanelWindow {
             width: Math.min(implicitWidth, win.width - win.theme.space.m * 2)
             spacing: win.theme.space.m
 
-            ThemedText {
-                height: 32
-                text: I18n.tr("edit.title")
-                font.weight: Font.DemiBold
-            }
-
-            // Selected block.
-            ThemedText {
-                visible: !win.selected
-                height: 32
-                text: I18n.tr("edit.hint")
-                color: win.theme.color.soft
-            }
-
+            // Title, hint or the selected widget's inspector; actions.
             Row {
-                visible: !!win.selected
-                spacing: win.theme.space.s
+                spacing: win.theme.space.m
 
                 ThemedText {
-                    height: 32
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: I18n.tr("edit.title")
+                    font.weight: Font.DemiBold
+                }
+
+                ThemedText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: !win.selected
+                    text: I18n.tr("edit.hint")
+                    color: win.theme.color.soft
+                }
+
+                Item {
+                    width: win.theme.space.l
+                    height: 1
+                }
+
+                Button {
+                    icon: "undo"
+                    enabled: BarEditor.undoStack.length > 0
+                    onClicked: BarEditor.undo()
+                }
+                Button {
+                    icon: "redo"
+                    enabled: BarEditor.redoStack.length > 0
+                    onClicked: BarEditor.redo()
+                }
+                Button {
+                    text: I18n.tr("edit.discard")
+                    onClicked: BarEditor.discard()
+                }
+                Button {
+                    primary: true
+                    icon: "check"
+                    text: I18n.tr("edit.done")
+                    onClicked: BarEditor.done()
+                }
+            }
+
+            // Inspector: sizes as live previews, zone, other screens, remove.
+            Row {
+                visible: !!win.selected
+                spacing: win.theme.space.m
+
+                ThemedText {
+                    anchors.verticalCenter: parent.verticalCenter
                     text: win.selectedType ? I18n.tr(`widget.${win.selectedType}`) : ""
                     color: win.theme.color.accent
                     font.weight: Font.DemiBold
                 }
 
-                Choice {
-                    model: BarEditor.sizes.map(s => ({ value: s, label: I18n.tr(`edit.size.${s}`) }))
-                    value: BarEditor.sizeOf(win.selectedEntry)
-                    onPicked: value => BarEditor.setSize(win.selected, value)
+                Repeater {
+                    model: BarEditor.sizes
+
+                    Rectangle {
+                        id: sizeCard
+
+                        required property string modelData
+                        readonly property bool current: BarEditor.sizeOf(win.selectedEntry) === modelData
+
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: Math.max(preview.width, sizeLabel.implicitWidth) + win.theme.space.m * 2
+                        height: preview.height + sizeLabel.implicitHeight + win.theme.space.s * 3
+                        radius: win.theme.radius.tile
+                        color: current ? Qt.alpha(win.theme.color.accent, 0.16) : sizeArea.containsMouse ? win.theme.color.surface3 : win.theme.color.surface2
+                        border.width: current ? 1 : 0
+                        border.color: win.theme.color.accent
+
+                        WidgetPreview {
+                            id: preview
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            y: win.theme.space.s
+                            type: win.selectedType
+                            size: sizeCard.modelData
+                        }
+
+                        ThemedText {
+                            id: sizeLabel
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: win.theme.space.s
+                            label: true
+                            text: I18n.tr(`edit.size.${sizeCard.modelData}`)
+                            font.pixelSize: win.theme.font.sizeS
+                            color: win.theme.color.soft
+                        }
+
+                        MouseArea {
+                            id: sizeArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: BarEditor.setSize(win.selected, sizeCard.modelData)
+                        }
+                    }
                 }
 
                 Choice {
+                    anchors.verticalCenter: parent.verticalCenter
                     model: BarEditor.zoneNames.map(z => ({ value: z, label: I18n.tr(`settings.zoneShort.${z}`) }))
                     value: win.selected?.zone ?? ""
                     onPicked: value => {
@@ -113,90 +187,115 @@ PanelWindow {
                     }
                 }
 
-                ToolButton {
-                    text: "✕"
-                    onActivated: BarEditor.remove(win.selected)
+                // Other screens with a bar: send the widget there.
+                Repeater {
+                    model: Quickshell.screens.filter(s => s.name !== win.screen?.name && (Config.forScreen(s).mode ?? "normal") === "normal" && !!Config.forScreen(s).bar)
+
+                    Button {
+                        required property ShellScreen modelData
+                        anchors.verticalCenter: parent.verticalCenter
+                        icon: "monitor"
+                        text: I18n.tr("edit.sendTo", { screen: modelData.name })
+                        onClicked: BarEditor.sendTo(win.selected, modelData.name)
+                    }
+                }
+
+                Button {
+                    anchors.verticalCenter: parent.verticalCenter
+                    icon: "delete"
+                    text: I18n.tr("dashEdit.remove")
+                    onClicked: BarEditor.remove(win.selected)
                 }
             }
 
-            // Palette: add a block (to the selected block's zone, else the end).
+            // Palette: widgets not on this bar, with a preview; click adds
+            // to the selected widget's zone (else the end).
             Row {
-                spacing: win.theme.space.xs
+                spacing: win.theme.space.s
 
-                ThemedText {
-                    height: 32
-                    text: I18n.tr("settings.addBlock")
-                    color: win.theme.color.soft
+                TextField {
+                    id: search
+                    anchors.verticalCenter: parent.verticalCenter
+                    implicitWidth: 180
+                    placeholder: I18n.tr("edit.searchWidget")
+                    onEdited: text => win.query = text
                 }
 
                 Repeater {
-                    // Only blocks not on this screen's bar yet.
-                    model: Object.keys(Registry.widgets).filter(t => !BarEditor.typesOn(win.screen).includes(t))
+                    model: Object.keys(Registry.widgets).filter(t => !BarEditor.typesOn(win.screen).includes(t) && I18n.tr(`widget.${t}`).toLowerCase().includes(win.query.trim().toLowerCase()))
 
-                    ToolButton {
+                    Rectangle {
+                        id: chip
+
                         required property string modelData
-                        text: `+ ${I18n.tr(`widget.${modelData}`)}`
-                        onActivated: BarEditor.add(win.screen.name, modelData, win.selected?.zone ?? "right")
+
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: Math.max(chipPreview.width, chipName.implicitWidth) + win.theme.space.m * 2
+                        height: chipPreview.height + chipName.implicitHeight + win.theme.space.s * 3
+                        radius: win.theme.radius.tile
+                        color: chipArea.containsMouse ? win.theme.color.surface3 : win.theme.color.surface2
+
+                        WidgetPreview {
+                            id: chipPreview
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            y: win.theme.space.s
+                            type: chip.modelData
+                            size: "normal"
+                        }
+
+                        ThemedText {
+                            id: chipName
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: win.theme.space.s
+                            text: `+ ${I18n.tr(`widget.${chip.modelData}`)}`
+                            font.pixelSize: win.theme.font.sizeS
+                        }
+
+                        MouseArea {
+                            id: chipArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: BarEditor.add(win.screen.name, chip.modelData, win.selected?.zone ?? "right")
+                        }
                     }
                 }
-            }
 
-            Row {
-                spacing: win.theme.space.xs
-
-                ToolButton {
-                    text: I18n.tr("edit.undo")
-                    enabled: BarEditor.undoStack.length > 0
-                    onActivated: BarEditor.undo()
-                }
-                ToolButton {
-                    text: I18n.tr("edit.redo")
-                    enabled: BarEditor.redoStack.length > 0
-                    onActivated: BarEditor.redo()
-                }
-                ToolButton {
-                    text: I18n.tr("edit.discard")
-                    onActivated: BarEditor.discard()
-                }
-                ToolButton {
-                    text: I18n.tr("edit.done")
-                    primary: true
-                    onActivated: BarEditor.done()
+                ThemedText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: !Object.keys(Registry.widgets).some(t => !BarEditor.typesOn(win.screen).includes(t))
+                    text: I18n.tr("edit.allPlaced")
+                    color: win.theme.color.soft
                 }
             }
         }
     }
 
-    component ToolButton: Rectangle {
-        id: button
+    property string query: ""
 
-        property string text
-        property bool primary: false
-        signal activated
+    // A widget drawn for a preview (not interactive), at a size.
+    component WidgetPreview: Item {
+        id: preview
 
-        readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
+        property string type
+        property string size: "normal"
 
-        width: label.implicitWidth + theme.space.m * 2
-        height: 32
-        radius: theme.radius.full
-        opacity: enabled ? 1 : 0.4
-        color: primary ? theme.color.accent : area.containsMouse ? theme.color.surface3 : theme.color.surface2
+        width: Math.min(loader.implicitWidth, 260)
+        height: Math.max(loader.implicitHeight, 20)
+        clip: true
 
-        ThemedText {
-            id: label
-            anchors.centerIn: parent
-            text: button.text
-            color: button.primary ? button.theme.color.onAccent : button.theme.color.ink
-            font.pixelSize: button.theme.font.sizeS
-        }
+        Loader {
+            id: loader
 
-        MouseArea {
-            id: area
-            anchors.fill: parent
-            hoverEnabled: true
-            enabled: button.enabled
-            cursorShape: Qt.PointingHandCursor
-            onClicked: button.activated()
+            enabled: false
+            source: preview.type ? Registry.url(preview.type) : ""
+            onLoaded: {
+                item.screen = Qt.binding(() => win.screen);
+                item.options = Qt.binding(() => ({ size: preview.size }));
+                if ("crossSize" in item)
+                    item.crossSize = 24;
+            }
         }
     }
 }

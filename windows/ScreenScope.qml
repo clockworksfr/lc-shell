@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import qs.dashboard
 import qs.launcher
 import qs.windows.bar
@@ -123,6 +124,16 @@ Scope {
         DashboardWindow {
             screen: root.modelData
             config: root.profile.dashboard
+            theme: root.theme
+        }
+    }
+
+    // "Bar saved · Undo" after the bar's edit mode, on the focused screen.
+    LazyLoader {
+        active: BarEditor.toastUntil > 0 && root.modelData.name === (Hyprland.focusedMonitor?.name ?? "")
+
+        EditToast {
+            screen: root.modelData
             theme: root.theme
         }
     }

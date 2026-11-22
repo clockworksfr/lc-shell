@@ -63,3 +63,11 @@ Spécification issue de l'étude de design (artifact « lc-shell rendus », ongl
 | Façade | segments VFD / LCD | Doto dans un afficheur | Plex Condensed |
 | Modulaire | échelle de LED | Nixie | Michroma |
 | Matrix | points de 6 px | Doto Matrix | Space Mono majuscules |
+
+## Implémenté (design 5)
+
+- Barre d'outils (`windows/bar/EditToolbar.qml`) : actions (annuler, rétablir, abandonner, terminé) ; inspecteur du widget sélectionné avec ses trois tailles en aperçu vivant, la zone, « Vers <écran> » (autres écrans normaux avec barre ; annulable en une fois) et « Retirer » ; palette des widgets absents avec aperçu et recherche.
+- Après « Terminé » : toast « Barre enregistrée · Annuler » 8 s (`EditToast.qml`, barre de temps, pause au survol) ; « Annuler » remet les barres d'avant l'enregistrement.
+- IPC : `bar select <type>`, `bar resize <compact|normal|extended>`, `bar undoSave`.
+- Pas encore : widget soulevé (échelle, rotation), cible refusée avec sa raison, envoi vers un écran modules (en module), hachures du cadre, feuille du bas au doigt.
+

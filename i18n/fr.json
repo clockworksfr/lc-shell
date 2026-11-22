@@ -342,5 +342,9 @@
   "format.dateNoDay": "d MMMM yyyy",
   "clock.week": "Semaine {n}",
   "theme.facade": "Façade",
-  "theme.modulaire": "Modulaire"
+  "theme.modulaire": "Modulaire",
+  "edit.sendTo": "Vers {screen}",
+  "edit.searchWidget": "Chercher un widget…",
+  "edit.allPlaced": "Tous les widgets sont déjà sur cette barre.",
+  "edit.saved": "Barre enregistrée"
 }
