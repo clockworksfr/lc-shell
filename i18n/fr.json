@@ -355,5 +355,8 @@
   "tray.passive": "En veille",
   "tray.active": "En cours",
   "tray.open": "Ouvrir",
-  "tray.menu": "Menu"
+  "tray.menu": "Menu",
+  "widget.dynamicIsland": "Île dynamique",
+  "island.sharing": "Écran partagé",
+  "island.mic": "Micro · {app}"
 }

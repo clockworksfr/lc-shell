@@ -26,6 +26,8 @@ Singleton {
     // What to show: without the shell's own level probes. Not tracked, so
     // reading names here can't loop.
     readonly property var appStreams: streams.filter(n => !/quickshell/i.test(streamName(n)))
+    // Apps recording from a microphone (the shell's own meters left out).
+    readonly property var captureStreams: Pipewire.nodes.values.filter(n => n.isStream && !n.isSink && !!n.audio).filter(n => !/quickshell/i.test(streamName(n)))
 
     readonly property real volume: sink?.audio?.volume ?? 0
     readonly property bool muted: sink?.audio?.muted ?? false

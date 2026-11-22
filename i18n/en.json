@@ -355,5 +355,8 @@
   "tray.passive": "Idle",
   "tray.active": "Running",
   "tray.open": "Open",
-  "tray.menu": "Menu"
+  "tray.menu": "Menu",
+  "widget.dynamicIsland": "Dynamic island",
+  "island.sharing": "Screen shared",
+  "island.mic": "Mic · {app}"
 }

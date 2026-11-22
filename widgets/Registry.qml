@@ -11,6 +11,7 @@ Singleton {
             battery: "Battery.qml",
             bluetooth: "Bluetooth.qml",
             clock: "Clock.qml",
+            dynamicIsland: "DynamicIsland.qml",
             media: "Media.qml",
             network: "Network.qml",
             notifications: "Notifications.qml",
