@@ -58,8 +58,10 @@ Exemple de réglages :
 - **Clair/sombre** : `variant` = `dark`, `light` ou `auto` ; en `auto`, `schedule` = horaires fixes (`type: "time"`) ou soleil (`type: "sun"`, `latitude`, `longitude`, calcul local).
 - **Barre** : sur n'importe quel bord, `position` = `top`/`bottom`/`left`/`right`. Blocs dans `left`/`center`/`right` (sur une barre verticale : du haut vers le bas ; `start`/`center`/`end` accepté). Rendu fourni par le thème, surchargeable : `style` (`full`/`islands`), `floating`, `margin`, `radius`, `opacity`, `border`, `padding`, `spacing`, `height` (épaisseur horizontale), `verticalWidth` (épaisseur verticale), `screenCorners` (rayon des coins d'écran, 0 = aucun).
 - **Cadre** : `"frame": true` (ou `{ "enabled": true, "thickness": 8 | { "top": …, "left": … }, "innerRadius": 18, "outline": 1 }`) dans la config de la barre. Un anneau entoure le bureau, la barre en est le côté épais (collée, sans îlots) ; les autres côtés réservent leur épaisseur. Dessiné sous les fenêtres, invisible aux clics, retiré en plein écran. Actif par défaut dans Matrix. Les coins d'écran (noirs, façon bord d'écran) suivent : `screenCorners`, ou automatique avec le cadre.
+- **Mode édition** : clic droit sur la barre (hors blocs) ou `bar edit`. Glisser un bloc (curseur d'insertion), « + » en fin de zone pour un nouvel îlot, clic pour sélectionner (taille S/M/L, zone, retrait), palette d'ajout, annuler / rétablir, abandonner, terminé (Échap). Les changements vont dans le profil de l'écran. Une zone peut contenir plusieurs groupes (îlots) : liste de listes dans `settings.json`.
+- **Cartes de survol** : 350 ms sur un bloc affichent sa carte (horloge et calendrier, média et paroles, volume par appli et micro, débit réseau, Bluetooth et batteries, batterie et historique, notifications, tray, espaces de travail) ; un clic ouvre le panneau complet.
 - **Barre verticale** : blocs empilés et compacts (libellé puis valeur, jamais de texte pivoté), horloge sur deux lignes (`verticalFormat`), espaces de travail et tray en colonne. Les panneaux s'ouvrent vers l'intérieur de l'écran ; notifications et OSD s'écartent de la barre.
-- Blocs :
+- Blocs (taille `size` : `compact` / `normal` / `extended`) :
   - `workspaces`, `clock` (`format`), `media` (`maxWidth`) ;
   - `volume` — clic : panneau audio (volumes, périphériques), clic milieu : muet, molette : volume ;
   - `tray` — clic : activer, clic droit : menu, clic milieu : action secondaire (`showPassive`) ;
@@ -171,4 +173,15 @@ L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non a
 | `qs -c lc ipc call wallpaper set <chemin>` / `setHere <chemin>` / `random` / `get` | Fond d'écran (tous / écran actif) |
 | `qs -c lc ipc call settings toggle` / `openPage <page>` / `close` | Paramètres |
 | `qs -c lc ipc call lock lock` / `preview` / `isLocked` | Verrouillage |
+| `qs -c lc ipc call bar edit` / `done` / `discard` | Mode édition de la barre |
+| `qs -c lc ipc call bar panel <bloc>` / `panelOn <bloc> <écran>` / `showCard <bloc>` / `hideCard` / `blocks` / `card` | Panneaux, cartes, diagnostic |
 | `qs -c lc ipc call shell reload` | Rechargement complet (nécessaire après modification d'un `.js`) |
+
+## Développement
+
+- Quickshell recharge le shell à chaque modification d'un fichier du dossier. Un **nouveau singleton** (`pragma Singleton`) ajouté à un module déjà chargé n'est pas pris en compte par ce rechargement : redémarrer le processus.
+- Tester une configuration via `~/.config/lc/settings.json` (hors du dossier du shell) plutôt qu'en modifiant `config/defaults.json`.
+- Les popups (panneaux, cartes de survol) d'une barre ne s'affichent que si la barre a le pointeur : pour des captures, placer le curseur sur la barre avant `bar panelOn` / `bar showCard`.
+- Diagnostic : `bar blocks` (géométrie des blocs), `bar card` (carte de survol), `media info`, `lyrics status`, `qs log -c lc`.
+- PipeWire : ne pas filtrer une liste suivie par `PwObjectTracker` sur des propriétés qui changent une fois le nœud suivi (boucle → plantage du module).
+
