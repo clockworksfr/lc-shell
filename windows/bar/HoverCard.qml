@@ -240,12 +240,10 @@ PanelWindow {
         running: root.screenName === "DP-1"
         onTriggered: {
             d.push(frameTime * 1000);
-            if (d.length % 300 === 0) {
-                const x = d.slice(-280);
+            if (d.length % 120 === 0) {
+                const x = d.slice(-110);
                 console.warn(`cardperf idle tick: avg ${(x.reduce((a, b) => a + b, 0) / x.length).toFixed(1)} ms, max ${Math.max(...x).toFixed(1)} ms`);
             }
-            if (d.length >= 900)
-                stop();
         }
     }
 
