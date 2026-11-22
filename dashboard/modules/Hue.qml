@@ -374,7 +374,7 @@ ModuleBase {
                     readonly property var light: HueBridge.lights[modelData] ?? null
 
                     width: lampColumn.width
-                    height: Math.max(lamps.m.hit, lamps.m.t3 + lamps.m.t4 + 22)
+                    height: Math.max(Math.min(lamps.m.hit, 56), 50)
                     opacity: lamp.light?.reachable ? 1 : 0.45
 
                     Rectangle {
@@ -403,12 +403,12 @@ ModuleBase {
                             width: parent.width
                             elide: Text.ElideRight
                             text: lamp.light?.name ?? ""
-                            font.pixelSize: lamps.m.t3
+                            font.pixelSize: Math.min(lamps.m.t3, 17)
                         }
 
                         ThemedText {
                             text: !lamp.light?.reachable ? I18n.tr("hue.unreachable") : lamp.light.on ? I18n.percent(lamp.light.brightness / 100) : I18n.tr("hue.offLamp")
-                            font.pixelSize: lamps.m.t4
+                            font.pixelSize: Math.min(lamps.m.t4, 13)
                             color: lamps.m.theme.color.soft
                         }
                     }
@@ -494,7 +494,7 @@ ModuleBase {
     component SectionLabel: ThemedText {
         property var m
         label: true
-        font.pixelSize: m.t4
+        font.pixelSize: Math.min(m.t4, 12)
         font.letterSpacing: 1
         font.capitalization: Font.AllUppercase
         color: m.theme.color.soft
@@ -577,15 +577,15 @@ ModuleBase {
                             width: parent.width
                             elide: Text.ElideRight
                             text: roomRow.room?.name ?? ""
-                            font.pixelSize: roomList.m.t3
+                            font.pixelSize: Math.min(roomList.m.t3, 17)
                             font.weight: roomRow.selected ? Font.DemiBold : Font.Normal
                         }
 
                         ThemedText {
                             width: parent.width
                             elide: Text.ElideRight
-                            text: roomRow.room ? `${roomRow.room.on ? I18n.percent(roomRow.room.brightness / 100) : I18n.tr("hue.off")} · ${I18n.tr("hue.lampCount", { n: roomRow.room.lights.length })}` : ""
-                            font.pixelSize: roomList.m.t4
+                            text: roomRow.room ? `${roomRow.room.on ? I18n.percent(roomRow.room.brightness / 100) : I18n.tr("hue.off")} · ${I18n.plural("hue.lampCount", roomRow.room.lights.length).replace("{n}", roomRow.room.lights.length)}` : ""
+                            font.pixelSize: Math.min(roomList.m.t4, 13)
                             color: roomList.m.theme.color.soft
                         }
                     }
@@ -655,7 +655,7 @@ ModuleBase {
                     width: parent.width - lampsCount.width - 10
                     elide: Text.ElideRight
                     text: sections.room?.name ?? ""
-                    font.pixelSize: sections.m.t2
+                    font.pixelSize: Math.min(sections.m.t2, 28)
                     font.weight: Font.DemiBold
                 }
 
@@ -695,7 +695,7 @@ ModuleBase {
                     width: sections.m.t3 * 3.4
                     horizontalAlignment: Text.AlignRight
                     text: sections.room?.on ? I18n.percent(sections.room.brightness / 100) : I18n.tr("hue.off")
-                    font.pixelSize: sections.m.t3
+                    font.pixelSize: Math.min(sections.m.t3, 17)
                     font.features: ({ "tnum": 1 })
                 }
             }

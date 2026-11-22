@@ -710,5 +710,6 @@
   "hue.brightness": "Luminosité",
   "hue.color": "Couleur",
   "hue.scenesCount": "Scènes · {n}",
-  "hue.lampCount": "{n} lampes"
+  "hue.lampCount.one": "{n} lampe",
+  "hue.lampCount.other": "{n} lampes"
 }
