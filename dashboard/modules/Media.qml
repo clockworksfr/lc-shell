@@ -55,7 +55,8 @@ ModuleBase {
         id: chip
 
         parent: root
-        visible: root.inner.y > root.pad + 1 && (Players.list.length > 1 || Players.locked)
+        // Beside the title only when there's room for both.
+        visible: root.inner.y > root.pad + 1 && (Players.list.length > 1 || Players.locked) && root.width >= width + 150
         x: root.width - width - 14
         y: 3
         width: chipRow.implicitWidth + 22
