@@ -21,7 +21,12 @@ TextWidget {
         : (options.format ?? I18n.tr("format.clockNormal"))
 
     // Month and day names follow the shell language (I18n.locale).
-    fullText: I18n.locale.toString(clock.date, format)
+    // Matrix: one rich text, the date part in the mono capitals (soft),
+    // the time in the display font (one width, one baseline).
+    fullText: figure && datePart
+        ? `<span style="font-family:'${theme.font.mono}'; font-size:${Math.round(figureSize * 0.45)}px; letter-spacing:0.6px; color:${theme.color.soft}">${I18n.locale.toString(clock.date, datePart).toUpperCase()}</span>&nbsp;&nbsp;${I18n.locale.toString(clock.date, format)}`
+        : I18n.locale.toString(clock.date, format)
+    textFormat: figure && datePart ? Text.StyledText : Text.PlainText
     // ~2/3 of the bar's thickness (27 px in a 40 px bar, the mockup).
     readonly property int figureSize: Math.round(Math.max(18, theme.bar.height * 0.68))
 
@@ -30,20 +35,6 @@ TextWidget {
     font.weight: figure ? (theme.font.displayWeight ?? Font.Normal) : vertical ? Font.DemiBold : Font.Normal
     font.letterSpacing: figure ? figureSize * 0.02 : 0
     font.features: ({ "tnum": 1 })
-
-    leftPadding: dateLabel.visible ? dateLabel.implicitWidth + figureSize * 0.5 : 0
-
-    ThemedText {
-        id: dateLabel
-        visible: root.figure && !!root.datePart
-        anchors.verticalCenter: parent.verticalCenter
-        text: I18n.locale.toString(clock.date, root.datePart)
-        font.family: root.theme.font.mono
-        font.capitalization: Font.AllUppercase
-        font.letterSpacing: 0.6
-        font.pixelSize: Math.round(root.figureSize * 0.45)
-        color: root.theme.color.soft
-    }
 
     SystemClock {
         id: clock
