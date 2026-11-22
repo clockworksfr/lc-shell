@@ -14,7 +14,11 @@ import qs.theme
 //
 // A layer surface along the whole bar side (input limited to the drawer):
 // a popup can't move while shown, and only shows while the bar has the
-// pointer.
+// pointer. The surface stays mapped (empty input region and nothing drawn
+// while closed): mapping a new one at each opening cost frames. Its depth
+// follows the drawer's (not the 60 % maximum), so each animation frame
+// redraws and recomposites only that band of the screen. The card's
+// content stays loaded between openings of the same type.
 PanelWindow {
     id: root
 
@@ -46,6 +50,16 @@ PanelWindow {
     property real filletHigh: fillet
     // Animate geometry only while switching (not on the first frame).
     property bool morph: false
+    // Depth of the surface (away from the bar): the drawer's, grown as
+    // needed, set back to the drawer's at each opening.
+    property real depth: 0
+    // Card type whose content is loaded (kept after closing).
+    property string cardType
+
+    function fitDepth(grow: bool): void {
+        const need = Math.ceil(bodyHeight + overlap + 2);
+        depth = grow ? Math.max(depth, need) : need;
+    }
 
     function showFor(target: Item): void {
         if (!target)
@@ -64,11 +78,12 @@ PanelWindow {
         probe.start("open");
         close.stop();
         shown = target;
+        cardType = target.type;
         morph = false;
+        fitDepth(reopening);
         place();
         if (!reopening)
             frame.progress = 0;
-        visible = true;
         phase = "opening";
         enter.duration = Motion.ms(theme, "base", screenName);
         enter.easing.type = Motion.easing(theme);
@@ -100,7 +115,12 @@ PanelWindow {
 
     onPhaseChanged: ShellState.card = { visible: phase !== "", type: shown?.type ?? "", screen: screenName }
     // Content size changes (lists loading…): follow.
-    onBodyHeightChanged: if (phase !== "") place()
+    onBodyHeightChanged: {
+        if (phase === "")
+            return;
+        fitDepth(true);
+        place();
+    }
 
     screen: host?.screen ?? null
     anchors {
@@ -116,23 +136,24 @@ PanelWindow {
         left: edge === "left" ? (host ? host.origin().x + host.width - overlap : 0) : 0
         right: edge === "right" ? (host ? (host.screen.width - host.origin().x) - overlap : 0) : 0
     }
-    implicitWidth: sideways ? cardWidth + overlap : 0
-    implicitHeight: sideways ? 0 : maxBody + overlap
+    implicitWidth: sideways ? Math.max(1, depth) : 0
+    implicitHeight: sideways ? 0 : Math.max(1, depth)
 
-    visible: false
+    visible: true
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "lc-card"
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    // Only the drawer takes the pointer.
+    // Only the drawer takes the pointer (nothing while closed).
     mask: Region {
-        item: frame
+        item: root.phase !== "" ? frame : null
     }
 
     DrawerFrame {
         id: frame
 
+        visible: root.phase !== ""
         edge: root.edge
         fillet: root.fillet
         filletLow: root.filletLow
@@ -199,7 +220,7 @@ PanelWindow {
                 x: root.theme.space.l
                 y: root.theme.space.l
                 width: root.cardWidth - root.theme.space.l * 2
-                source: root.shown ? Registry.url(root.shown.type) : ""
+                source: root.cardType ? Registry.url(root.cardType) : ""
 
                 onLoaded: {
                     item.block = Qt.binding(() => root.shown?.item ?? null);
@@ -267,9 +288,10 @@ PanelWindow {
         easing.type: Easing.InCubic
         onFinished: {
             root.phase = "";
-            root.visible = false;
             root.morph = false;
             root.shown = null;
+            // A 1 px band while closed: no invisible layer over the windows.
+            root.depth = 1;
             root.slot = null;
             if (root.host?.drawerSpan)
                 root.host.drawerSpan = null;
@@ -290,6 +312,8 @@ PanelWindow {
             script: {
                 root.morph = !Motion.reduced;
                 root.shown = root.slot;
+                root.cardType = root.slot?.type ?? root.cardType;
+                root.fitDepth(true);
                 root.place();
             }
         }
