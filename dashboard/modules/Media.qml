@@ -262,7 +262,8 @@ ModuleBase {
             withProgress: root.progressInside
 
             Layout.fillHeight: root.spectrumInside
-            big: root.shape !== "narrow"
+            // In a screen, a moderate title leaves room for the spectrum.
+            big: root.shape !== "narrow" && !root.spectrumInside
             Layout.fillWidth: true
         }
 
@@ -370,8 +371,11 @@ ModuleBase {
         }
 
         ColumnLayout {
+            // The screen (with the spectrum inside) takes the line's room.
+            Layout.fillWidth: root.spectrumInside
             Layout.preferredWidth: root.cw * 0.3
-            Layout.maximumWidth: root.cw * 0.3
+            Layout.maximumWidth: root.spectrumInside ? -1 : root.cw * 0.3
+            Layout.fillHeight: root.spectrumInside
             Layout.alignment: Qt.AlignVCenter
             spacing: root.gap / 2
 
