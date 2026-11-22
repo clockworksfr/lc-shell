@@ -5,9 +5,9 @@ import qs.components
 import qs.services
 import qs.theme
 
-// The bar's hover card: one per bar, moved from block to block. Opens
-// toward the inside of the screen, centered on the block, doesn't take the
-// keyboard. Content comes from cards/<Type>Card.qml.
+// The bar's hover card: one per bar, moved from widget to widget. A drawer
+// attached to the bar (fillets, slides out), centered on the widget,
+// doesn't take the keyboard. Content comes from cards/<Type>Card.qml.
 PopupWindow {
     id: root
 
@@ -17,7 +17,10 @@ PopupWindow {
     readonly property bool hovered: hover.hovered
 
     readonly property var theme: host?.theme ?? Themes.fallback
-    readonly property int gap: theme.space.s
+    // A drawer attached to the bar (no gap), with fillets on both ends.
+    readonly property int gap: 0
+    readonly property real fillet: theme.radius.control
+    readonly property bool sideways: host?.edge === "left" || host?.edge === "right"
 
     function showFor(target: Item): void {
         if (visible && slot === target)
@@ -32,8 +35,8 @@ PopupWindow {
             if (root.slot !== target)
                 return;
             root.place();
-            content.opacity = switching ? 0.4 : 0;
-            content.scale = switching ? 1 : 0.96;
+            content.opacity = switching ? 0.4 : 1;
+            frame.progress = switching ? 1 : 0;
             root.visible = true;
             if (switching)
                 swap.restart();
@@ -59,19 +62,19 @@ PopupWindow {
         let side;
         switch (host.edge) {
         case "bottom":
-            rect = Qt.rect(p.x, -gap, w, 0);
+            rect = Qt.rect(p.x - fillet, -gap, w + fillet * 2, 0);
             side = Edges.Top;
             break;
         case "left":
-            rect = Qt.rect(host.width + gap, p.y, 0, h);
+            rect = Qt.rect(host.width + gap, p.y - fillet, 0, h + fillet * 2);
             side = Edges.Right;
             break;
         case "right":
-            rect = Qt.rect(-gap, p.y, 0, h);
+            rect = Qt.rect(-gap, p.y - fillet, 0, h + fillet * 2);
             side = Edges.Left;
             break;
         default:
-            rect = Qt.rect(p.x, host.height + gap, w, 0);
+            rect = Qt.rect(p.x - fillet, host.height + gap, w + fillet * 2, 0);
             side = Edges.Bottom;
         }
         anchor.rect.x = rect.x;
@@ -85,29 +88,21 @@ PopupWindow {
 
     anchor.window: host
     color: "transparent"
-    implicitWidth: 380
-    implicitHeight: Math.min(frame.implicitHeight, (host?.screen?.height ?? 1000) * 0.6)
+    readonly property real bodyHeight: Math.min(loader.implicitHeight + theme.space.l * 2, (host?.screen?.height ?? 1000) * 0.6)
+    implicitWidth: sideways ? 380 : 380 + fillet * 2
+    implicitHeight: sideways ? bodyHeight + fillet * 2 : bodyHeight
 
     Item {
         id: content
 
         anchors.fill: parent
-        transformOrigin: root.host?.edge === "bottom" ? Item.Bottom : Item.Top
 
-        Rectangle {
+        DrawerFrame {
             id: frame
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            implicitHeight: loader.implicitHeight + root.theme.space.l * 2
-            height: parent.height
-            radius: root.theme.radius.panel
-            color: root.theme.color.surface
-            border.width: root.theme.border.width
-            border.color: root.theme.color.line
-            clip: true
-
-            Glass {}
+            anchors.fill: parent
+            edge: root.host?.edge ?? "top"
+            fillet: root.fillet
 
             Loader {
                 id: loader
@@ -129,22 +124,15 @@ PopupWindow {
         }
     }
 
-    ParallelAnimation {
+    // Opening: slides out of the bar.
+    NumberAnimation {
         id: appear
-        NumberAnimation {
-            target: content
-            property: "opacity"
-            to: 1
-            duration: 140
-            easing.type: Easing.OutCubic
-        }
-        NumberAnimation {
-            target: content
-            property: "scale"
-            to: 1
-            duration: 140
-            easing.type: Easing.OutCubic
-        }
+        target: frame
+        property: "progress"
+        from: 0
+        to: 1
+        duration: root.theme.motion.duration
+        easing.type: Easing.OutCubic
     }
 
     NumberAnimation {

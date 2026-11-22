@@ -4,12 +4,12 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.theme
 
-// Panel opened from a bar block, toward the inside of the screen, past the
-// bar's inner edge, centered on the block (kept on screen). A layer
-// surface rather than a popup: popups of a bar only show while the bar has
-// the pointer, which breaks panels opened from a key bind. Clicking outside
-// closes it (Hyprland focus grab). Open/close with toggle(); children go
-// into a Column.
+// Panel of a bar widget: a drawer coming out of the bar (attached to its
+// inner edge, concave fillets, slides out and back), centered on the
+// widget and kept on screen. A layer surface rather than a popup: popups of
+// a bar only show while the bar has the pointer, which breaks panels opened
+// from a key bind. Clicking outside closes it (Hyprland focus grab).
+// Open/close with toggle(); children go into a Column.
 PanelWindow {
     id: root
 
@@ -21,7 +21,9 @@ PanelWindow {
     readonly property var theme: bar?.theme ?? Themes.fallback
     readonly property string edge: bar?.edge ?? "top"
     readonly property bool sideways: edge === "left" || edge === "right"
-    readonly property int gap: theme.space.s
+    // Attached to the bar: no gap.
+    readonly property int gap: 0
+    readonly property real fillet: theme.radius.control
 
     // Offset along the bar (from the screen's left or top edge).
     property real along: 0
@@ -30,11 +32,22 @@ PanelWindow {
 
     function toggle(): void {
         if (visible) {
-            visible = false;
+            close();
             return;
         }
         place();
+        drawer.progress = 0;
         visible = true;
+        slide.to = 1;
+        slide.restart();
+    }
+
+    // Slides back into the bar, then hides.
+    function close(): void {
+        if (!visible || (slide.running && slide.to === 0))
+            return;
+        slide.to = 0;
+        slide.restart();
     }
 
     function place(): void {
@@ -46,7 +59,8 @@ PanelWindow {
         const o = bar.origin();
         const ox = o.x;
         const oy = o.y;
-        const clamp = (v, size, max) => Math.max(gap, Math.min(v, max - size - gap));
+        // Kept on screen (8 px from the edges).
+        const clamp = (v, size, max) => Math.max(8, Math.min(v, max - size - 8));
         if (sideways) {
             along = clamp(oy + p.y + anchorItem.height / 2 - implicitHeight / 2, implicitHeight, scr.height);
             across = edge === "left" ? ox + bar.width + gap : scr.width - ox + gap;
@@ -72,8 +86,9 @@ PanelWindow {
 
     visible: false
     color: "transparent"
-    implicitWidth: column.implicitWidth + theme.space.m * 2
-    implicitHeight: column.implicitHeight + theme.space.m * 2
+    // The drawer body plus room for the fillets on both ends along the bar.
+    implicitWidth: column.implicitWidth + theme.space.m * 2 + (sideways ? 0 : fillet * 2)
+    implicitHeight: column.implicitHeight + theme.space.m * 2 + (sideways ? fillet * 2 : 0)
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "lc-panel"
@@ -87,17 +102,24 @@ PanelWindow {
         active: root.visible
         // The bar stays usable: clicking the block again toggles the panel.
         windows: root.bar ? [root, root.bar] : [root]
-        onCleared: root.visible = false
+        onCleared: root.close()
     }
 
-    Rectangle {
-        anchors.fill: parent
-        radius: root.theme.radius.panel
-        color: root.theme.color.surface
-        border.width: root.theme.border.width
-        border.color: root.theme.color.line
+    NumberAnimation {
+        id: slide
+        target: drawer
+        property: "progress"
+        duration: root.theme.motion.duration + 40
+        easing.type: Easing.OutCubic
+        onFinished: if (to === 0) root.visible = false
+    }
 
-        Glass {}
+    DrawerFrame {
+        id: drawer
+
+        anchors.fill: parent
+        edge: root.edge
+        fillet: root.fillet
 
         Column {
             id: column
