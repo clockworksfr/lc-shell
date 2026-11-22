@@ -7,8 +7,8 @@ import qs.theme
 // An application icon (tray, active window, cards) that can follow the
 // theme: "native" colors, "tinted" (duotone in the accent) or "mono" (a
 // silhouette in the ink; the app's -symbolic icon when the theme has one).
-// Setting appearance.appIcons, else the theme's style.appIcons. Status
-// badges (saturated red) keep their color. Shader: assets/shaders.
+// Setting appearance.appIcons, else the theme's style.appIcons.
+// Shader: assets/shaders (tools/gen-shaders.sh).
 Item {
     id: root
 

@@ -5,7 +5,8 @@
 //          with the original by `amount`.
 // mode 2 = mono: a silhouette in `tint` (the ink); lighter parts of the
 //          icon are fainter so its inner shapes stay readable.
-// Saturated reds (status badges) keep their color in both modes.
+// Badges drawn inside an icon can't be told apart from a red icon here:
+// they follow the recolor like the rest.
 
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
@@ -29,13 +30,10 @@ void main() {
     }
     vec3 rgb = c.rgb / c.a;
     float lum = dot(rgb, vec3(0.2126, 0.7152, 0.0722));
-    bool badge = rgb.r > 0.75 && rgb.g < 0.35 && rgb.b < 0.35;
 
     vec3 outRgb;
     float outA = c.a;
-    if (badge) {
-        outRgb = rgb;
-    } else if (mode < 1.5) {
+    if (mode < 1.5) {
         vec3 dark = tint.rgb * 0.3;
         vec3 light = mix(tint.rgb, vec3(1.0), 0.45);
         outRgb = mix(rgb, mix(dark, light, lum), amount);
