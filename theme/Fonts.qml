@@ -23,6 +23,13 @@ Singleton {
         "outfit/Outfit-SemiBold.ttf",
         "geist-mono/GeistMono-Regular.ttf",
         "geist-mono/GeistMono-Medium.ttf",
+        "space-grotesk/SpaceGrotesk-Regular.ttf",
+        "space-grotesk/SpaceGrotesk-Medium.ttf",
+        "space-grotesk/SpaceGrotesk-Bold.ttf",
+        "space-mono/SpaceMono-Regular.ttf",
+        "space-mono/SpaceMono-Bold.ttf",
+        "doto/DotoMatrix.ttf",
+        "doto/DotoLCD.ttf",
         "symbols/lcSymbols-Outlined.ttf",
         "symbols/lcSymbols-Filled.ttf"
     ]

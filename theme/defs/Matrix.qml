@@ -5,8 +5,8 @@ import Quickshell
 
 // Matrix: monochrome, dot-matrix numerals, a single red accent
 // (Nothing Phone spirit). simon's own DA, docs/themes.md section 5.
-// Fonts (Doto, Space Grotesk, Space Mono) are not bundled yet: the
-// families fall back to the system defaults.
+// Fonts bundled: Space Grotesk, Space Mono, Doto Matrix (static Doto,
+// wght 900, ROND 100, made with tools/instance-font.py).
 Singleton {
     readonly property var definition: ({
             id: "matrix",
@@ -47,7 +47,8 @@ Singleton {
             font: {
                 family: "Space Grotesk",
                 mono: "Space Mono",
-                display: "Doto"
+                display: "Doto Matrix",
+                displayWeight: 400
             },
             radius: {
                 control: 999,
