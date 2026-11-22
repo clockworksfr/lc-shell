@@ -31,11 +31,8 @@ hl.on("hyprland.start", function()
     -- Presse-papier : plus de cliphist, lc-shell enregistre lui-même
     -- l'historique (wl-paste --watch lancé par le shell).
 
-    -- Panneau Philips Hue : configuration QuickShell INDÉPENDANTE
-    -- (~/.config/quickshell/hue).
-    -- ⚠️ `qs` est le binaire de QuickShell, et lc-shell tourne dessus aussi :
-    -- un `pkill qs` tue les deux. Pour ne viser que ce panneau : `qs -c hue kill`.
-    hl.exec_cmd("qs -c hue")
+    -- Philips Hue : dans lc-shell (module Lumières, widget « lights »,
+    -- Super+U). L'ancien panneau `qs -c hue` n'est plus lancé.
 end)
 
 --- Raccourcis
@@ -43,8 +40,9 @@ end)
 bind(mod .. " + Space", lc("launcher"), "Lanceur d'applications")
 bind(mod .. " + A",     lc("launcher"), "Lanceur d'applications")
 
--- Super+U : « U » et « Hue » se prononcent pareil.
-bind(mod .. " + U",         exec("qs -c hue ipc call panel toggle"), "Panneau Philips Hue")
+-- Super+U : « U » et « Hue » se prononcent pareil. Le tiroir du widget
+-- Lumières sur l'écran actif, ou un panneau centré s'il n'est pas dans la barre.
+bind(mod .. " + U",         exec("qs -c lc ipc call bar panel lights"), "Lumières (Philips Hue)")
 bind(mod .. " + SHIFT + U", exec("~/.local/bin/huectl group 1 toggle"), "Hue : Salon on/off")
 
 -- Caelestia avait une sidebar et un dashboard ; lc-shell ouvre à la place le
