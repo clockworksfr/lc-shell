@@ -36,7 +36,7 @@ PanelWindow {
         target: Showcase
 
         function onSnapshotRequested(path: string): void {
-            win.contentItem.grabToImage(result => result.saveToFile(`${path}-${win.screen.name}.png`));
+            canvas.grabToImage(result => result.saveToFile(`${path}-${win.screen.name}.png`));
         }
     }
 
@@ -50,50 +50,62 @@ PanelWindow {
         }
     }
 
-    Repeater {
-        model: win.cells
+    // Everything drawn (also what `snapshot` renders).
+    Item {
+        id: canvas
 
-        Item {
-            id: cell
+        anchors.fill: parent
 
-            required property var modelData
-            readonly property var rect: Dashboard.rect(modelData, win.grid, win.width, win.height)
-            readonly property bool framed: !Registry.frameless.includes(modelData.type)
+        Rectangle {
+            anchors.fill: parent
+            color: win.theme.color.bg
+        }
 
-            x: rect.x
-            y: rect.y
-            width: rect.width
-            height: rect.height
+        Repeater {
+            model: win.cells
 
-            // Page change: modules fade in, column by column.
-            opacity: 0
-            Component.onCompleted: cellEnter.start()
+            Item {
+                id: cell
 
-            SequentialAnimation {
-                id: cellEnter
-                PauseAnimation {
-                    duration: Motion.reduced ? 0 : (cell.modelData.x ?? 0) * (win.theme.motion.stagger ?? 20)
+                required property var modelData
+                readonly property var rect: Dashboard.rect(modelData, win.grid, win.width, win.height)
+                readonly property bool framed: !Registry.frameless.includes(modelData.type)
+
+                x: rect.x
+                y: rect.y
+                width: rect.width
+                height: rect.height
+
+                // Page change: modules fade in, column by column.
+                opacity: 0
+                Component.onCompleted: cellEnter.start()
+
+                SequentialAnimation {
+                    id: cellEnter
+                    PauseAnimation {
+                        duration: Motion.reduced ? 0 : (cell.modelData.x ?? 0) * (win.theme.motion.stagger ?? 20)
+                    }
+                    NumberAnimation {
+                        target: cell
+                        property: "opacity"
+                        to: 1
+                        duration: Motion.ms(win.theme, "slow", win.screen?.name ?? "")
+                        easing.type: Easing.OutCubic
+                    }
                 }
-                NumberAnimation {
-                    target: cell
-                    property: "opacity"
-                    to: 1
-                    duration: Motion.ms(win.theme, "slow", win.screen?.name ?? "")
-                    easing.type: Easing.OutCubic
-                }
-            }
 
-            // Modules draw their own frame (ModuleBase / ModulePanel).
-            Loader {
-                anchors.fill: parent
-                // Modules pad themselves (ModuleBase: in proportion to the cell).
-                anchors.margins: 0
-                source: Registry.url(cell.modelData.type)
-                onLoaded: {
-                    item.screen = Qt.binding(() => win.screen);
-                    item.options = Qt.binding(() => cell.modelData);
-                    if ("type" in item)
-                        item.type = Qt.binding(() => cell.modelData.type);
+                // Modules draw their own frame (ModuleBase / ModulePanel).
+                Loader {
+                    anchors.fill: parent
+                    // Modules pad themselves (ModuleBase: in proportion to the cell).
+                    anchors.margins: 0
+                    source: Registry.url(cell.modelData.type)
+                    onLoaded: {
+                        item.screen = Qt.binding(() => win.screen);
+                        item.options = Qt.binding(() => cell.modelData);
+                        if ("type" in item)
+                            item.type = Qt.binding(() => cell.modelData.type);
+                    }
                 }
             }
         }
