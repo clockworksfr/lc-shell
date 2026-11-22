@@ -6,7 +6,9 @@ import qs.theme
 
 // Album art in the theme's language (style.cover): "square" (rounded),
 // "sphere" (a round planet with a halo), "disc" (round, turning while
-// playing, a ring of dots following the sound),
+// playing, a ring of dots following the sound), "inset" (square, in a
+// recessed black frame: facade), "screwed" (square, 3 px corners, screwed
+// to the panel: modulaire),
 // "none" (no art: the theme shows text in its display instead; zero size).
 Item {
     id: root
@@ -39,13 +41,56 @@ Item {
         color: Qt.alpha(root.theme.color.accent, 0.16)
     }
 
+    // Facade: recessed frame (black edge, light lower bevel).
+    Rectangle {
+        visible: root.look === "inset"
+        anchors.fill: parent
+        radius: 4
+        color: "#030505"
+        border.width: 2
+        border.color: "black"
+
+        Rectangle {
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.margins: 2
+            height: 1
+            color: Qt.alpha("white", 0.12)
+        }
+    }
+
+    // Modulaire: a plate with four screws.
+    Rectangle {
+        visible: root.look === "screwed"
+        anchors.fill: parent
+        radius: 3
+        color: Qt.darker(root.theme.color.surface, 1.15)
+        border.width: 1
+        border.color: Qt.alpha("black", 0.4)
+
+        Repeater {
+            model: 4
+
+            Rectangle {
+                required property int index
+                width: 5
+                height: 5
+                radius: 2.5
+                x: index % 2 === 0 ? 0.5 : root.size - 5.5
+                y: index < 2 ? 0.5 : root.size - 5.5
+                color: Qt.darker(root.theme.color.surface, 1.5)
+            }
+        }
+    }
+
     ClippingRectangle {
         id: art
 
         anchors.centerIn: parent
-        width: root.look === "disc" ? root.size * 0.82 : root.size
+        width: root.look === "disc" ? root.size * 0.82 : root.look === "inset" || root.look === "screwed" ? root.size - 12 : root.size
         height: width
-        radius: root.look === "square" ? root.theme.radius.tile : width / 2
+        radius: root.look === "square" ? root.theme.radius.tile : root.look === "inset" ? 2 : root.look === "screwed" ? 3 : width / 2
         color: root.theme.color.surface2
 
         Image {

@@ -117,7 +117,7 @@ Singleton {
                 brushed: true,
                 screws: true,
                 module: "modulaire",
-                cover: "none",
+                cover: "screwed",
                 ring: "knob",
                 display: "lcd"
             }

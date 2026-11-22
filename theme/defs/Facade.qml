@@ -110,7 +110,7 @@ Singleton {
                 ghostDigits: true,
                 scanlines: true,
                 module: "facade",
-                cover: "none",
+                cover: "inset",
                 ring: "vu",
                 display: "vfd",
                 screws: true
