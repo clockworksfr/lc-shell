@@ -10,6 +10,7 @@ import qs.i18n
 import qs.launcher
 import qs.lock
 import qs.windows
+import qs.windows.hue
 import qs.services
 import qs.settings
 import qs.theme
@@ -27,6 +28,7 @@ ShellRoot {
     LauncherIpc {}
     DashboardIpc {}
     Shortcuts {}
+    HueFallback {}
     ThemeIpc {}
     I18nIpc {}
     SettingsIpc {}

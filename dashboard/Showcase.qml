@@ -15,7 +15,7 @@ Singleton {
     // Reviews: the quick-settings panel opened without a click (and without
     // grabbing the keyboard).
     property bool togglesPanel: false
-    readonly property var types: ["clock", "media", "weather", "system", "lyrics", "vu", "workspaces", "toggles"]
+    readonly property var types: ["clock", "media", "weather", "system", "lyrics", "vu", "workspaces", "toggles", "hue"]
 
     function next(): void {
         const index = types.indexOf(type);

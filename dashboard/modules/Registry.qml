@@ -7,6 +7,7 @@ import Quickshell
 Singleton {
     readonly property var modules: ({
             clock: "Clock.qml",
+            hue: "Hue.qml",
             lyrics: "Lyrics.qml",
             media: "Media.qml",
             showcase: "ShowcaseButton.qml",

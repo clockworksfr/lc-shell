@@ -13,6 +13,7 @@ battery_6_bar
 battery_alert
 battery_charging_full
 battery_full
+bed
 bedtime
 bluetooth
 bluetooth_connected
@@ -39,6 +40,7 @@ dark_mode
 dashboard
 delete
 description
+desk
 desktop_windows
 devices
 do_not_disturb_on
@@ -59,7 +61,9 @@ image
 ink_highlighter
 keyboard
 keyboard_return
+kitchen
 lan
+lightbulb
 light_mode
 link
 lock
@@ -120,6 +124,7 @@ thunderstorm
 title
 toolbar
 tune
+tv
 undo
 upload
 videocam
@@ -133,6 +138,7 @@ vpn_key
 wallpaper
 water_drop
 weather_snowy
+weekend
 wifi
 wifi_1_bar
 wifi_2_bar
