@@ -96,13 +96,16 @@ ModuleBase {
 
         property var m
         property var ch_
+        // dB figures under the bar (last row, when there is room).
+        property bool withScale: false
         readonly property string look: m.look
+        readonly property real rowHeight: Math.max(m.t3 * 1.6, 18)
 
-        implicitHeight: Math.max(m.t3 * 1.6, 18)
+        implicitHeight: rowHeight + (withScale ? m.t4 * 1.6 : 0)
 
         ThemedText {
             id: name
-            anchors.verticalCenter: parent.verticalCenter
+            y: (row.rowHeight - height) / 2
             width: row.m.t3 * 1.4
             label: true
             text: row.ch_.name
@@ -113,7 +116,7 @@ ModuleBase {
         ThemedText {
             id: value
             anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
+            y: (row.rowHeight - height) / 2
             width: row.m.t3 * 2.6
             horizontalAlignment: Text.AlignRight
             text: row.m.label(row.ch_.db)
@@ -129,8 +132,8 @@ ModuleBase {
             anchors.left: name.right
             anchors.right: value.left
             anchors.rightMargin: row.m.gap / 2
-            anchors.verticalCenter: parent.verticalCenter
-            height: row.look === "constellation" ? 10 : Math.max(8, row.height * 0.6)
+            y: (row.rowHeight - height) / 2
+            height: row.look === "constellation" ? 10 : Math.max(8, row.rowHeight * 0.6)
 
             // classic: segments.
             Row {
@@ -236,30 +239,18 @@ ModuleBase {
                 }
             }
         }
-    }
-
-    // dB scale under rows (when there is room).
-    component Scale: Item {
-        id: scale
-
-        property var m
-        readonly property real padLeft: m ? m.t3 * 1.4 : 0
-        readonly property real padRight: m ? m.t3 * 2.6 + m.gap / 2 : 0
-
-        implicitHeight: m ? m.t4 * 1.4 : 0
 
         Repeater {
-            model: [-40, -30, -20, -10, -3, 0]
+            model: row.withScale ? [-40, -30, -20, -10, -3, 0] : []
 
             ThemedText {
                 required property int modelData
-                readonly property var m: scale.m
-                visible: !!m
-                x: m ? scale.padLeft + (scale.width - scale.padLeft - scale.padRight) * m.frac(modelData) - width / 2 : 0
+                x: bar.x + bar.width * row.m.frac(modelData) - width / 2
+                y: row.rowHeight + 2
                 text: modelData === 0 ? "0" : `−${Math.abs(modelData)}`
-                font.family: m ? m.theme.font.mono : "monospace"
-                font.pixelSize: m ? m.t4 : 11
-                color: !m ? "grey" : modelData >= -3 ? (m.theme.color.signal ?? m.theme.color.urgent) : m.theme.color.soft
+                font.family: row.m.theme.font.mono
+                font.pixelSize: row.m.t4
+                color: modelData >= -3 ? (row.m.theme.color.signal ?? row.m.theme.color.urgent) : row.m.theme.color.soft
             }
         }
     }
@@ -288,16 +279,12 @@ ModuleBase {
 
             LevelRow {
                 required property var modelData
+                required property int index
                 m: root
                 ch_: modelData
+                withScale: root.roomy && index === root.channels.length - 1
                 Layout.fillWidth: true
             }
-        }
-
-        Scale {
-            visible: root.roomy
-            m: root
-            Layout.fillWidth: true
         }
 
         Item {
@@ -311,14 +298,19 @@ ModuleBase {
     GridLayout {
         visible: root.look === "facade"
         anchors.fill: parent
-        columns: root.shape === "tall" || root.shape === "narrow" ? 1 : root.shape === "tiny" ? 1 : 3
+        // Wide / strip: dials then the VFD; box: dials over the VFD;
+        // tall / narrow / tiny: stacked.
+        columns: root.shape === "wide" || root.shape === "strip" ? 3 : root.shape === "box" ? 2 : 1
         columnSpacing: root.gap
         rowSpacing: root.gap
 
         VuDial {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.maximumWidth: Math.max(140, root.cw * (root.shape === "tall" || root.shape === "narrow" || root.shape === "tiny" ? 1 : 0.3))
+            Layout.maximumWidth: Math.max(140, root.cw * (root.shape === "wide" || root.shape === "strip" ? 0.3 : 1))
+            // A dial face keeps its proportions (about 1.5 : 1).
+            Layout.maximumHeight: width / 1.4
+            Layout.alignment: Qt.AlignCenter
             db: root.levelL
             channel: I18n.tr("vu.left")
         }
@@ -327,7 +319,9 @@ ModuleBase {
             visible: root.shape !== "tiny"
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.maximumWidth: Math.max(140, root.cw * (root.shape === "tall" || root.shape === "narrow" ? 1 : 0.3))
+            Layout.maximumWidth: Math.max(140, root.cw * (root.shape === "wide" || root.shape === "strip" ? 0.3 : 1))
+            Layout.maximumHeight: width / 1.4
+            Layout.alignment: Qt.AlignCenter
             db: root.levelR
             channel: I18n.tr("vu.right")
         }
@@ -336,6 +330,7 @@ ModuleBase {
             visible: root.shape !== "tiny" && root.shape !== "narrow"
             Layout.fillWidth: true
             Layout.fillHeight: true
+            Layout.columnSpan: root.shape === "box" ? 2 : 1
 
             AudioSpectrum {
                 anchors.fill: parent
