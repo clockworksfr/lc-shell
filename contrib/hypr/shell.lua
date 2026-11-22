@@ -26,7 +26,10 @@ local lc = function(name) return hl.dsp.global("lc:" .. name) end
 -- Lancé explicitement parce qu'on est en session Hyprland "nue"
 -- (graphical-session.target inactif, cf. hyprland.lua).
 hl.on("hyprland.start", function()
-    hl.exec_cmd("qs -c lc -d")
+    -- lc-shell, relancé s'il s'arrête (plantage, `kill`) : indispensable au
+    -- verrouillage (allow_session_lock_restore + reverrouillage au redémarrage).
+    -- Pour l'arrêter vraiment : pkill -f lc-shell-loop, puis qs -c lc kill.
+    hl.exec_cmd("~/.config/hypr/lc-shell-loop.sh")
 
     -- Presse-papier : plus de cliphist, lc-shell enregistre lui-même
     -- l'historique (wl-paste --watch lancé par le shell).
