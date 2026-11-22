@@ -29,7 +29,8 @@ Singleton {
         { prefix: "/", id: "files" },
         { prefix: "=", id: "calc" },
         { prefix: ">", id: "actions" },
-        { prefix: "@", id: "wallpapers" }
+        { prefix: "@", id: "wallpapers" },
+        { prefix: "+", id: "clipboard" }
     ]
     readonly property var mode: modes.find(m => text.startsWith(m.prefix)) ?? null
     readonly property string modeId: mode?.id ?? "all"
@@ -54,6 +55,9 @@ Singleton {
             break;
         case "wallpapers":
             list = WallpaperProvider.results;
+            break;
+        case "clipboard":
+            list = ClipboardProvider.results;
             break;
         default:
             list = [...CalcProvider.results, ...AppsProvider.results, ...ActionsProvider.results];

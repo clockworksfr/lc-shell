@@ -190,6 +190,14 @@ Scope {
     IpcHandler {
         target: "shell"
 
+        // Screenshots: a zone (screens frozen) or the focused screen.
+        function screenshot(): void {
+            Screenshot.region();
+        }
+        function screenshotScreen(): void {
+            Screenshot.screen();
+        }
+
         // Full reload; also picks up .js changes, which hot reload ignores.
         function reload(): void {
             Quickshell.reload(true);

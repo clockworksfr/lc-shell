@@ -8,6 +8,7 @@ import qs.windows.dashboard
 import qs.windows.launcher
 import qs.windows.notifications
 import qs.windows.osd
+import qs.windows.screenshot
 import qs.windows.wallpaper
 import qs.services
 import qs.theme
@@ -125,6 +126,15 @@ Scope {
             screen: root.modelData
             config: root.profile.dashboard
             theme: root.theme
+        }
+    }
+
+    // Screenshot of a zone: the screen shows a still of itself meanwhile.
+    LazyLoader {
+        active: Screenshot.freezing
+
+        FreezeWindow {
+            screen: root.modelData
         }
     }
 

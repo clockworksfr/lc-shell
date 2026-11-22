@@ -2,6 +2,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import qs.launcher
+import qs.lock
+import qs.theme
 import qs.services
 import qs.settings
 
@@ -57,5 +59,66 @@ Scope {
         name: "dnd"
         description: "Toggle do not disturb"
         onPressed: NotificationCenter.setDnd(!NotificationCenter.dnd)
+    }
+
+    GlobalShortcut {
+        appid: "lc"
+        name: "clipboard"
+        description: "Launcher on the clipboard history"
+        onPressed: Launcher.open("+")
+    }
+
+    GlobalShortcut {
+        appid: "lc"
+        name: "screenshot"
+        description: "Screenshot of a zone (screens frozen)"
+        onPressed: Screenshot.region()
+    }
+
+    GlobalShortcut {
+        appid: "lc"
+        name: "screenshotScreen"
+        description: "Screenshot of the focused screen"
+        onPressed: Screenshot.screen()
+    }
+
+    GlobalShortcut {
+        appid: "lc"
+        name: "notifications"
+        description: "Notifications panel"
+        onPressed: ShellState.panelRequested("notifications", "")
+    }
+
+    GlobalShortcut {
+        appid: "lc"
+        name: "media"
+        description: "Media card (player, lyrics)"
+        onPressed: ShellState.card?.visible ? ShellState.cardRequested("", "") : ShellState.cardRequested("media", "")
+    }
+
+    GlobalShortcut {
+        appid: "lc"
+        name: "toggleVariant"
+        description: "Light / dark"
+        onPressed: Themes.toggleVariant()
+    }
+
+    GlobalShortcut {
+        appid: "lc"
+        name: "nextTheme"
+        description: "Next theme"
+        onPressed: {
+            const ids = Object.keys(Themes.definitions);
+            const id = ids[(ids.indexOf(Themes.themeFor("normal")) + 1) % ids.length];
+            Themes.setTheme("normal", id);
+            Themes.setTheme("modules", id);
+        }
+    }
+
+    GlobalShortcut {
+        appid: "lc"
+        name: "lock"
+        description: "Lock the session"
+        onPressed: Lock.lock()
     }
 }

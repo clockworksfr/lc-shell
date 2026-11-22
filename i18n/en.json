@@ -371,5 +371,21 @@
   "media.next": "NEXT",
   "vu.left": "L",
   "vu.right": "R",
-  "module.workspaces.short": "Spaces"
+  "module.workspaces.short": "Spaces",
+  "launcher.clip.image": "Image",
+  "launcher.clip.hint": "Enter: copy · Shift+Enter: delete",
+  "launcher.mode.clipboard": "clipboard",
+  "shot.open": "Open",
+  "shot.save": "Save",
+  "shot.title": "Screenshot",
+  "shot.copied": "Copied to the clipboard",
+  "shot.saved": "Screenshot saved",
+  "shortcut.clipboard": "Clipboard history",
+  "shortcut.screenshot": "Screenshot of a zone",
+  "shortcut.screenshotScreen": "Screenshot of the screen",
+  "shortcut.notifications": "Notifications panel",
+  "shortcut.media": "Media card",
+  "shortcut.toggleVariant": "Light / dark",
+  "shortcut.nextTheme": "Next theme",
+  "shortcut.lock": "Lock"
 }

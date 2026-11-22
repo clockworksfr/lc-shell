@@ -16,11 +16,19 @@ Column {
     readonly property var shortcuts: [
         { name: "launcher", keys: "SUPER + Space" },
         { name: "emoji", keys: "SUPER + period" },
+        { name: "clipboard", keys: "SUPER + SHIFT + V" },
         { name: "files", keys: "SUPER + SHIFT + F" },
+        { name: "screenshot", keys: "Print" },
+        { name: "screenshotScreen", keys: "SHIFT + Print" },
+        { name: "notifications", keys: "SUPER + S" },
+        { name: "media", keys: "SUPER + comma" },
         { name: "settings", keys: "SUPER + I" },
         { name: "editBar", keys: "SUPER + ALT + E" },
         { name: "clearNotifs", keys: "SUPER + SHIFT + N" },
-        { name: "dnd", keys: "SUPER + CTRL + N" }
+        { name: "dnd", keys: "SUPER + CTRL + N" },
+        { name: "toggleVariant", keys: "SUPER + SHIFT + T" },
+        { name: "nextTheme", keys: "SUPER + CTRL + T" },
+        { name: "lock", keys: "SUPER + Escape" }
     ]
     property string copied: ""
 

@@ -371,5 +371,21 @@
   "media.next": "SUIV.",
   "vu.left": "G",
   "vu.right": "D",
-  "module.workspaces.short": "Espaces"
+  "module.workspaces.short": "Espaces",
+  "launcher.clip.image": "Image",
+  "launcher.clip.hint": "Entrée : copier · Maj+Entrée : supprimer",
+  "launcher.mode.clipboard": "presse-papier",
+  "shot.open": "Ouvrir",
+  "shot.save": "Enregistrer",
+  "shot.title": "Capture d'écran",
+  "shot.copied": "Copiée dans le presse-papier",
+  "shot.saved": "Capture enregistrée",
+  "shortcut.clipboard": "Historique du presse-papier",
+  "shortcut.screenshot": "Capture d'une zone",
+  "shortcut.screenshotScreen": "Capture de l'écran",
+  "shortcut.notifications": "Panneau des notifications",
+  "shortcut.media": "Carte média",
+  "shortcut.toggleVariant": "Clair / sombre",
+  "shortcut.nextTheme": "Thème suivant",
+  "shortcut.lock": "Verrouiller"
 }
