@@ -91,3 +91,9 @@ clear_night
 air
 water_drop
 location_on
+chevron_right
+chevron_left
+radio_button_checked
+radio_button_unchecked
+check_box
+check_box_outline_blank

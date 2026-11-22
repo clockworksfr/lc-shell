@@ -1,142 +1,208 @@
 import QtQuick
 import Quickshell
+import Quickshell.Wayland
 import qs.cards
 import qs.components
 import qs.services
 import qs.theme
 
-// The bar's hover card: one per bar, moved from widget to widget. A drawer
-// attached to the bar (fillets, slides out), centered on the widget,
-// doesn't take the keyboard. Content comes from cards/<Type>Card.qml.
-PopupWindow {
+// The bar's hover card: one per bar, a drawer coming out of the bar
+// (merged with the widget's island), centered on the widget. Moving to
+// another widget while it's open doesn't close it: the drawer slides and
+// resizes to the new widget while its content cross-fades. Doesn't take
+// the keyboard. Content comes from cards/<Type>Card.qml.
+//
+// A layer surface along the whole bar side (input limited to the drawer):
+// a popup can't move while shown, and only shows while the bar has the
+// pointer.
+PanelWindow {
     id: root
 
     required property var host
-    // WidgetSlot the card is shown for.
+    // WidgetSlot the card is (or is being) shown for.
     property Item slot: null
+    // WidgetSlot whose content is shown (changes mid-switch).
+    property Item shown: null
     readonly property bool hovered: hover.hovered
+    readonly property bool open: phase === "open"
+    // "" (closed) | "opening" | "open" | "closing"
+    property string phase: ""
 
     readonly property var theme: host?.theme ?? Themes.fallback
-    // A drawer attached to the bar (no gap), with fillets on both ends.
-    readonly property int gap: 0
+    readonly property string edge: host?.edge ?? "top"
+    readonly property bool sideways: edge === "left" || edge === "right"
     readonly property real fillet: theme.drawer.fillet
     // Reaches over the bar's inner border: no line at the junction.
-    // +1: a popup's position is rounded; make sure the border line is covered.
-    readonly property real overlap: Math.max(1, host?.look?.border ?? 0) + 1
-    readonly property bool sideways: host?.edge === "left" || host?.edge === "right"
-    // Fillets at each end (place(): 0 where the card continues its island).
+    readonly property real overlap: Math.max(1, host?.look?.border ?? 0)
+    readonly property real cardWidth: 380
+    readonly property real maxBody: (host?.screen?.height ?? 1000) * 0.6
+    readonly property real bodyHeight: Math.min(loader.implicitHeight + theme.space.l * 2, maxBody)
+    readonly property string screenName: host?.screen?.name ?? ""
+
+    // Drawer geometry on this surface (along the bar / away from it).
+    property real along: 0
+    property real length: 0
     property real filletLow: fillet
     property real filletHigh: fillet
+    // Animate geometry only while switching (not on the first frame).
+    property bool morph: false
 
     function showFor(target: Item): void {
-        if (visible && slot === target)
+        if (!target)
             return;
-        const switching = visible;
-        // A visible popup doesn't follow anchor changes: close it, then
-        // re-anchor and reopen on the next event loop turn (hiding and
-        // showing in the same turn is a no-op). Reads as a quick swap.
-        visible = false;
+        if (slot === target && (phase === "open" || phase === "opening"))
+            return;
         slot = target;
-        Qt.callLater(() => {
-            if (root.slot !== target)
-                return;
-            root.place();
-            content.opacity = switching ? 0.4 : 1;
-            frame.progress = switching ? 1 : 0;
-            root.visible = true;
-            if (switching) {
-                swap.duration = Motion.ms(root.theme, "fast", root.host?.screen?.name ?? "");
-                swap.restart();
-            } else {
-                appear.duration = Motion.ms(root.theme, "base", root.host?.screen?.name ?? "");
-                appear.easing.type = Motion.easing(root.theme);
-                appear.easing.overshoot = Motion.overshoot(root.theme);
-                appear.restart();
-            }
-        });
+        if (phase === "open" || phase === "opening") {
+            // Switch: content fades out, then the drawer moves to the new
+            // widget while the new content fades in.
+            swap.restart();
+            return;
+        }
+        // Reopening while closing continues from where the drawer is.
+        const reopening = phase === "closing";
+        close.stop();
+        shown = target;
+        morph = false;
+        place();
+        if (!reopening)
+            frame.progress = 0;
+        visible = true;
+        phase = "opening";
+        enter.duration = Motion.ms(theme, "base", screenName);
+        enter.easing.type = Motion.easing(theme);
+        enter.easing.overshoot = Motion.overshoot(theme);
+        enter.restart();
     }
 
     function hide(): void {
-        visible = false;
-        slot = null;
-        if (host && host.drawerSpan?.slot !== undefined)
-            host.drawerSpan = null;
+        if (phase === "" || phase === "closing")
+            return;
+        swap.stop();
+        enter.stop();
+        phase = "closing";
+        close.duration = Motion.exitMs(theme, "base", screenName);
+        close.restart();
     }
-
-    onVisibleChanged: ShellState.card = { visible: visible, type: slot?.type ?? "", screen: host?.screen?.name ?? "" }
 
     function place(): void {
-        if (!slot || !host)
+        if (!shown || !host)
             return;
-        // The anchor rect spans exactly the drawer along the bar: the popup,
-        // centered on it, lands where drawerPlace() put it.
-        const d = host.drawerPlace(slot, sideways ? bodyHeight : 380, fillet);
+        const d = host.drawerPlace(shown, sideways ? bodyHeight : cardWidth, fillet);
+        const o = host.origin();
         filletLow = d.low;
         filletHigh = d.high;
-        const span = d.end - d.start;
-        let rect;
-        let side;
-        switch (host.edge) {
-        case "bottom":
-            rect = Qt.rect(d.start, overlap, span, 0);
-            side = Edges.Top;
-            break;
-        case "left":
-            rect = Qt.rect(host.width - overlap, d.start, 0, span);
-            side = Edges.Right;
-            break;
-        case "right":
-            rect = Qt.rect(overlap, d.start, 0, span);
-            side = Edges.Left;
-            break;
-        default:
-            rect = Qt.rect(d.start, host.height - overlap, span, 0);
-            side = Edges.Bottom;
-        }
-        host.drawerSpan = { slot: slot, start: d.start, end: d.end, squareLow: d.squareLow, squareHigh: d.squareHigh };
-        anchor.rect.x = rect.x;
-        anchor.rect.y = rect.y;
-        anchor.rect.width = rect.width;
-        anchor.rect.height = rect.height;
-        anchor.edges = side;
-        anchor.gravity = side;
-        anchor.updateAnchor();
+        along = d.start + (sideways ? o.y : o.x);
+        length = d.end - d.start;
+        host.drawerSpan = { slot: shown, start: d.start, end: d.end, squareLow: d.squareLow, squareHigh: d.squareHigh };
     }
 
-    anchor.window: host
+    onPhaseChanged: ShellState.card = { visible: phase !== "", type: shown?.type ?? "", screen: screenName }
+    // Content size changes (lists loading…): follow.
+    onBodyHeightChanged: if (phase !== "") place()
+
+    screen: host?.screen ?? null
+    anchors {
+        top: edge !== "bottom"
+        bottom: edge !== "top"
+        left: edge !== "right"
+        right: edge !== "left"
+    }
+    margins {
+        // The bar's inner edge, minus the overlap.
+        top: edge === "top" ? (host ? host.origin().y + host.height - overlap : 0) : 0
+        bottom: edge === "bottom" ? (host ? (host.screen.height - host.origin().y) - overlap : 0) : 0
+        left: edge === "left" ? (host ? host.origin().x + host.width - overlap : 0) : 0
+        right: edge === "right" ? (host ? (host.screen.width - host.origin().x) - overlap : 0) : 0
+    }
+    implicitWidth: sideways ? cardWidth + overlap : 0
+    implicitHeight: sideways ? 0 : maxBody + overlap
+
+    visible: false
     color: "transparent"
-    readonly property real bodyHeight: Math.min(loader.implicitHeight + theme.space.l * 2, (host?.screen?.height ?? 1000) * 0.6)
-    implicitWidth: sideways ? 380 + overlap : 380 + filletLow + filletHigh
-    implicitHeight: sideways ? bodyHeight + filletLow + filletHigh : bodyHeight + overlap
+    exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.layer: WlrLayer.Top
+    WlrLayershell.namespace: "lc-card"
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+    // Only the drawer takes the pointer.
+    mask: Region {
+        item: frame
+    }
 
-    Item {
-        id: content
+    DrawerFrame {
+        id: frame
 
-        anchors.fill: parent
+        edge: root.edge
+        fillet: root.fillet
+        filletLow: root.filletLow
+        filletHigh: root.filletHigh
+        overlap: root.overlap
+        color: root.theme.color.surface
+        lineWidth: root.host?.look?.border ?? 0
 
-        DrawerFrame {
-            id: frame
+        x: root.sideways ? (root.edge === "left" ? 0 : root.width - width) : root.along
+        y: root.sideways ? root.along : (root.edge === "top" ? 0 : root.height - height)
+        width: root.sideways ? root.cardWidth + root.overlap : root.length
+        height: root.sideways ? root.length : root.bodyHeight + root.overlap
+
+        Behavior on x {
+            enabled: root.morph
+            NumberAnimation {
+                duration: Motion.ms(root.theme, "base", root.screenName)
+                easing.type: Easing.OutCubic
+            }
+        }
+        Behavior on y {
+            enabled: root.morph
+            NumberAnimation {
+                duration: Motion.ms(root.theme, "base", root.screenName)
+                easing.type: Easing.OutCubic
+            }
+        }
+        Behavior on width {
+            enabled: root.morph
+            NumberAnimation {
+                duration: Motion.ms(root.theme, "base", root.screenName)
+                easing.type: Easing.OutCubic
+            }
+        }
+        Behavior on height {
+            enabled: root.morph
+            NumberAnimation {
+                duration: Motion.ms(root.theme, "base", root.screenName)
+                easing.type: Easing.OutCubic
+            }
+        }
+        Behavior on filletLow {
+            enabled: root.morph
+            NumberAnimation {
+                duration: Motion.ms(root.theme, "base", root.screenName)
+            }
+        }
+        Behavior on filletHigh {
+            enabled: root.morph
+            NumberAnimation {
+                duration: Motion.ms(root.theme, "base", root.screenName)
+            }
+        }
+
+        Item {
+            id: content
 
             anchors.fill: parent
-            edge: root.host?.edge ?? "top"
-            fillet: root.fillet
-            filletLow: root.filletLow
-            filletHigh: root.filletHigh
-            overlap: root.overlap
-            color: root.theme.color.surface
-            lineWidth: root.host?.look?.border ?? 0
+            clip: true
 
             Loader {
                 id: loader
 
                 x: root.theme.space.l
                 y: root.theme.space.l
-                width: parent.width - root.theme.space.l * 2
-                source: root.slot ? Registry.url(root.slot.type) : ""
+                width: root.cardWidth - root.theme.space.l * 2
+                source: root.shown ? Registry.url(root.shown.type) : ""
 
                 onLoaded: {
-                    item.block = Qt.binding(() => root.slot?.item ?? null);
-                    item.screen = Qt.binding(() => root.slot?.screen ?? null);
+                    item.block = Qt.binding(() => root.shown?.item ?? null);
+                    item.screen = Qt.binding(() => root.shown?.screen ?? null);
                 }
             }
         }
@@ -148,18 +214,57 @@ PopupWindow {
 
     // Opening: slides out of the bar.
     NumberAnimation {
-        id: appear
+        id: enter
         target: frame
         property: "progress"
-        from: 0
         to: 1
+        onFinished: {
+            root.phase = "open";
+            root.morph = true;
+        }
     }
 
+    // Closing: back into the bar, then hidden.
     NumberAnimation {
+        id: close
+        target: frame
+        property: "progress"
+        to: 0
+        easing.type: Easing.InCubic
+        onFinished: {
+            root.phase = "";
+            root.visible = false;
+            root.morph = false;
+            root.shown = null;
+            root.slot = null;
+            if (root.host?.drawerSpan)
+                root.host.drawerSpan = null;
+        }
+    }
+
+    // Switching widgets: fade out, move + resize, fade in.
+    SequentialAnimation {
         id: swap
-        target: content
-        property: "opacity"
-        to: 1
-        duration: 120
+
+        NumberAnimation {
+            target: content
+            property: "opacity"
+            to: 0
+            duration: Motion.reduced ? 0 : Math.round(Motion.ms(root.theme, "fast", root.screenName) / 2)
+        }
+        ScriptAction {
+            script: {
+                root.morph = !Motion.reduced;
+                root.shown = root.slot;
+                root.place();
+            }
+        }
+        NumberAnimation {
+            target: content
+            property: "opacity"
+            to: 1
+            duration: Motion.ms(root.theme, "base", root.screenName)
+            easing.type: Easing.OutCubic
+        }
     }
 }

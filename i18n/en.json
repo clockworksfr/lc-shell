@@ -269,5 +269,6 @@
   "widget.weather": "Weather",
   "bar.menu.edit": "Edit the bar",
   "bar.menu.barSettings": "Bar settings",
-  "bar.menu.settings": "Settings"
+  "bar.menu.settings": "Settings",
+  "common.back": "Back"
 }

@@ -43,10 +43,15 @@ Grid {
                 source: slot.modelData.icon
             }
 
+            // The app's menu, drawn in the theme's look (not a platform menu).
             function openMenu(): void {
                 const window = QsWindow.window;
-                const point = slot.mapToItem(window.contentItem, 0, slot.height + root.theme.space.s);
-                slot.modelData.display(window, point.x, point.y);
+                const point = slot.mapToItem(window.contentItem, slot.width / 2, slot.height / 2);
+                const edge = window.edge ?? "top";
+                const x = edge === "left" ? window.width : edge === "right" ? 0 : point.x;
+                const y = edge === "top" ? window.height : edge === "bottom" ? 0 : point.y;
+                menu.menu = slot.modelData.menu;
+                menu.openAt(x, y);
             }
 
             MouseArea {
@@ -65,5 +70,10 @@ Grid {
                 onWheel: wheel => slot.modelData.scroll(wheel.angleDelta.y !== 0 ? wheel.angleDelta.y : wheel.angleDelta.x, wheel.angleDelta.y === 0)
             }
         }
+    }
+
+    MenuPopup {
+        id: menu
+        host: QsWindow.window
     }
 }

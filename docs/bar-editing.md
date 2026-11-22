@@ -31,7 +31,7 @@ Spécification issue de l'étude de design (artifact « lc-shell rendus », ongl
 
 ### Règles communes
 
-- Apparition après 350 ms d'immobilité (fondu + échelle 0,96 → 1, 140 ms). Carte ouverte depuis moins de 600 ms : un widget voisin s'affiche sans attente (glissement 160 ms, contenu en fondu 120 ms). Sortie : grâce 250 ms, puis fondu 120 ms ; le pointeur sur la carte la garde.
+- Apparition après 350 ms d'immobilité : le tiroir sort de la barre. Carte ouverte (ou fermée depuis moins de 600 ms) : un autre widget s'affiche sans attente, le tiroir **ne se referme pas** : il glisse et se redimensionne jusqu'au nouveau widget (durée `base` du thème) pendant que le contenu passe en fondu enchaîné. Surface layer-shell persistante le long de la barre, entrée limitée au tiroir. Sortie : grâce 250 ms, puis fondu 120 ms ; le pointeur sur la carte la garde.
 - Clic : la carte grandit en panneau complet (220 ms). Toucher : 1er appui = carte, 2e / « Ouvrir » = panneau, appui long = édition. Clavier : focus = carte, Entrée = panneau, Échap = fermer. Les contrôles de la carte marchent sans ouvrir le panneau.
 - Jamais en plein écran, en édition, pendant un glisser.
 - 380 px de large (360 sur le portable), ≤ 60 % de la hauteur de l'écran ; marge intérieure 16, écart 12.

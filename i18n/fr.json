@@ -269,5 +269,6 @@
   "widget.weather": "Météo",
   "bar.menu.edit": "Modifier la barre",
   "bar.menu.barSettings": "Réglages de la barre",
-  "bar.menu.settings": "Paramètres"
+  "bar.menu.settings": "Paramètres",
+  "common.back": "Retour"
 }

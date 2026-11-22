@@ -186,3 +186,23 @@ L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non a
 - Diagnostic : `bar blocks` (géométrie des widgets), `bar card` (carte de survol), `media info`, `lyrics status`, `qs log -c lc`.
 - PipeWire : ne pas filtrer une liste suivie par `PwObjectTracker` sur des propriétés qui changent une fois le nœud suivi (boucle → plantage du module).
 
+## Raccourcis
+
+Raccourcis globaux Hyprland (instantanés, sans processus lancé), à lier dans la config Hyprland avec le dispatcher `global`, par exemple en Lua :
+
+```lua
+hl.bind("SUPER + Space", hl.dsp.global("lc:launcher"))
+```
+
+| Nom | Action |
+|---|---|
+| `lc:launcher` | Ouvrir / fermer le lanceur |
+| `lc:emoji` | Lanceur sur la recherche d'emoji |
+| `lc:files` | Lanceur sur la recherche de fichiers |
+| `lc:settings` | Ouvrir / fermer les paramètres |
+| `lc:editBar` | Modifier la barre |
+| `lc:clearNotifs` | Effacer les notifications |
+| `lc:dnd` | Ne pas déranger |
+
+Les mêmes actions existent en IPC : `qs -c lc ipc call launcher toggle`, `settings toggle`, `bar edit`, etc.
+
