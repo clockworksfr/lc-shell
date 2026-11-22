@@ -13,6 +13,7 @@ Singleton {
             media: "MediaCard.qml",
             network: "NetworkCard.qml",
             notifications: "NotificationsCard.qml",
+            system: "SystemCard.qml",
             tray: "TrayCard.qml",
             volume: "VolumeCard.qml",
             weather: "WeatherCard.qml",

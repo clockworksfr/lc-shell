@@ -346,5 +346,9 @@
   "edit.sendTo": "To {screen}",
   "edit.searchWidget": "Find a widget…",
   "edit.allPlaced": "Every widget is on this bar.",
-  "edit.saved": "Bar saved"
+  "edit.saved": "Bar saved",
+  "widget.system": "System",
+  "bar.v.cpu": "cpu\n{value}",
+  "system.processes": "Busiest processes",
+  "system.openMonitor": "Click the widget: system monitor (btop)."
 }

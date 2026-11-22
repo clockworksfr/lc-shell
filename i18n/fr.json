@@ -346,5 +346,9 @@
   "edit.sendTo": "Vers {screen}",
   "edit.searchWidget": "Chercher un widget…",
   "edit.allPlaced": "Tous les widgets sont déjà sur cette barre.",
-  "edit.saved": "Barre enregistrée"
+  "edit.saved": "Barre enregistrée",
+  "widget.system": "Système",
+  "bar.v.cpu": "cpu\n{value}",
+  "system.processes": "Processus les plus gourmands",
+  "system.openMonitor": "Clic sur le widget : moniteur système (btop)."
 }
