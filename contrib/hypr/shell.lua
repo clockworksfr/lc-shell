@@ -28,9 +28,8 @@ local lc = function(name) return hl.dsp.global("lc:" .. name) end
 hl.on("hyprland.start", function()
     hl.exec_cmd("qs -c lc -d")
 
-    -- cliphist : historique du presse-papier (lanceur de lc-shell, préfixe « + »)
-    hl.exec_cmd("wl-paste --type text --watch cliphist store")
-    hl.exec_cmd("wl-paste --type image --watch cliphist store")
+    -- Presse-papier : plus de cliphist, lc-shell enregistre lui-même
+    -- l'historique (wl-paste --watch lancé par le shell).
 
     -- Panneau Philips Hue : configuration QuickShell INDÉPENDANTE
     -- (~/.config/quickshell/hue).
@@ -53,9 +52,11 @@ bind(mod .. " + SHIFT + U", exec("~/.local/bin/huectl group 1 toggle"), "Hue : S
 bind(mod .. " + S",     lc("notifications"), "Panneau des notifications")
 bind(mod .. " + comma", lc("media"),         "Carte média (lecteur, paroles)")
 
--- Presse-papier et emoji : dans le lanceur de lc-shell.
-bind(mod .. " + SHIFT + V", lc("clipboard"), "Historique du presse-papier")
-bind(mod .. " + period",    lc("emoji"),     "Sélecteur d'emoji")
+-- Gestionnaire du presse-papier de lc-shell (historique, épinglés, collage
+-- direct) ; pause « incognito » de l'enregistrement. Emoji : dans le lanceur.
+bind(mod .. " + SHIFT + V",        lc("clipboard"),          "Historique du presse-papier")
+bind(mod .. " + CTRL + SHIFT + V", lc("clipboardIncognito"), "Presse-papier : pause / reprise")
+bind(mod .. " + period",           lc("emoji"),              "Sélecteur d'emoji")
 
 -- Capture d'écran : copiée dans le presse-papier, gardée en cache, puis
 -- notification « Ouvrir » (swappy) / « Enregistrer » (~/Images/Screenshots).
