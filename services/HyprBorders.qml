@@ -7,8 +7,8 @@ import Quickshell.Io
 import qs.theme
 
 // Hyprland's window borders follow the theme of the normal screens: active
-// = the theme's window color (`color.windowBorder`, else `signal`, else
-// `accent`), inactive = its line color; groups alike. Applied at start, on
+// = the theme's window color (`color.windowBorder`, else `accent`: white in
+// Matrix, the signal red was too loud), inactive = its line color; groups alike. Applied at start, on
 // every theme / light-dark change and after each Hyprland config reload
 // (which brings back the static colors of ~/.config/hypr). Off in Settings ›
 // Appearance: Hyprland's own colors come back (config reload).
@@ -19,7 +19,7 @@ Singleton {
     readonly property var colors: {
         const c = Themes.resolve(Themes.themeFor("normal"), false, "normal").color;
         return {
-            active: c.windowBorder ?? c.signal ?? c.accent,
+            active: c.windowBorder ?? c.accent,
             inactive: c.windowBorderInactive ?? c.line
         };
     }
