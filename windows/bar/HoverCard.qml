@@ -235,7 +235,7 @@ PanelWindow {
             if (!d.length)
                 return;
             const avg = d.reduce((a, b) => a + b, 0) / d.length;
-            console.info(`cardperf ${label} ${root.screenName} ${root.width}x${root.height}: first frame ${first} ms, ${d.length} frames, avg ${avg.toFixed(1)} ms, max ${Math.max(...d).toFixed(1)} ms, >25ms ${d.filter(x => x > 25).length}`);
+            console.warn(`cardperf ${label} ${root.screenName} ${root.width}x${root.height}: first frame ${first} ms, ${d.length} frames, avg ${avg.toFixed(1)} ms, max ${Math.max(...d).toFixed(1)} ms, >25ms ${d.filter(x => x > 25).length}`);
         }
 
         onTriggered: {
