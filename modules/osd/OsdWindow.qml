@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import qs.components
 import qs.services
 import qs.theme
+import qs.i18n
 
 // Volume / mic / brightness popup. Config (layout.json, module "osd"):
 //   position: "bottom" | "top", margin: distance from the edge in px
@@ -15,11 +16,7 @@ PanelWindow {
     property var config: ({})
 
     readonly property bool atTop: config.position === "top"
-    readonly property string title: ({
-            volume: "Volume",
-            mic: "Micro",
-            brightness: "Luminosité"
-        })[Osd.kind] ?? ""
+    readonly property string title: Osd.kind ? I18n.tr(`osd.${Osd.kind}`) : ""
 
     // Only one edge anchored: layer shell centers the window horizontally.
     anchors.top: atTop
@@ -62,7 +59,7 @@ PanelWindow {
 
                 ThemedText {
                     anchors.right: parent.right
-                    text: Osd.muted ? "muet" : `${Math.round(Osd.value * 100)} %`
+                    text: Osd.muted ? I18n.tr("common.muted") : I18n.percent(Osd.value)
                     color: Osd.muted ? win.theme.color.fgMuted : win.theme.color.fg
                 }
             }

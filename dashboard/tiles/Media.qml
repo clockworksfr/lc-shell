@@ -3,6 +3,7 @@ import Quickshell
 import qs.components
 import qs.services
 import qs.theme
+import qs.i18n
 
 // Active player: cover, track, progress, controls (touch-sized).
 Item {
@@ -25,7 +26,7 @@ Item {
     ThemedText {
         anchors.centerIn: parent
         visible: !root.player
-        text: "Aucun lecteur"
+        text: I18n.tr("media.noPlayer")
         color: root.theme.color.fgMuted
     }
 

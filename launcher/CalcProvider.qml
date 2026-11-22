@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.i18n
 
 // Calculator through qalc: "=" prefix (anything qalc understands: units,
 // currencies, "10 EUR to USD"...), or automatically in the default mode
@@ -20,7 +21,7 @@ Singleton {
     readonly property var results: active && result && computedTerm === Launcher.term ? [{
             key: "calc",
             title: result,
-            subtitle: `${computedTerm} · Entrée pour copier`,
+            subtitle: `${computedTerm} · ${I18n.tr("launcher.calc.copy")}`,
             icon: "accessories-calculator",
             score: 1000,
             activate: () => Quickshell.execDetached(["wl-copy", "--", root.result])

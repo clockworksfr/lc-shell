@@ -3,6 +3,7 @@
 import QtQuick
 import Quickshell
 import qs.dashboard
+import qs.i18n
 import qs.launcher
 import qs.modules
 import qs.services
@@ -20,6 +21,7 @@ ShellRoot {
     Ipc {}
     LauncherIpc {}
     ThemeIpc {}
+    I18nIpc {}
 
     // Singletons are lazy: touch the window placer so it starts.
     Component.onCompleted: CellTiler.managed

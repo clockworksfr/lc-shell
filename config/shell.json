@@ -1,4 +1,5 @@
 {
+  "language": "auto",
   "appearance": {
     "variant": "auto",
     "schedule": { "type": "time", "light": "07:30", "dark": "19:30" },

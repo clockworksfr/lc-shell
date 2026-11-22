@@ -4,6 +4,7 @@ import Quickshell.Services.Pipewire
 import qs.components
 import qs.services
 import qs.theme
+import qs.i18n
 
 // Output and input: volume, mute, device choice.
 Column {
@@ -15,7 +16,7 @@ Column {
     spacing: root.theme.space.s
 
     Section {
-        title: "Sortie"
+        title: I18n.tr("audio.output")
         muted: Audio.muted
         volume: Audio.volume
         maxVolume: Audio.maxVolume
@@ -33,7 +34,7 @@ Column {
     }
 
     Section {
-        title: "Entrée"
+        title: I18n.tr("audio.input")
         muted: Audio.sourceMuted
         volume: Audio.sourceVolume
         maxVolume: 1
@@ -76,7 +77,7 @@ Column {
 
             ThemedText {
                 anchors.right: parent.right
-                text: section.muted ? "muet" : `${Math.round(section.volume * 100)} %`
+                text: section.muted ? I18n.tr("common.muted") : I18n.percent(section.volume)
                 color: section.muted ? section.theme.color.fgMuted : section.theme.color.fg
 
                 MouseArea {

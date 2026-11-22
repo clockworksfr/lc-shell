@@ -3,13 +3,16 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.i18n
 
 // Emoji picker (":" prefix). Enter types the emoji into the previously
 // focused window and copies it; Shift+Enter only copies.
+// Names are shown in the shell language; search matches every language.
 // Data: launcher/data/emoji.json, see launcher/data/README.md.
 Singleton {
     id: root
 
+    // [{ emoji, names: { en: [name, keywords] , fr: ... }, search: [[text, weight, fuzzy]...] }]
     property var index: []
 
     // Newest Emoji version the installed font draws (noto-fonts-emoji
@@ -19,17 +22,19 @@ Singleton {
     readonly property var results: {
         if (Launcher.modeId !== "emoji")
             return [];
+        const language = I18n.language;
         const query = Search.normalize(Launcher.term);
         const out = [];
         for (const item of index) {
             const key = `emoji:${item.emoji}`;
-            const score = query ? Search.match(query, [[item.fr, 1, true], [item.en, 0.9, true], [item.keywords, 0.75]]) : 1;
+            const score = query ? Search.match(query, item.search) : 1;
             if (score <= 0)
                 continue;
+            const [name, keywords] = item.names[language] ?? item.names.en;
             out.push({
                 key: key,
-                title: item.name,
-                subtitle: item.keywordsText,
+                title: name || item.names.en[0],
+                subtitle: keywords.split("|").slice(0, 6).join(", "),
                 glyph: item.emoji,
                 score: score + Launcher.usageBonus(key),
                 activate: alt => root.pick(item.emoji, alt)
@@ -48,13 +53,15 @@ Singleton {
     FileView {
         path: Quickshell.shellDir + "/launcher/data/emoji.json"
         onLoaded: {
-            root.index = JSON.parse(text()).filter(e => e[4] <= root.maxVersion).map(([emoji, fr, en, keywords]) => ({
+            const data = JSON.parse(text());
+            root.index = data.emoji.filter(([, version]) => version <= root.maxVersion).map(([emoji, , names]) => ({
                         emoji: emoji,
-                        name: fr || en,
-                        keywordsText: keywords.split("|").slice(0, 6).join(", "),
-                        fr: Search.normalize(fr),
-                        en: Search.normalize(en),
-                        keywords: Search.normalize(keywords)
+                        names: names,
+                        // Names (fuzzy) then keywords, in every language.
+                        search: [
+                            ...Object.values(names).map(([name]) => [Search.normalize(name), 1, true]),
+                            ...Object.values(names).map(([, keywords]) => [Search.normalize(keywords), 0.75, false])
+                        ]
                     }));
         }
     }

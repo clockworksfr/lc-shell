@@ -4,6 +4,7 @@ import qs.components
 import qs.panels
 import qs.services
 import qs.theme
+import qs.i18n
 
 // Output volume. Left click: audio panel (volume, devices),
 // middle click: mute, wheel: volume.
@@ -13,7 +14,7 @@ ThemedText {
     property ShellScreen screen
     property var options: ({})
 
-    text: Audio.muted ? "muet" : `vol ${Math.round(Audio.volume * 100)} %`
+    text: Audio.muted ? I18n.tr("common.muted") : I18n.tr("bar.volume", { value: Math.round(Audio.volume * 100) })
     color: Audio.muted ? theme.color.fgMuted : theme.color.fg
 
     MouseArea {

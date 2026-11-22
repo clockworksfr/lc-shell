@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import qs.services
+import qs.i18n
 
 // Session and system actions (">" prefix, also mixed in the default mode).
 //
@@ -15,46 +16,40 @@ Singleton {
     readonly property var staticActions: [
         {
             key: "action:lock",
-            title: "Verrouiller",
-            keywords: "lock ecran session",
+            titleKey: "action.lock",
             icon: "system-lock-screen",
             run: () => Quickshell.execDetached(["loginctl", "lock-session"])
         },
         {
             key: "action:suspend",
-            title: "Mettre en veille",
-            keywords: "suspend sleep dormir",
+            titleKey: "action.suspend",
             icon: "system-suspend",
             run: () => Quickshell.execDetached(["systemctl", "suspend"])
         },
         {
             key: "action:logout",
-            title: "Quitter Hyprland",
-            keywords: "logout deconnexion session exit",
+            titleKey: "action.logout",
             icon: "system-log-out",
             confirm: true,
             run: () => Hyprland.dispatch("hl.dsp.exit()")
         },
         {
             key: "action:reboot",
-            title: "Redémarrer",
-            keywords: "reboot restart",
+            titleKey: "action.reboot",
             icon: "system-reboot",
             confirm: true,
             run: () => Quickshell.execDetached(["systemctl", "reboot"])
         },
         {
             key: "action:poweroff",
-            title: "Éteindre",
-            keywords: "shutdown poweroff arreter",
+            titleKey: "action.poweroff",
             icon: "system-shutdown",
             confirm: true,
             run: () => Quickshell.execDetached(["systemctl", "poweroff"])
         },
         {
             key: "action:reload",
-            title: "Recharger le shell",
-            keywords: "reload restart quickshell lc",
+            titleKey: "action.reload",
             icon: "view-refresh",
             run: () => Quickshell.reload(true)
         }
@@ -64,16 +59,16 @@ Singleton {
     readonly property var audioActions: [
         ...Audio.sinks.map(node => ({
                     key: `action:sink:${node.name}`,
-                    title: `Sortie audio : ${Audio.nodeName(node)}`,
-                    keywords: "audio son sortie output haut-parleur casque",
+                    titleKey: "action.sink",
+                    name: Audio.nodeName(node),
                     icon: "audio-speakers",
                     current: node === Audio.sink,
                     run: () => Audio.setDefaultSink(node)
                 })),
         ...Audio.sources.map(node => ({
                     key: `action:source:${node.name}`,
-                    title: `Entrée audio : ${Audio.nodeName(node)}`,
-                    keywords: "audio micro entree input microphone",
+                    titleKey: "action.source",
+                    name: Audio.nodeName(node),
                     icon: "audio-input-microphone",
                     current: node === Audio.source,
                     run: () => Audio.setDefaultSource(node)
@@ -89,14 +84,17 @@ Singleton {
             return [];
         const out = [];
         for (const action of [...staticActions, ...audioActions]) {
-            const score = Search.match(query, [[Search.normalize(action.title), 1, true], [action.keywords, 0.7]]);
+            const title = I18n.tr(action.titleKey, { name: action.name ?? "" });
+            // Keywords of every language: "veille" and "sleep" both find it.
+            const keywords = Search.normalize(`${I18n.all(action.titleKey)} ${I18n.all(action.titleKey + ".keywords")}`);
+            const score = Search.match(query, [[Search.normalize(title), 1, true], [keywords, 0.7]]);
             if (score <= 0)
                 continue;
             const pending = Launcher.confirmKey === action.key;
             out.push({
                 key: action.key,
-                title: action.title,
-                subtitle: pending ? "Entrée à nouveau pour confirmer" : action.current ? "actuel" : "",
+                title: title,
+                subtitle: pending ? I18n.tr("launcher.confirm") : action.current ? I18n.tr("launcher.current") : "",
                 urgent: pending,
                 icon: action.icon,
                 confirm: action.confirm ?? false,

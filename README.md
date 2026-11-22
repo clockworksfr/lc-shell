@@ -16,6 +16,7 @@ Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md
 | `shell.qml` | Point d'entrée : une `ScreenScope` par écran (`Variants` sur `Quickshell.screens`) |
 | `modules/` | Fenêtres par écran (`bar/`, `osd/`, `launcher/`), selon le profil de l'écran |
 | `blocks/` | Blocs de barre + `Registry` nom → fichier |
+| `i18n/` | Langue de l'interface : `I18n` + `en.json`, `fr.json` |
 | `launcher/` | Lanceur : état, recherche, fournisseurs (applis, emoji, fichiers, calcul, actions) |
 | `panels/` | Contenus de popups (`AudioPanel`) |
 | `services/` | Singletons : `Config`, `Screens`, `Audio`, `Players`, `Brightness`, `Osd`, IPC… |
@@ -50,6 +51,15 @@ Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md
 - **Barre** : blocs dans `left`/`center`/`right`. Rendu fourni par le thème, surchargeable : `style` (`full`/`islands`), `floating`, `margin`, `radius`, `opacity`, `border`, `padding`, `spacing`, `height`, `position` (`top`/`bottom`), `screenCorners` (rayon des coins d'écran, 0 = aucun).
 - Blocs : `workspaces`, `clock` (`format`), `media` (`maxWidth`), `volume` (clic : panneau audio, clic milieu : muet, molette : volume). Un nom inconnu s'affiche `?nom` en rouge. Ajouter un bloc : `blocks/Xxx.qml` (propriétés `screen`, `options`) + `blocks/Registry.qml`.
 - **Plein écran** : rien d'automatique (OSD, bientôt notifications) ne s'affiche au-dessus ; c'est redirigé vers un écran `modules` ou retenu. Le lanceur, appelé explicitement, reste autorisé.
+
+## Langues
+
+Interface en anglais et en français. `"language"` dans `shell.json` : `auto` (suit la locale du système), `en` ou `fr` ; `"locale"` pour forcer le format des dates et nombres (ex. `en_GB`). Bascule à chaud : `qs -c lc ipc call i18n set en|fr|auto`.
+
+- Textes : `i18n/<langue>.json`, clés plates (`"osd.volume": "Volume"`) avec `{paramètres}`, rechargés à chaud. Clé manquante : repli sur l'anglais, puis sur la clé elle-même.
+- Dans le code : `I18n.tr("clé", { n: 2 })`, `I18n.percent(0.42)`, `I18n.number(x, 1)`, `I18n.locale` pour les dates. Aucun texte visible en dur.
+- Recherche du lanceur (actions, emoji) dans toutes les langues à la fois : « veille » et « sleep » trouvent la même action.
+- Ajouter une langue : copier `en.json`, traduire, ajouter le code dans `I18n.languages` (et les annotations CLDR dans `tools/gen-emoji.py`).
 
 ## Mode modules (tableau de bord)
 
@@ -105,4 +115,5 @@ L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non a
 | `qs -c lc ipc call brightness increment` / `decrement` | Luminosité de l'écran focalisé (rétroéclairage ou DDC/CI) |
 | `qs -c lc ipc call theme set <id>` / `setModules <id>` / `list` | Thème des écrans normaux / modules |
 | `qs -c lc ipc call theme variant dark\|light\|auto` / `toggleVariant` | Clair / sombre |
+| `qs -c lc ipc call i18n set en\|fr\|auto` / `get` | Langue de l'interface |
 | `qs -c lc ipc call shell reload` | Rechargement complet (nécessaire après modification d'un `.js`) |

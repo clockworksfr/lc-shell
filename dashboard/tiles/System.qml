@@ -3,6 +3,7 @@ import Quickshell
 import qs.components
 import qs.services
 import qs.theme
+import qs.i18n
 
 // CPU, memory, GPU(s) load and temperatures.
 Item {
@@ -17,7 +18,7 @@ Item {
 
     readonly property var rows: [
         { label: "CPU", value: SystemStats.cpu, detail: SystemStats.cpuTemp ? `${Math.round(SystemStats.cpuTemp)}°` : "" },
-        { label: "RAM", value: SystemStats.memory, detail: `${SystemStats.memoryUsedGiB.toFixed(1)} / ${Math.round(SystemStats.memoryTotalGiB)} Gio` },
+        { label: "RAM", value: SystemStats.memory, detail: I18n.tr("system.memory", { used: I18n.number(SystemStats.memoryUsedGiB, 1), total: Math.round(SystemStats.memoryTotalGiB) }) },
         ...SystemStats.gpus.map((gpu, i) => ({ label: SystemStats.gpus.length > 1 ? `GPU ${i + 1}` : "GPU", value: gpu.busy, detail: gpu.temp ? `${Math.round(gpu.temp)}°` : "" }))
     ]
 
@@ -47,7 +48,7 @@ Item {
 
                     ThemedText {
                         anchors.right: parent.right
-                        text: `${Math.round(modelData.value * 100)} %${modelData.detail ? "  ·  " + modelData.detail : ""}`
+                        text: I18n.percent(modelData.value) + (modelData.detail ? "  ·  " + modelData.detail : "")
                         font.family: root.theme.font.mono
                     }
                 }

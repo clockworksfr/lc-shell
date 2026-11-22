@@ -5,6 +5,7 @@ import Quickshell.Widgets
 import qs.components
 import qs.launcher
 import qs.theme
+import qs.i18n
 
 // Launcher overlay on the focused screen.
 // Keys: Up/Down (or Ctrl+K/J), Enter, Shift+Enter (alternate action),
@@ -71,7 +72,7 @@ PanelWindow {
 
                 ThemedText {
                     visible: !input.text
-                    text: "Rechercher…"
+                    text: I18n.tr("launcher.placeholder")
                     color: win.theme.color.fgMuted
                     font.pixelSize: win.theme.font.sizeL
                 }
@@ -113,11 +114,11 @@ PanelWindow {
                 }
 
                 Repeater {
-                    model: [{ prefix: "", id: "all", label: "tout" }, ...Launcher.modes]
+                    model: [{ prefix: "", id: "all" }, ...Launcher.modes]
 
                     ThemedText {
                         required property var modelData
-                        text: modelData.prefix ? `${modelData.prefix} ${modelData.label}` : modelData.label
+                        text: (modelData.prefix ? `${modelData.prefix} ` : "") + I18n.tr(`launcher.mode.${modelData.id}`)
                         font.pixelSize: win.theme.font.sizeS
                         color: Launcher.modeId === modelData.id ? win.theme.color.fg : win.theme.color.fgMuted
 
@@ -217,7 +218,7 @@ PanelWindow {
 
             ThemedText {
                 visible: list.count === 0
-                text: Launcher.modeId === "files" && Launcher.term.length < 2 ? "Tape au moins 2 caractères" : "Aucun résultat"
+                text: Launcher.modeId === "files" && Launcher.term.length < 2 ? I18n.tr("launcher.minChars", { n: 2 }) : I18n.tr("launcher.noResults")
                 color: win.theme.color.fgMuted
                 font.pixelSize: win.theme.font.sizeS
             }

@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs.components
+import qs.i18n
 
 // Options: format (Qt date format, default "HH:mm").
 ThemedText {
@@ -11,8 +12,8 @@ ThemedText {
 
     readonly property string format: options.format ?? "HH:mm"
 
-    // Qt.locale() follows the system locale (month and day names).
-    text: Qt.locale().toString(clock.date, format)
+    // Month and day names follow the shell language (I18n.locale).
+    text: I18n.locale.toString(clock.date, format)
 
     SystemClock {
         id: clock

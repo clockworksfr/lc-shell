@@ -24,10 +24,10 @@ Singleton {
     property string confirmKey
 
     readonly property var modes: [
-        { prefix: ":", id: "emoji", label: "emoji" },
-        { prefix: "/", id: "files", label: "fichiers" },
-        { prefix: "=", id: "calc", label: "calcul" },
-        { prefix: ">", id: "actions", label: "actions" }
+        { prefix: ":", id: "emoji" },
+        { prefix: "/", id: "files" },
+        { prefix: "=", id: "calc" },
+        { prefix: ">", id: "actions" }
     ]
     readonly property var mode: modes.find(m => text.startsWith(m.prefix)) ?? null
     readonly property string modeId: mode?.id ?? "all"

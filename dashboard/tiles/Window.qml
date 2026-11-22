@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import qs.components
 import qs.theme
+import qs.i18n
 
 // Window cell: CellTiler floats windows of this workspace into it.
 // Drawn as a faint frame, visible when the cell is empty.
@@ -23,7 +24,7 @@ Item {
     ThemedText {
         anchors.centerIn: parent
         label: true
-        text: "fenêtre"
+        text: I18n.tr("tile.window")
         color: root.theme.color.fgMuted
     }
 }
