@@ -12,6 +12,7 @@ Singleton {
             showcase: "ShowcaseButton.qml",
             system: "System.qml",
             themeSwitch: "ThemeSwitch.qml",
+            toggles: "Toggles.qml",
             vu: "Vu.qml",
             weather: "Weather.qml",
             window: "Window.qml",

@@ -12,7 +12,7 @@ Singleton {
 
     // Module type shown, "" = off (the normal pages).
     property string type: ""
-    readonly property var types: ["clock", "media", "weather", "system", "lyrics", "vu", "workspaces"]
+    readonly property var types: ["clock", "media", "weather", "system", "lyrics", "vu", "workspaces", "toggles"]
 
     function next(): void {
         const index = types.indexOf(type);

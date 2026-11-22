@@ -520,5 +520,15 @@
   "settings.windowBorders": "Window borders follow the theme",
   "settings.windowBordersHint": "Hyprland's active / inactive window borders take the colors of the normal screens' theme",
   "dashboard.menu.edit": "Edit the dashboard",
-  "dashboard.menu.settings": "Dashboard settings"
+  "dashboard.menu.settings": "Dashboard settings",
+  "module.toggles": "Quick settings",
+  "module.toggles.short": "Settings",
+  "toggles.dnd": "Do not disturb",
+  "toggles.dndShort": "Silence",
+  "toggles.mic": "Microphone",
+  "toggles.wifi": "Wi-Fi",
+  "toggles.bluetooth": "Bluetooth",
+  "toggles.dark": "Dark",
+  "toggles.on": "On",
+  "toggles.auto": "Automatic"
 }
