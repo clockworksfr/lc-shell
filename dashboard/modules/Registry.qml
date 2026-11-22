@@ -9,6 +9,7 @@ Singleton {
             clock: "Clock.qml",
             lyrics: "Lyrics.qml",
             media: "Media.qml",
+            showcase: "ShowcaseButton.qml",
             system: "System.qml",
             themeSwitch: "ThemeSwitch.qml",
             vu: "Vu.qml",

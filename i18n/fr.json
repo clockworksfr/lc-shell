@@ -362,5 +362,7 @@
   "format.clockNormal": "ddd d  HH:mm",
   "card.historyWaiting": "Historique en cours de collecte (un point toutes les quelques minutes)…",
   "module.themeSwitch": "Thème",
-  "themeSwitch.hint": "toucher : suivant"
+  "themeSwitch.hint": "toucher : suivant",
+  "module.showcase": "Vitrine",
+  "showcase.title": "Vitrine"
 }

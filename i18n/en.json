@@ -362,5 +362,7 @@
   "format.clockNormal": "ddd d  HH:mm",
   "card.historyWaiting": "Collecting the history (a point every few minutes)…",
   "module.themeSwitch": "Theme",
-  "themeSwitch.hint": "tap: next"
+  "themeSwitch.hint": "tap: next",
+  "module.showcase": "Showcase",
+  "showcase.title": "Showcase"
 }

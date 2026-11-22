@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell.Io
 
-// qs -c lc ipc call dashboard <edit|done|discard>
+// qs -c lc ipc call dashboard <edit|done|discard|showcase>
 IpcHandler {
     target: "dashboard"
 
@@ -14,5 +14,9 @@ IpcHandler {
     }
     function discard(): void {
         DashboardEditor.discard();
+    }
+    // Showcase: one module type at every shape ("" = back to the pages).
+    function showcase(type: string): void {
+        Showcase.type = Showcase.types.includes(type) ? type : "";
     }
 }

@@ -17,7 +17,8 @@ PanelWindow {
 
     readonly property var grid: Dashboard.grid(config)
     readonly property string workspace: Hyprland.monitorFor(screen)?.activeWorkspace?.name ?? ""
-    readonly property var cells: Dashboard.page(config, workspace)
+    // The showcase (tests) replaces the page while it's on.
+    readonly property var cells: Showcase.type ? Showcase.cells : Dashboard.page(config, workspace)
 
     anchors {
         top: true
