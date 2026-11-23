@@ -105,6 +105,46 @@ PanelWindow {
         }
     }
 
+    // A widget's own menu (right click on it): its actions, Open (when it
+    // has a panel), Edit this widget, Remove from the bar.
+    function openWidgetMenu(slot: var, x: real, y: real): void {
+        const item = slot.item;
+        const own = (item?.contextActions ?? []).map(a => Object.assign({}, a, { id: `w:${a.id}` }));
+        const list = [];
+        if (item && typeof item.togglePanel === "function")
+            list.push({ id: "open", icon: "open_in_new", text: I18n.tr("bar.menu.open") });
+        list.push(...own);
+        if (list.length)
+            list.push({ isSeparator: true });
+        list.push({ id: "edit", icon: "edit", text: I18n.tr("bar.menu.editWidget") });
+        list.push({ id: "remove", icon: "delete", text: I18n.tr("bar.menu.removeWidget") });
+        widgetMenu.slot = slot;
+        widgetMenu.actions = list;
+        widgetMenu.openAt(x, y);
+    }
+
+    MenuPopup {
+        id: widgetMenu
+
+        property var slot: null
+
+        host: bar
+        onPicked: id => {
+            const slot = widgetMenu.slot;
+            if (!slot)
+                return;
+            if (id === "open")
+                slot.item?.togglePanel();
+            else if (id === "edit") {
+                ShellState.editing = true;
+                BarEditor.selected = slot.at;
+            } else if (id === "remove")
+                BarEditor.remove(slot.at);
+            else if (id.startsWith("w:"))
+                slot.item?.contextAction(id.slice(2));
+        }
+    }
+
     BarMenu {
         id: barMenu
         host: bar

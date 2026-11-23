@@ -10,6 +10,18 @@ import qs.services
 TextWidget {
     id: root
 
+    // Right-click menu (the bar's widget menu).
+    readonly property var contextActions: [
+        { id: "dnd", icon: "do_not_disturb_on", text: I18n.tr("ctx.dnd"), check: "box", checked: NotificationCenter.dnd },
+        ...(NotificationCenter.count > 0 ? [{ id: "clear", icon: "delete", text: I18n.tr("notif.clear") }] : [])
+    ]
+    function contextAction(id: string): void {
+        if (id === "dnd")
+            NotificationCenter.setDnd(!NotificationCenter.dnd);
+        else if (id === "clear")
+            NotificationCenter.clearAll();
+    }
+
     fullText: size === "compact" ? (NotificationCenter.dnd ? "∅" : `${NotificationCenter.unread}`)
         : NotificationCenter.dnd ? I18n.tr("bar.dnd")
         : NotificationCenter.unread > 0 ? I18n.tr("bar.notifsCount", { n: NotificationCenter.unread })

@@ -10,6 +10,18 @@ import qs.services
 TextWidget {
     id: root
 
+    // Right-click menu (the bar's widget menu).
+    readonly property var contextActions: [
+        { id: "mute", icon: Audio.muted ? "volume_up" : "volume_off", text: I18n.tr(Audio.muted ? "ctx.unmute" : "ctx.mute") },
+        { id: "mic", icon: Audio.sourceMuted ? "mic" : "mic_off", text: I18n.tr(Audio.sourceMuted ? "ctx.micOn" : "ctx.micOff") }
+    ]
+    function contextAction(id: string): void {
+        if (id === "mute")
+            Audio.toggleMute();
+        else if (id === "mic")
+            Audio.toggleSourceMute();
+    }
+
     fullText: Audio.muted ? I18n.tr("common.muted")
         : size === "compact" ? I18n.percent(Audio.volume)
         : size === "extended" ? `${Audio.sinkName} · ${I18n.percent(Audio.volume)}`

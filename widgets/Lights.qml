@@ -11,6 +11,13 @@ import qs.services
 TextWidget {
     id: root
 
+    // Right-click menu (the bar's widget menu).
+    readonly property var contextActions: HueBridge.roomsOn > 0 ? [{ id: "allOff", icon: "power_settings_new", text: I18n.tr("hue.allOff") }] : []
+    function contextAction(id: string): void {
+        if (id === "allOff")
+            HueBridge.allOff();
+    }
+
     readonly property bool shown: HueBridge.available
 
     fullText: HueBridge.roomsOn > 0 ? I18n.tr("bar.lightsOn", { n: HueBridge.roomsOn }) : I18n.tr("bar.lightsOff")

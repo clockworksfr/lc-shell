@@ -48,6 +48,23 @@ Item {
     Component.onCompleted: if (host) ShellState.addSlot(root)
     Component.onDestruction: ShellState.removeSlot(root)
 
+    // Right click: this widget's menu (the bar's own menu is for its empty
+    // spots). Under the block, so blocks handling right clicks themselves
+    // (tray icons and their app menus) keep them. Across the bar's
+    // thickness, like the hover area.
+    MouseArea {
+        x: root.vertical ? -(root.host?.thickness ?? 0) : 0
+        y: root.vertical ? 0 : -(root.host?.thickness ?? 0)
+        width: root.vertical ? root.width + 2 * (root.host?.thickness ?? 0) : root.width
+        height: root.vertical ? root.height : root.height + 2 * (root.host?.thickness ?? 0)
+        enabled: !root.editing && !!root.host
+        acceptedButtons: Qt.RightButton
+        onClicked: mouse => {
+            const p = mapToItem(root.host.contentItem, mouse.x, mouse.y);
+            root.host.openWidgetMenu(root, p.x, p.y);
+        }
+    }
+
     Loader {
         id: loader
 

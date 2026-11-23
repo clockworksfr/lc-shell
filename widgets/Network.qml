@@ -9,6 +9,18 @@ import qs.services
 TextWidget {
     id: root
 
+    // Right-click menu (the bar's widget menu).
+    readonly property var contextActions: [
+        ...(NetworkService.wifi ? [{ id: "wifi", icon: NetworkService.wifiEnabled ? "wifi_off" : "wifi", text: I18n.tr(NetworkService.wifiEnabled ? "ctx.wifiOff" : "ctx.wifiOn") }] : []),
+        ...(VpnService.available ? [{ id: "vpn", icon: "vpn_key", text: I18n.tr(VpnService.active ? "ctx.vpnOff" : "ctx.vpnOn", { name: VpnService.current.name }) }] : [])
+    ]
+    function contextAction(id: string): void {
+        if (id === "wifi")
+            NetworkService.setWifiEnabled(!NetworkService.wifiEnabled);
+        else if (id === "vpn")
+            VpnService.toggle();
+    }
+
     readonly property string signal: NetworkService.activeWifi ? I18n.percent(NetworkService.activeWifi.signalStrength) : ""
     // A VPN up: the quick settings' one, or any NetworkManager VPN.
     readonly property bool vpn: VpnService.active || VpnService.activeNames.length > 0

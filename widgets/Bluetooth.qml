@@ -9,6 +9,15 @@ import qs.services
 TextWidget {
     id: root
 
+    // Right-click menu (the bar's widget menu).
+    readonly property var contextActions: [
+        { id: "power", icon: BluetoothService.enabled ? "bluetooth_disabled" : "bluetooth", text: I18n.tr(BluetoothService.enabled ? "ctx.btOff" : "ctx.btOn") }
+    ]
+    function contextAction(id: string): void {
+        if (id === "power")
+            BluetoothService.setEnabled(!BluetoothService.enabled);
+    }
+
     readonly property bool shown: BluetoothService.available
     readonly property int count: BluetoothService.connected.length
 

@@ -8,6 +8,13 @@ import qs.services
 TextWidget {
     id: root
 
+    // Right-click menu (the bar's widget menu).
+    readonly property var contextActions: [{ id: "refresh", icon: "refresh", text: I18n.tr("ctx.refresh") }]
+    function contextAction(id: string): void {
+        if (id === "refresh")
+            Weather.refresh();
+    }
+
     readonly property bool shown: Weather.ready
     readonly property var now: Weather.now
 
