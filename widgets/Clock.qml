@@ -24,7 +24,7 @@ TextWidget {
     // Matrix: one rich text, the date part smaller and soft, the time big,
     // both in the display font (dots), one width, one baseline.
     fullText: figure && datePart
-        ? `<span style="font-family:'${theme.font.display}'; font-size:${Math.round(figureSize * 0.6)}px; color:${theme.color.soft}">${I18n.locale.toString(clock.date, datePart)}</span>&nbsp;&nbsp;${I18n.locale.toString(clock.date, format)}`
+        ? `<span style="font-size:${Math.round(figureSize * 0.6)}px; color:${theme.color.soft}">${I18n.locale.toString(clock.date, datePart)}</span>&nbsp;&nbsp;${I18n.locale.toString(clock.date, format)}`
         : I18n.locale.toString(clock.date, format)
     textFormat: figure && datePart ? Text.RichText : Text.PlainText
     // ~2/3 of the bar's thickness (27 px in a 40 px bar, the mockup).
