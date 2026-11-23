@@ -47,7 +47,7 @@ Grid {
     Repeater {
         model: root.numbered ? root.numberedIds : []
 
-        Row {
+        Item {
             id: numberedItem
 
             required property int modelData
@@ -58,6 +58,11 @@ Grid {
                 : ws ? root.theme.color.ink
                 : root.theme.color.line
 
+            implicitWidth: numberedRow.implicitWidth
+            implicitHeight: numberedRow.implicitHeight
+
+            Row {
+            id: numberedRow
             spacing: 6
 
             Rectangle {
@@ -94,6 +99,7 @@ Grid {
                 font.family: root.theme.font.mono
                 font.pixelSize: 12
                 font.weight: numberedItem.active ? Font.Bold : Font.Normal
+            }
             }
 
             MouseArea {
