@@ -47,7 +47,11 @@ Item {
         id: row
 
         anchors.centerIn: parent
-        columns: zone.vertical ? 1 : zone.groups.length + 1
+        // One row (or column) of the shown items only: a fixed column count
+        // kept room for the hidden edit "+" and empty groups (a gap at
+        // the zone's end).
+        rows: zone.vertical ? -1 : 1
+        columns: zone.vertical ? 1 : -1
         spacing: zone.groupGap
         horizontalItemAlignment: Grid.AlignHCenter
         verticalItemAlignment: Grid.AlignVCenter
