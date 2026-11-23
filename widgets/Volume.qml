@@ -26,7 +26,7 @@ TextWidget {
         : size === "compact" ? I18n.percent(Audio.volume)
         : size === "extended" ? `${Audio.sinkName} · ${I18n.percent(Audio.volume)}`
         : I18n.tr("bar.volume", { value: Math.round(Audio.volume * 100) })
-    // Extended (device · level): "VOL" over it, like BT / BAT.
+    // Extended (device · level): "SON" over it, like BT / BAT.
     microLabel: I18n.tr("bar.v.volume", { value: "" }).split("\n")[0]
     compactText: Audio.muted ? I18n.tr("common.muted") : I18n.tr("bar.v.volume", { value: Math.round(Audio.volume * 100) })
     color: Audio.muted ? theme.color.soft : theme.color.ink

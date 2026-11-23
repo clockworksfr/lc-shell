@@ -81,7 +81,7 @@
   "time.now": "just now",
   "time.minutesAgo": "{n} min ago",
   "format.dateShort": "MMM d HH:mm",
-  "bar.v.volume": "vol\n{value}",
+  "bar.v.volume": "audio\n{value}",
   "bar.v.wired": "eth",
   "bar.v.wifi": "wifi\n{value}",
   "bar.v.offline": "off",
