@@ -68,7 +68,9 @@ Column {
 
             icon: root.iconOf(modelData)
             title: modelData.name || I18n.tr("bt.unnamed")
-            sub: busy ? I18n.tr("bt.connecting") : modelData.connected ? I18n.tr("bt.connected") : I18n.tr("bt.paired")
+            readonly property bool low: modelData.batteryAvailable && (modelData.battery ?? 1) < 0.2
+            sub: [busy ? I18n.tr("bt.connecting") : modelData.connected ? I18n.tr("bt.connected") : I18n.tr("bt.paired"), modelData.batteryAvailable ? I18n.percent(modelData.battery ?? 0) : "", low ? I18n.tr("card.charge") : ""].filter(t => !!t).join(" · ")
+            subColor: low ? (root.theme.color.warn ?? root.theme.color.urgent) : root.theme.color.soft
             active: modelData.connected
             control: "button"
             buttonText: I18n.tr(modelData.connected ? "card.disconnect" : "card.connect")
@@ -112,5 +114,6 @@ Column {
     CardParts.Footer {
         page: "bluetooth"
         pageName: I18n.tr("bt.title")
+        hints: I18n.tr("card.hintsBluetooth")
     }
 }

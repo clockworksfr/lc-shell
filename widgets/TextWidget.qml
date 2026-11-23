@@ -47,6 +47,11 @@ ThemedText {
         const parts = rest.split("\n");
         if (parts.length < 2)
             return dot + esc(rest);
+        // A "●" leading the value: the signal dot there.
+        if (parts[1].startsWith("●")) {
+            dot = `<span style="color:${theme.color.signal ?? theme.color.urgent}">●</span> `;
+            parts[1] = parts[1].slice(1).trim();
+        }
         return `<span style="font-size:${Math.round(theme.font.sizeS * 0.82)}px; color:${theme.color.soft}">${esc(parts[0])}</span><br>${dot}${esc(parts.slice(1).join(" "))}`;
     }
 

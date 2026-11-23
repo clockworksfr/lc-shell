@@ -39,7 +39,8 @@ Singleton {
 
     // Same ceiling as the wpctl key binds (-l 1.5).
     readonly property real maxVolume: 1.5
-    readonly property real step: 0.05
+    // Wheel and keys step (audio.step, Settings › Sound).
+    readonly property real step: Config.get("audio.step") ?? 0.05
 
     // Emitted when the volume/mute of the current device actually changes,
     // whoever changed it (shell, wpctl, pavucontrol...). Not emitted while

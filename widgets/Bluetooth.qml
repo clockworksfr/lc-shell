@@ -21,7 +21,16 @@ TextWidget {
     readonly property bool shown: BluetoothService.available
     readonly property int count: BluetoothService.connected.length
 
-    fullText: size === "extended" && count > 0 ? `bt · ${BluetoothService.connected.map(d => d.name).join(", ")}`
+    // Lowest battery of the connected devices ("" = none reported).
+    readonly property string lowest: {
+        const levels = BluetoothService.connected.filter(d => d.batteryAvailable).map(d => d.battery ?? 1);
+        return levels.length ? I18n.percent(Math.min(...levels)) : "";
+    }
+    readonly property string names: [BluetoothService.connected.map(d => d.name).join(", "), lowest].filter(t => !!t).join(" · ")
+    // Extended in Matrix: BT over the names and the lowest battery.
+    microLabel: I18n.tr("bar.v.bluetooth", { n: "" }).split("\n")[0]
+
+    fullText: size === "extended" && count > 0 ? (theme.style.statusStack === true ? names : `bt · ${names}`)
         : !BluetoothService.enabled ? I18n.tr("bar.bluetoothOff")
         : count > 0 ? I18n.tr("bar.bluetoothCount", { n: count })
         : I18n.tr("bar.bluetooth")
@@ -30,7 +39,7 @@ TextWidget {
 
     icon: !BluetoothService.enabled ? "bluetooth_disabled" : count > 0 ? "bluetooth_connected" : "bluetooth"
     iconText: !BluetoothService.enabled || count === 0 || size === "compact" ? ""
-        : size === "extended" && !vertical ? BluetoothService.connected.map(d => d.name).join(", ")
+        : size === "extended" && !vertical ? names
         : `${count}`
 
     // Left: the card, pinned. Middle: power.

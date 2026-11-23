@@ -30,29 +30,46 @@ QtObject {
         width: parent?.width ?? 0
         implicitHeight: Math.max(headerText.implicitHeight, sw.implicitHeight * 0.8)
 
-        Column {
+        // Title, then the state in a pill.
+        Row {
             id: headerText
             anchors.left: parent.left
-            anchors.right: sw.visible ? sw.left : parent.right
-            anchors.rightMargin: 8
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 1
+            spacing: 8
+            readonly property real room: (sw.visible ? sw.x - 8 : header.width)
 
             ThemedText {
-                width: parent.width
+                id: titleText
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.min(implicitWidth, headerText.room - (pill.visible ? pill.width + 8 : 0))
                 text: header.title
                 font.pixelSize: 16
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
 
-            ThemedText {
+            Rectangle {
+                id: pill
                 visible: !!header.status
-                width: parent.width
-                text: header.status
-                color: header.theme.color.soft
-                font.pixelSize: 12
-                elide: Text.ElideRight
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.min(pillText.implicitWidth + 16, Math.max(40, headerText.room - titleText.implicitWidth - 8))
+                height: 22
+                radius: header.theme.style.module === "facade" || header.theme.style.module === "modulaire" ? 3 : 11
+                color: "transparent"
+                border.width: 1
+                border.color: header.theme.color.line
+
+                ThemedText {
+                    id: pillText
+                    anchors.centerIn: parent
+                    width: Math.min(implicitWidth, parent.width - 14)
+                    text: header.status
+                    color: header.theme.color.soft
+                    font.family: header.theme.font.mono
+                    font.pixelSize: 11
+                    font.capitalization: header.theme.style.module === "matrix" ? Font.AllUppercase : Font.MixedCase
+                    elide: Text.ElideRight
+                }
             }
         }
 
@@ -85,7 +102,7 @@ QtObject {
         property string buttonText
         property string trailing
         property color subColor: theme.color.soft
-        // A battery gauge left of the control (0–1, -1 = none).
+        // Battery (0–1, -1 = none): a ring around the icon, warn under 20 %.
         property real battery: -1
 
         signal toggled
@@ -115,9 +132,41 @@ QtObject {
             }
         }
 
+        Canvas {
+            id: ring
+            visible: line.battery >= 0
+            anchors.centerIn: bubble
+            width: bubble.width + 8
+            height: width
+            readonly property real level: Math.max(0, Math.min(1, line.battery))
+            readonly property color track: line.theme.color.line
+            readonly property color fill: level < 0.2 ? (line.theme.color.warn ?? line.theme.color.urgent) : line.theme.color.ok
+            onLevelChanged: requestPaint()
+            onFillChanged: requestPaint()
+            onTrackChanged: requestPaint()
+            onPaint: {
+                const ctx = getContext("2d");
+                ctx.reset();
+                const c = width / 2;
+                const r = c - 1.5;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = "round";
+                ctx.strokeStyle = track;
+                ctx.beginPath();
+                ctx.arc(c, c, r, 0, Math.PI * 2);
+                ctx.stroke();
+                if (level > 0) {
+                    ctx.strokeStyle = fill;
+                    ctx.beginPath();
+                    ctx.arc(c, c, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * level);
+                    ctx.stroke();
+                }
+            }
+        }
+
         Column {
             anchors.left: bubble.right
-            anchors.leftMargin: 10
+            anchors.leftMargin: line.battery >= 0 ? 14 : 10
             anchors.right: right.left
             anchors.rightMargin: 8
             anchors.verticalCenter: parent.verticalCenter
@@ -147,11 +196,6 @@ QtObject {
             anchors.verticalCenter: parent.verticalCenter
             spacing: 8
 
-            Gauge {
-                visible: line.battery >= 0
-                anchors.verticalCenter: parent.verticalCenter
-                level: Math.max(0, line.battery)
-            }
 
             ThemedText {
                 visible: line.control === "text" && !!line.trailing
@@ -284,9 +328,11 @@ QtObject {
         id: footer
 
         readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
-        // Settings page id (settings/Settings.qml pages).
+        // Settings page id (settings/Settings.qml pages), "" = no link.
         property string page
         property string pageName
+        // What the mouse does, mono capitals on the left.
+        property string hints
 
         width: parent?.width ?? 0
         implicitHeight: 30
@@ -299,10 +345,27 @@ QtObject {
 
         ThemedText {
             anchors.left: parent.left
+            anchors.right: link.visible ? link.left : parent.right
+            anchors.rightMargin: 10
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 1
+            text: footer.hints
+            color: footer.theme.color.soft
+            font.family: footer.theme.font.mono
+            font.pixelSize: 10
+            font.letterSpacing: 0.5
+            font.capitalization: Font.AllUppercase
+            elide: Text.ElideRight
+        }
+
+        ThemedText {
+            id: link
+            visible: !!footer.page
+            anchors.right: parent.right
             anchors.bottom: parent.bottom
             text: `${I18n.tr("card.settings")} › ${footer.pageName}`
             color: footer.theme.color.accent
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.weight: Font.DemiBold
 
             MouseArea {

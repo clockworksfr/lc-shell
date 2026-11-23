@@ -112,5 +112,6 @@ Column {
     CardParts.Footer {
         page: "network"
         pageName: I18n.tr("net.title")
+        hints: I18n.tr("card.hintsNetwork")
     }
 }

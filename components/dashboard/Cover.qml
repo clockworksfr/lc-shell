@@ -134,7 +134,8 @@ Item {
             x: root.size / 2 + Math.cos(angle) * (root.size / 2 - 3) - 3.5
             y: root.size / 2 + Math.sin(angle) * (root.size / 2 - 3) - 3.5
             scale: (3 + level * 4) / 7
-            color: level > 0.75 ? (root.theme.color.signal ?? root.theme.color.ink) : root.theme.color.ink
+            // Ink only: Matrix keeps red for alerts, play and the progress head.
+            color: root.theme.color.ink
             opacity: 0.45 + level * 0.55
             // (No width animation: 56 of them running 30 times a second cost
             // more than the spectrum; only the width moved, the dots went

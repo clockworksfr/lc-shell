@@ -121,4 +121,10 @@ Column {
         node: Audio.sourceMuted ? null : Audio.source
         enabled: !Audio.sourceMuted
     }
+
+    CardParts.Footer {
+        page: "sound"
+        pageName: I18n.tr("settings.page.sound")
+        hints: I18n.tr("card.hintsVolume").replace("5", Math.round(Audio.step * 100))
+    }
 }

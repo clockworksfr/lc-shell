@@ -109,5 +109,6 @@ Column {
     CardParts.Footer {
         page: "modes"
         pageName: I18n.tr("settings.modes")
+        hints: I18n.tr("card.hintsModes")
     }
 }
