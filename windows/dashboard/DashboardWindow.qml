@@ -9,19 +9,51 @@ import qs.components
 import qs.i18n
 import qs.settings
 
-// Dashboard of a "modules" screen: the page of its active workspace, drawn
-// on the bottom layer (under windows, which CellTiler floats into the
-// window cells).
+// Dashboard of a screen: the preset of its active workspace (if it has
+// one), on the bottom layer, under windows (which go over it, or into the
+// window cells: CellTiler), over the wallpaper, inside the bar's room.
+// Another workspace: it fades out and its modules go (they come back,
+// column by column, on return).
 PanelWindow {
     id: win
 
-    property var config: ({})
     property var theme
 
-    readonly property var grid: Dashboard.grid(config)
     readonly property string workspace: Hyprland.monitorFor(screen)?.activeWorkspace?.name ?? ""
+    readonly property var preset: Dashboard.presetFor(workspace)
+    readonly property bool shown: !!preset
+    readonly property var grid: Dashboard.grid(preset)
     // The showcase (tests) replaces the page while it's on.
-    readonly property var cells: Showcase.type ? Showcase.cells : Dashboard.page(config, workspace)
+    readonly property var target: !shown ? [] : Showcase.type ? Showcase.cells : Dashboard.cells(preset)
+    property var cells: []
+    onTargetChanged: {
+        if (shown) {
+            fadeOut.stop();
+            canvas.opacity = 1;
+            cells = target;
+            visible = true;
+        } else if (visible) {
+            fadeOut.restart();
+        }
+    }
+    Component.onCompleted: {
+        cells = target;
+        visible = shown;
+    }
+
+    NumberAnimation {
+        id: fadeOut
+        target: canvas
+        property: "opacity"
+        to: 0
+        duration: Motion.exitMs(win.theme, "base", win.screen?.name ?? "")
+        easing.type: Easing.InCubic
+        onFinished: {
+            win.cells = [];
+            win.visible = false;
+            canvas.opacity = 1;
+        }
+    }
 
     anchors {
         top: true
@@ -29,8 +61,9 @@ PanelWindow {
         left: true
         right: true
     }
-    color: theme.color.bg
-    exclusionMode: ExclusionMode.Ignore
+    color: "transparent"
+    // Inside the room left by the bar (if the screen has one).
+    exclusionMode: ExclusionMode.Normal
     WlrLayershell.layer: WlrLayer.Bottom
     WlrLayershell.namespace: "lc-dashboard"
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
@@ -87,11 +120,6 @@ PanelWindow {
         id: canvas
 
         anchors.fill: parent
-
-        Rectangle {
-            anchors.fill: parent
-            color: win.theme.color.bg
-        }
 
         Repeater {
             model: win.cells

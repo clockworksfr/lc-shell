@@ -5,8 +5,7 @@ import Quickshell
 import Quickshell.Hyprland
 import qs.services
 
-// Places windows of "modules" screens into the window cells of their
-// workspace's page: floated, resized, moved (hl.dsp.window.* by address).
+// Places windows into the window cells of their workspace's dashboard: floated, resized, moved (hl.dsp.window.* by address).
 //
 // - A window keeps its cell while it stays on the same workspace; new
 //   windows take the first free cell; extra windows stack in the last one.
@@ -22,14 +21,10 @@ Singleton {
         const next = {};
         const usedCells = {}; // "screen/workspace" -> Set of cell indices
 
+        const windowsConfig = Dashboard.windows;
         for (const screen of Quickshell.screens) {
-            if (Config.forScreen(screen).mode !== "modules")
-                continue;
-            const config = Dashboard.configFor(screen);
-            const windowsConfig = Object.assign({ enabled: true, ignore: [], only: [] }, config.windows ?? {});
             if (!windowsConfig.enabled)
                 continue;
-            const grid = Dashboard.grid(config);
 
             const toplevels = Hyprland.toplevels.values.filter(t => t.workspace?.monitor?.name === screen.name && (t.workspace?.id ?? 0) > 0);
             for (const toplevel of toplevels) {
@@ -43,7 +38,9 @@ Singleton {
                     continue;
 
                 const workspace = toplevel.workspace.name;
-                const cells = Dashboard.page(config, workspace).map((cell, index) => ({ cell, index })).filter(c => c.cell.type === "window");
+                const preset = Dashboard.presetFor(workspace);
+                const grid = Dashboard.grid(preset);
+                const cells = Dashboard.cells(preset).map((cell, index) => ({ cell, index })).filter(c => c.cell.type === "window");
                 if (cells.length === 0)
                     continue;
 
@@ -66,7 +63,7 @@ Singleton {
             }
         }
 
-        // Windows we managed that left the modules screens go back to tiling.
+        // Windows we managed that left a dashboard's window cells go back to tiling.
         for (const address in managed) {
             if (!(address in next) && Hyprland.toplevels.values.some(t => t.address === address))
                 dispatch(`hl.dsp.window.float({ action = "unset", ${selector(address)} })`);

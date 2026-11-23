@@ -5,7 +5,8 @@ import qs.i18n
 import qs.services
 import qs.theme
 
-// One card per connected screen: mode, theme, touch, bar position, frame.
+// One card per connected screen: bar (default, own or none), theme,
+// touch, bar position, frame.
 // Changes go to the screen's profile (matched by model).
 Column {
     id: root
@@ -22,7 +23,11 @@ Column {
 
             required property ShellScreen modelData
             readonly property var profile: Config.forScreen(modelData)
-            readonly property var bar: Object.assign({}, Themes.resolve(profile.theme ?? Themes.themeFor(profile.mode), false, profile.mode).bar, profile.bar ?? {})
+            readonly property var bar: Object.assign({}, Themes.resolve(profile.theme ?? Themes.themeFor("normal"), false, "normal").bar, profile.bar ?? {})
+            // "default" (the default bar), "custom" (with this screen's
+            // changes), "none".
+            readonly property var ownBar: Config.profileFor(modelData).bar
+            readonly property string barKind: ownBar === undefined ? "default" : ownBar === false || ownBar === null ? "none" : "custom"
 
             function setBar(key: string, value: var): void {
                 const current = Config.profileFor(modelData).bar;
@@ -51,19 +56,19 @@ Column {
                 }
 
                 Field {
-                    label: I18n.tr("settings.screenMode")
-                    hint: I18n.tr("settings.screenModeHint")
+                    label: I18n.tr("settings.screenBar")
+                    hint: I18n.tr("settings.screenBarHint")
                     Choice {
-                        model: [{ value: "normal", label: I18n.tr("settings.mode.normal") }, { value: "modules", label: I18n.tr("settings.mode.modules") }]
-                        value: card.profile.mode
-                        onPicked: value => Config.setScreen(card.modelData, "mode", value)
+                        model: [{ value: "default", label: I18n.tr("settings.bar.default") }, { value: "custom", label: I18n.tr("settings.bar.custom") }, { value: "none", label: I18n.tr("settings.bar.none") }]
+                        value: card.barKind
+                        onPicked: value => Config.setScreen(card.modelData, "bar", value === "default" ? undefined : value === "none" ? false : (card.barKind === "custom" ? card.ownBar : {}))
                     }
                 }
 
                 Field {
                     label: I18n.tr("settings.screenTheme")
                     Choice {
-                        model: [{ value: "", label: I18n.tr("settings.themeOfMode") }, ...Object.keys(Themes.definitions).map(id => ({ value: id, label: I18n.tr(`theme.${id}`) }))]
+                        model: [{ value: "", label: I18n.tr("settings.themeDefault") }, ...Object.keys(Themes.definitions).map(id => ({ value: id, label: I18n.tr(`theme.${id}`) }))]
                         value: card.profile.theme ?? ""
                         onPicked: value => Config.setScreen(card.modelData, "theme", value || undefined)
                     }
@@ -80,7 +85,7 @@ Column {
                 }
 
                 Field {
-                    visible: card.profile.mode === "normal"
+                    visible: card.barKind !== "none"
                     label: I18n.tr("settings.barPosition")
                     Choice {
                         model: ["top", "bottom", "left", "right"].map(v => ({ value: v, label: I18n.tr(`settings.edge.${v}`) }))
@@ -90,7 +95,7 @@ Column {
                 }
 
                 Field {
-                    visible: card.profile.mode === "normal"
+                    visible: card.barKind !== "none"
                     label: I18n.tr("settings.frame")
                     hint: I18n.tr("settings.frameHint")
                     Switch {

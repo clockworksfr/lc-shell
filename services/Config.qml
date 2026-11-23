@@ -10,11 +10,15 @@ import Quickshell.Io
 // Objects merge key by key; arrays (block lists, screens, pages) replace.
 //
 //   language, wallpaper, notifications…
-//   appearance  theme per screen mode, light/dark variant and its schedule
-//   modes       per-mode module config: modes.normal.bar, modes.modules.osd...
+//   appearance  themes (screens: "normal", dashboards: "modules"),
+//               light/dark variant and its schedule
+//   modes       default module config of screens: modes.normal.bar, .osd…
+//   dashboards  modules per workspace (dashboard/Dashboard.qml)
 //   screens     profiles, first match wins:
 //               { match: { model: "XENEON EDGE" } | { name: "eDP-*" },
-//                 mode: "normal" | "modules", theme, touch, <module overrides> }
+//                 theme, touch, <module overrides> }
+//               ("bar": false = no bar there; an object overrides the
+//               default bar). A legacy "mode" is ignored.
 //
 // Screens are matched by model first: connector names change with the eGPU.
 // A module override is merged key by key over the mode's config;
@@ -124,7 +128,8 @@ Singleton {
         if (!screen)
             return { mode: "normal", theme: null, touch: false };
         const profile = profileFor(screen);
-        const mode = profile.mode ?? "normal";
+        // Every screen is a normal one now (dashboards follow workspaces).
+        const mode = "normal";
         const base = (data.modes ?? {})[mode] ?? {};
         const result = { mode: mode, theme: profile.theme ?? null, touch: profile.touch ?? false };
         const reserved = ["match", "mode", "theme", "touch"];

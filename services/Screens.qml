@@ -37,12 +37,19 @@ Singleton {
 
     // Where an automatic popup (OSD, notification) may appear.
     // Nothing automatic is ever drawn over a fullscreen window: the popup
-    // goes to a "modules" screen instead, or nowhere ("").
+    // goes to a screen showing a dashboard instead, else to any screen
+    // without one, or nowhere ("").
     function popupTarget(preferred: string): string {
         const wanted = preferred || (Hyprland.focusedMonitor?.name ?? "");
         if (wanted && !hasFullscreen(wanted))
             return wanted;
-        const fallback = Quickshell.screens.find(s => Config.forScreen(s).mode === "modules" && !hasFullscreen(s.name));
+        const free = Quickshell.screens.filter(s => !hasFullscreen(s.name));
+        const dashboards = Config.data.dashboards ?? {};
+        const showsDashboard = s => {
+            const preset = (dashboards.workspaces ?? {})[Hyprland.monitorFor(s)?.activeWorkspace?.name ?? ""];
+            return !!preset && !!(dashboards.presets ?? {})[preset];
+        };
+        const fallback = free.find(showsDashboard) ?? free[0];
         return fallback?.name ?? "";
     }
 }

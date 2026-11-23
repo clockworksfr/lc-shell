@@ -2,16 +2,16 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import qs.services
 
-// Geometry of "modules" screens (the dashboard).
-//
-// Config (settings, modes.modules.dashboard, overridable per screen):
-//   grid     { columns, rows, gap, margin }
-//   pages    { "default": [cells], "<workspace name>": [cells] }
-//            Each Hyprland workspace of the screen is a page; a workspace
-//            without its own page uses "default".
-//   windows  { enabled, ignore: [classes], only: [classes] }
+// Dashboards: modules laid out on a grid, shown on a workspace (whatever
+// the screen), under its windows. Settings (`dashboards`):
+//   grid        { columns, rows, gap, margin }   (a preset may override it)
+//   windows     { enabled, ignore: [classes], only: [classes] }
+//   presets     { "<name>": { cells: [cells], grid? } }
+//   workspaces  { "<workspace name>": "<preset name>" }
+// A workspace without a preset has no dashboard.
 //
 // A cell: { "type": "<tile>", "x", "y", "w", "h", ...options } in grid
 // units. "type": "window" is a window cell: windows on that workspace are
@@ -21,17 +21,34 @@ Singleton {
 
     readonly property var defaultGrid: ({ columns: 12, rows: 4, gap: 12, margin: 12 })
 
-    function configFor(screen: ShellScreen): var {
-        return Config.forScreen(screen).dashboard ?? {};
+    readonly property var config: Config.data.dashboards ?? {}
+    readonly property var presets: config.presets ?? {}
+    readonly property var workspaces: config.workspaces ?? {}
+    readonly property var windows: Object.assign({ enabled: true, ignore: [], only: [] }, config.windows ?? {})
+
+    // Preset name of a workspace ("" = no dashboard there).
+    function presetNameFor(workspaceName: string): string {
+        const name = workspaces[workspaceName] ?? "";
+        return name && presets[name] ? name : "";
     }
 
-    function grid(config: var): var {
-        return Object.assign({}, defaultGrid, config.grid ?? {});
+    function presetFor(workspaceName: string): var {
+        const name = presetNameFor(workspaceName);
+        return name ? presets[name] : null;
     }
 
-    function page(config: var, workspaceName: string): var {
-        const pages = config.pages ?? {};
-        return pages[workspaceName] ?? pages.default ?? [];
+    function grid(preset: var): var {
+        return Object.assign({}, defaultGrid, config.grid ?? {}, preset?.grid ?? {});
+    }
+
+    function cells(preset: var): var {
+        return preset?.cells ?? [];
+    }
+
+    // Screens showing a dashboard right now (their active workspace has one).
+    function showsDashboard(screen: ShellScreen): bool {
+        const ws = Hyprland.monitorFor(screen)?.activeWorkspace?.name ?? "";
+        return !!presetNameFor(ws);
     }
 
     // Cell rectangle in screen-local pixels.

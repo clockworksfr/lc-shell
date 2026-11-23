@@ -3,12 +3,14 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import qs.i18n
 import qs.services
 
-// Dashboard edit mode (design study, "Dashboard editor"): one "modules"
-// screen at a time. Its pages (default + one per workspace) are edited in
-// a draft; "done" saves them to the screen's profile (dashboard.pages),
-// "discard" drops them. Undo / redo keep the last 50 states.
+// Dashboard edit mode (design study, "Dashboard editor"): the dashboard
+// of one workspace, on the screen showing it. Presets (named layouts) are
+// edited in a draft along with which preset each workspace uses; "done"
+// saves both (dashboards.presets / .workspaces), "discard" drops them.
+// Undo / redo keep the last 50 states.
 //
 // A cell: { type, x, y, w, h, ...options } in grid units; "window" cells
 // take the workspace's windows (CellTiler).
@@ -17,19 +19,21 @@ Singleton {
 
     property bool editing: false
     property string screenName: ""
-    // Page being edited: "default" or a workspace name.
-    property string page: "default"
-    // page name -> cells (draft).
+    // The workspace whose dashboard is edited.
+    property string workspace: ""
+    // Preset being edited (the workspace's).
+    property string page: ""
+    // Draft: preset name -> cells, workspace name -> preset name.
     property var pages: ({})
+    property var assignments: ({})
     // Selected cell index on the page, -1 = none.
     property int selected: -1
     property var undoStack: []
     property var redoStack: []
 
     readonly property ShellScreen screen: Quickshell.screens.find(s => s.name === screenName) ?? null
-    readonly property var config: screen ? (Config.forScreen(screen).dashboard ?? {}) : ({})
-    readonly property var grid: Dashboard.grid(config)
-    readonly property var cells: pages[page] ?? pages.default ?? []
+    readonly property var grid: Dashboard.grid(Dashboard.presets[page] ?? null)
+    readonly property var cells: pages[page] ?? []
     // Sizes a module snaps to (design study): S, M, L.
     readonly property var sizes: ({ S: { w: 2, h: 1 }, M: { w: 4, h: 2 }, L: { w: 6, h: 3 } })
 
@@ -37,32 +41,90 @@ Singleton {
         return JSON.parse(JSON.stringify(value ?? null));
     }
 
-    // Starts editing a screen (by name; "" = the first "modules" screen),
-    // on the page of its active workspace.
+    function snapshot(): var {
+        return { page: page, pages: copy(pages), assignments: copy(assignments) };
+    }
+
+    function restore(state: var): void {
+        pages = state.pages;
+        assignments = state.assignments;
+        page = state.page;
+        selected = -1;
+    }
+
+    // A preset name not taken yet ("base", "base 2", "base 3"…).
+    function freeName(base: string): string {
+        let name = base;
+        for (let i = 2; pages[name]; i++)
+            name = `${base} ${i}`;
+        return name;
+    }
+
+    // Starts editing the dashboard of a screen's active workspace (by
+    // screen name; "" = the first screen showing a dashboard, else the
+    // focused one). A workspace without one gets a new, empty preset.
     function start(name: string): void {
-        const target = Quickshell.screens.find(s => name ? s.name === name : Config.forScreen(s).mode === "modules");
-        if (!target || Config.forScreen(target).mode !== "modules")
+        const target = Quickshell.screens.find(s => name ? s.name === name : Dashboard.showsDashboard(s))
+            ?? Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
+            ?? Quickshell.screens[0];
+        if (!target)
             return;
         screenName = target.name;
-        pages = copy(Config.forScreen(target).dashboard?.pages ?? { default: [] });
-        if (!pages.default)
-            pages = Object.assign({ default: [] }, pages);
-        const workspace = Hyprland.monitorFor(target)?.activeWorkspace?.name ?? "";
-        page = pages[workspace] ? workspace : "default";
+        workspace = Hyprland.monitorFor(target)?.activeWorkspace?.name ?? "";
+        const draft = {};
+        for (const key in Dashboard.presets)
+            draft[key] = copy(Dashboard.presets[key].cells ?? []);
+        pages = draft;
+        assignments = copy(Dashboard.workspaces) ?? {};
+        page = Dashboard.presetNameFor(workspace);
+        if (!page) {
+            page = freeName(I18n.tr("dashEdit.workspacePreset", { name: workspace }));
+            pages = Object.assign({}, pages, { [page]: [] });
+            assignments = Object.assign({}, assignments, { [workspace]: page });
+        }
         selected = -1;
         undoStack = [];
         redoStack = [];
         editing = true;
     }
 
+    // The workspace uses another preset (edited from now on).
+    function usePreset(name: string): void {
+        if (!pages[name] || name === page)
+            return;
+        undoStack = [...undoStack, snapshot()].slice(-50);
+        redoStack = [];
+        assignments = Object.assign({}, assignments, { [workspace]: name });
+        page = name;
+        selected = -1;
+    }
+
+    // A copy of the preset, used by the workspace from now on.
+    function duplicate(): void {
+        undoStack = [...undoStack, snapshot()].slice(-50);
+        redoStack = [];
+        const name = freeName(page);
+        pages = Object.assign({}, pages, { [name]: copy(cells) });
+        assignments = Object.assign({}, assignments, { [workspace]: name });
+        page = name;
+        selected = -1;
+    }
+
+    // No dashboard on this workspace any more (the preset is kept); saved
+    // at once.
+    function removeFromWorkspace(): void {
+        const next = copy(assignments);
+        delete next[workspace];
+        assignments = next;
+        done();
+    }
+
     function setCells(list: var, record: bool): void {
         if (record) {
-            undoStack = [...undoStack, { page: page, pages: copy(pages) }].slice(-50);
+            undoStack = [...undoStack, snapshot()].slice(-50);
             redoStack = [];
         }
-        const next = copy(pages);
-        next[page] = list;
-        pages = next;
+        pages = Object.assign({}, pages, { [page]: list });
     }
 
     function overlaps(a: var, b: var): bool {
@@ -132,65 +194,32 @@ Singleton {
     }
 
     // A page for a workspace (starts as a copy of the default page).
-    function addPage(name: string): void {
-        if (!name || pages[name])
-            return;
-        undoStack = [...undoStack, { page: page, pages: copy(pages) }].slice(-50);
-        redoStack = [];
-        const next = copy(pages);
-        next[name] = copy(pages.default ?? []);
-        pages = next;
-        page = name;
-        selected = -1;
-    }
-
-    function removePage(name: string): void {
-        if (name === "default" || !pages[name])
-            return;
-        undoStack = [...undoStack, { page: page, pages: copy(pages) }].slice(-50);
-        redoStack = [];
-        const next = copy(pages);
-        delete next[name];
-        pages = next;
-        page = "default";
-        selected = -1;
-    }
-
     function undo(): void {
-        const last = undoStack[undoStack.length - 1];
-        if (!last)
+        if (!undoStack.length)
             return;
-        redoStack = [...redoStack, { page: page, pages: copy(pages) }];
+        const last = undoStack[undoStack.length - 1];
         undoStack = undoStack.slice(0, -1);
-        pages = last.pages;
-        page = pages[last.page] ? last.page : "default";
-        selected = -1;
+        redoStack = [...redoStack, snapshot()];
+        restore(last);
     }
 
     function redo(): void {
-        const last = redoStack[redoStack.length - 1];
-        if (!last)
+        if (!redoStack.length)
             return;
-        undoStack = [...undoStack, { page: page, pages: copy(pages) }];
+        const last = redoStack[redoStack.length - 1];
         redoStack = redoStack.slice(0, -1);
-        pages = last.pages;
-        page = pages[last.page] ? last.page : "default";
-        selected = -1;
+        undoStack = [...undoStack, snapshot()];
+        restore(last);
     }
 
-    // Saves the pages to the screen's profile (left out when equal to the
-    // mode's default: later default changes still apply).
+    // Saves the presets (other keys of each preset, like a grid, kept) and
+    // the workspaces' choices.
     function done(): void {
-        if (screen) {
-            const current = Config.profileFor(screen).dashboard;
-            const dashboard = Object.assign({}, current && typeof current === "object" ? current : {});
-            const defaults = Config.get("modes.modules.dashboard.pages") ?? {};
-            if (JSON.stringify(pages) === JSON.stringify(defaults))
-                delete dashboard.pages;
-            else
-                dashboard.pages = copy(pages);
-            Config.setScreen(screen, "dashboard", Object.keys(dashboard).length ? dashboard : undefined);
-        }
+        const presets = {};
+        for (const name in pages)
+            presets[name] = Object.assign({}, Dashboard.presets[name] ?? {}, { cells: copy(pages[name]) });
+        Config.set("dashboards.presets", presets);
+        Config.set("dashboards.workspaces", copy(assignments));
         editing = false;
     }
 

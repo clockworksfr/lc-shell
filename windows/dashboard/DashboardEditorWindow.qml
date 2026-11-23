@@ -268,7 +268,8 @@ PanelWindow {
         readonly property var cell: DashboardEditor.cells[DashboardEditor.selected] ?? null
         readonly property string workspace: Hyprland.monitorFor(win.screen)?.activeWorkspace?.name ?? ""
 
-        // Left: pages.
+        // Left: the workspace's preset (pick another, duplicate it, or no
+        // dashboard on this workspace).
         Row {
             anchors.left: parent.left
             anchors.leftMargin: win.theme.space.l
@@ -279,34 +280,29 @@ PanelWindow {
             ThemedText {
                 anchors.verticalCenter: parent.verticalCenter
                 label: true
-                text: I18n.tr("dashEdit.page")
+                text: I18n.tr("dashEdit.presetOf", { name: DashboardEditor.workspace })
                 color: win.theme.color.soft
             }
 
             Choice {
                 anchors.verticalCenter: parent.verticalCenter
-                model: Object.keys(DashboardEditor.pages).sort((a, b) => a === "default" ? -1 : b === "default" ? 1 : a.localeCompare(b, undefined, { numeric: true })).map(p => ({ value: p, label: p === "default" ? I18n.tr("dashEdit.defaultPage") : I18n.tr("dashEdit.workspacePage", { name: p }) }))
+                model: Object.keys(DashboardEditor.pages).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).map(p => ({ value: p, label: p }))
                 value: DashboardEditor.page
-                onPicked: value => {
-                    DashboardEditor.page = value;
-                    DashboardEditor.selected = -1;
-                }
+                onPicked: value => DashboardEditor.usePreset(value)
             }
 
             Button {
                 anchors.verticalCenter: parent.verticalCenter
-                visible: !!bottom.workspace && !DashboardEditor.pages[bottom.workspace]
-                icon: "add"
-                text: I18n.tr("dashEdit.addPage", { name: bottom.workspace })
-                onClicked: DashboardEditor.addPage(bottom.workspace)
+                icon: "content_copy"
+                text: I18n.tr("dashEdit.duplicate")
+                onClicked: DashboardEditor.duplicate()
             }
 
             Button {
                 anchors.verticalCenter: parent.verticalCenter
-                visible: DashboardEditor.page !== "default"
                 icon: "delete"
-                text: I18n.tr("dashEdit.removePage")
-                onClicked: DashboardEditor.removePage(DashboardEditor.page)
+                text: I18n.tr("dashEdit.removeFromWorkspace")
+                onClicked: DashboardEditor.removeFromWorkspace()
             }
         }
 

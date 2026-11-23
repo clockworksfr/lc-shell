@@ -122,13 +122,20 @@ Scope {
         }
     }
 
+    // Dashboard: loaded once this screen has shown a workspace that has
+    // one (kept, hidden, afterwards), in the dashboards' theme.
+    readonly property bool showsDashboard: Dashboard.showsDashboard(modelData)
+    property bool dashboardLoaded: false
+    onShowsDashboardChanged: if (showsDashboard) dashboardLoaded = true
+    Component.onCompleted: if (showsDashboard) dashboardLoaded = true
+    readonly property var dashboardTheme: Themes.resolve(Themes.themeFor("modules"), profile.touch, "modules")
+
     LazyLoader {
-        active: root.profile.mode === "modules" && !!root.profile.dashboard
+        active: root.dashboardLoaded
 
         DashboardWindow {
             screen: root.modelData
-            config: root.profile.dashboard
-            theme: root.theme
+            theme: root.dashboardTheme
         }
     }
 
