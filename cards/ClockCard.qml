@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import qs.components
 import qs.i18n
+import qs.services
 import qs.theme
 
 // Date and week, time with seconds, month calendar (hover cards mockup):
@@ -16,8 +17,9 @@ Column {
     readonly property string look: theme.style.module ?? "classic"
     readonly property bool squared: look === "facade" || look === "modulaire"
 
-    // Months away from the current one (wheel).
-    property int monthOffset: 0
+    // Months away from the current one (shared with the bar clock's wheel).
+    property int monthOffset: ShellState.calendarOffset
+    onMonthOffsetChanged: ShellState.calendarOffset = monthOffset
 
     function isoWeek(date: date): int {
         const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -53,6 +55,19 @@ Column {
     }
 
     spacing: 12
+
+    // Wheel anywhere on the card: other months (under the controls: their
+    // clicks stay theirs).
+    MouseArea {
+        parent: root.parent
+        x: root.x
+        y: root.y
+        width: root.width
+        height: root.height
+        z: -1
+        acceptedButtons: Qt.NoButton
+        onWheel: wheel => root.monthOffset += wheel.angleDelta.y > 0 ? -1 : 1
+    }
 
     SystemClock {
         id: clock
@@ -236,16 +251,13 @@ Column {
         hints: I18n.tr("card.wheelMonths")
     }
 
-    WheelHandler {
-        onWheel: event => root.monthOffset += event.angleDelta.y > 0 ? -1 : 1
-    }
 
     // Back to the current month when the card closes.
     Connections {
         target: root.QsWindow.window
         function onPhaseChanged(): void {
             if (root.QsWindow.window?.phase === "")
-                root.monthOffset = 0;
+                ShellState.calendarOffset = 0;
         }
     }
 }

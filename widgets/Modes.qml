@@ -13,7 +13,9 @@ TextWidget {
 
     readonly property bool caffeine: Idle.caffeine
     readonly property bool dnd: NotificationCenter.dnd
-    readonly property bool shown: caffeine || dnd
+    // Always there (to turn a mode on), unless `autoHide` (then only while
+    // a mode is on).
+    readonly property bool shown: !options.autoHide || caffeine || dnd
     readonly property var names: [caffeine ? I18n.tr("bar.modeCaffeine") : "", dnd ? I18n.tr("bar.dnd") : ""].filter(s => !!s)
 
     // Right-click menu (the bar's widget menu).

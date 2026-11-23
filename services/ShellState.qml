@@ -26,6 +26,10 @@ Singleton {
     // Reviews: where the bar and its open card are on their screen
     // ("bar x,y wxh" / "card x,y wxh", screen coordinates), to crop them.
     property var barGeometry: ({})
+    // Months away from the current one in the clock card (its arrows, the
+    // wheel on the card or on the bar clock).
+    property int calendarOffset: 0
+
     // A widget's click: its hover card pinned open (or unpinned).
     signal cardPinRequested(var widget)
     function pinCard(widget: var): void {

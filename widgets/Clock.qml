@@ -132,11 +132,17 @@ TextWidget {
     font.letterSpacing: figure ? figureSize * 0.02 : 0
     font.features: ({ "tnum": 1 })
 
-    // Click: the card (calendar) pinned, to browse the months.
+    // Click: the card (calendar) pinned, to browse the months; wheel: the
+    // card's month.
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: ShellState.pinCard(root)
+        onWheel: wheel => {
+            ShellState.calendarOffset += wheel.angleDelta.y > 0 ? -1 : 1;
+            if (!(ShellState.card.visible && ShellState.card.type === "clock"))
+                ShellState.cardRequested("clock", root.screen?.name ?? "");
+        }
     }
 
     function togglePanel(): void {
