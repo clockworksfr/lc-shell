@@ -141,7 +141,7 @@ Column {
                 readonly property var users: Object.keys(Dashboard.workspaces).filter(ws => Dashboard.workspaces[ws] === modelData)
 
                 label: modelData
-                hint: users.length ? I18n.tr("settings.dashboardUsedBy", { list: users.join(", ") }) : I18n.tr("settings.dashboardUnused")
+                hint: users.length ? `${I18n.tr("settings.dashboardUsedBy", { list: users.join(", ") })} · ${I18n.tr("settings.dashboardRemoveHint")}` : I18n.tr("settings.dashboardUnused")
 
                 Row {
                     spacing: root.theme.space.s

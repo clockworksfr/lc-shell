@@ -57,7 +57,7 @@ Column {
 
                 Field {
                     label: I18n.tr("settings.screenBar")
-                    hint: I18n.tr("settings.screenBarHint")
+                    hint: I18n.tr(`settings.bar.${card.barKind}Hint`)
                     Choice {
                         model: [{ value: "default", label: I18n.tr("settings.bar.default") }, { value: "custom", label: I18n.tr("settings.bar.custom") }, { value: "none", label: I18n.tr("settings.bar.none") }]
                         value: card.barKind

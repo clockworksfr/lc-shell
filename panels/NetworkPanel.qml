@@ -15,6 +15,12 @@ Column {
 
     // Network waiting for its passphrase.
     property var pskTarget: null
+    // > 0: only that many networks (connected and known first), the others
+    // under an "Other networks (n)" line.
+    property int foldAfter: 0
+    property bool unfolded: false
+    readonly property var networks: NetworkService.wifiEnabled ? NetworkService.wifiNetworks.slice().sort((a, b) => (b.connected - a.connected) || (b.known - a.known) || (b.signalStrength - a.signalStrength)).slice(0, 24) : []
+    readonly property var shownNetworks: foldAfter > 0 && !unfolded ? networks.slice(0, foldAfter) : networks
 
     width: 360
     spacing: theme.space.s
@@ -66,7 +72,7 @@ Column {
     }
 
     Repeater {
-        model: NetworkService.wifiEnabled ? NetworkService.wifiNetworks.slice(0, 12) : []
+        model: root.shownNetworks
 
         Column {
             id: entry
@@ -133,5 +139,12 @@ Column {
                 }
             }
         }
+    }
+
+    ListRow {
+        visible: root.foldAfter > 0 && root.networks.length > root.foldAfter
+        title: I18n.tr(root.unfolded ? "card.lessDevices" : "net.otherNetworks", { n: root.networks.length - root.foldAfter })
+        trailing: root.unfolded ? "⌃" : "›"
+        onClicked: root.unfolded = !root.unfolded
     }
 }

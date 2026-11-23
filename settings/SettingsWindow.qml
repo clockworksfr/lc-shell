@@ -141,6 +141,27 @@ PanelWindow {
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
 
+            // More pages below: a fade at the bottom of the list.
+            Rectangle {
+                parent: navFlick.parent
+                anchors.left: navFlick.left
+                anchors.right: navFlick.right
+                anchors.bottom: navFlick.bottom
+                height: 24
+                z: 2
+                visible: navFlick.contentY < navFlick.contentHeight - navFlick.height - 1
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0
+                        color: Qt.alpha(win.theme.color.surface, 0)
+                    }
+                    GradientStop {
+                        position: 1
+                        color: win.theme.color.surface
+                    }
+                }
+            }
+
             Column {
                 id: navList
                 width: parent.width
@@ -189,6 +210,17 @@ PanelWindow {
                 }
             }
             }
+        }
+
+        // The page's title, in the header band (left of the ×).
+        ThemedText {
+            x: sidebar.width + win.theme.space.xl
+            y: (win.theme.space.s * 2 + 32 - height) / 2 + 2
+            width: parent.width - x - 64
+            text: I18n.tr(`settings.page.${Settings.page}`)
+            font.pixelSize: 22
+            font.weight: Font.DemiBold
+            elide: Text.ElideRight
         }
 
         Flickable {

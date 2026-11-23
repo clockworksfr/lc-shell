@@ -23,6 +23,7 @@ Column {
 
         BluetoothPanel {
             width: parent.width
+            foldNearby: true
         }
     }
 }

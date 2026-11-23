@@ -20,7 +20,7 @@ Item {
     readonly property bool flagged: !!Settings.highlight && I18n.tr(Settings.highlight) === label
 
     width: parent?.width ?? 0
-    implicitHeight: stacked ? texts.implicitHeight + theme.space.xs + slot.height + theme.space.xs : Math.max(texts.implicitHeight, slot.height, theme.hit)
+    implicitHeight: stacked ? texts.implicitHeight + theme.space.xs + slot.height + theme.space.xs : Math.max(texts.implicitHeight, slot.height, theme.hit, 36)
 
     onFlaggedChanged: if (flagged) Settings.reveal(root)
 

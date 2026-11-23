@@ -30,6 +30,7 @@ Column {
         // Wired, VPNs, Wi-Fi switch and networks (password inline).
         NetworkPanel {
             width: parent.width
+            foldAfter: 4
         }
     }
 
