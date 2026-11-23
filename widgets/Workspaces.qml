@@ -72,24 +72,6 @@ Grid {
                 radius: 3
                 color: numberedItem.ink
 
-                // The active dot glows where the theme glows (Matrix in dark).
-                layer.enabled: numberedItem.active && Qt.color(root.theme.color.glow ?? "#00000000").a > 0
-                layer.effect: MultiEffect {
-                    autoPaddingEnabled: true
-                    shadowEnabled: true
-                    shadowColor: root.theme.color.glow ?? "transparent"
-                    shadowBlur: 0.9
-                    blurMax: 14
-                    shadowHorizontalOffset: 0
-                    shadowVerticalOffset: 0
-                }
-
-                Behavior on width {
-                    NumberAnimation {
-                        duration: root.theme.motion.duration
-                        easing.type: Easing.OutCubic
-                    }
-                }
             }
 
             ThemedText {
