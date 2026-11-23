@@ -136,6 +136,7 @@ volume_mute
 volume_off
 volume_up
 vpn_key
+vpn_lock
 wallpaper
 water_drop
 weather_snowy

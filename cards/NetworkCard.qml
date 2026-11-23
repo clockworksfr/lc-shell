@@ -105,6 +105,15 @@ Column {
         }
     }
 
+    // The VPN (quick settings' one): its state, a switch.
+    Switch {
+        visible: VpnService.available
+        width: parent.width
+        text: `${I18n.tr("net.vpn")} · ${VpnService.current?.name ?? ""}`
+        checked: VpnService.active
+        onToggled: VpnService.toggle()
+    }
+
     ThemedText {
         text: I18n.tr("card.open")
         color: root.theme.color.soft

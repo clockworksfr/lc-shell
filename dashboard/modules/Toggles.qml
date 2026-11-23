@@ -74,6 +74,14 @@ ModuleBase {
             on: Themes.variant === "dark"
         },
         {
+            id: "vpn",
+            icon: VpnService.active ? "vpn_lock" : "vpn_key",
+            label: I18n.tr("toggles.vpn"),
+            sub: VpnService.current?.name ?? I18n.tr("toggles.noVpn"),
+            on: VpnService.active,
+            placeholder: !VpnService.available
+        },
+        {
             id: "caffeine",
             icon: "coffee",
             label: I18n.tr("toggles.caffeine"),
@@ -108,6 +116,9 @@ ModuleBase {
         case "dark":
             Themes.toggleVariant();
             break;
+        case "vpn":
+            VpnService.toggle();
+            break;
         case "caffeine":
             Idle.caffeine = !Idle.caffeine;
             break;
@@ -118,7 +129,7 @@ ModuleBase {
     }
 
     // Fixed counts (the labels depend on the columns, which depend on them).
-    readonly property int total: 7
+    readonly property int total: 8
     readonly property int levels: 2
     // Strips, wide and narrow cells: compact rows (52 px, a comfortable
     // touch target), so even a one-unit-high cell holds two rows of buttons.

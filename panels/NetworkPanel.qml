@@ -27,6 +27,31 @@ Column {
         trailing: NetworkService.wired?.linkSpeed ? `${NetworkService.wired.linkSpeed} Mb/s` : ""
     }
 
+    // VPNs: a click connects or disconnects one (and makes it the quick
+    // settings' VPN).
+    ThemedText {
+        visible: VpnService.connections.length > 0
+        text: I18n.tr("net.vpn")
+        label: true
+        color: root.theme.color.soft
+        topPadding: root.theme.space.xs
+    }
+
+    Repeater {
+        model: VpnService.connections
+
+        ListRow {
+            required property var modelData
+            title: modelData.name
+            subtitle: (modelData.active ? I18n.tr("net.connected") : I18n.tr("net.disconnected")) + (VpnService.current?.name === modelData.name ? ` · ${I18n.tr("net.vpnDefault")}` : "")
+            selected: modelData.active
+            onClicked: {
+                VpnService.choose(modelData.name);
+                VpnService.setActive(modelData, !modelData.active);
+            }
+        }
+    }
+
     Switch {
         visible: !!NetworkService.wifi
         text: I18n.tr("net.wifi")

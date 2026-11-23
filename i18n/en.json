@@ -716,5 +716,10 @@
   "toggles.awake": "Stays awake",
   "notifications.app": "Application",
   "module.notificationSample": "Notification (preview)",
-  "module.notificationSample.short": "Notification"
+  "module.notificationSample.short": "Notification",
+  "net.vpn": "VPN",
+  "net.vpnDefault": "quick settings",
+  "bar.v.vpn": "vpn\n{value}",
+  "toggles.vpn": "VPN",
+  "toggles.noVpn": "None set up"
 }

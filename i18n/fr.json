@@ -716,5 +716,10 @@
   "toggles.awake": "Reste éveillé",
   "notifications.app": "Application",
   "module.notificationSample": "Notification (aperçu)",
-  "module.notificationSample.short": "Notification"
+  "module.notificationSample.short": "Notification",
+  "net.vpn": "VPN",
+  "net.vpnDefault": "réglage rapide",
+  "bar.v.vpn": "vpn\n{value}",
+  "toggles.vpn": "VPN",
+  "toggles.noVpn": "Aucun configuré"
 }

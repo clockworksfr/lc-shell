@@ -226,6 +226,18 @@ PanelWindow {
                     item.screen = Qt.binding(() => root.shown?.screen ?? null);
                 }
             }
+
+            // "Click for more": a click on the card (not on its controls)
+            // opens the widget's panel.
+            TapHandler {
+                onTapped: {
+                    const widget = root.shown?.item ?? null;
+                    if (widget && typeof widget.togglePanel === "function") {
+                        root.hide();
+                        widget.togglePanel();
+                    }
+                }
+            }
         }
 
         HoverHandler {
