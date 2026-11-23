@@ -43,6 +43,23 @@ PanelWindow {
     readonly property int fixedLength: framed ? 0 : Math.max(0, Math.min((look.length ?? 0) > 0 && (look.length ?? 0) < 1 ? Math.round(edgeLength * look.length) : (look.length ?? 0), edgeLength - 2 * Math.max(gap, 8)))
 
     // Top-left of the bar window on its screen (popups and IPC need it).
+    // Reviews (bar geometry IPC): bar and open card, global coordinates.
+    function geometryText(): string {
+        const o = origin();
+        const sx = screen.x;
+        const sy = screen.y;
+        const lines = [`bar ${Math.round(sx + o.x)},${Math.round(sy + o.y)} ${Math.round(width)}x${Math.round(height)}`];
+        const c = card.frameRect();
+        if (c)
+            lines.push(`card ${Math.round(sx + c.x)},${Math.round(sy + c.y)} ${Math.round(c.width)}x${Math.round(c.height)}`);
+        return lines.join("\n");
+    }
+    Component.onCompleted: {
+        const g = Object.assign({}, ShellState.barGeometry);
+        g[screen.name] = geometryText;
+        ShellState.barGeometry = g;
+    }
+
     function origin(): point {
         const scr = screen;
         const x = edge === "right" ? scr.width - width - margins.right
@@ -306,14 +323,6 @@ PanelWindow {
                 card.hide();
             else
                 card.pin(slot);
-        }
-
-        function onBarSnapshotRequested(screenName: string, path: string): void {
-            if (screenName !== bar.screen.name)
-                return;
-            bar.contentItem.grabToImage(r => r.saveToFile(`${path}-bar.png`));
-            if (card.phase === "open")
-                card.snapshot(`${path}-card.png`);
         }
 
         function onCardRequested(type: string, screenName: string): void {

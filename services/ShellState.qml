@@ -23,9 +23,9 @@ Singleton {
     // Show (type) or hide ("") the hover card of a block without hovering:
     // reviews, screenshots. On `screenName`, or the focused screen.
     signal cardRequested(string type, string screenName)
-    // Reviews: the bar (and its open card) of a screen saved as images,
-    // nothing else of the screen.
-    signal barSnapshotRequested(string screenName, string path)
+    // Reviews: where the bar and its open card are on their screen
+    // ("bar x,y wxh" / "card x,y wxh", screen coordinates), to crop them.
+    property var barGeometry: ({})
     // A widget's click: its hover card pinned open (or unpinned).
     signal cardPinRequested(var widget)
     function pinCard(widget: var): void {

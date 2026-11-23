@@ -100,9 +100,13 @@ PanelWindow {
         enter.restart();
     }
 
-    // Reviews: the drawer alone as an image.
-    function snapshot(path: string): void {
-        frame.grabToImage(r => r.saveToFile(path));
+    // Reviews: the drawer's rectangle on its screen (null while closed).
+    function frameRect(): var {
+        if (phase !== "open")
+            return null;
+        const ox = edge === "right" ? (screen.width - width - margins.right) : margins.left;
+        const oy = edge === "bottom" ? (screen.height - height - margins.bottom) : margins.top;
+        return Qt.rect(ox + frame.x, oy + frame.y, frame.width, frame.height);
     }
 
     function hide(): void {
