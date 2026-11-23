@@ -79,7 +79,7 @@ Singleton {
                 opacity: 0.94,
                 border: 1,
                 padding: 14,
-                spacing: 12,
+                spacing: 18,
                 screenCorners: 14
             },
             style: {

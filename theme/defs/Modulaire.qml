@@ -109,7 +109,7 @@ Singleton {
                 opacity: 1,
                 border: 0,
                 padding: 14,
-                spacing: 8,
+                spacing: 12,
                 screenCorners: 0
             },
             style: {

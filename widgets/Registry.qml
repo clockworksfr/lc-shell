@@ -14,6 +14,7 @@ Singleton {
             dynamicIsland: "DynamicIsland.qml",
             lights: "Lights.qml",
             media: "Media.qml",
+            modes: "Modes.qml",
             network: "Network.qml",
             notifications: "Notifications.qml",
             system: "System.qml",

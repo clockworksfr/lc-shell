@@ -1,0 +1,51 @@
+import QtQuick
+import Quickshell
+import qs.components
+import qs.i18n
+import qs.lock
+import qs.services
+
+// Active modes: caffeine (idle actions held) and do-not-disturb. Hidden
+// while neither is on. Right click: turn either on or off.
+TextWidget {
+    id: root
+
+    readonly property bool caffeine: Idle.caffeine
+    readonly property bool dnd: NotificationCenter.dnd
+    readonly property bool shown: caffeine || dnd
+    readonly property var names: [caffeine ? I18n.tr("bar.modeCaffeine") : "", dnd ? I18n.tr("bar.dnd") : ""].filter(s => !!s)
+
+    // Right-click menu (the bar's widget menu).
+    readonly property var contextActions: [
+        { id: "caffeine", icon: "coffee", text: I18n.tr("toggles.caffeine"), check: "box", checked: Idle.caffeine },
+        { id: "dnd", icon: "do_not_disturb_on", text: I18n.tr("ctx.dnd"), check: "box", checked: NotificationCenter.dnd }
+    ]
+    function contextAction(id: string): void {
+        if (id === "caffeine")
+            Idle.caffeine = !Idle.caffeine;
+        else if (id === "dnd")
+            NotificationCenter.setDnd(!NotificationCenter.dnd);
+    }
+
+    fullText: names.join(" · ") || I18n.tr("bar.modesNone")
+    compactText: I18n.tr("bar.v.modes", { value: names.join(" · ") || "–" })
+    microLabel: I18n.tr("bar.v.modes", { value: "" }).split("\n")[0]
+    color: shown ? theme.color.accent : theme.color.soft
+
+    // Icons: the first active mode, the second beside it.
+    icon: caffeine || !dnd ? "coffee" : "do_not_disturb_on"
+    iconFilled: true
+    iconText: ""
+    readonly property real iconSize: theme.font.sizeL + 3
+    leftPadding: useIcon && !vertical ? (caffeine && dnd ? iconSize * 2 + 4 : iconSize) : 0
+
+    Icon {
+        visible: root.useIcon && root.caffeine && root.dnd
+        name: "do_not_disturb_on"
+        filled: true
+        color: root.color
+        size: root.iconSize
+        x: root.vertical ? (root.width - width) / 2 : root.iconSize + 4
+        y: root.vertical ? root.iconSize + 2 : (root.height - height) / 2
+    }
+}

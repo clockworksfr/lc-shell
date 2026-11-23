@@ -137,7 +137,7 @@ Singleton {
                 border: 0,
                 // Inner padding of the band or of each island.
                 padding: 8,
-                spacing: 12,
+                spacing: 18,
                 // Rounded screen corners radius, 0 = none.
                 screenCorners: 0,
                 // Bar length along its edge: 0 = full, else a centered bar of
