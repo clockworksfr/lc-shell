@@ -411,7 +411,7 @@ QtObject {
             anchors.left: levelIcon.right
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
-            width: visible ? Math.min(implicitWidth, level.width * 0.3) : 0
+            width: visible ? Math.round(level.width * 0.28) : 0
             text: level.name
             font.pixelSize: 12
             elide: Text.ElideRight
