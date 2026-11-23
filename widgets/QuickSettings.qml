@@ -41,7 +41,8 @@ Item {
         id: parts
 
         anchors.centerIn: parent
-        columns: root.vertical ? 1 : 3
+        // As many columns as parts shown (Grid keeps a hidden part's spacing).
+        columns: root.vertical ? 1 : 1 + (bt.shown ? 1 : 0) + (modes.shown ? 1 : 0)
         columnSpacing: root.spacing
         rowSpacing: root.spacing / 2
         verticalItemAlignment: Grid.AlignVCenter

@@ -89,7 +89,7 @@ Singleton {
                 opacity: 1,
                 border: 0,
                 // Micro-label stacks are narrow: generous room between them.
-                spacing: 30,
+                spacing: 22,
                 screenCorners: 32,
                 frame: {
                     enabled: true,
