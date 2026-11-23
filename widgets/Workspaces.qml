@@ -61,33 +61,41 @@ Grid {
             implicitWidth: numberedRow.implicitWidth
             implicitHeight: numberedRow.implicitHeight
 
+            // Halo of the active (or urgent) dot where the theme glows
+            // (Matrix in dark): a blurred copy behind it, outside the row
+            // (a layer inside the row looped its layout).
+            Rectangle {
+                z: -1
+                visible: (numberedItem.active || !!numberedItem.ws?.urgent) && Qt.color(root.theme.color.glow ?? "#00000000").a > 0
+                x: numberedRow.x + dot.x
+                y: numberedRow.y + dot.y
+                width: dot.width
+                height: dot.height
+                radius: dot.radius
+                color: dot.color
+                layer.enabled: visible
+                layer.effect: MultiEffect {
+                    autoPaddingEnabled: true
+                    shadowEnabled: true
+                    shadowColor: numberedItem.ws?.urgent ? root.theme.color.urgent : root.theme.color.glow ?? "transparent"
+                    shadowBlur: 0.9
+                    blurMax: 14
+                    shadowHorizontalOffset: 0
+                    shadowVerticalOffset: 0
+                }
+            }
+
             Row {
             id: numberedRow
             spacing: 6
 
             Rectangle {
+                id: dot
                 anchors.verticalCenter: parent.verticalCenter
                 width: numberedItem.active ? 13 : 6
                 height: 6
                 radius: 3
                 color: numberedItem.ink
-
-                // Halo of the active (or urgent) dot where the theme glows
-                // (Matrix in dark): soft rings behind it (no layer: a
-                // layer here looped the row's layout).
-                Repeater {
-                    model: (numberedItem.active || !!numberedItem.ws?.urgent) && Qt.color(root.theme.color.glow ?? "#00000000").a > 0 ? [{ grow: 1.5, alpha: 0.22 }, { grow: 3, alpha: 0.14 }, { grow: 5, alpha: 0.08 }, { grow: 7, alpha: 0.05 }] : []
-
-                    Rectangle {
-                        required property var modelData
-                        z: -1
-                        anchors.centerIn: parent
-                        width: parent.width + modelData.grow * 2
-                        height: parent.height + modelData.grow * 2
-                        radius: height / 2
-                        color: Qt.alpha(numberedItem.ws?.urgent ? root.theme.color.urgent : root.theme.color.ink, modelData.alpha)
-                    }
-                }
 
                 Behavior on width {
                     NumberAnimation {
