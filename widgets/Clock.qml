@@ -2,6 +2,8 @@ import QtQuick
 import Quickshell
 import qs.components
 import qs.i18n
+import qs.services
+import qs.theme
 
 // Options: format (Qt date format, default "HH:mm"); on a vertical bar
 // the time is stacked (hours over minutes), `verticalFormat` to change it.
@@ -54,6 +56,73 @@ TextWidget {
             color: root.theme.color.ink
         }
     }
+    // --- OSD in the clock (animations mockup) ---
+    // Volume, mic or brightness changing on this screen: the clock widens
+    // for a gauge (fast), which follows the value (80 ms, linear), then
+    // retracts 1.2 s after the last change (base). No popup on this screen.
+    readonly property string screenName: screen?.name ?? ""
+    readonly property bool hostsOsd: !vertical && !!screenName
+    onHostsOsdChanged: Osd.setInline(screenName, hostsOsd)
+    onScreenNameChanged: Osd.setInline(screenName, hostsOsd)
+    Component.onCompleted: Osd.setInline(screenName, hostsOsd)
+    Component.onDestruction: Osd.setInline(screenName, false)
+
+    readonly property bool osdHere: hostsOsd && Osd.shown && Osd.screenName === screenName
+    readonly property real osdGauge: 120
+    property real osdWidth: osdHere ? osdRow.implicitWidth + 14 : 0
+    Behavior on osdWidth {
+        NumberAnimation {
+            duration: Motion.ms(root.theme, root.osdHere ? "fast" : "base", root.screenName)
+            easing.type: Easing.OutCubic
+        }
+    }
+    rightPadding: osdWidth
+
+    Item {
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        width: root.osdWidth
+        height: parent.height
+        clip: true
+        visible: width > 0
+
+        Row {
+            id: osdRow
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 7
+
+            Icon {
+                anchors.verticalCenter: parent.verticalCenter
+                name: Osd.kind === "brightness" ? "light_mode" : Osd.kind === "mic" ? (Osd.muted ? "mic_off" : "mic") : Osd.muted ? "volume_off" : "volume_up"
+                size: 16
+                color: root.theme.color.soft
+            }
+
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: root.osdGauge
+                height: 6
+                radius: 3
+                color: root.theme.color.line
+
+                Rectangle {
+                    width: parent.width * Math.max(0, Math.min(1, Osd.value))
+                    height: parent.height
+                    radius: parent.radius
+                    color: Osd.muted ? root.theme.color.soft : root.theme.color.accent
+
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: 80
+                            easing.type: Easing.Linear
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // ~2/3 of the bar's thickness (27 px in a 40 px bar, the mockup).
     readonly property int figureSize: Math.round(Math.max(18, theme.bar.height * 0.68))
 

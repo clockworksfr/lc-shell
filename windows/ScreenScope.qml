@@ -175,7 +175,7 @@ Scope {
 
     // Automatic popup: never over a fullscreen window (see Screens.popupTarget).
     LazyLoader {
-        active: !!root.profile.osd && Osd.shown && Osd.screenName === root.modelData.name && !root.fullscreen
+        active: !!root.profile.osd && Osd.shown && Osd.screenName === root.modelData.name && !root.fullscreen && !Osd.inlineScreens[root.modelData.name]
 
         OsdWindow {
             screen: root.modelData

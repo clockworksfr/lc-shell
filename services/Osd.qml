@@ -25,7 +25,21 @@ Singleton {
         : kind === "mic" ? Audio.sourceName
         : monitor?.name ?? ""
 
-    readonly property int timeout: 1500
+    // After 1.2 s without a change, it goes (the bar clock retracts).
+    readonly property int timeout: 1200
+
+    // Screens whose bar clock shows the OSD itself (no popup there).
+    property var inlineScreens: ({})
+    function setInline(name: string, on: bool): void {
+        if (!name || !!inlineScreens[name] === on)
+            return;
+        const next = Object.assign({}, inlineScreens);
+        if (on)
+            next[name] = true;
+        else
+            delete next[name];
+        inlineScreens = next;
+    }
 
     function show(kind: string, monitor: BrightnessMonitor): void {
         root.kind = kind;
