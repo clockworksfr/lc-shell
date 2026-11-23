@@ -144,9 +144,9 @@ PanelWindow {
             // More pages below: a fade at the bottom of the list.
             Rectangle {
                 parent: navFlick.parent
-                anchors.left: navFlick.left
-                anchors.right: navFlick.right
-                anchors.bottom: navFlick.bottom
+                x: navFlick.x
+                y: navFlick.y + navFlick.height - height
+                width: navFlick.width
                 height: 24
                 z: 2
                 visible: navFlick.contentY < navFlick.contentHeight - navFlick.height - 1
