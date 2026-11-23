@@ -16,6 +16,7 @@ Singleton {
             media: "Media.qml",
             modes: "Modes.qml",
             network: "Network.qml",
+            quickSettings: "QuickSettings.qml",
             notifications: "Notifications.qml",
             system: "System.qml",
             tray: "Tray.qml",

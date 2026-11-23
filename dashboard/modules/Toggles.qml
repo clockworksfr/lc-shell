@@ -5,8 +5,8 @@ import Quickshell.Wayland
 import qs.components
 import qs.components.dashboard
 import qs.dashboard
-import qs.lock
 import qs.i18n
+import qs.panels
 import qs.services
 import qs.theme
 
@@ -37,95 +37,15 @@ ModuleBase {
         return focused?.available ? focused : Brightness.monitors.find(m => m.available) ?? null;
     }
 
-    readonly property var tiles: [
-        {
-            id: "dnd",
-            icon: "do_not_disturb_on",
-            label: I18n.tr(narrowLabels ? "toggles.dndShort" : "toggles.dnd"),
-            sub: NotificationCenter.dnd ? I18n.tr("toggles.on") : "",
-            on: NotificationCenter.dnd
-        },
-        {
-            id: "mic",
-            icon: Audio.sourceMuted ? "mic_off" : "mic",
-            label: I18n.tr("toggles.mic"),
-            sub: Audio.sourceMuted ? I18n.tr("common.muted") : I18n.percent(Audio.sourceVolume),
-            on: !Audio.sourceMuted
-        },
-        {
-            id: "wifi",
-            icon: NetworkService.wifiEnabled ? "wifi" : "wifi_off",
-            label: I18n.tr("toggles.wifi"),
-            sub: NetworkService.activeWifi?.name ?? "",
-            on: NetworkService.wifiEnabled
-        },
-        {
-            id: "bluetooth",
-            icon: BluetoothService.enabled ? "bluetooth" : "bluetooth_disabled",
-            label: I18n.tr("toggles.bluetooth"),
-            sub: BluetoothService.devices.filter(d => d.connected).map(d => d.name).join(", "),
-            on: BluetoothService.enabled
-        },
-        {
-            id: "dark",
-            icon: "dark_mode",
-            label: I18n.tr("toggles.dark"),
-            sub: Themes.variantMode === "auto" ? I18n.tr("toggles.auto") : "",
-            on: Themes.variant === "dark"
-        },
-        {
-            id: "vpn",
-            icon: VpnService.active ? "vpn_lock" : "vpn_key",
-            label: I18n.tr("toggles.vpn"),
-            sub: VpnService.current?.name ?? I18n.tr("toggles.noVpn"),
-            on: VpnService.active,
-            placeholder: !VpnService.available
-        },
-        {
-            id: "caffeine",
-            icon: "coffee",
-            label: I18n.tr("toggles.caffeine"),
-            sub: Idle.caffeine ? I18n.tr("toggles.awake") : "",
-            on: Idle.caffeine
-        },
-        {
-            id: "record",
-            icon: "screen_record",
-            label: I18n.tr("toggles.record"),
-            sub: I18n.tr("toggles.soon"),
-            on: false,
-            placeholder: true
-        }
-    ]
+    // (panels/QuickToggles: shared with the bar's quick settings.)
+    readonly property var tiles: QuickToggles.tiles.map(t => Object.assign({}, t, { label: narrowLabels && t.short ? t.short : t.label }))
     readonly property var more: ({ id: "more", icon: shape === "tiny" ? "tune" : "more_horiz", label: I18n.tr(shape === "tiny" ? "toggles.all" : "toggles.more"), sub: "", on: false })
 
     function activate(id: string): void {
-        switch (id) {
-        case "dnd":
-            NotificationCenter.setDnd(!NotificationCenter.dnd);
-            break;
-        case "mic":
-            Audio.toggleSourceMute();
-            break;
-        case "wifi":
-            NetworkService.setWifiEnabled(!NetworkService.wifiEnabled);
-            break;
-        case "bluetooth":
-            BluetoothService.setEnabled(!BluetoothService.enabled);
-            break;
-        case "dark":
-            Themes.toggleVariant();
-            break;
-        case "vpn":
-            VpnService.toggle();
-            break;
-        case "caffeine":
-            Idle.caffeine = !Idle.caffeine;
-            break;
-        case "more":
+        if (id === "more")
             panelOpen = true;
-            break;
-        }
+        else
+            QuickToggles.activate(id);
     }
 
     // Fixed counts (the labels depend on the columns, which depend on them).
