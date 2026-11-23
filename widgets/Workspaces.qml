@@ -72,6 +72,25 @@ Grid {
                 radius: 3
                 color: numberedItem.ink
 
+                // Halo of the active (or urgent) dot where the theme glows
+                // (Matrix in dark): a shadow behind it, no layer (a layer
+                // here looped the row's layout).
+                RectangularShadow {
+                    z: -1
+                    anchors.fill: parent
+                    visible: (numberedItem.active || !!numberedItem.ws?.urgent) && Qt.color(root.theme.color.glow ?? "#00000000").a > 0
+                    radius: parent.radius
+                    blur: 9
+                    spread: 1
+                    color: numberedItem.ws?.urgent ? root.theme.color.urgent : root.theme.color.glow ?? "transparent"
+                }
+
+                Behavior on width {
+                    NumberAnimation {
+                        duration: root.theme.motion.duration
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
 
             ThemedText {
