@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import qs.services
 
@@ -29,12 +30,16 @@ Singleton {
     readonly property bool playing: Players.list.some(p => p.isPlaying)
     readonly property bool onPower: Power.hasBattery ? !Power.onBattery : false
     // Why idle actions are held right now ("" = they aren't).
-    // Caffeine (quick settings): stay awake until turned off (not kept
-    // across restarts).
+    // Caffeine (quick settings): stay awake until turned off. Kept across
+    // restarts (state file), a timed one only until its end.
     property bool caffeine: false
     // Caffeine until a time (ms since epoch, 0 = until turned off).
     property real caffeineUntil: 0
-    onCaffeineChanged: if (!caffeine) caffeineUntil = 0
+    onCaffeineChanged: {
+        if (!caffeine)
+            caffeineUntil = 0;
+        Qt.callLater(saveState);
+    }
 
     // `minutes` 0: until turned off.
     property int caffeineMinutes: 0
@@ -42,6 +47,41 @@ Singleton {
         caffeineMinutes = on ? minutes : 0;
         caffeineUntil = on && minutes > 0 ? Date.now() + minutes * 60000 : 0;
         caffeine = on;
+    }
+
+    // Saved once the previous state is read (else the startup default
+    // would overwrite it).
+    property bool stateRead: false
+    onCaffeineUntilChanged: Qt.callLater(saveState)
+    onCaffeineMinutesChanged: Qt.callLater(saveState)
+
+    function saveState(): void {
+        if (!stateRead)
+            return;
+        stateFile.setText(JSON.stringify({
+            caffeine: caffeine,
+            caffeineUntil: caffeine ? caffeineUntil : 0,
+            caffeineMinutes: caffeine ? caffeineMinutes : 0
+        }));
+    }
+
+    FileView {
+        id: stateFile
+        path: Quickshell.statePath("idle.json")
+        printErrors: false
+        onLoaded: {
+            try {
+                const saved = JSON.parse(text());
+                const until = saved.caffeineUntil ?? 0;
+                if ((saved.caffeine ?? false) && !(until > 0 && until <= Date.now())) {
+                    root.caffeineMinutes = saved.caffeineMinutes ?? 0;
+                    root.caffeineUntil = until;
+                    root.caffeine = true;
+                }
+            } catch (e) {}
+            root.stateRead = true;
+        }
+        onLoadFailed: root.stateRead = true
     }
 
     Timer {
