@@ -166,15 +166,16 @@ Rectangle {
                 }
             }
 
-            // The summary (Matrix: Doto capitals).
+            // The summary (often the sender): the body's size, told apart by
+            // its weight; the message is what matters.
             ThemedText {
                 width: parent.width
                 visible: !!root.entry.summary
                 text: root.entry.summary
-                font.family: root.look === "matrix" ? root.theme.font.display : root.textFont
-                font.capitalization: root.look === "matrix" || root.onScreen ? Font.AllUppercase : Font.MixedCase
-                font.pixelSize: root.look === "matrix" ? 26 : root.onScreen ? 15 : root.theme.font.sizeM
-                font.weight: root.look === "matrix" ? (root.theme.font.displayWeight ?? Font.Normal) : Font.DemiBold
+                font.family: root.textFont
+                font.capitalization: root.onScreen ? Font.AllUppercase : Font.MixedCase
+                font.pixelSize: root.onScreen ? 15 : root.theme.font.sizeM + 1
+                font.weight: Font.DemiBold
                 color: root.ink
                 wrapMode: Text.Wrap
                 maximumLineCount: 2
@@ -188,8 +189,9 @@ Rectangle {
                 text: root.onScreen ? [root.entry.body, I18n.relativeTime(root.entry.time)].filter(s => !!s).join(" · ") : root.entry.body
                 font.family: root.textFont
                 font.capitalization: root.look === "modulaire" ? Font.AllUppercase : Font.MixedCase
-                font.pixelSize: root.onScreen ? 14 : root.look === "matrix" ? 15 : root.theme.font.sizeM
-                color: root.soft
+                font.pixelSize: root.onScreen ? 14 : root.theme.font.sizeM + 1
+                // Full ink: the message reads first.
+                color: root.ink
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
                 maximumLineCount: root.popup ? 4 : 8
