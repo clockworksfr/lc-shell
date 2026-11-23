@@ -73,16 +73,20 @@ Grid {
                 color: numberedItem.ink
 
                 // Halo of the active (or urgent) dot where the theme glows
-                // (Matrix in dark): a shadow behind it, no layer (a layer
-                // here looped the row's layout).
-                RectangularShadow {
-                    z: -1
-                    anchors.fill: parent
-                    visible: (numberedItem.active || !!numberedItem.ws?.urgent) && Qt.color(root.theme.color.glow ?? "#00000000").a > 0
-                    radius: parent.radius
-                    blur: 9
-                    spread: 1
-                    color: numberedItem.ws?.urgent ? root.theme.color.urgent : root.theme.color.glow ?? "transparent"
+                // (Matrix in dark): two soft rings behind it (no layer: a
+                // layer here looped the row's layout).
+                Repeater {
+                    model: (numberedItem.active || !!numberedItem.ws?.urgent) && Qt.color(root.theme.color.glow ?? "#00000000").a > 0 ? [{ grow: 4, alpha: 0.32 }, { grow: 9, alpha: 0.12 }] : []
+
+                    Rectangle {
+                        required property var modelData
+                        z: -1
+                        anchors.centerIn: parent
+                        width: parent.width + modelData.grow * 2
+                        height: parent.height + modelData.grow * 2
+                        radius: height / 2
+                        color: Qt.alpha(numberedItem.ws?.urgent ? root.theme.color.urgent : root.theme.color.ink, modelData.alpha)
+                    }
                 }
 
                 Behavior on width {
