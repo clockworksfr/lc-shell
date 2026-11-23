@@ -21,10 +21,10 @@ TextWidget {
         : (options.format ?? I18n.tr("format.clockNormal"))
 
     // Month and day names follow the shell language (I18n.locale).
-    // Matrix: one rich text, the date part in the mono capitals (soft),
-    // the time in the display font (one width, one baseline).
+    // Matrix: one rich text, the date part smaller and soft, the time big,
+    // both in the display font (dots), one width, one baseline.
     fullText: figure && datePart
-        ? `<span style="font-family:'${theme.font.mono}'; font-size:${Math.round(figureSize * 0.45)}px; letter-spacing:0.6px; color:${theme.color.soft}">${I18n.locale.toString(clock.date, datePart).toUpperCase()}</span>&nbsp;&nbsp;${I18n.locale.toString(clock.date, format)}`
+        ? `<span style="font-family:'${theme.font.display}'; font-size:${Math.round(figureSize * 0.6)}px; color:${theme.color.soft}">${I18n.locale.toString(clock.date, datePart)}</span>&nbsp;&nbsp;${I18n.locale.toString(clock.date, format)}`
         : I18n.locale.toString(clock.date, format)
     textFormat: figure && datePart ? Text.RichText : Text.PlainText
     // ~2/3 of the bar's thickness (27 px in a 40 px bar, the mockup).
