@@ -30,9 +30,11 @@ ThemedText {
     readonly property bool stacked: !useIcon && (vertical || size === "compact")
     // Themes with micro labels (Matrix, style.statusStack): statuses as a
     // small soft label over the value, mono capitals ("VOL / 64"); a
-    // leading "●" is the signal dot. Extended keeps its full line.
+    // leading "●" is the signal dot. Extended keeps its full line, under
+    // `microLabel` when the widget gives one (its value alone isn't clear).
+    property string microLabel
     readonly property bool microStatus: theme.style.statusStack === true && !useIcon && !!icon
-    readonly property bool microStack: microStatus && !vertical && size !== "extended"
+    readonly property bool microStack: microStatus && !vertical && (size !== "extended" || !!microLabel)
 
     function micro(value: string): string {
         const esc = t => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
@@ -49,7 +51,7 @@ ThemedText {
     }
 
     label: stacked && !microStack
-    text: useIcon ? iconText : microStack ? micro(compactText) : stacked ? compactText : fullText
+    text: useIcon ? iconText : microStack ? micro(size === "extended" ? `${microLabel}\n${fullText}` : compactText) : stacked ? compactText : fullText
     textFormat: microStack ? Text.RichText : Text.PlainText
     leftPadding: useIcon && !vertical ? iconItem.width + (iconText ? 6 : 0) : 0
     topPadding: useIcon && vertical ? iconItem.height + (iconText ? 2 : 0) : 0
