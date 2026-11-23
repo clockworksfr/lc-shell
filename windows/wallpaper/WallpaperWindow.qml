@@ -10,6 +10,8 @@ PanelWindow {
 
     property var theme: Themes.fallback
     property string source
+    // > 0: the source is a tile repeated over the screen at that size.
+    property int tileSize: 0
 
     // The layer currently shown.
     property Image front: null
@@ -53,10 +55,11 @@ PanelWindow {
 
     component Layer: Image {
         anchors.fill: parent
-        fillMode: Image.PreserveAspectCrop
-        // Decode at screen size, not at the file's size.
-        sourceSize.width: parent?.width ?? 0
-        sourceSize.height: parent?.height ?? 0
+        // A theme tile repeats; an image fills the screen.
+        fillMode: win.tileSize > 0 ? Image.Tile : Image.PreserveAspectCrop
+        // Decode at screen size (or the tile's), not at the file's size.
+        sourceSize.width: win.tileSize > 0 ? win.tileSize : (parent?.width ?? 0)
+        sourceSize.height: win.tileSize > 0 ? win.tileSize : (parent?.height ?? 0)
         asynchronous: true
         cache: false
         opacity: 0

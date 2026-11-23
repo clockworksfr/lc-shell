@@ -9,9 +9,10 @@ import Quickshell.Io
 //
 // settings:
 //   "wallpaper": { "enabled": true, "directory": "~/Images/Wallpapers" }
-// Without a chosen image, screens show their theme's wallpaper
-// (assets/wallpapers/<theme>-<variant>.svg; "themeDefaults": false for the
-// plain background color).
+// Without a chosen image, screens show their theme's wallpaper: a tile
+// repeated over the screen (assets/wallpapers/<theme>-<variant>-tile.svg,
+// sizes in tiles.json, tools/gen-tiles.py); "themeDefaults": false for the
+// plain background color.
 Singleton {
     id: root
 
@@ -39,9 +40,26 @@ Singleton {
         return (state.screens ?? {})[keyOf(screen)] ?? state.all ?? "";
     }
 
-    // The theme's own wallpaper (light / dark).
+    // The theme's own wallpaper (light / dark): a tile.
     function themePath(theme: var): string {
-        return themeDefaults && theme?.id ? `${assets}/${theme.id}-${theme.variant === "light" ? "light" : "dark"}.svg` : "";
+        return themeDefaults && theme?.id ? `${assets}/${theme.id}-${theme.variant === "light" ? "light" : "dark"}-tile.svg` : "";
+    }
+
+    // Tile size (px) of a theme tile, 0 for an image shown whole.
+    property var tiles: ({})
+    function tileSize(path: string): int {
+        const m = /\/([a-z]+-(?:dark|light))-tile\.svg$/.exec(path);
+        return m ? (tiles[m[1]]?.size ?? 64) : 0;
+    }
+
+    FileView {
+        path: `${root.assets}/tiles.json`
+        printErrors: false
+        onLoaded: {
+            try {
+                root.tiles = JSON.parse(text());
+            } catch (e) {}
+        }
     }
 
     // What a screen shows: the chosen image, else its theme's wallpaper.

@@ -67,6 +67,7 @@ Scope {
             screen: root.modelData
             theme: root.theme
             source: Wallpaper.sourceFor(root.modelData, root.theme)
+            tileSize: Wallpaper.tileSize(source)
         }
     }
 
