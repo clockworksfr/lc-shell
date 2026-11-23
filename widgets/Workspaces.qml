@@ -73,10 +73,10 @@ Grid {
                 color: numberedItem.ink
 
                 // Halo of the active (or urgent) dot where the theme glows
-                // (Matrix in dark): two soft rings behind it (no layer: a
+                // (Matrix in dark): soft rings behind it (no layer: a
                 // layer here looped the row's layout).
                 Repeater {
-                    model: (numberedItem.active || !!numberedItem.ws?.urgent) && Qt.color(root.theme.color.glow ?? "#00000000").a > 0 ? [{ grow: 4, alpha: 0.32 }, { grow: 9, alpha: 0.12 }] : []
+                    model: (numberedItem.active || !!numberedItem.ws?.urgent) && Qt.color(root.theme.color.glow ?? "#00000000").a > 0 ? [{ grow: 1.5, alpha: 0.22 }, { grow: 3, alpha: 0.14 }, { grow: 5, alpha: 0.08 }, { grow: 7, alpha: 0.05 }] : []
 
                     Rectangle {
                         required property var modelData
