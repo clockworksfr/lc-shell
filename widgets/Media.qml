@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs.components
+import qs.i18n
 import qs.services
 
 // Active MPRIS player. Hidden when there is none.
