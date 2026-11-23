@@ -21,12 +21,39 @@ TextWidget {
         : (options.format ?? I18n.tr("format.clockNormal"))
 
     // Month and day names follow the shell language (I18n.locale).
-    // Matrix: one rich text, the date part smaller and soft, the time big,
-    // both in the display font (dots), one width, one baseline.
-    fullText: figure && datePart
-        ? `<span style="font-family:'${theme.font.display}'; font-weight:900; font-size:${Math.round(figureSize * 0.6)}px; color:${theme.color.soft}">${I18n.locale.toString(clock.date, datePart)}</span>&nbsp;&nbsp;${I18n.locale.toString(clock.date, format)}`
-        : I18n.locale.toString(clock.date, format)
-    textFormat: figure && datePart ? Text.RichText : Text.PlainText
+    // Matrix with a date: two texts side by side in the dots font, the
+    // date smaller and soft, the time big (rich text can't reach the
+    // shell's own fonts). The widget's own text is empty, its padding the
+    // pair's width.
+    readonly property bool pair: figure && !!datePart
+    fullText: pair ? "" : I18n.locale.toString(clock.date, format)
+    leftPadding: pair ? pairRow.implicitWidth : 0
+
+    Row {
+        id: pairRow
+        visible: root.pair
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: root.figureSize * 0.45
+
+        ThemedText {
+            anchors.baseline: timeText.baseline
+            text: I18n.locale.toString(clock.date, root.datePart)
+            font.family: root.theme.font.display
+            font.pixelSize: Math.round(root.figureSize * 0.6)
+            color: root.theme.color.soft
+        }
+
+        ThemedText {
+            id: timeText
+            text: I18n.locale.toString(clock.date, root.format)
+            font.family: root.theme.font.display
+            font.weight: root.theme.font.displayWeight ?? Font.Normal
+            font.pixelSize: root.figureSize
+            font.letterSpacing: root.figureSize * 0.02
+            font.features: ({ "tnum": 1 })
+            color: root.theme.color.ink
+        }
+    }
     // ~2/3 of the bar's thickness (27 px in a 40 px bar, the mockup).
     readonly property int figureSize: Math.round(Math.max(18, theme.bar.height * 0.68))
 
