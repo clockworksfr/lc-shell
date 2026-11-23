@@ -1,7 +1,10 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Hyprland
+import qs.components
 import qs.theme
+import qs.windows.dashboard
 
 // Wallpaper of one screen, on the background layer. A new image loads in
 // the hidden layer, then fades in over the current one.
@@ -27,7 +30,26 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Background
     WlrLayershell.namespace: "lc-wallpaper"
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-    mask: Region {}
+
+    readonly property string workspace: Hyprland.monitorFor(screen)?.activeWorkspace?.name ?? ""
+
+    // Right click on the background of any workspace: its modules
+    // (edit, apply a preset or none, save as…), the wallpaper.
+    MouseArea {
+        anchors.fill: parent
+        z: 10
+        acceptedButtons: Qt.RightButton
+        onClicked: mouse => {
+            menu.actions = DashboardMenu.actions(win.workspace);
+            menu.openAt(mouse.x, mouse.y);
+        }
+    }
+
+    MenuPopup {
+        id: menu
+        host: win
+        onPicked: id => DashboardMenu.pick(id, win.workspace, win.screen.name)
+    }
 
     onSourceChanged: load()
     Component.onCompleted: load()

@@ -90,8 +90,10 @@ PanelWindow {
             anchors.fill: parent
             acceptedButtons: Qt.RightButton
             onClicked: mouse => {
-                if (!DashboardEditor.editing)
+                if (!DashboardEditor.editing) {
+                    menu.actions = DashboardMenu.actions(win.workspace);
                     menu.openAt(mouse.x, mouse.y);
+                }
             }
         }
     }
@@ -100,19 +102,7 @@ PanelWindow {
         id: menu
 
         host: win
-        actions: [
-            { id: "edit", icon: "edit", text: I18n.tr("dashboard.menu.edit") },
-            { id: "dashboard", icon: "tune", text: I18n.tr("dashboard.menu.settings") },
-            { id: "settings", icon: "settings", text: I18n.tr("bar.menu.settings") }
-        ]
-        onPicked: id => {
-            if (id === "edit")
-                DashboardEditor.start(win.screen.name);
-            else if (id === "dashboard")
-                Settings.open("dashboard");
-            else
-                Settings.open("appearance");
-        }
+        onPicked: id => DashboardMenu.pick(id, win.workspace, win.screen.name)
     }
 
     // Everything drawn (also what `snapshot` renders).
