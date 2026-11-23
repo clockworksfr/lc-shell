@@ -166,16 +166,17 @@ Rectangle {
                 }
             }
 
-            // The summary (often the sender): the body's size, told apart by
-            // its weight; the message is what matters.
+            // The summary (often the sender): about the body's size, told
+            // apart by its weight (Matrix: the dots font, a notch bigger, the
+            // dots stay readable); the message is what matters.
             ThemedText {
                 width: parent.width
                 visible: !!root.entry.summary
                 text: root.entry.summary
-                font.family: root.textFont
+                font.family: root.look === "matrix" ? root.theme.font.display : root.textFont
                 font.capitalization: root.onScreen ? Font.AllUppercase : Font.MixedCase
-                font.pixelSize: root.onScreen ? 15 : root.theme.font.sizeM + 1
-                font.weight: Font.DemiBold
+                font.pixelSize: root.look === "matrix" ? 18 : root.onScreen ? 15 : root.theme.font.sizeM + 1
+                font.weight: root.look === "matrix" ? (root.theme.font.displayWeight ?? Font.Normal) : Font.DemiBold
                 color: root.ink
                 wrapMode: Text.Wrap
                 maximumLineCount: 2
