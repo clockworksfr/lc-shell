@@ -132,6 +132,17 @@ TextWidget {
     font.letterSpacing: figure ? figureSize * 0.02 : 0
     font.features: ({ "tnum": 1 })
 
+    // Click: the card (calendar) pinned, to browse the months.
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: ShellState.pinCard(root)
+    }
+
+    function togglePanel(): void {
+        ShellState.pinCard(root);
+    }
+
     SystemClock {
         id: clock
         precision: root.format.includes("s") ? SystemClock.Seconds : SystemClock.Minutes

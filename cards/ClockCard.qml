@@ -4,13 +4,17 @@ import qs.components
 import qs.i18n
 import qs.theme
 
-// Date, week, time with seconds, month calendar (wheel: other months).
+// Date and week, time with seconds, month calendar (hover cards mockup):
+// arrows or wheel for other months, a click on the month back to today.
+// (Events: later, with an agenda.)
 Column {
     id: root
 
     property var block
     property ShellScreen screen
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
+    readonly property string look: theme.style.module ?? "classic"
+    readonly property bool squared: look === "facade" || look === "modulaire"
 
     // Months away from the current one (wheel).
     property int monthOffset: 0
@@ -48,69 +52,125 @@ Column {
         return out;
     }
 
-    spacing: theme.space.m
+    spacing: 12
 
     SystemClock {
         id: clock
         precision: SystemClock.Seconds
     }
 
-    Item {
+    // Header: long date · week, mono capitals.
+    ThemedText {
         width: parent.width
-        implicitHeight: dateText.implicitHeight
-
-        ThemedText {
-            id: dateText
-            text: I18n.locale.toString(clock.date, I18n.tr("format.dateLong"))
-            font.weight: Font.DemiBold
-        }
-
-        ThemedText {
-            anchors.right: parent.right
-            text: I18n.tr("card.week", { n: root.isoWeek(clock.date) })
-            label: true
-            color: root.theme.color.soft
-        }
+        text: `${I18n.locale.toString(clock.date, I18n.tr("format.dateLong"))} · ${I18n.tr("card.week", { n: root.isoWeek(clock.date) })}`
+        font.family: root.theme.font.mono
+        font.pixelSize: 11
+        font.letterSpacing: 0.9
+        font.capitalization: Font.AllUppercase
+        color: root.theme.color.soft
+        elide: Text.ElideRight
     }
 
+    // The time, seconds smaller.
     Row {
-        spacing: root.theme.space.xs
+        spacing: 2
 
         HeroText {
+            id: hero
             text: I18n.locale.toString(clock.date, "HH:mm")
-            pixelSize: 44
+            pixelSize: 40
         }
 
         ThemedText {
-            anchors.baseline: parent.children[0].baseline
-            text: I18n.locale.toString(clock.date, "ss")
-            color: root.theme.color.soft
+            anchors.baseline: hero.baseline
+            text: `:${I18n.locale.toString(clock.date, "ss")}`
+            color: root.theme.color.ink
+            opacity: 0.6
+            font.family: root.theme.font.display
             font.pixelSize: 20
             font.features: ({ "tnum": 1 })
         }
     }
 
-    // Month title.
-    ThemedText {
-        text: I18n.locale.toString(root.shownMonth, "MMMM yyyy")
-        font.weight: Font.DemiBold
-        color: root.monthOffset === 0 ? root.theme.color.ink : root.theme.color.accent
+    // Month: title (click: back to today), previous / next.
+    Item {
+        width: parent.width
+        implicitHeight: 28
+
+        ThemedText {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            text: I18n.locale.toString(root.shownMonth, "MMMM yyyy")
+            font.weight: Font.DemiBold
+            font.pixelSize: 14
+            color: root.monthOffset === 0 ? root.theme.color.ink : root.theme.color.accent
+
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -6
+                enabled: root.monthOffset !== 0
+                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                onClicked: root.monthOffset = 0
+            }
+        }
+
+        Row {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: 4
+
+            CardParts.SmallButton {
+                visible: root.monthOffset !== 0
+                text: I18n.tr("card.today")
+                onTapped: root.monthOffset = 0
+            }
+
+            Repeater {
+                model: [{ icon: "chevron_left", step: -1 }, { icon: "chevron_right", step: 1 }]
+
+                Rectangle {
+                    required property var modelData
+
+                    width: 28
+                    height: 26
+                    radius: root.squared ? 4 : 13
+                    color: arrow.containsMouse ? root.theme.color.surface3 : "transparent"
+                    border.width: 1
+                    border.color: root.theme.color.line
+
+                    Icon {
+                        anchors.centerIn: parent
+                        name: parent.modelData.icon
+                        size: 18
+                        color: root.theme.color.ink
+                    }
+
+                    MouseArea {
+                        id: arrow
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.monthOffset += parent.modelData.step
+                    }
+                }
+            }
+        }
     }
 
     Grid {
         id: calendar
 
-        readonly property int cell: Math.floor(width / 8)
+        readonly property real cell: (width - 7 * columnSpacing) / 8
 
         width: parent.width
         columns: 8
+        columnSpacing: 2
         rowSpacing: 2
 
         // Header: week column, then day names.
-        ThemedText {
+        Item {
             width: calendar.cell
-            horizontalAlignment: Text.AlignHCenter
-            text: ""
+            height: 20
         }
 
         Repeater {
@@ -119,9 +179,13 @@ Column {
             ThemedText {
                 required property int index
                 width: calendar.cell
+                height: 20
                 horizontalAlignment: Text.AlignHCenter
-                text: I18n.locale.dayName((1 + index) % 7, Locale.NarrowFormat)
-                label: true
+                verticalAlignment: Text.AlignVCenter
+                text: I18n.locale.dayName((1 + index) % 7, Locale.NarrowFormat).toUpperCase()
+                font.family: root.theme.font.mono
+                font.pixelSize: 10
+                font.letterSpacing: 0.6
                 color: root.theme.color.soft
             }
         }
@@ -137,45 +201,79 @@ Column {
 
                 model: [{ week: modelData.week }, ...modelData.days]
 
-                Item {
+                Rectangle {
                     required property var modelData
                     required property int index
+                    readonly property bool day: index > 0
+                    readonly property bool today: !!modelData.today
 
                     width: calendar.cell
-                    height: calendar.cell * 0.8
-
-                    // Current week tint.
-                    Rectangle {
-                        anchors.fill: parent
-                        visible: weekRow.current && parent.index > 0
-                        color: Qt.alpha(root.theme.color.accent, 0.08)
-                    }
-
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: Math.min(parent.width, parent.height) - 2
-                        height: width
-                        radius: width / 2
-                        visible: !!parent.modelData.today
-                        color: root.theme.color.accent
-                    }
+                    height: 26
+                    radius: root.squared ? 2 : height / 2
+                    // The current week tinted, today filled.
+                    color: today ? root.theme.color.accent
+                        : day && weekRow.current ? Qt.alpha(root.theme.color.accent, 0.12)
+                        : "transparent"
 
                     ThemedText {
                         anchors.centerIn: parent
-                        text: parent.index === 0 ? `${parent.modelData.week}` : `${parent.modelData.date.getDate()}`
-                        font.pixelSize: parent.index === 0 ? root.theme.font.sizeS : root.theme.font.sizeM
+                        text: parent.day ? `${parent.modelData.date.getDate()}` : `${parent.modelData.week}`
+                        font.family: root.theme.font.mono
+                        font.pixelSize: parent.day ? 12 : 10
+                        font.weight: parent.today ? Font.Bold : Font.Medium
                         font.features: ({ "tnum": 1 })
-                        color: parent.modelData.today ? root.theme.color.onAccent
-                            : parent.index === 0 || !parent.modelData.inMonth ? root.theme.color.soft
-                            : root.theme.color.ink
-                        opacity: parent.index > 0 && !parent.modelData.inMonth ? 0.5 : 1
+                        color: parent.today ? root.theme.color.onAccent
+                            : parent.day ? root.theme.color.ink
+                            : root.theme.color.soft
+                        opacity: !parent.day ? 0.7 : parent.modelData.inMonth ? 1 : 0.35
                     }
                 }
             }
         }
     }
 
+    // Footer: what the mouse does.
+    Item {
+        width: parent.width
+        implicitHeight: 24
+
+        Rectangle {
+            width: parent.width
+            height: 1
+            color: root.theme.color.line
+        }
+
+        ThemedText {
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            text: I18n.tr("card.wheelMonths")
+            font.family: root.theme.font.mono
+            font.pixelSize: 11
+            font.capitalization: root.look === "matrix" ? Font.AllUppercase : Font.MixedCase
+            color: root.theme.color.soft
+        }
+
+        ThemedText {
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            text: I18n.tr("card.clickPin")
+            font.family: root.theme.font.mono
+            font.pixelSize: 11
+            font.capitalization: root.look === "matrix" ? Font.AllUppercase : Font.MixedCase
+            color: root.theme.color.soft
+        }
+    }
+
     WheelHandler {
         onWheel: event => root.monthOffset += event.angleDelta.y > 0 ? -1 : 1
+    }
+
+    // Back to the current month when the card closes.
+    Connections {
+        target: root.QsWindow.window
+        function onPhaseChanged(): void {
+            if (root.QsWindow.window?.phase === "")
+                root.monthOffset = 0;
+        }
     }
 }
