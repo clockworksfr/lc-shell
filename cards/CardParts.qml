@@ -126,7 +126,7 @@ QtObject {
             ThemedText {
                 width: parent.width
                 text: line.title
-                font.pixelSize: 13.5
+                font.pixelSize: 14
                 font.weight: line.active ? Font.DemiBold : Font.Normal
                 elide: Text.ElideRight
             }
@@ -136,7 +136,7 @@ QtObject {
                 width: parent.width
                 text: line.sub
                 color: line.subColor
-                font.pixelSize: 11.5
+                font.pixelSize: 12
                 elide: Text.ElideRight
             }
         }
@@ -201,7 +201,7 @@ QtObject {
             id: label
             anchors.centerIn: parent
             text: button.text
-            font.pixelSize: 11.5
+            font.pixelSize: 12
             font.weight: Font.DemiBold
             font.family: button.look === "matrix" || button.look === "modulaire" ? button.theme.font.mono : button.theme.font.family
             font.capitalization: button.look === "classic" || button.look === "constellation" ? Font.MixedCase : Font.AllUppercase
@@ -275,7 +275,7 @@ QtObject {
             anchors.verticalCenter: parent.verticalCenter
             text: I18n.percent(gauge.level)
             color: gauge.low ? gauge.theme.color.urgent : gauge.theme.color.soft
-            font.pixelSize: 11.5
+            font.pixelSize: 12
             font.features: ({ "tnum": 1 })
         }
     }
@@ -302,7 +302,7 @@ QtObject {
             anchors.bottom: parent.bottom
             text: `${I18n.tr("card.settings")} › ${footer.pageName}`
             color: footer.theme.color.accent
-            font.pixelSize: 12.5
+            font.pixelSize: 13
             font.weight: Font.DemiBold
 
             MouseArea {
