@@ -38,7 +38,7 @@ ThemedText {
     // capitals ("BT 2", "NET ↓1,3M"): "phosphor" (Façade: VFD ink, off at
     // 22 %), "led" (Modulaire: a LED before, on / off / alert).
     readonly property string sigilStyle: theme.style.statusSigil ?? ""
-    readonly property bool sigil: !!sigilStyle && !useIcon && !!icon && !vertical && size !== "extended"
+    readonly property bool sigil: !!sigilStyle && !useIcon && !!icon && !vertical && (size !== "extended" || !!microLabel)
     // Statuses as label + value (micro stacks or sigils).
     readonly property bool labelled: theme.style.statusStack === true || !!sigilStyle
     readonly property string level: Qt.colorEqual(color, theme.color.urgent) || Qt.colorEqual(color, theme.color.warn ?? "#00000000") ? "alert" : Qt.colorEqual(color, theme.color.soft) ? "off" : "on"
@@ -64,7 +64,7 @@ ThemedText {
     }
 
     label: stacked && !microStack
-    text: useIcon ? iconText : sigil ? compactText.replace(/\n/g, " ") : microStack ? micro(size === "extended" ? `${microLabel}\n${fullText}` : compactText) : stacked ? compactText : fullText
+    text: useIcon ? iconText : sigil ? (size === "extended" ? `${microLabel} ${fullText}` : compactText.replace(/\n/g, " ")) : microStack ? micro(size === "extended" ? `${microLabel}\n${fullText}` : compactText) : stacked ? compactText : fullText
     textFormat: microStack ? Text.RichText : Text.PlainText
     leftPadding: useIcon && !vertical ? iconItem.width + (iconText ? 6 : 0) : sigil && sigilStyle === "led" ? 14 : 0
     topPadding: useIcon && vertical ? iconItem.height + (iconText ? 2 : 0) : 0
