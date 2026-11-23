@@ -239,6 +239,11 @@ PanelWindow {
     property real cardClosedAt: 0
 
     function widgetHovered(slot: Item, inside: bool): void {
+        // A pinned card stays on its widget.
+        if (card.pinned) {
+            hoveredSlot = inside ? slot : (hoveredSlot === slot ? null : hoveredSlot);
+            return;
+        }
         if (inside) {
             hoveredSlot = slot;
             hideCard.stop();
@@ -269,7 +274,7 @@ PanelWindow {
         id: hideCard
         interval: 250
         onTriggered: {
-            if (card.hovered || bar.hoveredSlot)
+            if (card.pinned || card.hovered || bar.hoveredSlot)
                 return;
             card.hide();
             bar.cardClosedAt = Date.now();
@@ -290,6 +295,17 @@ PanelWindow {
             const slot = ShellState.slots.find(s => s.host === bar && s.type === "clock" && s.visible) ?? null;
             const p = slot ? slot.mapToItem(bar.contentItem, slot.width / 2, slot.height / 2) : Qt.point(bar.width / 2, bar.height / 2);
             barMenu.openAt(p.x, bar.vertical ? p.y : (bar.edge === "top" ? bar.height : 0));
+        }
+
+        // A widget's click: pin its card, or close it if it's pinned there.
+        function onCardPinRequested(widget: var): void {
+            const slot = ShellState.slots.find(s => s.host === bar && s.item === widget);
+            if (!slot || !Registry.has(slot.type))
+                return;
+            if (card.pinned && card.shown === slot)
+                card.hide();
+            else
+                card.pin(slot);
         }
 
         function onCardRequested(type: string, screenName: string): void {

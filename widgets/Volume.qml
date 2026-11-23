@@ -43,21 +43,14 @@ TextWidget {
             if (mouse.button === Qt.MiddleButton)
                 Audio.toggleMute();
             else
-                popup.toggle();
+                ShellState.pinCard(root);
         }
         onWheel: wheel => wheel.angleDelta.y > 0 ? Audio.increment() : Audio.decrement()
     }
 
-    readonly property bool panelOpen: popup.visible
+    readonly property bool panelOpen: false
 
     function togglePanel(): void {
-        popup.toggle();
-    }
-
-    BarPopup {
-        id: popup
-        anchorItem: root
-
-        AudioPanel {}
+        ShellState.pinCard(root);
     }
 }

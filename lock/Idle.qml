@@ -32,6 +32,25 @@ Singleton {
     // Caffeine (quick settings): stay awake until turned off (not kept
     // across restarts).
     property bool caffeine: false
+    // Caffeine until a time (ms since epoch, 0 = until turned off).
+    property real caffeineUntil: 0
+    onCaffeineChanged: if (!caffeine) caffeineUntil = 0
+
+    // `minutes` 0: until turned off.
+    property int caffeineMinutes: 0
+    function setCaffeine(on: bool, minutes: int): void {
+        caffeineMinutes = on ? minutes : 0;
+        caffeineUntil = on && minutes > 0 ? Date.now() + minutes * 60000 : 0;
+        caffeine = on;
+    }
+
+    Timer {
+        running: root.caffeine && root.caffeineUntil > 0
+        interval: 15000
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: if (Date.now() >= root.caffeineUntil) root.caffeine = false
+    }
     readonly property string inhibitedBy: caffeine ? "caffeine" : inhibitWhenAudio && playing ? "audio" : inhibitWhenCharging && onPower ? "charging" : ""
     readonly property bool active: enabled && !inhibitedBy
 

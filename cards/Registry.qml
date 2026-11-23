@@ -12,12 +12,14 @@ Singleton {
             clock: "ClockCard.qml",
             dynamicIsland: "DynamicIslandCard.qml",
             media: "MediaCard.qml",
+            modes: "ModesCard.qml",
             network: "NetworkCard.qml",
             notifications: "NotificationsCard.qml",
             system: "SystemCard.qml",
             tray: "TrayCard.qml",
             volume: "VolumeCard.qml",
             weather: "WeatherCard.qml",
+            wifi: "WifiCard.qml",
             window: "WindowCard.qml",
             workspaces: "WorkspacesCard.qml"
         })

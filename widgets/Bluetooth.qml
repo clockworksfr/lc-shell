@@ -33,23 +33,17 @@ TextWidget {
         : size === "extended" && !vertical ? BluetoothService.connected.map(d => d.name).join(", ")
         : `${count}`
 
+    // Left: the card, pinned. Middle: power.
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: popup.toggle()
+        acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+        onClicked: mouse => mouse.button === Qt.MiddleButton ? BluetoothService.setEnabled(!BluetoothService.enabled) : ShellState.pinCard(root)
     }
 
-    readonly property bool panelOpen: popup.visible
+    readonly property bool panelOpen: false
 
     function togglePanel(): void {
-        popup.toggle();
-    }
-
-    BarPopup {
-        id: popup
-        anchorItem: root
-        onVisibleChanged: BluetoothService.discoveryRequests += visible ? 1 : -1
-
-        BluetoothPanel {}
+        ShellState.pinCard(root);
     }
 }

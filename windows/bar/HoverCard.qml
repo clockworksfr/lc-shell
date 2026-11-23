@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.cards
 import qs.components
@@ -30,6 +31,15 @@ PanelWindow {
     readonly property bool open: phase === "open"
     // "" (closed) | "opening" | "open" | "closing"
     property string phase: ""
+    // Pinned (a click on the widget or the card): stays open until a click
+    // outside, Escape or another click on the widget, and takes the
+    // keyboard on demand.
+    property bool pinned: false
+
+    function pin(target: Item): void {
+        showFor(target);
+        pinned = true;
+    }
 
     readonly property var theme: host?.theme ?? Themes.fallback
     readonly property string edge: host?.edge ?? "top"
@@ -91,6 +101,10 @@ PanelWindow {
     }
 
     function hide(): void {
+        if (pinned) {
+            pinned = false;
+            Qt.callLater(ShellState.restoreFocus);
+        }
         if (phase === "" || phase === "closing")
             return;
         swap.stop();
@@ -143,7 +157,15 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "lc-card"
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: pinned ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
+    // Pinned: a click outside (the bar included: its widgets toggle the
+    // pin themselves) closes it.
+    HyprlandFocusGrab {
+        active: root.pinned && root.phase !== "closing"
+        windows: [root, root.host]
+        onCleared: root.hide()
+    }
     // Only the drawer takes the pointer (nothing while closed).
     mask: Region {
         item: root.phase !== "" ? frame : null
@@ -227,17 +249,13 @@ PanelWindow {
                 }
             }
 
-            // "Click for more": a click on the card (not on its controls)
-            // opens the widget's panel.
+            // A click on the card (not on its controls) pins it.
             TapHandler {
-                onTapped: {
-                    const widget = root.shown?.item ?? null;
-                    if (widget && typeof widget.togglePanel === "function") {
-                        root.hide();
-                        widget.togglePanel();
-                    }
-                }
+                onTapped: root.pinned = true
             }
+
+            focus: root.pinned
+            Keys.onEscapePressed: root.hide()
         }
 
         HoverHandler {

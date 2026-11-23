@@ -23,6 +23,7 @@ Singleton {
             window: "Window.qml",
             volume: "Volume.qml",
             weather: "Weather.qml",
+            wifi: "Wifi.qml",
             workspaces: "Workspaces.qml"
         })
 

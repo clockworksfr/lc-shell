@@ -23,6 +23,11 @@ Singleton {
     // Show (type) or hide ("") the hover card of a block without hovering:
     // reviews, screenshots. On `screenName`, or the focused screen.
     signal cardRequested(string type, string screenName)
+    // A widget's click: its hover card pinned open (or unpinned).
+    signal cardPinRequested(var widget)
+    function pinCard(widget: var): void {
+        cardPinRequested(widget);
+    }
 
     // Open a bar menu without a right click (key binds, reviews): "bar"
     // (the bar's menu) or "tray:N" (the menu of the Nth tray item), on

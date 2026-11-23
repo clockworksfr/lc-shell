@@ -1,93 +1,116 @@
 import QtQuick
 import Quickshell
+import Quickshell.Bluetooth
 import qs.components
 import qs.i18n
 import qs.services
 import qs.theme
 
-// Paired devices: name, state, battery (low battery flagged).
+// Bluetooth: power, devices (connected first, battery), connect or
+// disconnect in one click; search, then pair new devices.
 Column {
     id: root
 
     property var block
     property ShellScreen screen
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
-    readonly property var devices: BluetoothService.devices.filter(d => d.paired || d.connected)
+    readonly property var known: BluetoothService.devices.filter(d => d.paired || d.connected)
+    readonly property var found: BluetoothService.devices.filter(d => !d.paired && !d.connected && !!d.name)
 
-    spacing: theme.space.s
-
-    ThemedText {
-        text: I18n.tr("bt.title")
-        font.weight: Font.DemiBold
+    // Searching while asked, and only while the card is open.
+    property bool scanning: false
+    onScanningChanged: BluetoothService.discoveryRequests += scanning ? 1 : -1
+    Component.onDestruction: if (scanning) BluetoothService.discoveryRequests -= 1
+    Connections {
+        target: root.QsWindow.window
+        function onPhaseChanged(): void {
+            if (root.QsWindow.window?.phase === "")
+                root.scanning = false;
+        }
     }
 
-    ThemedText {
-        visible: !BluetoothService.enabled || root.devices.length === 0
-        text: !BluetoothService.enabled ? I18n.tr("card.bluetoothOff") : I18n.tr("card.noDevices")
-        color: root.theme.color.soft
+    function iconOf(device: var): string {
+        const i = device.icon ?? "";
+        return i.includes("headset") || i.includes("headphone") ? "headphones"
+            : i.includes("speaker") || i.includes("audio") ? "speaker"
+            : i.includes("mouse") ? "mouse"
+            : i.includes("keyboard") ? "keyboard"
+            : i.includes("phone") ? "mobile"
+            : i.includes("gaming") ? "sports_esports"
+            : i.includes("watch") ? "watch"
+            : "bluetooth";
+    }
+
+    spacing: 4
+
+    CardParts.Header {
+        title: I18n.tr("bt.title")
+        status: !BluetoothService.available ? I18n.tr("card.noAdapter")
+            : !BluetoothService.enabled ? I18n.tr("qs.off")
+            : BluetoothService.connected.length > 0 ? I18n.tr("card.btConnected", { n: BluetoothService.connected.length })
+            : I18n.tr("card.on")
+        checked: BluetoothService.enabled
+        available: BluetoothService.available
+        onToggled: BluetoothService.setEnabled(!BluetoothService.enabled)
+    }
+
+    Item {
+        width: 1
+        height: 4
     }
 
     Repeater {
-        model: BluetoothService.enabled ? root.devices : []
+        model: BluetoothService.enabled ? root.known.slice(0, 8) : []
 
-        Item {
+        CardParts.Line {
             required property var modelData
-            readonly property bool low: modelData.batteryAvailable && modelData.battery < 0.2
+            readonly property bool busy: modelData.state === BluetoothDeviceState.Connecting || modelData.state === BluetoothDeviceState.Disconnecting
 
-            width: root.width
-            implicitHeight: Math.max(36, names.implicitHeight)
-
-            Column {
-                id: names
-                anchors.left: parent.left
-                anchors.right: battery.left
-                anchors.rightMargin: root.theme.space.s
-                anchors.verticalCenter: parent.verticalCenter
-
-                ThemedText {
-                    width: parent.width
-                    text: parent.parent.modelData.name || I18n.tr("bt.unnamed")
-                    color: parent.parent.modelData.connected ? root.theme.color.ink : root.theme.color.soft
-                    elide: Text.ElideRight
-                }
-
-                ThemedText {
-                    text: parent.parent.modelData.connected ? I18n.tr("bt.connected") : I18n.tr("bt.paired")
-                    color: root.theme.color.soft
-                    font.pixelSize: root.theme.font.sizeS
-                }
-            }
-
-            // Battery: small gauge and value.
-            Row {
-                id: battery
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                visible: parent.modelData.batteryAvailable
-                spacing: root.theme.space.xs
-
-                Rectangle {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 36
-                    height: 6
-                    radius: root.theme.radius.full
-                    color: root.theme.color.surface2
-
-                    Rectangle {
-                        width: parent.width * (parent.parent.parent.modelData.battery ?? 0)
-                        height: parent.height
-                        radius: parent.radius
-                        color: parent.parent.parent.low ? root.theme.color.urgent : root.theme.color.ok
-                    }
-                }
-
-                ThemedText {
-                    text: I18n.percent(parent.parent.modelData.battery ?? 0)
-                    color: parent.parent.low ? root.theme.color.urgent : root.theme.color.ink
-                    font.pixelSize: root.theme.font.sizeS
-                    font.features: ({ "tnum": 1 })
-                }
-            }
+            icon: root.iconOf(modelData)
+            title: modelData.name || I18n.tr("bt.unnamed")
+            sub: busy ? I18n.tr("bt.connecting") : modelData.connected ? I18n.tr("bt.connected") : I18n.tr("bt.paired")
+            active: modelData.connected
+            control: "button"
+            buttonText: I18n.tr(modelData.connected ? "card.disconnect" : "card.connect")
+            battery: modelData.batteryAvailable ? (modelData.battery ?? 0) : -1
+            onPressed: BluetoothService.toggleConnection(modelData)
         }
+    }
+
+    CardParts.Line {
+        visible: BluetoothService.enabled
+        icon: "bluetooth_searching"
+        title: I18n.tr(root.scanning ? "bt.searching" : "card.search")
+        sub: root.scanning ? I18n.tr("card.found", { n: root.found.length }) : I18n.tr("card.searchSub")
+        active: root.scanning
+        control: "button"
+        buttonText: I18n.tr(root.scanning ? "card.stop" : "card.search")
+        onPressed: root.scanning = !root.scanning
+    }
+
+    Repeater {
+        model: root.scanning ? root.found.slice(0, 6) : []
+
+        CardParts.Line {
+            required property var modelData
+
+            icon: root.iconOf(modelData)
+            title: modelData.name
+            sub: modelData.pairing ? I18n.tr("bt.pairing") : I18n.tr("card.new")
+            dimmed: modelData.pairing
+            control: "button"
+            buttonText: I18n.tr("card.pair")
+            onPressed: BluetoothService.toggleConnection(modelData)
+        }
+    }
+
+    Item {
+        width: 1
+        height: 6
+    }
+
+    CardParts.Footer {
+        page: "bluetooth"
+        pageName: I18n.tr("bt.title")
     }
 }

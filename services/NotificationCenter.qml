@@ -160,8 +160,17 @@ Singleton {
         unread = 0;
     }
 
+    // Do-not-disturb until a time (ms since epoch, 0 = until turned off).
+    property real dndUntil: 0
+
     function setDnd(value: bool): void {
+        setDndUntil(value, 0);
+    }
+
+    // `until`: 0 (until turned off) or a time (ms since epoch).
+    function setDndUntil(value: bool, until: real): void {
         dnd = value;
+        dndUntil = value && until > 0 ? until : 0;
         saveState();
         // Leaving DND doesn't replay what arrived meanwhile: it's in history.
     }
@@ -174,9 +183,60 @@ Singleton {
     function saveState(): void {
         stateFile.setText(JSON.stringify({
             dnd: dnd,
+            dndUntil: dndUntil,
             // image://qsimage/ URLs only live with their notification.
             history: history.map(h => Object.assign({}, h, { image: h.image.startsWith("image://") ? "" : h.image }))
         }));
+    }
+
+    // Daily schedule (notifications.dndSchedule: { enabled, from, to },
+    // "HH:mm"): do-not-disturb turned on at `from`, until `to`.
+    readonly property var dndSchedule: Config.get("notifications.dndSchedule") ?? {}
+    property var wasInSchedule: null
+
+    function minutesOf(text: string): int {
+        const [h, m] = (text ?? "").split(":").map(Number);
+        return (h || 0) * 60 + (m || 0);
+    }
+
+    function checkSchedule(): void {
+        if (!dndSchedule.enabled) {
+            wasInSchedule = null;
+            return;
+        }
+        const now = new Date();
+        const current = now.getHours() * 60 + now.getMinutes();
+        const from = minutesOf(dndSchedule.from ?? "22:00");
+        const to = minutesOf(dndSchedule.to ?? "08:00");
+        const inside = from <= to ? current >= from && current < to : current >= from || current < to;
+        // Entering the range (not at start-up, not after turning it off).
+        if (inside && wasInSchedule === false) {
+            const end = new Date(now);
+            end.setHours(Math.floor(to / 60), to % 60, 0, 0);
+            if (end <= now)
+                end.setDate(end.getDate() + 1);
+            setDndUntil(true, end.getTime());
+        }
+        wasInSchedule = inside;
+    }
+
+    onDndScheduleChanged: checkSchedule()
+
+    Timer {
+        running: !!root.dndSchedule.enabled
+        interval: 20000
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: root.checkSchedule()
+    }
+
+    // Ends a timed do-not-disturb.
+    Timer {
+        running: root.dnd && root.dndUntil > 0
+        interval: 15000
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: if (Date.now() >= root.dndUntil) root.setDnd(false)
     }
 
     NotificationServer {
@@ -224,7 +284,8 @@ Singleton {
         onLoaded: {
             try {
                 const saved = JSON.parse(text());
-                root.dnd = saved.dnd ?? false;
+                root.dndUntil = saved.dndUntil ?? 0;
+                root.dnd = (saved.dnd ?? false) && !(root.dndUntil > 0 && root.dndUntil <= Date.now());
                 root.history = saved.history ?? [];
             } catch (e) {
                 root.history = [];

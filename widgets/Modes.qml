@@ -6,7 +6,8 @@ import qs.lock
 import qs.services
 
 // Active modes: caffeine (idle actions held) and do-not-disturb. Hidden
-// while neither is on. Right click: turn either on or off.
+// while neither is on. Left click: the card (durations), middle click:
+// caffeine, right click: turn either on or off.
 TextWidget {
     id: root
 
@@ -22,7 +23,7 @@ TextWidget {
     ]
     function contextAction(id: string): void {
         if (id === "caffeine")
-            Idle.caffeine = !Idle.caffeine;
+            Idle.setCaffeine(!Idle.caffeine, 0);
         else if (id === "dnd")
             NotificationCenter.setDnd(!NotificationCenter.dnd);
     }
@@ -47,5 +48,18 @@ TextWidget {
         size: root.iconSize
         x: root.vertical ? (root.width - width) / 2 : root.iconSize + 4
         y: root.vertical ? root.iconSize + 2 : (root.height - height) / 2
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+        onClicked: mouse => mouse.button === Qt.MiddleButton ? Idle.setCaffeine(!Idle.caffeine, 0) : ShellState.pinCard(root)
+    }
+
+    readonly property bool panelOpen: false
+
+    function togglePanel(): void {
+        ShellState.pinCard(root);
     }
 }
