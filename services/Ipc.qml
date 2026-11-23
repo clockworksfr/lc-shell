@@ -48,6 +48,10 @@ Scope {
         function showCardOn(type: string, screen: string): void {
             ShellState.cardRequested(type, screen);
         }
+        // Reviews: <path>-bar.png and, a card being open, <path>-card.png.
+        function snapshot(screen: string, path: string): void {
+            ShellState.barSnapshotRequested(screen, path);
+        }
         function hideCard(): void {
             ShellState.cardRequested("", "");
         }

@@ -308,6 +308,14 @@ PanelWindow {
                 card.pin(slot);
         }
 
+        function onBarSnapshotRequested(screenName: string, path: string): void {
+            if (screenName !== bar.screen.name)
+                return;
+            bar.contentItem.grabToImage(r => r.saveToFile(`${path}-bar.png`));
+            if (card.phase === "open")
+                card.snapshot(`${path}-card.png`);
+        }
+
         function onCardRequested(type: string, screenName: string): void {
             if (screenName && screenName !== bar.screen.name)
                 return;

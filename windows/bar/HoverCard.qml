@@ -100,6 +100,11 @@ PanelWindow {
         enter.restart();
     }
 
+    // Reviews: the drawer alone as an image.
+    function snapshot(path: string): void {
+        frame.grabToImage(r => r.saveToFile(path));
+    }
+
     function hide(): void {
         if (pinned) {
             pinned = false;
