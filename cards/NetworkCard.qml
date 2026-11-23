@@ -20,7 +20,8 @@ Column {
 
     CardParts.Header {
         title: NetworkService.kind === "wired" ? I18n.tr("net.wired") : NetworkService.kind === "wifi" ? NetworkService.activeWifi.name : I18n.tr("net.offline")
-        status: [NetworkService.address, NetworkService.kind === "wifi" ? I18n.percent(NetworkService.activeWifi.signalStrength) : NetworkService.kind === "wired" && NetworkService.wired?.linkSpeed ? `${NetworkService.wired.linkSpeed} Mb/s` : "", VpnService.active || VpnService.activeNames.length > 0 ? "VPN" : ""].filter(t => !!t).join(" · ")
+        // (No address while the screen is shared.)
+        status: [Screens.sharing ? "" : NetworkService.address, NetworkService.kind === "wifi" ? I18n.percent(NetworkService.activeWifi.signalStrength) : NetworkService.kind === "wired" && NetworkService.wired?.linkSpeed ? `${NetworkService.wired.linkSpeed} Mb/s` : "", VpnService.active || VpnService.activeNames.length > 0 ? "VPN" : ""].filter(t => !!t).join(" · ")
         switchShown: false
     }
 

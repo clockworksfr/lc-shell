@@ -40,12 +40,12 @@ TextWidget {
     readonly property bool vpn: VpnService.active || VpnService.activeNames.length > 0
 
     readonly property string label: NetworkService.kind === "wired" ? I18n.tr("net.wired")
-        : NetworkService.kind === "wifi" ? `${NetworkService.activeWifi.name} ${signal}`
+        : NetworkService.kind === "wifi" ? `${(Screens.sharing ? I18n.tr("toggles.wifi") : NetworkService.activeWifi.name)} ${signal}`
         : I18n.tr("net.offline")
 
     fullText: (size === "extended" && NetworkService.kind !== "none" ? `${label} · ↓ ${I18n.bytes(NetworkService.rxRate, true)}`
         : NetworkService.kind === "wired" ? I18n.tr("net.wired")
-        : NetworkService.kind === "wifi" ? `${NetworkService.activeWifi.name} ${signal}`
+        : NetworkService.kind === "wifi" ? `${(Screens.sharing ? I18n.tr("toggles.wifi") : NetworkService.activeWifi.name)} ${signal}`
         : I18n.tr("net.offline")) + (vpn ? " · VPN" : "")
     // Matrix micro labels: NET over the download rate (and VPN).
     compactText: labelled && !vertical && size !== "compact"
@@ -62,8 +62,8 @@ TextWidget {
         : NetworkService.kind === "wifi" ? (strength > 0.66 ? "wifi" : strength > 0.33 ? "wifi_2_bar" : "wifi_1_bar")
         : "signal_wifi_off"
     iconText: size === "compact" ? ""
-        : size === "extended" && NetworkService.kind !== "none" ? `${NetworkService.kind === "wifi" ? NetworkService.activeWifi.name + " · " : ""}↓ ${I18n.bytes(NetworkService.rxRate, true)}`
-        : NetworkService.kind === "wifi" && !vertical ? NetworkService.activeWifi.name
+        : size === "extended" && NetworkService.kind !== "none" ? `${NetworkService.kind === "wifi" ? (Screens.sharing ? I18n.tr("toggles.wifi") : NetworkService.activeWifi.name) + " · " : ""}↓ ${I18n.bytes(NetworkService.rxRate, true)}`
+        : NetworkService.kind === "wifi" && !vertical ? (Screens.sharing ? I18n.tr("toggles.wifi") : NetworkService.activeWifi.name)
         : ""
 
     // Left: the card, pinned. Middle: the chosen VPN. Wheel: traffic source.

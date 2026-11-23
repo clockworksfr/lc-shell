@@ -24,7 +24,7 @@ TextWidget {
 
     fullText: Audio.muted ? I18n.tr("common.muted")
         : size === "compact" ? I18n.percent(Audio.volume)
-        : size === "extended" ? `${Audio.sinkName} · ${I18n.percent(Audio.volume)}`
+        : size === "extended" ? (Screens.sharing ? I18n.percent(Audio.volume) : `${Audio.sinkName} · ${I18n.percent(Audio.volume)}`)
         : I18n.tr("bar.volume", { value: Math.round(Audio.volume * 100) })
     // Extended (device · level): "SON" over it, like BT / BAT.
     microLabel: I18n.tr("bar.v.volume", { value: "" }).split("\n")[0]
@@ -33,7 +33,7 @@ TextWidget {
 
     icon: Audio.muted ? "volume_off" : Audio.volume > 0.66 ? "volume_up" : Audio.volume > 0.01 ? "volume_down" : "volume_mute"
     iconFilled: true
-    iconText: Audio.muted || size === "compact" ? "" : size === "extended" ? `${Audio.sinkName} · ${I18n.percent(Audio.volume)}` : I18n.percent(Audio.volume)
+    iconText: Audio.muted || size === "compact" ? "" : size === "extended" ? (Screens.sharing ? I18n.percent(Audio.volume) : `${Audio.sinkName} · ${I18n.percent(Audio.volume)}`) : I18n.percent(Audio.volume)
 
     MouseArea {
         anchors.fill: parent

@@ -26,7 +26,8 @@ TextWidget {
         const levels = BluetoothService.connected.filter(d => d.batteryAvailable).map(d => d.battery ?? 1);
         return levels.length ? I18n.percent(Math.min(...levels)) : "";
     }
-    readonly property string names: [BluetoothService.connected.map(d => d.name).join(", "), lowest].filter(t => !!t).join(" · ")
+    // (No device names while the screen is shared.)
+    readonly property string names: [Screens.sharing ? `${count}` : BluetoothService.connected.map(d => d.name).join(", "), lowest].filter(t => !!t).join(" · ")
     // Extended in Matrix: BT over the names and the lowest battery.
     microLabel: I18n.tr("bar.v.bluetooth", { n: "" }).split("\n")[0]
 

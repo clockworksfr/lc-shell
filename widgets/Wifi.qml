@@ -23,14 +23,14 @@ TextWidget {
     readonly property string value: !NetworkService.wifiEnabled ? I18n.tr("bar.off") : active ? `${Math.round(strength * 100)}` : "—"
 
     fullText: !NetworkService.wifiEnabled ? I18n.tr("bar.wifiOff")
-        : active ? (size === "compact" ? I18n.percent(strength) : `${active.name} ${I18n.percent(strength)}`)
+        : active ? (size === "compact" ? I18n.percent(strength) : (Screens.sharing ? I18n.percent(strength) : `${active.name} ${I18n.percent(strength)}`))
         : I18n.tr("bar.wifi")
     compactText: I18n.tr("bar.v.wifi", { value: root.value })
     microLabel: I18n.tr("bar.v.wifi", { value: "" }).split("\n")[0]
     color: active ? theme.color.ink : theme.color.soft
 
     icon: !NetworkService.wifiEnabled ? "wifi_off" : !active ? "signal_wifi_off" : strength > 0.66 ? "wifi" : strength > 0.33 ? "wifi_2_bar" : "wifi_1_bar"
-    iconText: active && size !== "compact" && !vertical ? (size === "extended" ? `${active.name} · ${I18n.percent(strength)}` : I18n.percent(strength)) : ""
+    iconText: active && size !== "compact" && !vertical ? (size === "extended" ? (Screens.sharing ? I18n.percent(strength) : `${active.name} · ${I18n.percent(strength)}`) : I18n.percent(strength)) : ""
 
     MouseArea {
         anchors.fill: parent
