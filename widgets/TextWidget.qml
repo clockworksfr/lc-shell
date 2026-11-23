@@ -34,6 +34,14 @@ ThemedText {
     // `microLabel` when the widget gives one (its value alone isn't clear).
     property string microLabel
     readonly property bool microStatus: theme.style.statusStack === true && !useIcon && !!icon
+    // Sigils (style.statusSigil): the label and value on one line, mono
+    // capitals ("BT 2", "NET ↓1,3M"): "phosphor" (Façade: VFD ink, off at
+    // 22 %), "led" (Modulaire: a LED before, on / off / alert).
+    readonly property string sigilStyle: theme.style.statusSigil ?? ""
+    readonly property bool sigil: !!sigilStyle && !useIcon && !!icon && !vertical && size !== "extended"
+    // Statuses as label + value (micro stacks or sigils).
+    readonly property bool labelled: theme.style.statusStack === true || !!sigilStyle
+    readonly property string level: Qt.colorEqual(color, theme.color.urgent) || Qt.colorEqual(color, theme.color.warn ?? "#00000000") ? "alert" : Qt.colorEqual(color, theme.color.soft) ? "off" : "on"
     readonly property bool microStack: microStatus && !vertical && (size !== "extended" || !!microLabel)
 
     function micro(value: string): string {
@@ -56,14 +64,47 @@ ThemedText {
     }
 
     label: stacked && !microStack
-    text: useIcon ? iconText : microStack ? micro(size === "extended" ? `${microLabel}\n${fullText}` : compactText) : stacked ? compactText : fullText
+    text: useIcon ? iconText : sigil ? compactText.replace(/\n/g, " ") : microStack ? micro(size === "extended" ? `${microLabel}\n${fullText}` : compactText) : stacked ? compactText : fullText
     textFormat: microStack ? Text.RichText : Text.PlainText
-    leftPadding: useIcon && !vertical ? iconItem.width + (iconText ? 6 : 0) : 0
+    leftPadding: useIcon && !vertical ? iconItem.width + (iconText ? 6 : 0) : sigil && sigilStyle === "led" ? 14 : 0
     topPadding: useIcon && vertical ? iconItem.height + (iconText ? 2 : 0) : 0
-    font.pixelSize: microStack ? 12 : vertical || stacked ? theme.font.sizeS : theme.font.sizeM
+    font.pixelSize: microStack ? 12 : sigil ? (sigilStyle === "led" ? 14 : 12) : vertical || stacked ? theme.font.sizeS : theme.font.sizeM
+    font.weight: sigil && sigilStyle === "phosphor" ? Font.DemiBold : Font.Normal
+    font.letterSpacing: sigil ? (sigilStyle === "phosphor" ? 1 : 0.6) : 0
+    // Façade: a status that's off dims (the VFD's unlit segments).
+    opacity: sigil && sigilStyle === "phosphor" && level === "off" ? 0.45 : 1
+
+    // Modulaire: the status LED (on: ok, off: dark, alert: urgent), a soft
+    // halo when lit.
+    Item {
+        visible: parent.sigil && parent.sigilStyle === "led"
+        width: 8
+        height: 8
+        anchors.verticalCenter: parent.verticalCenter
+
+        readonly property color lit: parent.level === "alert" ? parent.theme.color.urgent : parent.theme.color.ok
+
+        Repeater {
+            model: parent.parent.level !== "off" ? [{ s: 16, a: 0.18 }, { s: 12, a: 0.3 }] : []
+            Rectangle {
+                required property var modelData
+                anchors.centerIn: parent
+                width: modelData.s
+                height: width
+                radius: width / 2
+                color: Qt.alpha(parent.lit, modelData.a)
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 4
+            color: parent.parent.level === "off" ? "#3B2A24" : parent.lit
+        }
+    }
     // (Every size: extended keeps one line, in the same mono capitals.)
-    font.family: microStatus ? theme.font.mono : theme.font.family
-    font.capitalization: microStatus ? Font.AllUppercase : Font.MixedCase
+    font.family: microStatus || sigilStyle === "phosphor" ? theme.font.mono : theme.font.family
+    font.capitalization: microStatus || sigil ? Font.AllUppercase : Font.MixedCase
     lineHeight: stacked || microStack ? 0.9 : 1
     horizontalAlignment: Text.AlignHCenter
     width: vertical && crossSize > 0 ? crossSize : implicitWidth

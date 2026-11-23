@@ -118,6 +118,8 @@ Singleton {
                 barClock: "display",
                 labelCase: "upper",
                 statusIcons: false,
+                // Statuses as VFD sigils ("BT 2", "NET ↓1,3M").
+                statusSigil: "phosphor",
                 appIcons: "tinted",
                 workspaces: "segments",
                 glass: false,

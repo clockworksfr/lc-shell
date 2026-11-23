@@ -28,7 +28,7 @@ TextWidget {
         : I18n.tr("bar.notifs")
     // Matrix (micro labels): the red dot and the count, nothing else.
     // Matrix: NOTIF over the count, the red dot when unread.
-    compactText: theme.style.statusStack === true && size !== "compact" ? I18n.tr("bar.v.notifsLabel", { value: NotificationCenter.dnd ? "∅" : NotificationCenter.unread > 0 ? `● ${NotificationCenter.unread}` : "0" })
+    compactText: labelled && size !== "compact" ? I18n.tr("bar.v.notifsLabel", { value: NotificationCenter.dnd ? "∅" : NotificationCenter.unread > 0 ? `● ${NotificationCenter.unread}` : "0" })
         : NotificationCenter.dnd ? I18n.tr("bar.dnd")
         : NotificationCenter.unread > 0 ? I18n.tr("bar.v.notifs", { n: NotificationCenter.unread })
         : I18n.tr("bar.notifs")

@@ -30,7 +30,7 @@ TextWidget {
     // Extended in Matrix: BT over the names and the lowest battery.
     microLabel: I18n.tr("bar.v.bluetooth", { n: "" }).split("\n")[0]
 
-    fullText: size === "extended" && count > 0 ? (theme.style.statusStack === true ? names : `bt · ${names}`)
+    fullText: size === "extended" && count > 0 ? (labelled ? names : `bt · ${names}`)
         : !BluetoothService.enabled ? I18n.tr("bar.bluetoothOff")
         : count > 0 ? I18n.tr("bar.bluetoothCount", { n: count })
         : I18n.tr("bar.bluetooth")

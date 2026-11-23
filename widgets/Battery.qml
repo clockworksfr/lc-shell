@@ -16,8 +16,8 @@ TextWidget {
         : size === "extended" && Power.timeLeft > 0 ? `${I18n.tr(Power.charging ? "bar.batteryCharging" : "bar.battery", { value: I18n.percent(Power.level) })} · ${Math.floor(Power.timeLeft / 3600)}h${String(Math.round(Power.timeLeft / 60) % 60).padStart(2, "0")}`
         : I18n.tr(Power.charging ? "bar.batteryCharging" : "bar.battery", { value: I18n.percent(Power.level) })
     // Matrix: the value in ink, "↑" while charging (no green).
-    compactText: I18n.tr("bar.v.battery", { value: `${Math.round(Power.level * 100)}${Power.charging && theme.style.statusStack === true ? "↑" : ""}` })
-    color: Power.low ? theme.color.urgent : Power.charging && theme.style.statusStack !== true ? theme.color.ok : theme.color.ink
+    compactText: I18n.tr("bar.v.battery", { value: `${Math.round(Power.level * 100)}${Power.charging && labelled ? "↑" : ""}` })
+    color: Power.low ? theme.color.urgent : Power.charging && !labelled ? theme.color.ok : theme.color.ink
 
     icon: Power.charging ? "battery_charging_full" : Power.low ? "battery_alert" : Power.level > 0.95 ? "battery_full" : `battery_${Math.min(6, Math.floor(Power.level * 7))}_bar`
     iconFilled: true

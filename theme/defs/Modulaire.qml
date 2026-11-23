@@ -116,7 +116,9 @@ Singleton {
                 // The bar's clock in the display font (7 segments / Nixie).
                 barClock: "display",
                 labelCase: "upper",
-                statusIcons: true,
+                // Statuses as a LED and a silk-screened sigil.
+                statusIcons: false,
+                statusSigil: "led",
                 appIcons: "native",
                 workspaces: "sequencer",
                 glass: false,

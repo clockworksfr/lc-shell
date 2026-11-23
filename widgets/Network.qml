@@ -48,7 +48,7 @@ TextWidget {
         : NetworkService.kind === "wifi" ? `${NetworkService.activeWifi.name} ${signal}`
         : I18n.tr("net.offline")) + (vpn ? " · VPN" : "")
     // Matrix micro labels: NET over the download rate (and VPN).
-    compactText: theme.style.statusStack === true && !vertical && size !== "compact"
+    compactText: labelled && !vertical && size !== "compact"
         ? I18n.tr("bar.v.net", { value: NetworkService.kind === "none" ? "—" : `↓${shortRate(NetworkService.rxRate)}${vpn ? " · VPN" : ""}` })
         : vpn ? I18n.tr("bar.v.vpn", { value: NetworkService.kind === "wired" ? "eth" : NetworkService.kind === "wifi" ? signal : "—" })
         : NetworkService.kind === "wired" ? I18n.tr("bar.v.wired")
