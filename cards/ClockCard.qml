@@ -232,36 +232,8 @@ Column {
         }
     }
 
-    // Footer: what the mouse does.
-    Item {
-        width: parent.width
-        implicitHeight: 24
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: root.theme.color.line
-        }
-
-        ThemedText {
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            text: I18n.tr("card.wheelMonths")
-            font.family: root.theme.font.mono
-            font.pixelSize: 11
-            font.capitalization: root.look === "matrix" ? Font.AllUppercase : Font.MixedCase
-            color: root.theme.color.soft
-        }
-
-        ThemedText {
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            text: I18n.tr("card.clickPin")
-            font.family: root.theme.font.mono
-            font.pixelSize: 11
-            font.capitalization: root.look === "matrix" ? Font.AllUppercase : Font.MixedCase
-            color: root.theme.color.soft
-        }
+    CardParts.Footer {
+        hints: I18n.tr("card.wheelMonths")
     }
 
     WheelHandler {

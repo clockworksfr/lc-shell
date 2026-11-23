@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs.components
+import qs.components.dashboard
 import qs.i18n
 import qs.services
 import qs.theme
@@ -175,35 +176,21 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: root.theme.space.l
 
+        // The module's buttons (theme pills), 40 px, play wider.
         Repeater {
             model: [
-                { glyph: "⏮", main: false, run: () => Players.previous() },
-                { glyph: root.player?.isPlaying ? "⏸" : "▶", main: true, run: () => Players.togglePlaying() },
-                { glyph: "⏭", main: false, run: () => Players.next() }
+                { icon: "skip_previous", main: false, run: () => Players.previous() },
+                { icon: root.player?.isPlaying ? "pause" : "play_arrow", main: true, run: () => Players.togglePlaying() },
+                { icon: "skip_next", main: false, run: () => Players.next() }
             ]
 
-            Rectangle {
+            ModuleButton {
                 required property var modelData
                 anchors.verticalCenter: parent.verticalCenter
-                width: modelData.main ? 56 : 40
-                height: width
-                radius: width / 2
-                color: modelData.main ? root.theme.color.accent : area.containsMouse ? root.theme.color.surface2 : "transparent"
-
-                ThemedText {
-                    anchors.centerIn: parent
-                    text: parent.modelData.glyph
-                    font.pixelSize: parent.modelData.main ? 22 : 16
-                    color: parent.modelData.main ? root.theme.color.onAccent : root.theme.color.ink
-                }
-
-                MouseArea {
-                    id: area
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: parent.modelData.run()
-                }
+                icon: modelData.icon
+                primary: modelData.main
+                size: modelData.main ? 44 : 38
+                onTapped: modelData.run()
             }
         }
     }

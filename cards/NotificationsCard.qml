@@ -106,9 +106,23 @@ Column {
         }
     }
 
-    ListRow {
-        visible: NotificationCenter.count > 0
-        title: I18n.tr("notif.clear")
-        onClicked: NotificationCenter.clearAll()
+    // Footer: clear everything (a real button), the settings.
+    Item {
+        width: parent.width
+        implicitHeight: 34
+
+        CardParts.SmallButton {
+            visible: NotificationCenter.count > 0
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            text: I18n.tr("notif.clear")
+            onTapped: NotificationCenter.clearAll()
+        }
+    }
+
+    CardParts.Footer {
+        page: "notifications"
+        pageName: I18n.tr("settings.page.notifications")
+        hints: I18n.tr("card.hintsNotifications")
     }
 }

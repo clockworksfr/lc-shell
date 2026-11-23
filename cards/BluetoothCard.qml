@@ -82,7 +82,7 @@ Column {
     CardParts.Line {
         visible: BluetoothService.enabled
         icon: "bluetooth_searching"
-        title: I18n.tr(root.scanning ? "bt.searching" : "card.search")
+        title: I18n.tr(root.scanning ? "bt.searching" : "card.newDevices")
         sub: root.scanning ? I18n.tr("card.found", { n: root.found.length }) : I18n.tr("card.searchSub")
         active: root.scanning
         control: "button"

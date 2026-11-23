@@ -131,4 +131,8 @@ Column {
             }
         }
     }
+
+    CardParts.Footer {
+        hints: I18n.tr("card.hintsWorkspaces")
+    }
 }

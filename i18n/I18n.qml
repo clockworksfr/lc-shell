@@ -32,6 +32,9 @@ Singleton {
     readonly property var locale: Qt.locale(Config.data.locale ?? (language === "fr" ? "fr_FR" : "en_US"))
 
     function tr(key: string, args: var): string {
+        // Plurals: "<key>.one" for one (French: 0 and 1), when it exists.
+        if (args && typeof args.n === "number" && (language === "fr" ? args.n <= 1 : args.n === 1) && has(`${key}.one`))
+            key = `${key}.one`;
         let text = (tables[language] ?? {})[key] ?? (tables.en ?? {})[key] ?? key;
         if (args) {
             for (const name in args)

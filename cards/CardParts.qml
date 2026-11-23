@@ -112,10 +112,21 @@ QtObject {
         implicitHeight: 44
         opacity: dimmed ? 0.55 : 1
 
-        // Radio lines: a click anywhere picks.
+        // Radio lines: a click anywhere picks (a tint under the pointer).
+        Rectangle {
+            anchors.fill: parent
+            anchors.leftMargin: -6
+            anchors.rightMargin: -6
+            radius: 8
+            visible: line.control === "radio" && lineArea.containsMouse
+            color: line.theme.color.surface2
+        }
+
         MouseArea {
+            id: lineArea
             anchors.fill: parent
             enabled: line.control === "radio"
+            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: line.pressed()
         }
@@ -349,6 +360,52 @@ QtObject {
             color: gauge.low ? gauge.theme.color.urgent : gauge.theme.color.soft
             font.pixelSize: 12
             font.features: ({ "tnum": 1 })
+        }
+    }
+
+    // A fold line: "Other outputs (5)" with a chevron.
+    component More: Item {
+        id: more
+
+        readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
+        property string text
+        property bool open: false
+
+        signal toggled
+
+        width: parent?.width ?? 0
+        implicitHeight: 30
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 6
+            color: moreArea.containsMouse ? more.theme.color.surface2 : "transparent"
+        }
+
+        Icon {
+            id: chevron
+            x: 6
+            anchors.verticalCenter: parent.verticalCenter
+            name: more.open ? "expand_less" : "expand_more"
+            size: 18
+            color: more.theme.color.soft
+        }
+
+        ThemedText {
+            anchors.left: chevron.right
+            anchors.leftMargin: 14
+            anchors.verticalCenter: parent.verticalCenter
+            text: more.text
+            color: more.theme.color.soft
+            font.pixelSize: 12
+        }
+
+        MouseArea {
+            id: moreArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: more.toggled()
         }
     }
 

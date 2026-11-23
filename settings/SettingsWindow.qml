@@ -97,7 +97,10 @@ PanelWindow {
             }
 
             Column {
-                anchors.fill: parent
+                id: sideHead
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
                 anchors.margins: win.theme.space.m
                 spacing: win.theme.space.xs
 
@@ -120,12 +123,29 @@ PanelWindow {
                     }
                 }
 
-                Item {
-                    width: 1
-                    height: win.theme.space.xs
-                }
+            }
 
-                // Search results (the query is set) or the pages.
+            // Search results (the query is set) or the pages, scrolling
+            // when they don't fit; filets between groups of pages.
+            Flickable {
+                id: navFlick
+                anchors.top: sideHead.bottom
+                anchors.topMargin: win.theme.space.s
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.leftMargin: win.theme.space.m
+                anchors.rightMargin: win.theme.space.m
+                anchors.bottomMargin: win.theme.space.s
+                contentHeight: navList.implicitHeight
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+
+            Column {
+                id: navList
+                width: parent.width
+                spacing: win.theme.space.xs
+
                 ThemedText {
                     visible: !!sidebar.query.trim() && !sidebar.results.length
                     width: parent.width
@@ -137,16 +157,37 @@ PanelWindow {
                 Repeater {
                     model: sidebar.query.trim() ? sidebar.results : Settings.pages
 
-                    NavRow {
+                    // First page of a group: a filet above it.
+                    Item {
+                        id: navItem
                         required property var modelData
                         readonly property bool result: typeof modelData === "object"
-                        icon: result ? Settings.icons[modelData.page] : Settings.icons[modelData]
-                        title: result ? I18n.tr(modelData.key) : I18n.tr(`settings.page.${modelData}`)
-                        subtitle: result ? I18n.tr(`settings.page.${modelData.page}`) : ""
-                        selected: !result && Settings.page === modelData
-                        onClicked: result ? Settings.show(modelData.page, modelData.key) : Settings.page = modelData
+                        readonly property bool groupStart: !result && ["notifications", "clipboard", "system"].includes(modelData)
+
+                        width: parent.width
+                        height: navRow.height + (groupStart ? win.theme.space.s * 2 + 1 : 0)
+
+                        Rectangle {
+                            visible: navItem.groupStart
+                            x: win.theme.space.s
+                            width: parent.width - win.theme.space.s * 2
+                            height: 1
+                            y: win.theme.space.s
+                            color: win.theme.color.line
+                        }
+
+                        NavRow {
+                            id: navRow
+                            y: navItem.groupStart ? win.theme.space.s * 2 + 1 : 0
+                            icon: navItem.result ? Settings.icons[navItem.modelData.page] : Settings.icons[navItem.modelData]
+                            title: navItem.result ? I18n.tr(navItem.modelData.key) : I18n.tr(`settings.page.${navItem.modelData}`)
+                            subtitle: navItem.result ? I18n.tr(`settings.page.${navItem.modelData.page}`) : ""
+                            selected: !navItem.result && Settings.page === navItem.modelData
+                            onClicked: navItem.result ? Settings.show(navItem.modelData.page, navItem.modelData.key) : Settings.page = navItem.modelData
+                        }
                     }
                 }
+            }
             }
         }
 

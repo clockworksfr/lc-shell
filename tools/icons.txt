@@ -49,6 +49,7 @@ do_not_disturb_on
 download
 drag_indicator
 edit
+expand_less
 expand_more
 filter_list
 foggy

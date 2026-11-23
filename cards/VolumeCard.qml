@@ -25,6 +25,19 @@ Column {
         return n.includes("head") || n.includes("casque") || n.includes("bluez") ? "headphones" : n.includes("hdmi") ? "monitor" : "speaker";
     }
 
+    // The other devices fold under a line (the card stays short).
+    property bool moreOutputs: false
+    property bool moreInputs: false
+    Connections {
+        target: root.QsWindow.window
+        function onPhaseChanged(): void {
+            if (root.QsWindow.window?.phase === "") {
+                root.moreOutputs = false;
+                root.moreInputs = false;
+            }
+        }
+    }
+
     spacing: 4
 
     CardParts.Header {
@@ -47,7 +60,7 @@ Column {
     }
 
     Repeater {
-        model: Audio.sinks
+        model: root.moreOutputs ? Audio.sinks : Audio.sinks.filter(n => n === Audio.sink)
 
         CardParts.Line {
             required property PwNode modelData
@@ -60,6 +73,13 @@ Column {
             checked: modelData === Audio.sink
             onPressed: Audio.setDefaultSink(modelData)
         }
+    }
+
+    CardParts.More {
+        visible: Audio.sinks.length > 1
+        open: root.moreOutputs
+        text: I18n.tr(root.moreOutputs ? "card.lessDevices" : "card.moreOutputs", { n: Audio.sinks.length - 1 })
+        onToggled: root.moreOutputs = !root.moreOutputs
     }
 
     CardParts.Sub {
@@ -129,9 +149,16 @@ Column {
         }
     }
 
-    // Other inputs, when there is a choice.
+    // Other inputs, when there is a choice (folded).
+    CardParts.More {
+        visible: Audio.sources.length > 1
+        open: root.moreInputs
+        text: I18n.tr(root.moreInputs ? "card.lessDevices" : "card.moreInputs", { n: Audio.sources.length - 1 })
+        onToggled: root.moreInputs = !root.moreInputs
+    }
+
     Repeater {
-        model: Audio.sources.length > 1 ? Audio.sources : []
+        model: root.moreInputs && Audio.sources.length > 1 ? Audio.sources : []
 
         CardParts.Line {
             required property PwNode modelData
