@@ -25,16 +25,91 @@ Grid {
 
     // "stars" draws like "dots", with a star for the active workspace.
     readonly property bool stars: theme.style.workspaces === "stars"
-    readonly property bool dots: theme.style.workspaces === "dots" || stars
+    readonly property bool dots: theme.style.workspaces === "dots" || theme.style.workspaces === "numbered" || stars
+    // "numbered" (Matrix): a dot and its number per workspace, empty ones
+    // in between (and up to five) shown dim; dots only on a vertical bar.
+    readonly property bool numbered: theme.style.workspaces === "numbered" && !vertical
+    readonly property var numberedIds: {
+        const ids = workspaces.map(ws => ws.id);
+        if (!ids.length)
+            return [];
+        const first = Math.min(...ids);
+        const last = Math.max(Math.max(...ids), first + 4);
+        return Array.from({ length: last - first + 1 }, (_, i) => first + i);
+    }
     readonly property int cell: (crossSize > 0 ? crossSize : theme.bar.height - theme.space.s)
 
-    columns: vertical ? 1 : Math.max(1, workspaces.length)
-    spacing: dots ? theme.space.s : theme.space.xs
+    columns: vertical ? 1 : Math.max(1, numbered ? numberedIds.length : workspaces.length)
+    spacing: numbered ? 14 : dots ? theme.space.s : theme.space.xs
     horizontalItemAlignment: Grid.AlignHCenter
     verticalItemAlignment: Grid.AlignVCenter
 
     Repeater {
-        model: root.workspaces
+        model: root.numbered ? root.numberedIds : []
+
+        Row {
+            id: numberedItem
+
+            required property int modelData
+            readonly property var ws: root.workspaces.find(w => w.id === modelData) ?? null
+            readonly property bool active: ws?.active ?? false
+            readonly property color ink: ws?.urgent ? root.theme.color.urgent
+                : active ? root.theme.color.accent
+                : ws ? root.theme.color.ink
+                : root.theme.color.line
+
+            spacing: 6
+
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: numberedItem.active ? 13 : 6
+                height: 6
+                radius: 3
+                color: numberedItem.ink
+
+                // The active dot glows where the theme glows (Matrix in dark).
+                layer.enabled: numberedItem.active && Qt.color(root.theme.color.glow ?? "#00000000").a > 0
+                layer.effect: MultiEffect {
+                    autoPaddingEnabled: true
+                    shadowEnabled: true
+                    shadowColor: root.theme.color.glow ?? "transparent"
+                    shadowBlur: 0.9
+                    blurMax: 14
+                    shadowHorizontalOffset: 0
+                    shadowVerticalOffset: 0
+                }
+
+                Behavior on width {
+                    NumberAnimation {
+                        duration: root.theme.motion.duration
+                        easing.type: Easing.OutCubic
+                    }
+                }
+            }
+
+            ThemedText {
+                anchors.verticalCenter: parent.verticalCenter
+                text: numberedItem.modelData
+                color: numberedItem.ink
+                font.family: root.theme.font.mono
+                font.pixelSize: 12
+                font.weight: numberedItem.active ? Font.Bold : Font.Normal
+            }
+
+            MouseArea {
+                width: parent.width + 12
+                height: Math.max(parent.height, root.theme.hit)
+                x: -6
+                y: (parent.height - height) / 2
+                cursorShape: Qt.PointingHandCursor
+                onClicked: Hyprland.dispatch(`hl.dsp.focus({ workspace = ${numberedItem.modelData} })`)
+                onWheel: wheel => Hyprland.dispatch(`hl.dsp.focus({ workspace = "${wheel.angleDelta.y > 0 ? "m-1" : "m+1"}" })`)
+            }
+        }
+    }
+
+    Repeater {
+        model: root.numbered ? [] : root.workspaces
 
         Rectangle {
             id: item

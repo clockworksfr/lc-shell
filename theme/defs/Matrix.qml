@@ -103,7 +103,8 @@ Singleton {
                 // Matrix statuses are text (label over value), no icons.
                 statusIcons: false,
                 appIcons: "mono",
-                workspaces: "dots",
+                // Dots with their number, empty ones dim (as in the mockup).
+                workspaces: "numbered",
                 module: "matrix",
                 cover: "disc",
                 ring: "dots",
