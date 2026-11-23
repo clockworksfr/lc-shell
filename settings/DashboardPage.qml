@@ -87,12 +87,13 @@ Column {
             model: root.assigned
 
             Field {
+                id: wsField
                 required property string modelData
                 label: I18n.tr("settings.dashboardWorkspace", { name: modelData })
                 Choice {
                     model: [{ value: "", label: I18n.tr("settings.dashboardNone") }, ...root.presetNames.map(p => ({ value: p, label: p }))]
-                    value: Dashboard.workspaces[parent.modelData] ?? ""
-                    onPicked: value => root.assign(parent.modelData, value)
+                    value: Dashboard.workspaces[wsField.modelData] ?? ""
+                    onPicked: value => root.assign(wsField.modelData, value)
                 }
             }
         }
@@ -103,7 +104,8 @@ Column {
             label: I18n.tr("settings.dashboardAdd")
             hint: I18n.tr("settings.dashboardAddHint")
             Choice {
-                model: Array.from({ length: 10 }, (_, i) => `${i + 1}`).filter(ws => !root.assigned.includes(ws)).map(ws => ({ value: ws, label: I18n.tr("settings.dashboardWorkspace", { name: ws }) }))
+                // Workspace numbers (short: the row stays in the window).
+                model: Array.from({ length: 10 }, (_, i) => `${i + 1}`).filter(ws => !root.assigned.includes(ws)).map(ws => ({ value: ws, label: ws }))
                 value: ""
                 onPicked: value => root.assign(value, root.presetNames[0])
             }

@@ -168,7 +168,7 @@
   "settings.language.auto": "System",
   "settings.dashboard": "Dashboard",
   "settings.dashboardWindows": "Place windows in window cells",
-  "settings.dashboardWindowsHint": "Windows on module screens float into the page's window cells",
+  "settings.dashboardWindowsHint": "Windows of a workspace whose dashboard has window cells go into them",
   "lock.password": "Password",
   "lock.checking": "Checking…",
   "lock.failed": "Wrong password",

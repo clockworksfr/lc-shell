@@ -168,7 +168,7 @@
   "settings.language.auto": "Système",
   "settings.dashboard": "Tableau de bord",
   "settings.dashboardWindows": "Ranger les fenêtres dans les cases",
-  "settings.dashboardWindowsHint": "Les fenêtres des écrans modules flottent dans les cases fenêtre de la page",
+  "settings.dashboardWindowsHint": "Les fenêtres d'un espace dont le tableau de bord a des cases fenêtre s'y rangent",
   "lock.password": "Mot de passe",
   "lock.checking": "Vérification…",
   "lock.failed": "Mot de passe incorrect",
