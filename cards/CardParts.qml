@@ -96,7 +96,7 @@ QtObject {
         property string sub
         property bool active: false
         property bool dimmed: false
-        // "switch" | "button" | "text" | ""
+        // "switch" | "button" | "text" | "radio" (the whole line picks) | ""
         property string control: ""
         property bool checked: false
         property string buttonText
@@ -111,6 +111,14 @@ QtObject {
         width: parent?.width ?? 0
         implicitHeight: 44
         opacity: dimmed ? 0.55 : 1
+
+        // Radio lines: a click anywhere picks.
+        MouseArea {
+            anchors.fill: parent
+            enabled: line.control === "radio"
+            cursorShape: Qt.PointingHandCursor
+            onClicked: line.pressed()
+        }
 
         Rectangle {
             id: bubble
@@ -211,6 +219,26 @@ QtObject {
                 anchors.verticalCenter: parent.verticalCenter
                 text: line.buttonText
                 onTapped: line.pressed()
+            }
+
+            Rectangle {
+                visible: line.control === "radio"
+                anchors.verticalCenter: parent.verticalCenter
+                width: 18
+                height: 18
+                radius: 9
+                color: "transparent"
+                border.width: 1.5
+                border.color: line.checked ? (line.look === "matrix" ? line.theme.color.ink : line.theme.color.accent) : line.theme.color.line
+
+                Rectangle {
+                    visible: line.checked
+                    anchors.centerIn: parent
+                    width: 8
+                    height: 8
+                    radius: 4
+                    color: line.look === "matrix" ? line.theme.color.ink : line.theme.color.accent
+                }
             }
 
             HueParts.Switch {
@@ -319,6 +347,96 @@ QtObject {
             anchors.verticalCenter: parent.verticalCenter
             text: I18n.percent(gauge.level)
             color: gauge.low ? gauge.theme.color.urgent : gauge.theme.color.soft
+            font.pixelSize: 12
+            font.features: ({ "tnum": 1 })
+        }
+    }
+
+    // A small section title (mono capitals).
+    component Sub: ThemedText {
+        readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
+        topPadding: 6
+        font.family: theme.font.mono
+        font.pixelSize: 10
+        font.letterSpacing: 0.8
+        font.capitalization: Font.AllUppercase
+        color: theme.color.soft
+    }
+
+    // A level: round icon (click: `iconTapped`), optional name, the theme's
+    // slider, the value.
+    component Level: Item {
+        id: level
+
+        readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
+        property string icon
+        property string name
+        property real value: 0
+        property real to: 1
+        property bool muted: false
+        property string valueText: muted ? I18n.tr("common.muted") : I18n.percent(value)
+
+        signal moved(real value)
+        signal iconTapped
+
+        width: parent?.width ?? 0
+        implicitHeight: 40
+
+        Rectangle {
+            id: levelIcon
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            width: 30
+            height: 30
+            radius: level.theme.style.module === "facade" || level.theme.style.module === "modulaire" ? 5 : 15
+            color: level.theme.color.surface2
+
+            Icon {
+                anchors.centerIn: parent
+                name: level.icon
+                size: 18
+                color: level.muted ? level.theme.color.soft : level.theme.color.ink
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: level.iconTapped()
+            }
+        }
+
+        ThemedText {
+            id: levelName
+            visible: !!level.name
+            anchors.left: levelIcon.right
+            anchors.leftMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            width: visible ? Math.min(implicitWidth, level.width * 0.3) : 0
+            text: level.name
+            font.pixelSize: 12
+            elide: Text.ElideRight
+        }
+
+        Slider {
+            anchors.left: levelName.visible ? levelName.right : levelIcon.right
+            anchors.leftMargin: 10
+            anchors.right: levelValue.left
+            anchors.rightMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            value: level.value
+            to: level.to
+            dimmed: level.muted
+            onMoved: v => level.moved(v)
+        }
+
+        ThemedText {
+            id: levelValue
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            width: 44
+            horizontalAlignment: Text.AlignRight
+            text: level.valueText
+            color: level.muted ? level.theme.color.soft : level.theme.color.ink
             font.pixelSize: 12
             font.features: ({ "tnum": 1 })
         }

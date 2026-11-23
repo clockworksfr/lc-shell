@@ -6,8 +6,8 @@ import qs.i18n
 import qs.services
 import qs.theme
 
-// Output device (pickable) and volume, per-application volumes, input
-// device (pickable) and its live level.
+// Sound (status widgets mockup): volume, outputs (radio lines),
+// per-application volumes, input (level, live meter, devices).
 Column {
     id: root
 
@@ -15,104 +15,134 @@ Column {
     property ShellScreen screen
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
 
-    spacing: theme.space.m
-
-    // Output: current device (tap to pick another), volume.
-    DevicePicker {
-        width: parent.width
-        icon: "speaker"
-        devices: Audio.sinks
-        current: Audio.sink
-        trailing: Audio.muted ? I18n.tr("common.muted") : I18n.percent(Audio.volume)
-        trailingColor: Audio.muted ? root.theme.color.soft : root.theme.color.ink
-        onPicked: node => Audio.setDefaultSink(node)
+    // "Bluetooth", "HDMI", "USB" from the node's name.
+    function kindOf(node: PwNode): string {
+        const n = (node?.name ?? "").toLowerCase();
+        return n.includes("bluez") ? "Bluetooth" : n.includes("hdmi") ? "HDMI" : n.includes("usb") ? "USB" : "";
+    }
+    function iconOf(node: PwNode): string {
+        const n = `${node?.name ?? ""} ${Audio.nodeName(node)}`.toLowerCase();
+        return n.includes("head") || n.includes("casque") || n.includes("bluez") ? "headphones" : n.includes("hdmi") ? "monitor" : "speaker";
     }
 
-    Slider {
-        width: parent.width
+    spacing: 4
+
+    CardParts.Header {
+        title: I18n.tr("settings.page.sound")
+        status: Audio.muted ? I18n.tr("common.muted") : `${Audio.sinkName} · ${I18n.percent(Audio.volume)}`
+        switchShown: false
+    }
+
+    CardParts.Level {
+        icon: Audio.muted ? "volume_off" : "volume_up"
         value: Audio.volume
         to: Audio.maxVolume
-        dimmed: Audio.muted
-        onMoved: value => Audio.setVolume(value)
+        muted: Audio.muted
+        onMoved: v => Audio.setVolume(v)
+        onIconTapped: Audio.toggleMute()
     }
 
-    ThemedText {
+    CardParts.Sub {
+        text: I18n.tr("soundset.output")
+    }
+
+    Repeater {
+        model: Audio.sinks
+
+        CardParts.Line {
+            required property PwNode modelData
+
+            icon: root.iconOf(modelData)
+            title: Audio.nodeName(modelData)
+            sub: root.kindOf(modelData)
+            active: modelData === Audio.sink
+            control: "radio"
+            checked: modelData === Audio.sink
+            onPressed: Audio.setDefaultSink(modelData)
+        }
+    }
+
+    CardParts.Sub {
+        visible: Audio.appStreams.length > 0
         text: I18n.tr("card.apps")
-        label: true
-        color: root.theme.color.soft
-    }
-
-    ThemedText {
-        visible: Audio.appStreams.length === 0
-        text: I18n.tr("card.noApps")
-        color: root.theme.color.soft
-        font.pixelSize: root.theme.font.sizeS
     }
 
     Repeater {
         model: Audio.appStreams
 
-        Row {
+        CardParts.Level {
             required property PwNode modelData
 
-            width: root.width
-            spacing: root.theme.space.s
-
-            ThemedText {
-                width: parent.width * 0.38
-                anchors.verticalCenter: parent.verticalCenter
-                text: Audio.streamName(parent.modelData)
-                font.pixelSize: root.theme.font.sizeS
-                elide: Text.ElideRight
+            icon: "music_note"
+            name: Audio.streamName(modelData)
+            value: modelData.audio?.volume ?? 0
+            muted: modelData.audio?.muted ?? false
+            onMoved: v => {
+                if (modelData.audio)
+                    modelData.audio.volume = v;
             }
+            onIconTapped: {
+                if (modelData.audio)
+                    modelData.audio.muted = !modelData.audio.muted;
+            }
+        }
+    }
 
-            Slider {
-                width: parent.width * 0.62 - parent.spacing
-                value: parent.modelData.audio?.volume ?? 0
-                dimmed: parent.modelData.audio?.muted ?? false
-                onMoved: value => {
-                    if (parent.modelData.audio)
-                        parent.modelData.audio.volume = value;
+    CardParts.Sub {
+        text: I18n.tr("soundset.input")
+    }
+
+    CardParts.Level {
+        icon: Audio.sourceMuted ? "mic_off" : "mic"
+        value: Audio.sourceVolume
+        muted: Audio.sourceMuted
+        onMoved: v => Audio.setSourceVolume(v)
+        onIconTapped: Audio.toggleSourceMute()
+    }
+
+    // Live input level, under the slider.
+    Item {
+        width: parent.width
+        height: 10
+
+        Rectangle {
+            x: 40
+            width: parent.width - 40 - 54
+            height: 4
+            radius: 2
+            anchors.verticalCenter: parent.verticalCenter
+            color: root.theme.color.surface2
+
+            Rectangle {
+                readonly property real peak: mic.peak > 0 ? Math.max(0, Math.min(1, (20 * Math.log10(mic.peak) + 60) / 60)) : 0
+                width: parent.width * peak
+                height: parent.height
+                radius: parent.radius
+                color: root.theme.color.ok
+
+                Behavior on width {
+                    NumberAnimation {
+                        duration: 80
+                    }
                 }
             }
         }
     }
 
-    ThemedText {
-        text: I18n.tr("card.microphone")
-        label: true
-        color: root.theme.color.soft
-    }
+    // Other inputs, when there is a choice.
+    Repeater {
+        model: Audio.sources.length > 1 ? Audio.sources : []
 
-    // Input: current device (tap to pick another), live level.
-    DevicePicker {
-        width: parent.width
-        icon: Audio.sourceMuted ? "mic_off" : "mic"
-        devices: Audio.sources
-        current: Audio.source
-        trailing: Audio.sourceMuted ? I18n.tr("common.muted") : I18n.percent(Audio.sourceVolume)
-        trailingColor: Audio.sourceMuted ? root.theme.color.soft : root.theme.color.ink
-        onPicked: node => Audio.setDefaultSource(node)
-    }
+        CardParts.Line {
+            required property PwNode modelData
 
-    Rectangle {
-        width: parent.width
-        height: 6
-        radius: root.theme.radius.full
-        color: root.theme.color.surface2
-
-        Rectangle {
-            readonly property real peak: mic.peak > 0 ? Math.max(0, Math.min(1, (20 * Math.log10(mic.peak) + 60) / 60)) : 0
-            width: parent.width * peak
-            height: parent.height
-            radius: parent.radius
-            color: root.theme.color.ok
-
-            Behavior on width {
-                NumberAnimation {
-                    duration: 80
-                }
-            }
+            icon: "mic"
+            title: Audio.nodeName(modelData)
+            sub: root.kindOf(modelData)
+            active: modelData === Audio.source
+            control: "radio"
+            checked: modelData === Audio.source
+            onPressed: Audio.setDefaultSource(modelData)
         }
     }
 
@@ -120,6 +150,11 @@ Column {
         id: mic
         node: Audio.sourceMuted ? null : Audio.source
         enabled: !Audio.sourceMuted
+    }
+
+    Item {
+        width: 1
+        height: 4
     }
 
     CardParts.Footer {
