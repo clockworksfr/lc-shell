@@ -18,7 +18,9 @@ Item {
     property string fontFamily: theme.font.family
     property real labelSize: 11
 
-    readonly property var steps: Weather.nowcast.filter(q => q.time - Date.now() < 3600 * 1000)
+    // How far ahead (ms): the hour, or two on big weather modules.
+    property real horizon: 3600 * 1000
+    readonly property var steps: Weather.nowcast.filter(q => q.time - Date.now() < horizon)
     readonly property real start: steps.length ? steps[0].time : 0
     // The last step lasts as long as the one before it.
     readonly property real end: steps.length > 1 ? steps[steps.length - 1].time * 2 - steps[steps.length - 2].time : start + 900 * 1000

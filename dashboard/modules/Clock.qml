@@ -8,7 +8,10 @@ import qs.theme
 // Time and date, by shape: tiny = time; narrow = hours over minutes;
 // wide = time left, day / date / week right (+ the week strip when tall
 // enough); box / tall = time, date, the week (the month when roomy);
-// strip = one line. In modulaire, the time sits in an amber LCD window. Options: format ("HH:mm").
+// strip = one line. In modulaire, the time sits in an amber LCD window.
+// Big cells (tiers large / poster): the time, day, date, week, day of
+// the year and the year's progress left, the month in a zone right
+// (poster: the next two months under the time). Options: format ("HH:mm").
 ModuleBase {
     id: root
 
@@ -16,6 +19,8 @@ ModuleBase {
     readonly property string format: options.format ?? "HH:mm"
     readonly property string time: I18n.locale.toString(now, format)
     readonly property bool roomy: (shape === "box" || shape === "tall") && ch >= 360 && cw >= 520
+    readonly property int dayOfYear: Math.round((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - new Date(now.getFullYear(), 0, 1)) / 86400000) + 1
+    readonly property int daysInYear: new Date(now.getFullYear(), 1, 29).getMonth() === 1 ? 366 : 365
 
     // Width of a figure of `n` characters at size 1 (display fonts ~0.62).
     function perChar(n: int): real {
@@ -44,7 +49,7 @@ ModuleBase {
 
     // tiny: the time alone, centered.
     Figure {
-        visible: root.shape === "tiny"
+        visible: root.shape === "tiny" && !root.large
         anchors.centerIn: parent
         text: root.time
         inDisplay: true
@@ -53,7 +58,7 @@ ModuleBase {
 
     // narrow: hours over minutes, date under.
     Column {
-        visible: root.shape === "narrow"
+        visible: root.shape === "narrow" && !root.large
         anchors.centerIn: parent
         spacing: root.gap / 2
 
@@ -80,7 +85,7 @@ ModuleBase {
 
     // wide / strip: time left, the rest right (strip: on one line).
     Item {
-        visible: root.shape === "wide" || root.shape === "strip"
+        visible: (root.shape === "wide" || root.shape === "strip") && !root.large
         anchors.fill: parent
 
         Figure {
@@ -155,7 +160,7 @@ ModuleBase {
 
     // box / tall: time, date, the week (or the month when roomy).
     Column {
-        visible: root.shape === "box" || root.shape === "tall"
+        visible: (root.shape === "box" || root.shape === "tall") && !root.large
         // Centered when its content is shorter than the cell (no empty
         // band on top); the month fills the rest when roomy.
         anchors.left: parent.left
@@ -208,6 +213,140 @@ ModuleBase {
             visible: root.roomy
             width: parent.width
             height: Math.max(120, root.inner.height - y)
+        }
+    }
+
+    // Big cells: the time and the date left, the month right (below when
+    // the cell is tall).
+    Item {
+        id: big
+
+        readonly property bool stacked: root.ratio < 1.15
+        visible: root.large
+        anchors.fill: parent
+
+        Column {
+            id: bigLeft
+
+            width: big.stacked ? parent.width : Math.round(parent.width * (root.poster ? 0.44 : 0.42))
+            spacing: root.gap
+            // Large: centered against the month; poster: on top (the next
+            // months under it).
+            y: root.poster || big.stacked ? 0 : Math.max(0, (parent.height - height) / 2)
+
+            Figure {
+                text: root.time
+                inDisplay: true
+                pixelSize: Math.min(root.heroMax, bigLeft.width * root.perChar(root.time.length)) * root.hk
+            }
+
+            SecondDots {
+                m: root
+            }
+
+            Column {
+                width: parent.width
+                spacing: Math.round(root.gap * 0.3)
+
+                DayName {
+                    m: root
+                    width: parent.width
+                }
+
+                ThemedText {
+                    width: parent.width
+                    elide: Text.ElideRight
+                    text: I18n.locale.toString(root.now, I18n.tr("format.dateNoDay"))
+                    font.pixelSize: root.t3
+                    color: root.theme.color.soft
+                }
+
+                ThemedText {
+                    width: parent.width
+                    elide: Text.ElideRight
+                    label: true
+                    text: `${I18n.tr("clock.week", { n: root.week(root.now) })} · ${I18n.tr("clock.dayOfYear", { n: root.dayOfYear, total: root.daysInYear })}`
+                    font.pixelSize: root.t4
+                    color: root.theme.color.soft
+                }
+            }
+
+            // The year's progress.
+            Column {
+                width: parent.width
+                spacing: Math.round(root.gap * 0.4)
+
+                Rectangle {
+                    width: parent.width
+                    height: Math.max(6, Math.round(root.t4 * 0.45))
+                    radius: height / 2
+                    color: root.theme.color.surface2
+
+                    Rectangle {
+                        width: parent.width * root.dayOfYear / root.daysInYear
+                        height: parent.height
+                        radius: parent.radius
+                        color: root.theme.color.signal ?? root.theme.color.accent
+                    }
+                }
+
+                ThemedText {
+                    label: true
+                    text: I18n.tr("clock.yearProgress", { value: I18n.tr("format.percent", { value: Math.round(root.dayOfYear / root.daysInYear * 100) }) })
+                    font.pixelSize: root.t4
+                    color: root.theme.color.soft
+                }
+            }
+        }
+
+        // Poster: the next two months, small, under the time.
+        Row {
+            id: nextMonths
+
+            visible: root.poster && !big.stacked
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            width: bigLeft.width
+            height: Math.max(0, parent.height - bigLeft.height - root.gap * 2)
+            spacing: root.gap
+
+            Repeater {
+                model: nextMonths.visible && nextMonths.height > 200 ? 2 : 0
+
+                ModuleZone {
+                    id: nextZone
+                    required property int index
+                    width: (nextMonths.width - nextMonths.spacing) / 2
+                    height: nextMonths.height
+                    label: I18n.locale.toString(new Date(root.now.getFullYear(), root.now.getMonth() + index + 1, 1), "MMMM yyyy")
+                    labelSize: root.t4
+                    gap: root.gap
+
+                    MonthGrid {
+                        m: root
+                        offset: nextZone.index + 1
+                        width: parent.width
+                        height: parent.height
+                    }
+                }
+            }
+        }
+
+        ModuleZone {
+            x: big.stacked ? 0 : bigLeft.width + root.gap * 1.5
+            y: big.stacked ? bigLeft.height + root.gap * 1.5 : 0
+            width: parent.width - x
+            height: parent.height - y
+            label: I18n.locale.toString(root.now, "MMMM yyyy")
+            labelSize: root.t4
+            gap: root.gap
+
+            MonthGrid {
+                m: root
+                boost: root.poster ? 1.3 : 1.15
+                width: parent.width
+                height: parent.height
+            }
         }
     }
 
@@ -312,16 +451,20 @@ ModuleBase {
         id: month
 
         property var m
+        // Months after the current one (0: this month, today lit).
+        property int offset: 0
+        // Day figures bigger than t3 × 1.1 (big cells).
+        property real boost: 1
 
-        readonly property date first: new Date(month.m.now.getFullYear(), month.m.now.getMonth(), 1)
+        readonly property date first: new Date(month.m.now.getFullYear(), month.m.now.getMonth() + offset, 1)
         readonly property date start: month.m.monday(first)
-        readonly property int weeks: Math.ceil(((first.getDay() + 6) % 7 + new Date(month.m.now.getFullYear(), month.m.now.getMonth() + 1, 0).getDate()) / 7)
+        readonly property int weeks: Math.ceil(((first.getDay() + 6) % 7 + new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate()) / 7)
         // A narrow week-number column and a short header row leave the
         // days more room.
         readonly property real weekW: Math.max(month.m.t4 * 2, width * 0.075)
         readonly property real dayW: (width - weekW) / 7
         readonly property real rowH: height / (weeks + 0.7)
-        readonly property real daySize: Math.max(11, Math.min(month.m.t3 * 1.1, rowH * 0.62, dayW * 0.5))
+        readonly property real daySize: Math.max(11, Math.min(month.m.t3 * 1.1 * boost, rowH * 0.62, dayW * 0.5))
 
         columns: 8
 
@@ -337,7 +480,7 @@ ModuleBase {
                 readonly property date day: new Date(month.start.getTime() + (row * 7 + col) * 86400000 + 3600000)
                 readonly property bool header: row < 0
                 readonly property bool weekCol: col < 0
-                readonly property bool inMonth: day.getMonth() === month.m.now.getMonth()
+                readonly property bool inMonth: day.getMonth() === month.first.getMonth()
                 readonly property bool today: !header && !weekCol && day.toDateString() === month.m.now.toDateString()
 
                 width: weekCol ? month.weekW : month.dayW

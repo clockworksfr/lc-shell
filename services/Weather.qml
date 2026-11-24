@@ -236,7 +236,7 @@ Singleton {
             return;
         const p = location;
         const units = imperial ? "&temperature_unit=fahrenheit&wind_speed_unit=mph" : "";
-        fetch.command = ["curl", "-fsS", "--max-time", "15", `https://api.open-meteo.com/v1/forecast?latitude=${p.latitude}&longitude=${p.longitude}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,relative_humidity_2m,pressure_msl,is_day&minutely_15=precipitation&forecast_minutely_15=8&hourly=temperature_2m,precipitation_probability,weather_code,is_day&forecast_hours=13&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&forecast_days=6&timeformat=unixtime&timezone=auto${units}`];
+        fetch.command = ["curl", "-fsS", "--max-time", "15", `https://api.open-meteo.com/v1/forecast?latitude=${p.latitude}&longitude=${p.longitude}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,relative_humidity_2m,pressure_msl,is_day&minutely_15=precipitation&forecast_minutely_15=8&hourly=temperature_2m,precipitation_probability,weather_code,is_day&forecast_hours=13&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&forecast_days=7&timeformat=unixtime&timezone=auto${units}`];
         fetch.running = true;
     }
 

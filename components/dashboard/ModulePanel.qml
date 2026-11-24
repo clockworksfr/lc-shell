@@ -17,14 +17,17 @@ Item {
     property string title
     // Room kept on the right of the title row (a chip there).
     property real titleReserve: 0
+    // Size tier (ModuleBase): bigger title, row and corners on big cells.
+    property string tier: "normal"
+    readonly property real tierScale: tier === "poster" ? 1.6 : tier === "large" ? 1.3 : 1
     readonly property bool titled: !!title && height > 200
-    readonly property real titleHeight: titled ? titleText.implicitHeight + 6 : 0
+    readonly property real titleHeight: !titled ? 0 : tier === "poster" ? 48 : tier === "large" ? 38 : titleText.implicitHeight + 6
 
     Rectangle {
         id: face
 
         anchors.fill: parent
-        radius: root.look === "matrix" ? 28 : root.look === "facade" || root.look === "modulaire" ? root.theme.radius.card : root.theme.radius.card
+        radius: (root.look === "matrix" ? 28 : root.theme.radius.card) * root.tierScale
         color: root.theme.color.surface
         border.width: root.look === "facade" ? 2 : root.theme.border.width
         border.color: root.look === "constellation" ? Qt.alpha(root.theme.color.accent, 0.35) : root.theme.color.line
@@ -146,13 +149,13 @@ Item {
         width: Math.min(implicitWidth, parent.width - 36 - root.titleReserve)
         elide: Text.ElideRight
         // Modulaire: centered, but never under a chip on the right.
-        x: root.look === "modulaire" ? Math.max(18, Math.min((parent.width - width) / 2, parent.width - root.titleReserve - 10 - width)) : 18
-        y: 10
+        x: root.look === "modulaire" ? Math.max(18, Math.min((parent.width - width) / 2, parent.width - root.titleReserve - 10 - width)) : 18 * root.tierScale
+        y: 10 * root.tierScale
         label: true
         text: root.title
         font.family: root.look === "modulaire" ? root.theme.font.mono : root.theme.font.family
         // The same size on every module (Michroma is wide: a bit smaller).
-        font.pixelSize: root.look === "modulaire" ? 12 : 14
+        font.pixelSize: (root.look === "modulaire" ? 12 : 14) + (root.tier === "poster" ? (root.look === "modulaire" ? 4 : 5) : root.tier === "large" ? 2 : 0)
         font.letterSpacing: 1.5
         color: root.look === "facade" ? (root.theme.color.silk ?? root.theme.color.soft) : root.theme.color.soft
     }
