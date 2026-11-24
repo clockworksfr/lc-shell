@@ -861,6 +861,8 @@
   "hue.scenesCount": "Scènes · {n}",
   "hue.lampCount.one": "{n} lampe",
   "hue.lampCount.other": "{n} lampes",
+  "toggles.outputs": "Sortie audio",
+  "toggles.inputs": "Entrée audio",
   "toggles.caffeine": "Caféine",
   "toggles.awake": "Reste éveillé",
   "notifications.app": "Application",

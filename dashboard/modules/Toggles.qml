@@ -22,6 +22,8 @@ import qs.theme
 //   box     2 or 3 columns, rows of 120 px or more
 //   tall    2 columns
 // Sliders under the tiles when there is room (always in the panel).
+// Big cells: the 8 tiles in 4 × 2, volume, brightness and microphone
+// sliders; poster: the audio outputs and inputs listed on the right.
 ModuleBase {
     id: root
 
@@ -50,7 +52,9 @@ ModuleBase {
 
     // Fixed counts (the labels depend on the columns, which depend on them).
     readonly property int total: 8
-    readonly property int levels: 2
+    readonly property int levels: large ? 3 : 2
+    // Poster: the audio devices' column.
+    readonly property real devicesWidth: poster && !full ? Math.round(cw * 0.34) : 0
     // Strips, wide and narrow cells: compact rows (52 px, a comfortable
     // touch target), so even a one-unit-high cell holds two rows of buttons.
     readonly property bool compact: shape === "strip" || shape === "wide" || shape === "narrow"
@@ -58,21 +62,22 @@ ModuleBase {
     // (From the cell's height: compact shapes have no sliders under.)
     readonly property int rowsFit: Math.max(1, Math.floor((ch + gap) / (compactRow + gap)))
     readonly property int colsFit: Math.max(1, Math.floor((tilesWidth + gap) / ((look === "matrix" ? 120 : 140) + gap)))
-    readonly property int cols: shape === "tiny" || shape === "narrow" ? 1
+    readonly property int cols: large && !full ? 4
+        : shape === "tiny" || shape === "narrow" ? 1
         : compact ? Math.max(1, Math.min(colsFit, Math.ceil(total / rowsFit)))
         : shape === "tall" ? 2
         : cw / 3 >= 160 ? 3 : 2
     // Rows never under the touch target size (72 px on the modules screen).
     readonly property real minRow: Math.max(theme.hit, look === "matrix" ? 60 : shape === "narrow" ? 80 : 110)
-    readonly property real sliderRow: Math.max(48, theme.hit * 0.75)
+    readonly property real sliderRow: large ? hit : Math.max(48, theme.hit * 0.75)
     readonly property real sliderBlock: levels * sliderRow + levels * gap
     // Wide cells: the sliders in a column on the right of the tiles.
-    readonly property bool sideSliders: !full && ((shape === "wide" && cw >= 620) || (shape === "strip" && cw >= 900)) && ch >= sliderBlock - gap
+    readonly property bool sideSliders: !full && !large && ((shape === "wide" && cw >= 620) || (shape === "strip" && cw >= 900)) && ch >= sliderBlock - gap
     readonly property real sideWidth: Math.min(cw * 0.36, 420)
-    readonly property real tilesWidth: sideSliders ? cw - sideWidth - gap * 1.5 : cw
+    readonly property real tilesWidth: sideSliders ? cw - sideWidth - gap * 1.5 : devicesWidth > 0 ? cw - devicesWidth - gap * 1.5 : cw
     // Sliders under the tiles: always in the panel; in the cell when the
     // tiles still get their minimum rows above them.
-    readonly property bool sliders: sideSliders || full || ((shape === "box" || shape === "tall") && ch - sliderBlock >= Math.ceil(total / cols) * (minRow + gap) - gap)
+    readonly property bool sliders: sideSliders || full || large || ((shape === "box" || shape === "tall") && ch - sliderBlock >= Math.ceil(total / cols) * (minRow + gap) - gap)
     // In the panel: rows of a fixed height, the sliders right under them.
     readonly property real fullRow: Math.max(64, theme.hit)
     readonly property real tilesHeight: full ? Math.ceil(total / cols) * (fullRow + gap) - gap
@@ -122,13 +127,14 @@ ModuleBase {
         visible: root.sliders
         x: root.sideSliders ? parent.width - width : 0
         y: root.sideSliders ? (parent.height - height) / 2 : root.full ? root.tilesHeight + root.gap * 1.5 : parent.height - height
-        width: root.sideSliders ? root.sideWidth : parent.width
+        width: root.sideSliders ? root.sideWidth : root.tilesWidth
         spacing: root.gap
 
         Repeater {
             model: [
                 { icon: Audio.muted ? "volume_off" : "volume_up", value: Audio.volume, to: Audio.maxVolume, kind: "volume", text: Audio.muted ? I18n.tr("common.muted") : I18n.percent(Audio.volume), enabled: true },
-                { icon: "light_mode", value: root.brightness?.brightness ?? 0, to: 1, kind: "brightness", text: root.brightness ? I18n.percent(root.brightness.brightness) : "—", enabled: !!root.brightness }
+                { icon: "light_mode", value: root.brightness?.brightness ?? 0, to: 1, kind: "brightness", text: root.brightness ? I18n.percent(root.brightness.brightness) : "—", enabled: !!root.brightness },
+                ...(root.large ? [{ icon: Audio.sourceMuted ? "mic_off" : "mic", value: Audio.sourceVolume, to: 1, kind: "mic", text: Audio.sourceMuted ? I18n.tr("common.muted") : I18n.percent(Audio.sourceVolume), enabled: !!Audio.source }] : [])
             ]
 
             Item {
@@ -150,9 +156,9 @@ ModuleBase {
 
                     MouseArea {
                         anchors.fill: parent
-                        enabled: level.modelData.kind === "volume"
+                        enabled: level.modelData.kind === "volume" || level.modelData.kind === "mic"
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: Audio.toggleMute()
+                        onClicked: level.modelData.kind === "mic" ? Audio.toggleSourceMute() : Audio.toggleMute()
                     }
                 }
 
@@ -164,8 +170,8 @@ ModuleBase {
                     enabled: level.modelData.enabled
                     value: level.modelData.value
                     to: level.modelData.to
-                    dimmed: level.modelData.kind === "volume" && Audio.muted
-                    onMoved: value => level.modelData.kind === "volume" ? Audio.setVolume(value) : root.brightness?.setBrightness(value)
+                    dimmed: level.modelData.kind === "volume" && Audio.muted || level.modelData.kind === "mic" && Audio.sourceMuted
+                    onMoved: value => level.modelData.kind === "volume" ? Audio.setVolume(value) : level.modelData.kind === "mic" ? Audio.setSourceVolume(value) : root.brightness?.setBrightness(value)
                 }
 
                 ThemedText {
@@ -178,6 +184,83 @@ ModuleBase {
                     font.pixelSize: root.t3
                     font.features: ({ "tnum": 1 })
                     color: root.theme.color.ink
+                }
+            }
+        }
+    }
+
+    // Poster: audio outputs and inputs, the default one checked.
+    Column {
+        visible: root.devicesWidth > 0
+        x: parent.width - width
+        width: root.devicesWidth
+        height: parent.height
+        spacing: root.gap
+
+        Repeater {
+            model: [
+                { label: I18n.tr("toggles.outputs"), nodes: Audio.sinks, current: Audio.sink, output: true },
+                { label: I18n.tr("toggles.inputs"), nodes: Audio.sources, current: Audio.source, output: false }
+            ]
+
+            ModuleZone {
+                id: devZone
+                required property var modelData
+                width: parent.width
+                height: (parent.height - parent.spacing) / 2
+                label: modelData.label
+                labelSize: root.t4
+                gap: root.gap
+
+                Column {
+                    width: parent.width
+                    spacing: 2
+
+                    Repeater {
+                        model: devZone.modelData.nodes.slice(0, Math.max(1, Math.floor(devZone.body.height / (root.t3 * 2.2))))
+
+                        Item {
+                            id: devRow
+                            required property var modelData
+                            readonly property bool current: modelData === devZone.modelData.current
+                            width: parent.width
+                            height: root.t3 * 2.2
+
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: root.theme.radius.tile
+                                color: devArea.containsMouse ? Qt.alpha(root.theme.color.ink, 0.06) : "transparent"
+                            }
+
+                            Icon {
+                                id: devCheck
+                                anchors.verticalCenter: parent.verticalCenter
+                                x: 6
+                                name: devRow.current ? "radio_button_checked" : "radio_button_unchecked"
+                                size: root.t3 * 1.1
+                                color: devRow.current ? (root.theme.color.signal ?? root.theme.color.accent) : root.theme.color.soft
+                            }
+
+                            ThemedText {
+                                anchors.verticalCenter: parent.verticalCenter
+                                x: devCheck.x + devCheck.width + root.gap * 0.5
+                                width: parent.width - x - 6
+                                elide: Text.ElideRight
+                                text: Audio.nodeName(devRow.modelData)
+                                font.family: devZone.textFont
+                                font.pixelSize: root.t3
+                                color: devRow.current ? devZone.ink : devZone.soft
+                            }
+
+                            MouseArea {
+                                id: devArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: devZone.modelData.output ? Audio.setDefaultSink(devRow.modelData) : Audio.setDefaultSource(devRow.modelData)
+                            }
+                        }
+                    }
                 }
             }
         }
