@@ -69,9 +69,20 @@ Singleton {
         onTriggered: Hyprland.refreshMonitors()
     }
 
+    // A screen's Hyprland monitor and its active workspace, looked up in
+    // the monitor list (Hyprland.monitorFor() in bindings looped on new
+    // outputs and the dashboard never showed there).
+    function monitorOf(screen: ShellScreen): var {
+        const name = screen?.name ?? "";
+        return Hyprland.monitors.values.find(m => m.name === name) ?? null;
+    }
+    function activeWorkspaceOn(screen: ShellScreen): string {
+        return monitorOf(screen)?.activeWorkspace?.name ?? "";
+    }
+
     // The room a dashboard has on a screen (what its bar leaves), local.
     function area(screen: ShellScreen): var {
-        const r = Hyprland.monitorFor(screen)?.lastIpcObject?.reserved ?? [0, 0, 0, 0];
+        const r = monitorOf(screen)?.lastIpcObject?.reserved ?? [0, 0, 0, 0];
         return {
             x: r[0] ?? 0,
             y: r[1] ?? 0,
@@ -156,7 +167,7 @@ Singleton {
 
     // Screens showing a dashboard right now (their active workspace has one).
     function showsDashboard(screen: ShellScreen): bool {
-        const ws = Hyprland.monitorFor(screen)?.activeWorkspace?.name ?? "";
+        const ws = activeWorkspaceOn(screen);
         return !!presetNameFor(ws);
     }
 

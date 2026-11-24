@@ -314,7 +314,7 @@ PanelWindow {
         border.color: win.theme.color.line
 
         readonly property var cell: DashboardEditor.cells[DashboardEditor.selected] ?? null
-        readonly property string workspace: Hyprland.monitorFor(win.screen)?.activeWorkspace?.name ?? ""
+        readonly property string workspace: Dashboard.activeWorkspaceOn(win.screen)
 
         // Left: the workspace's preset (pick another, duplicate it, or no
         // dashboard on this workspace).

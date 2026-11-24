@@ -19,7 +19,7 @@ PanelWindow {
 
     property var theme
 
-    readonly property string workspace: Hyprland.monitorFor(screen)?.activeWorkspace?.name ?? ""
+    readonly property string workspace: Dashboard.activeWorkspaceOn(screen)
     readonly property var preset: Dashboard.presetFor(workspace)
     readonly property bool shown: !!preset
     // Counted on the screen's room (the same in the editor).
