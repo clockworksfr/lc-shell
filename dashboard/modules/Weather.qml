@@ -19,7 +19,7 @@ ModuleBase {
 
     readonly property var now: Weather.now
     readonly property var today: Weather.daily[0] ?? null
-    readonly property real hourWidth: Math.max(56, t3 * 3.4)
+    readonly property real hourWidth: Math.max(56, t3 * 3)
     // modulaire: everything on its green LCD; facade: the current block in
     // its VFD (the hours are in one too). Text there: screen font, caps.
     readonly property bool onLcd: theme.style.module === "modulaire"
@@ -349,7 +349,21 @@ ModuleBase {
             id: wideCurrent
             m: root
             anchors.verticalCenter: parent.verticalCenter
-            size: root.figure(root.shape === "strip" ? 0.7 : 0.5, 0.16)
+            // Never so big that fewer than 4 hours fit: the block is the
+            // icon (0.97 × size with its gap) and the figure, measured in the
+            // theme's display font (wide in Constellation, Matrix, Façade).
+            readonly property real detailsWidth: Math.min(root.cw * 0.3, 340)
+            readonly property real room: root.cw - detailsWidth - 4 * root.hourWidth - 2 * root.gap - (root.vfdBlock ? 40 : 0)
+            readonly property real perSize: 0.97 + figureMetrics.advanceWidth / 100 * (root.theme.font.displayItalic ? 1.25 : 1) + 0.4
+            size: Math.max(root.t2, Math.min(root.figure(root.shape === "strip" ? 0.7 : 0.5, 0.16), room / perSize))
+
+            TextMetrics {
+                id: figureMetrics
+                text: root.now ? Weather.temp(root.now.temp) : "88°"
+                font.family: root.theme.font.display
+                font.weight: root.theme.font.displayWeight ?? Font.Normal
+                font.pixelSize: 100 * root.hk
+            }
         }
 
         Details {
