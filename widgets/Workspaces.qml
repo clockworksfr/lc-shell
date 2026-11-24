@@ -28,7 +28,11 @@ Grid {
     readonly property bool dots: theme.style.workspaces === "dots" || theme.style.workspaces === "numbered" || stars
     // "numbered" (Matrix): a dot and its number per workspace, empty ones
     // in between (and up to five) shown dim; dots only on a vertical bar.
-    readonly property bool numbered: theme.style.workspaces === "numbered" && !vertical
+    readonly property bool numbered: (theme.style.workspaces === "numbered" || sequencer) && !vertical
+    // "sequencer" (Modulaire, design "Barre"): a sequencer step per
+    // workspace, a round LED (active orange, urgent red, occupied dim
+    // amber, empty brown) and its number in Barlow Condensed.
+    readonly property bool sequencer: theme.style.workspaces === "sequencer"
     readonly property var numberedIds: {
         const ids = workspaces.map(ws => ws.id);
         if (!ids.length)
@@ -40,7 +44,7 @@ Grid {
     readonly property int cell: (crossSize > 0 ? crossSize : theme.bar.height - theme.space.s)
 
     columns: vertical ? 1 : Math.max(1, numbered ? numberedIds.length : workspaces.length)
-    spacing: numbered ? 14 : dots ? theme.space.s : theme.space.xs
+    spacing: sequencer ? 16 : numbered ? 14 : dots ? theme.space.s : theme.space.xs
     horizontalItemAlignment: Grid.AlignHCenter
     verticalItemAlignment: Grid.AlignVCenter
 
@@ -57,6 +61,7 @@ Grid {
                 : active ? root.theme.color.accent
                 : ws ? root.theme.color.ink
                 : root.theme.color.line
+            readonly property color led: ws?.urgent ? "#FF3B30" : active ? "#E8742A" : ws ? "#7A4A2A" : "#3B2A24"
 
             implicitWidth: numberedRow.implicitWidth
             implicitHeight: numberedRow.implicitHeight
@@ -66,7 +71,7 @@ Grid {
             // (a layer inside the row looped its layout).
             Rectangle {
                 z: -1
-                visible: (numberedItem.active || !!numberedItem.ws?.urgent) && Qt.color(root.theme.color.glow ?? "#00000000").a > 0
+                visible: (numberedItem.active || !!numberedItem.ws?.urgent) && (root.sequencer || Qt.color(root.theme.color.glow ?? "#00000000").a > 0)
                 x: numberedRow.x + dot.x
                 y: numberedRow.y + dot.y
                 width: dot.width
@@ -77,7 +82,7 @@ Grid {
                 layer.effect: MultiEffect {
                     autoPaddingEnabled: true
                     shadowEnabled: true
-                    shadowColor: numberedItem.ws?.urgent ? root.theme.color.urgent : root.theme.color.glow ?? "transparent"
+                    shadowColor: root.sequencer ? numberedItem.led : numberedItem.ws?.urgent ? root.theme.color.urgent : root.theme.color.glow ?? "transparent"
                     shadowBlur: 0.9
                     blurMax: 14
                     shadowHorizontalOffset: 0
@@ -87,15 +92,17 @@ Grid {
 
             Row {
             id: numberedRow
-            spacing: 6
+            spacing: root.sequencer ? 5 : 6
 
             Rectangle {
                 id: dot
                 anchors.verticalCenter: parent.verticalCenter
-                width: numberedItem.active ? 13 : 6
-                height: 6
-                radius: 3
-                color: numberedItem.ink
+                width: root.sequencer ? 14 : numberedItem.active ? 13 : 6
+                height: root.sequencer ? 14 : 6
+                radius: height / 2
+                color: root.sequencer ? numberedItem.led : numberedItem.ink
+                border.width: root.sequencer ? 1 : 0
+                border.color: "#66000000"
 
                 Behavior on width {
                     NumberAnimation {
@@ -108,10 +115,10 @@ Grid {
             ThemedText {
                 anchors.verticalCenter: parent.verticalCenter
                 text: numberedItem.modelData
-                color: numberedItem.ink
-                font.family: root.theme.font.mono
-                font.pixelSize: 12
-                font.weight: numberedItem.active ? Font.Bold : Font.Normal
+                color: root.sequencer ? root.theme.color.ink : numberedItem.ink
+                font.family: root.sequencer ? root.theme.font.family : root.theme.font.mono
+                font.pixelSize: root.sequencer ? 18 : 12
+                font.weight: root.sequencer ? Font.DemiBold : numberedItem.active ? Font.Bold : Font.Normal
             }
             }
 

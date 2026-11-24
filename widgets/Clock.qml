@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import qs.components
 import qs.i18n
@@ -27,7 +28,10 @@ TextWidget {
     // date smaller and soft, the time big (rich text can't reach the
     // shell's own fonts). The widget's own text is empty, its padding the
     // pair's width.
-    readonly property bool pair: figure && !!datePart
+    // Modulaire: the time in a Nixie window (design "Barre"): dark glass,
+    // orange glowing digits, no colon.
+    readonly property bool nixie: figure && theme.style.module === "modulaire"
+    readonly property bool pair: figure && (!!datePart || nixie)
     fullText: pair ? "" : I18n.locale.toString(clock.date, format)
     leftPadding: pair ? pairRow.implicitWidth : 0
 
@@ -38,22 +42,54 @@ TextWidget {
         spacing: root.figureSize * 0.45
 
         ThemedText {
-            anchors.baseline: timeText.baseline
+            visible: !!root.datePart
+            // On the time's baseline (Matrix), centered by the Nixie window.
+            y: root.nixie ? (timeBox.height - height) / 2 + timeBox.y : timeBox.y + timeText.y + timeText.baselineOffset - baselineOffset
             text: I18n.locale.toString(clock.date, root.datePart)
             font.family: root.theme.font.display
             font.pixelSize: Math.round(root.figureSize * 0.6)
             color: root.theme.color.soft
         }
 
-        ThemedText {
-            id: timeText
-            text: I18n.locale.toString(clock.date, root.format)
-            font.family: root.theme.font.display
-            font.weight: root.theme.font.displayWeight ?? Font.Normal
-            font.pixelSize: root.figureSize
-            font.letterSpacing: root.figureSize * 0.02
-            font.features: ({ "tnum": 1 })
-            color: root.theme.color.ink
+        Item {
+            id: timeBox
+            implicitWidth: timeText.implicitWidth + (root.nixie ? 16 : 0)
+            implicitHeight: timeText.implicitHeight + (root.nixie ? 6 : 0)
+            width: implicitWidth
+            height: implicitHeight
+
+            // The Nixie window.
+            Rectangle {
+                visible: root.nixie
+                anchors.fill: parent
+                radius: 5
+                color: "#120C09"
+                border.width: 2
+                border.color: "#000000"
+            }
+
+            ThemedText {
+                id: timeText
+                anchors.centerIn: parent
+                text: root.nixie ? I18n.locale.toString(clock.date, root.format).replace(/:/g, "") : I18n.locale.toString(clock.date, root.format)
+                font.family: root.theme.font.display
+                font.weight: root.theme.font.displayWeight ?? Font.Normal
+                font.pixelSize: root.nixie ? Math.round(root.figureSize * 0.82) : root.figureSize
+                font.letterSpacing: root.nixie ? root.figureSize * 0.12 : root.figureSize * 0.02
+                font.features: ({ "tnum": 1 })
+                color: root.nixie ? "#FF8A2A" : root.theme.color.ink
+
+                layer.enabled: root.nixie
+                layer.effect: MultiEffect {
+                    autoPaddingEnabled: true
+                    shadowEnabled: true
+                    shadowColor: "#FF6A00"
+                    shadowBlur: 0.6
+                    blurMax: 16
+                    shadowHorizontalOffset: 0
+                    shadowVerticalOffset: 0
+                }
+            }
         }
     }
     // --- OSD in the clock (animations mockup) ---

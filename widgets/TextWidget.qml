@@ -66,10 +66,10 @@ ThemedText {
     label: stacked && !microStack
     text: useIcon ? iconText : sigil ? (size === "extended" ? `${microLabel} ${fullText}` : compactText.replace(/\n/g, " ")) : microStack ? micro(size === "extended" ? `${microLabel}\n${fullText}` : compactText) : stacked ? compactText : fullText
     textFormat: microStack ? Text.RichText : Text.PlainText
-    leftPadding: useIcon && !vertical ? iconItem.width + (iconText ? 6 : 0) : sigil && sigilStyle === "led" ? 14 : 0
+    leftPadding: useIcon && !vertical ? iconItem.width + (iconText ? 6 : 0) : sigil && sigilStyle === "led" ? 15 : 0
     topPadding: useIcon && vertical ? iconItem.height + (iconText ? 2 : 0) : 0
-    font.pixelSize: microStack ? 12 : sigil ? (sigilStyle === "led" ? 14 : 12) : vertical || stacked ? theme.font.sizeS : theme.font.sizeM
-    font.weight: sigil && sigilStyle === "phosphor" ? Font.DemiBold : Font.Normal
+    font.pixelSize: microStack ? 12 : sigil ? (sigilStyle === "led" ? 16 : 12) : vertical || stacked ? theme.font.sizeS : theme.font.sizeM
+    font.weight: sigil && (sigilStyle === "phosphor" || sigilStyle === "led") ? Font.DemiBold : Font.Normal
     font.letterSpacing: sigil ? (sigilStyle === "phosphor" ? 1 : 0.6) : 0
     // Façade: a status that's off dims (the VFD's unlit segments).
     opacity: sigil && sigilStyle === "phosphor" && level === "off" ? 0.45 : 1
@@ -82,7 +82,8 @@ ThemedText {
         height: 8
         anchors.verticalCenter: parent.verticalCenter
 
-        readonly property color lit: parent.level === "alert" ? parent.theme.color.urgent : parent.theme.color.ok
+        // The mockup's LED colors in both variants (the case stays dark).
+        readonly property color lit: parent.level === "alert" ? "#FF3B30" : "#46C46A"
 
         Repeater {
             model: parent.parent.level !== "off" ? [{ s: 16, a: 0.18 }, { s: 12, a: 0.3 }] : []

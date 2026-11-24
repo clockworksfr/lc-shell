@@ -140,6 +140,13 @@ Singleton {
                 spacing: 18,
                 // Rounded screen corners radius, 0 = none.
                 screenCorners: 0,
+                // Case color instead of the surface ("" = surface), both
+                // variants (Modulaire: a dark rack case).
+                caseColor: "",
+                // Perforated metal rails along the long edges (Modulaire).
+                rails: false,
+                // Each group on its own aluminium plate (Modulaire).
+                plates: false,
                 // Bar length along its edge: 0 = full, else a centered bar of
                 // that many px, or that share of the edge under 1 (ignored in
                 // a frame).

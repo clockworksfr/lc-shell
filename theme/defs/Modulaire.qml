@@ -99,10 +99,14 @@ Singleton {
                 stagger: 25
             },
             bar: {
-                // A centered front panel / rail (the mockup's bar tab).
-                length: 0.62,
+                // A centered rack case (design "Barre"): dark case, two
+                // perforated rails, one aluminium plate per group.
+                length: 0.66,
                 height: 56,
-                verticalWidth: 64,
+                verticalWidth: 72,
+                caseColor: "#141515",
+                rails: true,
+                plates: true,
                 style: "full",
                 floating: false,
                 margin: 0,
@@ -110,7 +114,7 @@ Singleton {
                 opacity: 1,
                 border: 0,
                 padding: 14,
-                spacing: 12,
+                spacing: 17,
                 screenCorners: 0
             },
             style: {

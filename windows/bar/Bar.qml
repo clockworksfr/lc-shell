@@ -95,11 +95,19 @@ PanelWindow {
         anchors.fill: parent
         visible: !bar.islands && !bar.framed
         radius: bar.look.floating ? bar.look.radius : 0
-        color: Qt.alpha(bar.theme.color.surface, bar.look.opacity)
+        color: Qt.alpha(bar.look.caseColor || bar.theme.color.surface, bar.look.opacity)
         border.width: bar.look.floating ? bar.look.border : 0
-        border.color: bar.theme.color.line
+        border.color: bar.look.caseColor ? "black" : bar.theme.color.line
+        clip: bar.look.rails && radius > 0
 
         Glass {}
+
+        BarRails {
+            visible: !!bar.look.rails
+            anchors.fill: parent
+            vertical: bar.vertical
+            radius: parent.radius
+        }
 
         Rectangle {
             visible: !bar.look.floating && bar.look.border > 0

@@ -26,6 +26,12 @@ Item {
     readonly property bool empty: groups.every(g => g.length === 0)
     // Gap between islands (or between groups of a full bar).
     readonly property int groupGap: islands ? look.margin || theme.space.s : look.spacing * 2
+    // Modulaire: each group on an aluminium plate (design "Barre"): 74 %
+    // of the bar thick, 19 px padding at its ends, radius 6 (4 if the bar
+    // is rounded).
+    readonly property bool plates: !!look.plates
+    readonly property real plateInset: plates ? 19 : 0
+    readonly property real plateRadius: Math.min(look.radius > 0 ? look.radius : 6, host.thickness * 0.37)
     readonly property Item plus: plusTarget
 
     visible: !empty || editing
@@ -67,8 +73,8 @@ Item {
                 readonly property bool hasBlocks: blocks.implicitWidth > 0 && blocks.implicitHeight > 0
 
                 visible: hasBlocks
-                implicitWidth: zone.vertical ? zone.host.thickness : blocks.implicitWidth + (zone.islands ? zone.look.padding * 2 : 0)
-                implicitHeight: zone.vertical ? blocks.implicitHeight + (zone.islands ? zone.look.padding * 2 : 0) : zone.host.thickness
+                implicitWidth: zone.vertical ? zone.host.thickness : blocks.implicitWidth + (zone.islands ? zone.look.padding * 2 : 0) + zone.plateInset * 2
+                implicitHeight: zone.vertical ? blocks.implicitHeight + (zone.islands ? zone.look.padding * 2 : 0) + zone.plateInset * 2 : zone.host.thickness
 
                 // Under an open drawer coming out of this island, its
                 // background grows (not its content) so the drawer and its
@@ -116,11 +122,38 @@ Item {
                     topRightRadius: (group.edge === "bottom" && group.squareHigh) || (group.edge === "left" && group.squareLow) ? 0 : radius
                     bottomLeftRadius: (group.edge === "top" && group.squareLow) || (group.edge === "right" && group.squareHigh) ? 0 : radius
                     bottomRightRadius: (group.edge === "top" && group.squareHigh) || (group.edge === "left" && group.squareHigh) ? 0 : radius
-                    color: Qt.alpha(zone.theme.color.surface, zone.look.opacity)
+                    color: Qt.alpha(zone.look.caseColor || zone.theme.color.surface, zone.look.opacity)
                     border.width: zone.look.border
-                    border.color: zone.theme.color.line
+                    border.color: zone.look.caseColor ? "black" : zone.theme.color.line
+                    clip: !!zone.look.rails && radius > 0
 
                     Glass {}
+
+                    BarRails {
+                        visible: !!zone.look.rails
+                        anchors.fill: parent
+                        vertical: zone.vertical
+                        radius: parent.radius
+                    }
+                }
+
+                // Modulaire: the group's aluminium plate.
+                Rectangle {
+                    visible: zone.plates
+                    anchors.centerIn: parent
+                    width: zone.vertical ? zone.host.thickness * 0.74 : blocks.implicitWidth + zone.plateInset * 2
+                    height: zone.vertical ? blocks.implicitHeight + zone.plateInset * 2 : zone.host.thickness * 0.74
+                    radius: zone.plateRadius
+                    gradient: Gradient {
+                        GradientStop {
+                            position: 0
+                            color: zone.theme.color.surface
+                        }
+                        GradientStop {
+                            position: 1
+                            color: zone.theme.color.surface2
+                        }
+                    }
                 }
 
                 Grid {
