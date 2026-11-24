@@ -355,6 +355,7 @@
   "vu.spectrum": "Spectre",
   "vu.footer": "Sortie : {output} · crête {peak} dB",
   "hue.colorTitle": "Couleur",
+  "clock.weekShort": "Sem.",
   "clock.week": "Semaine {n}",
   "clock.dayOfYear": "jour {n} sur {total}",
   "clock.yearProgress": "{value} de l'année",

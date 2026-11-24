@@ -228,7 +228,7 @@ ModuleBase {
         Column {
             id: bigLeft
 
-            width: big.stacked ? parent.width : Math.round(parent.width * (root.poster ? 0.44 : 0.42))
+            width: big.stacked ? parent.width : Math.round(parent.width * (root.poster ? 0.5 : 0.53) - root.gap * 1.5)
             spacing: root.gap
             // Large: centered against the month; poster: on top (the next
             // months under it).
@@ -282,10 +282,21 @@ ModuleBase {
                     radius: height / 2
                     color: root.theme.color.surface2
 
+                    // The theme's progress: accent; Matrix ink with only its
+                    // head in the signal red.
                     Rectangle {
                         width: parent.width * root.dayOfYear / root.daysInYear
                         height: parent.height
                         radius: parent.radius
+                        color: root.theme.style.module === "matrix" ? root.theme.color.ink : root.theme.color.accent
+                    }
+                    Rectangle {
+                        visible: root.theme.style.module === "matrix"
+                        x: parent.width * root.dayOfYear / root.daysInYear - width / 2
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.height * 2
+                        height: width
+                        radius: width / 2
                         color: root.theme.color.signal ?? root.theme.color.accent
                     }
                 }
@@ -318,7 +329,9 @@ ModuleBase {
                     required property int index
                     width: (nextMonths.width - nextMonths.spacing) / 2
                     height: nextMonths.height
-                    label: I18n.locale.toString(new Date(root.now.getFullYear(), root.now.getMonth() + index + 1, 1), "MMMM yyyy")
+                    // The year only when it changes.
+                    readonly property date shown: new Date(root.now.getFullYear(), root.now.getMonth() + index + 1, 1)
+                    label: I18n.locale.toString(shown, shown.getFullYear() === root.now.getFullYear() ? "MMMM" : "MMMM yyyy")
                     labelSize: root.t4
                     gap: root.gap
 
@@ -357,7 +370,7 @@ ModuleBase {
         property var m
 
         visible: secondDots.m.theme.style.module === "matrix"
-        spacing: 11
+        spacing: 18
 
         Repeater {
             model: 7
@@ -368,7 +381,7 @@ ModuleBase {
                 width: 7
                 height: 7
                 radius: 3.5
-                color: lit ? secondDots.m.theme.color.ink : "#1A1A1A"
+                color: lit ? secondDots.m.theme.color.ink : secondDots.m.theme.color.surface3
             }
         }
     }
@@ -384,30 +397,37 @@ ModuleBase {
         font.capitalization: Font.Capitalize
     }
 
-    // 7 equal cells, today lit.
+    // 7 equal cells, today lit (design review): matrix outlined pills,
+    // today in the signal color; classic surface cells, today accent;
+    // constellation today in the accent gradient; facade display cells,
+    // today ink; modulaire dark cells with light digits (both variants),
+    // today accent.
     component WeekStrip: Row {
         id: strip
 
         property var m
 
-        spacing: Math.max(3, strip.m.gap / 3)
+        spacing: 6
 
         Repeater {
             model: 7
 
             Rectangle {
+                id: cellDay
                 required property int index
                 readonly property date day: new Date(strip.m.monday(strip.m.now).getTime() + index * 86400000 + 3600000)
                 readonly property bool today: day.toDateString() === strip.m.now.toDateString()
+                readonly property string look: strip.m.theme.style.module ?? "classic"
+                readonly property color todayFill: look === "facade" ? strip.m.theme.color.ink : look === "matrix" ? (strip.m.theme.color.signal ?? strip.m.theme.color.accent) : strip.m.theme.color.accent
+                readonly property color todayInk: look === "facade" ? "#030505" : look === "modulaire" ? "#111111" : look === "matrix" ? "white" : strip.m.theme.color.onAccent
+                readonly property color dayInk: look === "modulaire" ? "#E9E7E1" : strip.m.theme.color.ink
 
                 width: (strip.width - strip.spacing * 6) / 7
                 height: strip.height
-                radius: strip.m.theme.radius.tile
-                readonly property string look: strip.m.theme.style.module ?? "classic"
-                // facade: display cells; constellation: today in a gradient.
-                color: look === "facade" ? (today ? strip.m.theme.color.ink : (strip.m.theme.color.screen ?? "#030505")) : today ? (strip.m.theme.color.signal ?? strip.m.theme.color.accent) : strip.m.theme.color.surface2
-                border.width: look === "facade" ? 1 : 0
-                border.color: "#000000"
+                radius: look === "matrix" ? width / 2 : look === "facade" || look === "modulaire" ? 3 : strip.m.theme.radius.tile
+                color: today ? todayFill : look === "matrix" ? "transparent" : look === "facade" ? strip.m.theme.color.surface2 : look === "modulaire" ? "#1A1B1C" : strip.m.theme.color.surface2
+                border.width: look === "matrix" && !today ? 1 : look === "facade" ? 1 : 0
+                border.color: look === "matrix" ? strip.m.theme.color.line : "#000000"
                 gradient: look === "constellation" && today ? todayGradient : null
 
                 Gradient {
@@ -415,32 +435,33 @@ ModuleBase {
                     orientation: Gradient.Horizontal
                     GradientStop {
                         position: 0
-                        color: "#9FB8FF"
+                        color: strip.m.theme.color.accent
                     }
                     GradientStop {
                         position: 1
-                        color: "#F2A7D8"
+                        color: strip.m.theme.color.accent2 ?? strip.m.theme.color.accent
                     }
                 }
 
                 ThemedText {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    y: parent.height * 0.12
+                    y: 6
                     label: true
-                    text: I18n.locale.dayName(parent.day.getDay(), Locale.NarrowFormat)
+                    text: I18n.locale.dayName(cellDay.day.getDay(), Locale.NarrowFormat)
                     font.pixelSize: strip.m.t4
-                    color: parent.look === "facade" ? (parent.today ? (strip.m.theme.color.screen ?? "#030505") : Qt.alpha(strip.m.theme.color.ink, 0.6)) : parent.today ? strip.m.theme.color.onAccent : strip.m.theme.color.soft
+                    color: cellDay.today ? cellDay.todayInk : cellDay.look === "modulaire" ? Qt.alpha(cellDay.dayInk, 0.6) : strip.m.theme.color.soft
                 }
 
                 ThemedText {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: parent.height * 0.12
-                    text: parent.day.getDate()
-                    font.pixelSize: Math.min(strip.m.t2 * 1.2, parent.width * 0.42, parent.height * 0.4)
-                    font.weight: Font.DemiBold
+                    anchors.bottomMargin: 6
+                    text: cellDay.day.getDate()
+                    font.family: cellDay.look === "facade" || cellDay.look === "modulaire" ? "IBM Plex Mono" : cellDay.look === "matrix" ? "Space Mono" : strip.m.theme.font.family
+                    font.pixelSize: Math.min(strip.m.t3, parent.width * 0.42, parent.height * 0.4)
+                    font.weight: Font.Bold
                     font.features: ({ "tnum": 1 })
-                    color: parent.look === "facade" ? (parent.today ? (strip.m.theme.color.screen ?? "#030505") : strip.m.theme.color.ink) : parent.today ? strip.m.theme.color.onAccent : strip.m.theme.color.ink
+                    color: cellDay.today ? cellDay.todayInk : cellDay.dayInk
                 }
             }
         }
@@ -465,6 +486,11 @@ ModuleBase {
         readonly property real dayW: (width - weekW) / 7
         readonly property real rowH: height / (weeks + 0.7)
         readonly property real daySize: Math.max(11, Math.min(month.m.t3 * 1.1 * boost, rowH * 0.62, dayW * 0.5))
+        readonly property string look: month.m.theme.style.module ?? "classic"
+        // Small months (the next ones): no days of other months.
+        readonly property bool small: offset > 0
+        readonly property int thisWeek: month.m.week(month.m.now)
+        readonly property string digits: look === "facade" || look === "modulaire" ? "IBM Plex Mono" : look === "matrix" ? "Space Mono" : month.m.theme.font.family
 
         columns: 8
 
@@ -486,28 +512,61 @@ ModuleBase {
                 width: weekCol ? month.weekW : month.dayW
                 height: header ? month.rowH * 0.7 : month.rowH
 
-                // Today: a pill wide enough for two digits, bold figure.
+                readonly property int weekNumber: month.m.week(new Date(month.start.getTime() + slot.row * 7 * 86400000 + 3600000))
+                readonly property bool weekend: slot.col >= 5
+
+                // Today: a circle (classic accent, constellation gradient
+                // with a halo, matrix signal), a square (facade ink,
+                // modulaire accent).
                 Rectangle {
                     anchors.centerIn: parent
+                    visible: slot.today && month.look === "constellation"
+                    width: todayMark.width + 16
+                    height: width
+                    radius: width / 2
+                    color: Qt.alpha(month.m.theme.color.accent, 0.2)
+                }
+                Rectangle {
+                    id: todayMark
+                    anchors.centerIn: parent
                     visible: slot.today
-                    height: Math.min(parent.height * 0.94, month.daySize * 1.55)
-                    width: Math.min(parent.width * 0.96, Math.max(height, dayLabel.implicitWidth + month.daySize * 0.9))
-                    radius: height / 2
-                    color: month.m.theme.color.signal ?? month.m.theme.color.accent
+                    height: Math.min(parent.height * 0.94, month.daySize * 1.6)
+                    width: height
+                    radius: month.look === "facade" || month.look === "modulaire" ? 3 : height / 2
+                    color: month.look === "facade" ? month.m.theme.color.ink : month.look === "matrix" ? (month.m.theme.color.signal ?? month.m.theme.color.accent) : month.m.theme.color.accent
+                    gradient: month.look === "constellation" ? markGradient : null
+
+                    Gradient {
+                        id: markGradient
+                        orientation: Gradient.Horizontal
+                        GradientStop {
+                            position: 0
+                            color: month.m.theme.color.accent
+                        }
+                        GradientStop {
+                            position: 1
+                            color: month.m.theme.color.accent2 ?? month.m.theme.color.accent
+                        }
+                    }
                 }
 
                 ThemedText {
                     id: dayLabel
                     anchors.centerIn: parent
                     label: slot.header || slot.weekCol
-                    text: slot.header ? (slot.weekCol ? "" : I18n.locale.dayName((slot.col + 1) % 7, Locale.NarrowFormat))
-                        : slot.weekCol ? month.m.week(new Date(month.start.getTime() + slot.row * 7 * 86400000 + 3600000))
+                    // Week numbers (and their "Sem." header) in the mono.
+                    text: slot.header ? (slot.weekCol ? I18n.tr("clock.weekShort") : I18n.locale.dayName((slot.col + 1) % 7, Locale.NarrowFormat))
+                        : slot.weekCol ? slot.weekNumber
+                        : !slot.inMonth && month.small ? ""
                         : slot.day.getDate()
-                    font.pixelSize: slot.header || slot.weekCol ? Math.min(month.m.t4, month.daySize * 0.75) : month.daySize
+                    font.family: slot.header || slot.weekCol ? month.m.theme.font.mono : month.digits
+                    font.pixelSize: slot.header || slot.weekCol ? Math.min(month.m.t4, month.daySize * 0.62) : month.daySize
                     font.weight: slot.today ? Font.Bold : Font.Normal
                     font.features: ({ "tnum": 1 })
-                    color: slot.today ? (month.m.theme.color.signal ? "white" : month.m.theme.color.onAccent) : slot.header || slot.weekCol || !slot.inMonth ? month.m.theme.color.soft : month.m.theme.color.ink
-                    opacity: slot.weekCol ? 0.6 : !slot.header && !slot.inMonth ? 0.45 : 1
+                    color: slot.today ? (month.look === "facade" ? "#030505" : month.look === "modulaire" ? "#111111" : month.look === "matrix" ? "white" : month.m.theme.color.onAccent)
+                        : slot.weekCol && slot.weekNumber === month.thisWeek && month.offset === 0 ? month.m.theme.color.ink
+                        : slot.header || slot.weekCol || !slot.inMonth || slot.weekend ? month.m.theme.color.soft : month.m.theme.color.ink
+                    opacity: slot.weekCol ? (slot.weekNumber === month.thisWeek && month.offset === 0 ? 1 : 0.75) : !slot.header && !slot.inMonth ? 0.28 : 1
                 }
             }
         }
