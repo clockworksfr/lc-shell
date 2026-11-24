@@ -12,6 +12,8 @@ Canvas {
     property var values: []
     property real max: 0
     property color color: theme.color.accent
+    property real lineWidth: 2
+    property real fillAlpha: 0.15
     // Dashed continuation from the last value (projection), optional.
     property var projection: []
 
@@ -33,7 +35,7 @@ Canvas {
 
         ctx.beginPath();
         values.forEach((v, i) => i === 0 ? ctx.moveTo(0, y(v)) : ctx.lineTo(i * step, y(v)));
-        ctx.lineWidth = 2;
+        ctx.lineWidth = lineWidth;
         ctx.lineJoin = "round";
         ctx.strokeStyle = color;
         ctx.stroke();
@@ -41,7 +43,7 @@ Canvas {
         ctx.lineTo((values.length - 1) * step, height);
         ctx.lineTo(0, height);
         ctx.closePath();
-        ctx.fillStyle = Qt.alpha(color, 0.15);
+        ctx.fillStyle = Qt.alpha(color, fillAlpha);
         ctx.fill();
 
         if (projection.length > 0) {

@@ -67,15 +67,17 @@ ModuleBase {
         parent: root
         // Beside the title only when there's room for both.
         visible: root.inner.y > root.pad + 1 && root.width >= width + 150
+        // A small pill on the title row (design review): surface fill,
+        // line border, 12 px ink text with its "⌄".
         x: root.width - width - 14
-        y: 3
-        width: chipRow.implicitWidth + 22
-        height: 30
+        y: 8
+        width: chipRow.implicitWidth + 20
+        height: 22
 
         Rectangle {
             anchors.fill: parent
             radius: height / 2
-            color: chipArea.containsMouse || chipArea.pressed ? root.theme.color.surface3 : "transparent"
+            color: chipArea.containsMouse || chipArea.pressed ? root.theme.color.surface3 : root.theme.color.surface
             border.width: 1
             border.color: root.theme.color.line
         }
@@ -88,16 +90,10 @@ ModuleBase {
             ThemedText {
                 anchors.verticalCenter: parent.verticalCenter
                 label: true
-                text: root.sourceLabel()
-                font.pixelSize: 15
+                text: `${root.sourceLabel()} ⌄`
+                font.pixelSize: 12
+                font.letterSpacing: 0.5
                 color: root.theme.color.ink
-            }
-
-            Icon {
-                anchors.verticalCenter: parent.verticalCenter
-                name: "expand_more"
-                size: 18
-                color: root.theme.color.soft
             }
         }
 
@@ -132,18 +128,17 @@ ModuleBase {
         property bool showCurve: height >= lane.m.t2 * 2.6
 
         readonly property string text: I18n.bytes(rate, true)
-        // Facade / modulaire: the lane in the theme's screen (VFD, amber LCD).
+        // Facade / modulaire: both lanes in one screen of the theme (VFD,
+        // green LCD), drawn by the module.
         readonly property bool onScreen: lane.m.look === "facade" || lane.m.look === "modulaire"
-        readonly property color ink: onScreen ? screen.ink : lane.m.theme.color.ink
-        readonly property color soft: onScreen ? screen.soft : lane.m.theme.color.soft
-
-        Display {
-            id: screen
-            visible: lane.onScreen
-            anchors.fill: parent
-            anchors.margins: -6
-            tint: "amber"
-        }
+        readonly property var laneScreen: lane.m.sharedScreen
+        readonly property color ink: onScreen ? laneScreen.ink : lane.m.theme.color.ink
+        readonly property color soft: onScreen ? laneScreen.soft : lane.m.theme.color.soft
+        // Figure size per shape (design review).
+        readonly property real figurePx: lane.big ? Math.min(lane.m.heroMax * 0.6, lane.height * 0.3)
+            : lane.m.shape === "box" || lane.m.shape === "tall" ? Math.min(lane.m.ch, lane.m.cw) * 0.12
+            : lane.m.shape === "wide" || lane.m.shape === "strip" ? Math.min(lane.m.ch * 0.2, lane.m.cw * 0.06)
+            : Math.min(lane.m.t2 * 1.5, lane.height * (lane.showCurve ? 0.32 : 0.55))
         // "12,4 Mo/s" → figure "12,4", unit "Mo/s".
         readonly property var parts: /^([\d\s.,]+)\s*(.*)$/.exec(text) ?? [text, text, ""]
         readonly property bool big: lane.m.large
@@ -157,7 +152,7 @@ ModuleBase {
             ThemedText {
                 label: true
                 text: `${lane.glyph} ${lane.label}`
-                font.family: lane.onScreen ? screen.textFont : lane.m.theme.font.family
+                font.family: lane.onScreen ? lane.laneScreen.textFont : lane.m.theme.font.family
                 font.pixelSize: lane.m.t4
                 color: lane.soft
             }
@@ -166,17 +161,19 @@ ModuleBase {
                 spacing: 6
 
                 Figure {
+                    id: laneFigure
                     text: lane.parts[1].trim()
+                    // Matrix: the dots glow.
                     glow: false
                     color: lane.onScreen ? lane.ink : lane.m.theme.color.nixie ?? lane.m.theme.color.ink
-                    pixelSize: lane.big ? Math.min(lane.m.heroMax * 0.6, lane.height * 0.3) : Math.min(lane.m.t2 * 1.5, lane.height * (lane.showCurve ? 0.32 : 0.55))
+                    pixelSize: Math.max(14, lane.figurePx)
                 }
 
                 ThemedText {
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 4
                     text: lane.parts[2]
-                    font.pixelSize: lane.m.t3
+                    font.pixelSize: Math.max(11, lane.figurePx * 0.4)
                     color: lane.soft
                 }
             }
@@ -185,7 +182,7 @@ ModuleBase {
             ThemedText {
                 visible: lane.big
                 text: I18n.tr("system.avgPeak", { avg: I18n.bytes(lane.history.length ? lane.history.reduce((a, b) => a + b, 0) / lane.history.length : 0, true), peak: I18n.bytes(Math.max(0, ...lane.history), true) })
-                font.family: lane.onScreen ? screen.textFont : lane.m.theme.font.family
+                font.family: lane.onScreen ? lane.laneScreen.textFont : lane.m.theme.font.family
                 font.pixelSize: lane.m.t4 * 1.1
                 font.features: ({ "tnum": 1 })
                 color: lane.soft
@@ -200,6 +197,8 @@ ModuleBase {
             anchors.bottomMargin: lane.axisHeight
             width: parent.width
             values: lane.history
+            lineWidth: 1.4
+            fillAlpha: 0.18
             // Its own scale (upload would flatten under download).
             max: Math.max(16 * 1024, ...lane.history)
             color: lane.onScreen ? lane.ink : lane.lineColor
@@ -222,7 +221,7 @@ ModuleBase {
                     anchors.bottom: parent.bottom
                     label: true
                     text: modelData
-                    font.family: lane.onScreen ? screen.textFont : lane.m.theme.font.mono
+                    font.family: lane.onScreen ? lane.laneScreen.textFont : lane.m.theme.font.mono
                     font.pixelSize: lane.m.t4
                     color: lane.soft
                 }
@@ -251,6 +250,18 @@ ModuleBase {
             font.features: ({ "tnum": 1 })
             color: root.theme.color.soft
         }
+    }
+
+    // Facade / modulaire: one screen for both lanes (VFD; modulaire a
+    // green LCD).
+    property var sharedScreen: sharedDisplay
+    Display {
+        id: sharedDisplay
+        visible: (root.look === "facade" || root.look === "modulaire") && NetworkService.sourceNames.length > 0 && (root.large || root.shape !== "tiny")
+        anchors.fill: parent
+        anchors.margins: -6
+        anchors.bottomMargin: root.poster ? root.connectionHeight + root.gap * 1.5 - 6 : -6
+        tint: "green"
     }
 
     // The two lanes, side by side or stacked.
@@ -305,9 +316,11 @@ ModuleBase {
                 width: (parent.width - (pills.count - 1) * parent.spacing) / Math.max(1, pills.count)
                 height: parent.height
                 radius: root.look === "matrix" || root.look === "classic" || root.look === "constellation" ? height / 2 : 4
-                color: modelData.on ? Qt.alpha(root.theme.color.signal ?? root.theme.color.accent, 0.14) : "transparent"
+                // Matrix: ink (its red is for alerts only).
+                readonly property color tone: root.look === "matrix" ? root.theme.color.ink : (root.theme.color.signal ?? root.theme.color.accent)
+                color: modelData.on && root.look !== "matrix" ? Qt.alpha(tone, 0.14) : "transparent"
                 border.width: 1
-                border.color: modelData.on ? (root.theme.color.signal ?? root.theme.color.accent) : root.theme.color.line
+                border.color: modelData.on ? tone : root.theme.color.line
 
                 Row {
                     anchors.centerIn: parent
