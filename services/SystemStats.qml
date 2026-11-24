@@ -22,6 +22,11 @@ Singleton {
     property var gpus: []
 
     property var lastCpu: null
+    // The last minute (30 samples, 2 s apart), 0..1: CPU, dedicated (or
+    // first) GPU, memory.
+    property var cpuHistory: []
+    property var gpuHistory: []
+    property var memoryHistory: []
 
     Timer {
         interval: 2000
@@ -32,6 +37,10 @@ Singleton {
             stat.reload();
             meminfo.reload();
             sensors.running = true;
+            const gpu = root.gpus.find(g => !g.integrated) ?? root.gpus[0];
+            root.cpuHistory = [...root.cpuHistory, root.cpu].slice(-30);
+            root.gpuHistory = [...root.gpuHistory, gpu?.busy ?? 0].slice(-30);
+            root.memoryHistory = [...root.memoryHistory, root.memory].slice(-30);
         }
     }
 

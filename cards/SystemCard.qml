@@ -19,8 +19,6 @@ Column {
     Component.onDestruction: SystemStats.refCount--
 
     readonly property var gpu: SystemStats.gpus.find(g => !g.integrated) ?? SystemStats.gpus[0] ?? null
-    property var cpuHistory: []
-    property var gpuHistory: []
     property var processes: []
 
     spacing: theme.space.m
@@ -31,8 +29,6 @@ Column {
         running: true
         triggeredOnStart: true
         onTriggered: {
-            root.cpuHistory = [...root.cpuHistory, SystemStats.cpu].slice(-30);
-            root.gpuHistory = [...root.gpuHistory, root.gpu?.busy ?? 0].slice(-30);
             if (!top.running)
                 top.running = true;
         }
@@ -56,8 +52,8 @@ Column {
 
         Repeater {
             model: [
-                { label: "CPU", value: SystemStats.cpu, temp: SystemStats.cpuTemp, values: root.cpuHistory },
-                ...(root.gpu ? [{ label: "GPU", value: root.gpu.busy, temp: root.gpu.temp, values: root.gpuHistory }] : [])
+                { label: "CPU", value: SystemStats.cpu, temp: SystemStats.cpuTemp, values: SystemStats.cpuHistory },
+                ...(root.gpu ? [{ label: "GPU", value: root.gpu.busy, temp: root.gpu.temp, values: SystemStats.gpuHistory }] : [])
             ]
 
             Rectangle {

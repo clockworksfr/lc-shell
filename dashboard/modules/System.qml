@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import Quickshell
+import Quickshell.Io
 import qs.components
 import qs.components.dashboard
 import qs.i18n
@@ -16,7 +17,10 @@ import qs.theme
 //                  values listed beside it
 //   modulaire      rotary knobs with their silk label, one LCD under them
 //   matrix         rings of dots (red beyond 90 %)
-// tiny: CPU alone; strip: side by side.
+// tiny: CPU alone; strip: side by side. Big cells (tiers large / poster):
+// the gauges on top, the last minute's curves (CPU, GPU; poster: RAM)
+// with average and peak, the probes at the bottom; poster: memory, GPU
+// and the 5 busiest processes in a column on the right.
 ModuleBase {
     id: root
 
@@ -48,6 +52,11 @@ ModuleBase {
     ].filter(t => t.value > 0)
     readonly property bool showTemps: temps.length > 0 && shape !== "tiny" && layout !== "strip" && ch >= 230
     readonly property real tempsHeight: showTemps ? t3 * 2.6 : 0
+    // Big cells: the gauges' band and the poster's right column.
+    readonly property real sideWidth: poster ? Math.round(cw * 0.3) : 0
+    readonly property real gaugesHeight: large ? Math.round((ch - tempsHeight - gap) * (poster ? 0.38 : 0.42)) : 0
+    readonly property real gaugesBottom: large ? ch - gaugesHeight : showTemps ? tempsHeight + gap : 0
+    readonly property real gaugesRight: poster ? sideWidth + gap : 0
 
     component TempsRow: Row {
         id: tempsRow
@@ -166,7 +175,8 @@ ModuleBase {
         // Only the VFD holds the rows (modulaire's LCD is for figures).
         screen: root.look === "facade"
         anchors.fill: parent
-        anchors.bottomMargin: root.showTemps ? root.tempsHeight + root.gap : 0
+        anchors.bottomMargin: root.gaugesBottom
+        anchors.rightMargin: root.gaugesRight
 
         ColumnLayout {
             id: rows
@@ -243,7 +253,8 @@ ModuleBase {
     RowLayout {
         visible: root.layout === "orbits"
         anchors.fill: parent
-        anchors.bottomMargin: root.showTemps ? root.tempsHeight + root.gap : 0
+        anchors.bottomMargin: root.gaugesBottom
+        anchors.rightMargin: root.gaugesRight
         spacing: root.gap
 
         Item {
@@ -366,14 +377,16 @@ ModuleBase {
     ColumnLayout {
         visible: root.layout === "rings"
         anchors.fill: parent
-        anchors.bottomMargin: root.showTemps ? root.tempsHeight + root.gap : 0
+        anchors.bottomMargin: root.gaugesBottom
+        anchors.rightMargin: root.gaugesRight
         spacing: root.gap / 2
 
         // Even cells over the whole room, each ring centered in its own.
         Grid {
             id: ringGrid
 
-            readonly property var g: root.bestGrid(root.stats.length, root.look === "modulaire" ? 70 : 90)
+            // Big cells: one row in the gauges' band.
+            readonly property var g: root.large ? { n: root.stats.length, columns: root.stats.length, rows: 1 } : root.bestGrid(root.stats.length, root.look === "modulaire" ? 70 : 90)
             readonly property real cellW: width / g.columns
             readonly property real cellH: height / g.rows
 
@@ -395,7 +408,7 @@ ModuleBase {
                         id: knob
 
                         readonly property var modelData: parent.modelData
-                        readonly property real size: Math.min(ringGrid.cellW, ringGrid.cellH) - root.gap
+                        readonly property real size: Math.min(ringGrid.cellW, ringGrid.cellH, root.large ? root.heroMax * 1.3 : Infinity) - root.gap
 
                         anchors.centerIn: parent
                         width: size
@@ -528,7 +541,322 @@ ModuleBase {
         m: root
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.rightMargin: root.gaugesRight
         anchors.bottom: parent.bottom
         height: root.tempsHeight
+    }
+
+    // --- Big cells ---
+
+    function average(values: var): real {
+        return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+    }
+
+    // The last minute, in the theme's language: matrix columns of dots,
+    // facade VFD segments, area and line elsewhere.
+    component HistoryChart: Canvas {
+        id: hc
+
+        property var m
+        property var values: []
+        property color ink: m.theme.color.accent
+        readonly property string look: m.look
+        onValuesChanged: requestPaint()
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
+        onInkChanged: requestPaint()
+        onPaint: {
+            const ctx = getContext("2d");
+            ctx.reset();
+            const v = hc.values;
+            const n = 30;
+            if (look === "matrix" || look === "facade") {
+                const rows = look === "matrix" ? 10 : 12;
+                const cw = width / n, rh = height / rows;
+                for (let i = 0; i < n; i++) {
+                    const value = v[v.length - n + i] ?? 0;
+                    const lit = Math.round(value * rows);
+                    for (let r = 0; r < rows; r++) {
+                        const on = r < lit;
+                        ctx.fillStyle = on ? hc.ink : Qt.alpha(hc.ink, 0.1);
+                        if (look === "matrix") {
+                            ctx.beginPath();
+                            ctx.arc(i * cw + cw / 2, height - r * rh - rh / 2, Math.min(cw, rh) * 0.3, 0, Math.PI * 2);
+                            ctx.fill();
+                        } else {
+                            ctx.fillRect(i * cw + 1, height - (r + 1) * rh + 1, cw - 2, rh - 2);
+                        }
+                    }
+                }
+                return;
+            }
+            // Grid lines.
+            ctx.strokeStyle = Qt.alpha(hc.ink, 0.15);
+            ctx.lineWidth = 1;
+            for (const f of [0.25, 0.5, 0.75]) {
+                ctx.beginPath();
+                ctx.moveTo(0, height * f);
+                ctx.lineTo(width, height * f);
+                ctx.stroke();
+            }
+            if (v.length < 2)
+                return;
+            const pts = v.map((value, i) => [width * (n - v.length + i) / (n - 1), height - value * (height - 3)]);
+            ctx.beginPath();
+            ctx.moveTo(pts[0][0], height);
+            for (const [x, y] of pts)
+                ctx.lineTo(x, y);
+            ctx.lineTo(pts[pts.length - 1][0], height);
+            ctx.closePath();
+            ctx.fillStyle = Qt.alpha(hc.ink, look === "modulaire" ? 0.12 : 0.18);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(pts[0][0], pts[0][1]);
+            for (const [x, y] of pts.slice(1))
+                ctx.lineTo(x, y);
+            ctx.strokeStyle = hc.ink;
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+        }
+    }
+
+    // A curve with its figure, average and peak.
+    component HistoryZone: ModuleZone {
+        id: hzone
+
+        property var m
+        property string name
+        property real value
+        property var values: []
+        property real temp: 0
+
+        label: hzone.name
+        labelSize: hzone.m.t4
+        gap: hzone.m.gap
+        tint: "green"
+
+        readonly property color tone: hzone.onDisplay ? hzone.ink : hzone.value > 0.9 ? hzone.m.theme.color.urgent : (hzone.m.theme.color.signal ?? hzone.m.theme.color.accent)
+
+        Row {
+            id: hzHead
+            width: parent.width
+            spacing: hzone.m.gap
+
+            ThemedText {
+                id: hzFigure
+                text: I18n.percent(hzone.value)
+                font.family: hzone.onDisplay ? hzone.textFont : (hzone.m.theme.font.display ?? hzone.m.theme.font.family)
+                font.pixelSize: hzone.m.t2
+                font.features: ({ "tnum": 1 })
+                color: hzone.onDisplay ? hzone.ink : hzone.m.theme.color.ink
+            }
+
+            ThemedText {
+                anchors.baseline: hzFigure.baseline
+                text: I18n.tr("system.avgPeak", { avg: I18n.percent(hzone.m.average(hzone.values)), peak: I18n.percent(Math.max(0, ...hzone.values)) }) + (hzone.temp > 0 ? ` · ${Math.round(hzone.temp)}°` : "")
+                font.family: hzone.textFont
+                font.pixelSize: hzone.m.t4 * 1.1
+                font.features: ({ "tnum": 1 })
+                color: hzone.soft
+            }
+        }
+
+        HistoryChart {
+            m: hzone.m
+            y: hzHead.height + hzone.m.gap * 0.6
+            width: parent.width
+            height: parent.height - y
+            values: hzone.values
+            ink: hzone.tone
+        }
+    }
+
+    Row {
+        id: curves
+
+        visible: root.large
+        y: root.gaugesHeight + root.gap
+        width: root.cw - root.gaugesRight
+        height: root.ch - y - (root.showTemps ? root.tempsHeight + root.gap : 0)
+        spacing: root.gap
+
+        readonly property var series: [
+            { name: "CPU", value: SystemStats.cpu, values: SystemStats.cpuHistory, temp: SystemStats.cpuTemp },
+            ...(root.gpu ? [{ name: "GPU", value: root.gpu.busy, values: SystemStats.gpuHistory, temp: root.gpu.temp }] : []),
+            ...(root.poster ? [{ name: "RAM", value: SystemStats.memory, values: SystemStats.memoryHistory, temp: 0 }] : [])
+        ]
+
+        Repeater {
+            model: root.large ? curves.series : []
+
+            HistoryZone {
+                required property var modelData
+                m: root
+                width: (curves.width - (curves.series.length - 1) * curves.spacing) / curves.series.length
+                height: curves.height
+                name: modelData.name
+                value: modelData.value
+                values: modelData.values
+                temp: modelData.temp
+            }
+        }
+    }
+
+    // Poster: memory, GPU and the busiest processes on the right.
+    property var processes: []
+    Timer {
+        interval: 3000
+        repeat: true
+        running: root.poster && root.visible
+        triggeredOnStart: true
+        onTriggered: if (!top.running) top.running = true
+    }
+    Process {
+        id: top
+        command: ["ps", "-eo", "comm=,pcpu=", "--sort=-pcpu"]
+        stdout: StdioCollector {
+            onStreamFinished: root.processes = text.trim().split("\n").filter(l => !/^ps\s/.test(l.trim())).slice(0, 5).map(l => {
+                const m = /^(.*\S)\s+([\d.]+)$/.exec(l.trim());
+                return m ? { name: m[1], cpu: parseFloat(m[2]) } : null;
+            }).filter(p => !!p)
+        }
+    }
+
+    Column {
+        visible: root.poster
+        x: root.cw - root.sideWidth
+        width: root.sideWidth
+        height: root.ch
+        spacing: root.gap
+
+        ModuleZone {
+            id: memZone
+            width: parent.width
+            height: Math.round((parent.height - 2 * parent.spacing) * 0.26)
+            label: I18n.tr("system.zone.memory")
+            labelSize: root.t4
+            gap: root.gap
+            tint: "green"
+
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width
+                spacing: root.gap * 0.5
+
+                ThemedText {
+                    text: I18n.tr("system.memory", { used: I18n.number(SystemStats.memoryUsedGiB, 1), total: Math.round(SystemStats.memoryTotalGiB) })
+                    font.family: memZone.onDisplay ? memZone.textFont : (root.theme.font.display ?? root.theme.font.family)
+                    font.pixelSize: root.t2 * 0.8
+                    font.features: ({ "tnum": 1 })
+                    color: memZone.ink
+                }
+
+                Rectangle {
+                    width: parent.width
+                    height: Math.max(8, root.t4 * 0.6)
+                    radius: height / 2
+                    color: Qt.alpha(memZone.ink, 0.15)
+
+                    Rectangle {
+                        width: parent.width * SystemStats.memory
+                        height: parent.height
+                        radius: parent.radius
+                        color: memZone.onDisplay ? memZone.ink : (root.theme.color.signal ?? root.theme.color.accent)
+                    }
+                }
+            }
+        }
+
+        ModuleZone {
+            id: gpuZone
+            visible: !!root.gpu
+            width: parent.width
+            height: Math.round((parent.height - 2 * parent.spacing) * 0.26)
+            label: "GPU"
+            labelSize: root.t4
+            gap: root.gap
+            tint: "green"
+
+            Grid {
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width
+                columns: 2
+                columnSpacing: root.gap
+
+                Repeater {
+                    model: [
+                        { label: I18n.tr("system.load"), value: I18n.percent(root.gpu?.busy ?? 0) },
+                        { label: I18n.tr("system.temp"), value: root.gpu?.temp ? `${Math.round(root.gpu.temp)}°` : "–" }
+                    ]
+
+                    Column {
+                        required property var modelData
+                        width: (gpuZone.body.width - root.gap) / 2
+
+                        ThemedText {
+                            label: true
+                            text: gpuZone.onDisplay ? modelData.label.toUpperCase() : modelData.label
+                            font.family: gpuZone.textFont
+                            font.pixelSize: root.t4
+                            color: gpuZone.soft
+                        }
+
+                        ThemedText {
+                            text: modelData.value
+                            font.family: gpuZone.onDisplay ? gpuZone.textFont : (root.theme.font.display ?? root.theme.font.family)
+                            font.pixelSize: root.t2 * 0.8
+                            font.features: ({ "tnum": 1 })
+                            color: gpuZone.ink
+                        }
+                    }
+                }
+            }
+        }
+
+        ModuleZone {
+            id: procZone
+            width: parent.width
+            height: parent.height - memZone.height - (gpuZone.visible ? gpuZone.height + parent.spacing : 0) - parent.spacing
+            label: I18n.tr("system.zone.processes")
+            labelSize: root.t4
+            gap: root.gap
+            tint: "green"
+
+            Column {
+                width: parent.width
+                spacing: root.gap * 0.4
+
+                Repeater {
+                    model: root.processes
+
+                    Item {
+                        required property var modelData
+                        width: procZone.body.width
+                        height: root.t3 * 1.6
+
+                        ThemedText {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - procCpu.width - root.gap
+                            elide: Text.ElideRight
+                            text: modelData.name
+                            font.family: procZone.onDisplay ? procZone.textFont : root.theme.font.mono
+                            font.pixelSize: root.t3
+                            color: procZone.ink
+                        }
+
+                        ThemedText {
+                            id: procCpu
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: I18n.tr("format.percent", { value: I18n.number(modelData.cpu, 0) })
+                            font.family: procZone.textFont
+                            font.pixelSize: root.t3
+                            font.features: ({ "tnum": 1 })
+                            color: procZone.soft
+                        }
+                    }
+                }
+            }
+        }
     }
 }
