@@ -803,6 +803,8 @@
   "network.all": "All",
   "network.allLong": "All interfaces (total)",
   "network.auto": "Automatic (active interface)",
+  "network.now": "now",
+  "network.internet": "Internet",
   "network.wifi": "Wi-Fi",
   "network.wired": "Wired",
   "lock.capsLock": "Caps Lock is on",

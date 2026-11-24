@@ -806,6 +806,8 @@
   "network.all": "Toutes",
   "network.allLong": "Toutes les interfaces (total)",
   "network.auto": "Automatique (interface active)",
+  "network.now": "maintenant",
+  "network.internet": "Internet",
   "network.wifi": "Wi-Fi",
   "network.wired": "Filaire",
   "lock.capsLock": "Verr. Maj activé",

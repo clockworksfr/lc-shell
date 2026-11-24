@@ -156,3 +156,4 @@ wifi_off
 shuffle
 repeat
 repeat_one
+public

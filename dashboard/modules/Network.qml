@@ -13,11 +13,15 @@ import qs.theme
 //   narrow  download, then upload, each with its curve
 //   wide / strip  the two side by side (figure over the curve)
 //   box / tall    the two stacked
+// Big cells: big figure, average and peak of the minute, a tall curve with
+// its time axis (large: stacked; poster: side by side, and a connection
+// row — wired, Wi-Fi on / off (no name), VPN, Internet).
 ModuleBase {
     id: root
 
     readonly property string look: theme.style.module ?? "classic"
-    readonly property bool stacked: shape === "narrow" || shape === "box" || shape === "tall"
+    readonly property bool stacked: poster ? false : large || shape === "narrow" || shape === "box" || shape === "tall"
+    readonly property real connectionHeight: poster ? t3 * 2.6 : 0
 
     Component.onCompleted: NetworkService.watchers++
     Component.onDestruction: NetworkService.watchers--
@@ -142,6 +146,8 @@ ModuleBase {
         }
         // "12,4 Mo/s" → figure "12,4", unit "Mo/s".
         readonly property var parts: /^([\d\s.,]+)\s*(.*)$/.exec(text) ?? [text, text, ""]
+        readonly property bool big: lane.m.large
+        readonly property real axisHeight: big ? lane.m.t4 * 1.6 : 0
 
         Column {
             id: head
@@ -163,7 +169,7 @@ ModuleBase {
                     text: lane.parts[1].trim()
                     glow: false
                     color: lane.onScreen ? lane.ink : lane.m.theme.color.nixie ?? lane.m.theme.color.ink
-                    pixelSize: Math.min(lane.m.t2 * 1.5, lane.height * (lane.showCurve ? 0.32 : 0.55))
+                    pixelSize: lane.big ? Math.min(lane.m.heroMax * 0.6, lane.height * 0.3) : Math.min(lane.m.t2 * 1.5, lane.height * (lane.showCurve ? 0.32 : 0.55))
                 }
 
                 ThemedText {
@@ -174,6 +180,16 @@ ModuleBase {
                     color: lane.soft
                 }
             }
+
+            // Big cells: the minute's average and peak.
+            ThemedText {
+                visible: lane.big
+                text: I18n.tr("system.avgPeak", { avg: I18n.bytes(lane.history.length ? lane.history.reduce((a, b) => a + b, 0) / lane.history.length : 0, true), peak: I18n.bytes(Math.max(0, ...lane.history), true) })
+                font.family: lane.onScreen ? screen.textFont : lane.m.theme.font.family
+                font.pixelSize: lane.m.t4 * 1.1
+                font.features: ({ "tnum": 1 })
+                color: lane.soft
+            }
         }
 
         Sparkline {
@@ -181,17 +197,42 @@ ModuleBase {
             anchors.top: head.bottom
             anchors.topMargin: lane.m.gap / 2
             anchors.bottom: parent.bottom
+            anchors.bottomMargin: lane.axisHeight
             width: parent.width
             values: lane.history
             // Its own scale (upload would flatten under download).
             max: Math.max(16 * 1024, ...lane.history)
             color: lane.onScreen ? lane.ink : lane.lineColor
         }
+
+        // Big cells: the time axis under the curve.
+        Item {
+            visible: lane.big
+            anchors.bottom: parent.bottom
+            width: parent.width
+            height: lane.axisHeight
+
+            Repeater {
+                model: ["−60 s", "−30 s", I18n.tr("network.now")]
+
+                ThemedText {
+                    required property string modelData
+                    required property int index
+                    x: index === 0 ? 0 : index === 1 ? (parent.width - width) / 2 : parent.width - width
+                    anchors.bottom: parent.bottom
+                    label: true
+                    text: modelData
+                    font.family: lane.onScreen ? screen.textFont : lane.m.theme.font.mono
+                    font.pixelSize: lane.m.t4
+                    color: lane.soft
+                }
+            }
+        }
     }
 
     // tiny: the two figures.
     Column {
-        visible: root.shape === "tiny" && NetworkService.sourceNames.length > 0
+        visible: !root.large && root.shape === "tiny" && NetworkService.sourceNames.length > 0
         anchors.centerIn: parent
         spacing: 2
 
@@ -214,8 +255,9 @@ ModuleBase {
 
     // The two lanes, side by side or stacked.
     Grid {
-        visible: root.shape !== "tiny" && NetworkService.sourceNames.length > 0
+        visible: (root.large || root.shape !== "tiny") && NetworkService.sourceNames.length > 0
         anchors.fill: parent
+        anchors.bottomMargin: root.poster ? root.connectionHeight + root.gap * 1.5 : 0
         columns: root.stacked ? 1 : 2
         spacing: root.gap * 1.5
 
@@ -229,7 +271,7 @@ ModuleBase {
                 required property var modelData
                 m: root
                 width: root.stacked ? root.cw : (root.cw - root.gap * 1.5) / 2
-                height: root.stacked ? (root.ch - root.gap * 1.5) / 2 : root.ch
+                height: (root.stacked ? (root.ch - root.gap * 1.5) / 2 : root.ch) - (root.poster ? root.connectionHeight + root.gap * 1.5 : 0)
                 glyph: modelData.glyph
                 label: modelData.label
                 rate: modelData.rx ? NetworkService.rxRate : NetworkService.txRate
@@ -237,6 +279,54 @@ ModuleBase {
                 // Upload: the second accent, or a cool blue where the theme
                 // has a single one (Classic).
                 lineColor: modelData.rx ? root.theme.color.accent : (root.theme.color.accent2 && Qt.colorEqual(root.theme.color.accent2, root.theme.color.accent) === false ? root.theme.color.accent2 : "#5AA0C8")
+            }
+        }
+    }
+
+    // Poster: the connection, in pills (no network names).
+    Row {
+        visible: root.poster
+        anchors.bottom: parent.bottom
+        width: parent.width
+        height: root.connectionHeight
+        spacing: root.gap
+
+        Repeater {
+            id: pills
+            model: [
+                { icon: "lan", label: I18n.tr("network.wired"), on: NetworkService.wiredConnected },
+                { icon: NetworkService.wifiEnabled ? "wifi" : "wifi_off", label: I18n.tr("network.wifi"), on: NetworkService.wifiEnabled && !!NetworkService.activeWifi },
+                ...(VpnService.available ? [{ icon: "vpn_key", label: "VPN", on: VpnService.active }] : []),
+                { icon: "public", label: I18n.tr("network.internet"), on: NetworkService.online }
+            ]
+
+            Rectangle {
+                required property var modelData
+                width: (parent.width - (pills.count - 1) * parent.spacing) / Math.max(1, pills.count)
+                height: parent.height
+                radius: root.look === "matrix" || root.look === "classic" || root.look === "constellation" ? height / 2 : 4
+                color: modelData.on ? Qt.alpha(root.theme.color.signal ?? root.theme.color.accent, 0.14) : "transparent"
+                border.width: 1
+                border.color: modelData.on ? (root.theme.color.signal ?? root.theme.color.accent) : root.theme.color.line
+
+                Row {
+                    anchors.centerIn: parent
+                    spacing: root.gap * 0.5
+
+                    Icon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        name: parent.parent.modelData.icon
+                        size: root.t3 * 1.2
+                        color: parent.parent.modelData.on ? root.theme.color.ink : root.theme.color.soft
+                    }
+
+                    ThemedText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: parent.parent.modelData.label
+                        font.pixelSize: root.t3
+                        color: parent.parent.modelData.on ? root.theme.color.ink : root.theme.color.soft
+                    }
+                }
             }
         }
     }
