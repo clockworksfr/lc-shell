@@ -130,11 +130,11 @@ ModuleBase {
                     gradient: Gradient {
                         GradientStop {
                             position: 0
-                            color: cell.active ? "#E8742A" : "#3A3B3D"
+                            color: "#3A3B3D"
                         }
                         GradientStop {
                             position: 1
-                            color: cell.active ? "#B8541A" : "#232426"
+                            color: "#202123"
                         }
                     }
 
@@ -167,15 +167,17 @@ ModuleBase {
                     width: root.look === "matrix" && cell.active ? 22 : root.look === "matrix" ? 8 : 10
                     height: root.look === "matrix" ? 8 : 10
                     radius: height / 2
+                    // Modulaire: a sequencer step (design .c-step): active
+                    // orange, urgent red, occupied dim amber, empty brown.
                     color: root.look === "modulaire"
-                        ? (cell.active ? "#FFB070" : cell.busy ? "#46C46A" : "#333333")
+                        ? (cell.urgent ? "#FF3B30" : cell.active ? "#E8742A" : cell.busy ? "#7A4A2A" : "#3B2A24")
                         : (cell.urgent ? "#E5323A" : cell.active ? root.theme.color.ink : cell.busy ? root.theme.color.soft : root.theme.color.line)
 
-                    layer.enabled: (root.look === "modulaire" && (cell.active || cell.busy)) || (root.look === "matrix" && cell.active && Qt.color(root.theme.color.glow ?? "#00000000").a > 0)
+                    layer.enabled: (root.look === "modulaire" && (cell.active || cell.urgent)) || (root.look === "matrix" && cell.active && Qt.color(root.theme.color.glow ?? "#00000000").a > 0)
                     layer.effect: MultiEffect {
                         autoPaddingEnabled: true
                         shadowEnabled: true
-                        shadowColor: root.look === "matrix" ? (root.theme.color.glow ?? "transparent") : cell.active ? "#EEE8742A" : "#EE46C46A"
+                        shadowColor: root.look === "matrix" ? (root.theme.color.glow ?? "transparent") : cell.urgent ? "#EEFF3B30" : "#EEE8742A"
                         shadowBlur: 0.81
                         blurMax: 15
                         shadowHorizontalOffset: 0
@@ -252,7 +254,7 @@ ModuleBase {
                         font.weight: root.look === "constellation" ? Font.Light : root.look === "modulaire" ? Font.DemiBold : Font.Bold
                         font.pixelSize: root.look === "constellation" ? cell.figureSize * 0.55 : root.look === "modulaire" ? Math.min(22, cell.figureSize * 0.7) : cell.figureSize * (root.look === "matrix" ? 0.75 : 1)
                         color: root.look === "classic" ? (cell.active ? root.theme.color.onAccent : root.theme.color.ink)
-                            : root.look === "modulaire" ? (cell.active ? "#111111" : "#DDDDDD")
+                            : root.look === "modulaire" ? "#EFEDE6"
                             : root.look === "matrix" ? (cell.active || cell.busy ? root.theme.color.ink : root.theme.color.soft)
                             : root.theme.color.soft
                     }
