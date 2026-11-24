@@ -96,6 +96,8 @@ Item {
         title: base.framed ? base.title : ""
         titleReserve: base.titleReserve
         tier: base.tier
+        // Screen modules wear Modulaire's black finish.
+        finish: ["vu", "system", "network", "notificationSample"].includes(base.options.type ?? "") ? "black" : "normal"
     }
 
     Item {

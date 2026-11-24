@@ -22,6 +22,9 @@ Singleton {
     property var gpus: []
 
     property var lastCpu: null
+    // Each core's load (0..1).
+    property var cores: []
+    property var lastCores: []
     // The last minute (30 samples, 2 s apart), 0..1: CPU, dedicated (or
     // first) GPU, memory.
     property var cpuHistory: []
@@ -48,14 +51,24 @@ Singleton {
         id: stat
         path: "/proc/stat"
         onLoaded: {
-            const fields = text().split("\n")[0].split(/\s+/).slice(1).map(Number);
-            const idle = fields[3] + fields[4];
-            const total = fields.reduce((a, b) => a + b, 0);
-            if (root.lastCpu) {
-                const dTotal = total - root.lastCpu.total;
-                root.cpu = dTotal > 0 ? 1 - (idle - root.lastCpu.idle) / dTotal : 0;
-            }
-            root.lastCpu = { idle, total };
+            const lines = text().split("\n");
+            const parse = line => {
+                const fields = line.split(/\s+/).slice(1).map(Number);
+                return { idle: fields[3] + fields[4], total: fields.reduce((a, b) => a + b, 0) };
+            };
+            const busy = (now, last) => {
+                const dTotal = now.total - (last?.total ?? 0);
+                return last && dTotal > 0 ? 1 - (now.idle - last.idle) / dTotal : 0;
+            };
+            const all = parse(lines[0]);
+            if (root.lastCpu)
+                root.cpu = busy(all, root.lastCpu);
+            root.lastCpu = all;
+            // Per core (cpu0, cpu1…): Modulaire's ladders.
+            const cores = lines.filter(l => /^cpu\d+ /.test(l)).map(parse);
+            const last = root.lastCores;
+            root.cores = cores.map((c, i) => busy(c, last[i]));
+            root.lastCores = cores;
         }
     }
 

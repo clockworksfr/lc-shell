@@ -31,8 +31,24 @@ Item {
         visible: root.kind !== "none"
         radius: 4
         color: root.kind === "lcd" ? (root.tint === "amber" ? (root.theme.color.lcdAmber ?? "#2A1606") : (root.theme.color.lcd ?? "#1A2410")) : (root.theme.color.screen ?? "#030505")
-        border.width: root.kind === "vfd" && root.theme.variant === "light" ? 1 : 2
+        // LCD: no frame line, a soft inner shadow instead (below).
+        border.width: root.kind === "lcd" ? 0 : root.kind === "vfd" && root.theme.variant === "light" ? 1 : 2
         border.color: root.kind === "vfd" ? (root.theme.color.screenEdge ?? Qt.alpha("black", 0.6)) : Qt.alpha("black", 0.6)
+
+        // LCD inner shadow (design: inset 0 0 10px #000), in three rings.
+        Repeater {
+            model: root.kind === "lcd" ? 3 : 0
+
+            Rectangle {
+                required property int index
+                anchors.fill: parent
+                anchors.margins: index * 2
+                radius: Math.max(0, 4 - index)
+                color: "transparent"
+                border.width: 2
+                border.color: Qt.alpha("black", [0.55, 0.3, 0.12][index])
+            }
+        }
 
         // Static scanlines (VFD).
         Canvas {

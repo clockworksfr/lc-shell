@@ -6,7 +6,7 @@ import qs.theme
 
 // A round gauge (0..1) in the theme's language (style.ring): "arc" (thick
 // 270° arc), "orbit" (thin circle, gradient arc, a planet at the value),
-// "knob" (rotary knob: ticks, white index), "dots" (36 dots, lit ones
+// "knob" (rotary knob: full cap, cream index), "dots" (36 dots, lit ones
 // glowing), "vu" (falls back to "arc" outside audio). Children sit in the
 // center.
 Item {
@@ -118,55 +118,68 @@ Item {
         }
     }
 
-    // Knob: body, ticks, index.
+    // Knob (design .c-knob): a full cap (default #2B2C2E, or a colored one),
+    // a highlight up-left, a dark rim, a drop shadow, a cream index from
+    // −135° to +135°. No ticks.
+    property color capColor: "#2B2C2E"
+
     Item {
         visible: root.look === "knob"
         anchors.centerIn: parent
         width: root.size
         height: root.size
 
-        Repeater {
-            model: 11
-
-            Rectangle {
-                required property int index
-                readonly property real angle: (135 + 27 * index) * Math.PI / 180
-                readonly property real r: root.size / 2 - 3
-                width: 2
-                height: root.size * 0.07
-                x: root.size / 2 + Math.cos(angle) * r - width / 2
-                y: root.size / 2 + Math.sin(angle) * r - height / 2
-                rotation: 135 + 27 * index + 90
-                color: root.theme.color.soft
+        Canvas {
+            id: cap
+            anchors.fill: parent
+            anchors.margins: -root.size * 0.08
+            property color fill: root.capColor
+            onFillChanged: requestPaint()
+            onWidthChanged: requestPaint()
+            onHeightChanged: requestPaint()
+            onPaint: {
+                const ctx = getContext("2d");
+                ctx.reset();
+                const c = width / 2, r = root.size / 2;
+                // Drop shadow under the cap.
+                ctx.save();
+                ctx.shadowColor = "rgba(0,0,0,0.45)";
+                ctx.shadowBlur = Math.max(4, r * 0.12);
+                ctx.shadowOffsetY = Math.max(2, r * 0.06);
+                ctx.beginPath();
+                ctx.arc(c, c, r, 0, Math.PI * 2);
+                ctx.fillStyle = fill;
+                ctx.fill();
+                ctx.restore();
+                // Highlight at (40 %, 35 %).
+                const hx = c - r + 0.8 * r, hy = c - r + 0.7 * r;
+                const g = ctx.createRadialGradient(hx, hy, 0, hx, hy, r * 0.8);
+                g.addColorStop(0, "rgba(255,255,255,0.40)");
+                g.addColorStop(1, "rgba(255,255,255,0)");
+                ctx.beginPath();
+                ctx.arc(c, c, r, 0, Math.PI * 2);
+                ctx.fillStyle = g;
+                ctx.fill();
+                // Rim.
+                ctx.beginPath();
+                ctx.arc(c, c, r - r * 0.03, 0, Math.PI * 2);
+                ctx.lineWidth = Math.max(1.5, r * 0.06);
+                ctx.strokeStyle = "rgba(0,0,0,0.19)";
+                ctx.stroke();
             }
         }
 
-        Rectangle {
-            anchors.centerIn: parent
-            width: root.size * 0.7
-            height: width
-            radius: width / 2
-            gradient: Gradient {
-                GradientStop {
-                    position: 0
-                    color: Qt.lighter(root.theme.color.surface3, 1.6)
-                }
-                GradientStop {
-                    position: 1
-                    color: root.theme.color.surface3
-                }
-            }
-            border.width: 1
-            border.color: Qt.alpha("black", 0.5)
+        Item {
+            anchors.fill: parent
             rotation: -135 + 270 * root.v
 
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
-                y: parent.height * 0.06
-                width: Math.max(2, parent.width * 0.05)
-                height: parent.height * 0.3
-                radius: width / 2
-                color: "white"
+                y: parent.height * 0.08
+                width: Math.max(2, parent.width * 0.08)
+                height: parent.height * 0.38
+                radius: 2
+                color: "#F3F1EA"
             }
         }
     }

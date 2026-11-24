@@ -44,6 +44,7 @@
   "system.zone.probes": "Sondes",
   "system.load": "Charge",
   "system.temp": "Température",
+  "system.cores": "CPU · {n} cœurs",
   "system.memory": "{used} / {total} Gio",
   "theme.classic": "Classique",
   "theme.matrix": "Matrix",

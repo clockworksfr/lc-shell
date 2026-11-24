@@ -3,7 +3,8 @@ import Quickshell
 import qs.theme
 
 // A ladder of round LEDs (modulaire), lit up to `value` (0..1): green,
-// yellow from 70 %, red from 85 %, each with a halo; unlit #2A2A2A.
+// yellow from 70 %, red from 85 % (#FF3B30), each with a halo; unlit
+// warm brown #3A2C22 (design .c-led).
 // Vertical by default (bottom to top).
 Item {
     id: root
@@ -30,7 +31,7 @@ Item {
                 // Vertical ladders fill from the bottom.
                 readonly property real at: ((root.vertical ? root.count - 1 - index : index) + 0.5) / root.count
                 readonly property bool lit: at <= root.value
-                readonly property color tone: at >= 0.85 ? "#D2332B" : at >= 0.7 ? "#E5C230" : "#46C46A"
+                readonly property color tone: at >= 0.85 ? "#FF3B30" : at >= 0.7 ? "#E5C230" : "#46C46A"
 
                 width: size
                 height: size
@@ -38,16 +39,16 @@ Item {
                 Rectangle {
                     visible: led.lit
                     anchors.centerIn: parent
-                    width: led.size * 1.8
+                    width: led.size + 10
                     height: width
                     radius: width / 2
-                    color: Qt.alpha(led.tone, 0.25)
+                    color: Qt.alpha(led.tone, 0.28)
                 }
 
                 Rectangle {
                     anchors.fill: parent
                     radius: width / 2
-                    color: led.lit ? led.tone : "#2A2A2A"
+                    color: led.lit ? led.tone : "#3A2C22"
                     border.width: 1
                     border.color: Qt.alpha("black", 0.5)
                 }

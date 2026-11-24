@@ -60,35 +60,14 @@ Item {
         }
     }
 
-    // Modulaire: a plate with four screws.
-    Rectangle {
-        visible: root.look === "screwed"
-        anchors.fill: parent
-        radius: 3
-        color: Qt.darker(root.theme.color.surface, 1.15)
-        border.width: 1
-        border.color: Qt.alpha("black", 0.4)
-
-        Repeater {
-            model: 4
-
-            Rectangle {
-                required property int index
-                width: 5
-                height: 5
-                radius: 2.5
-                x: index % 2 === 0 ? 0.5 : root.size - 5.5
-                y: index < 2 ? 0.5 : root.size - 5.5
-                color: Qt.darker(root.theme.color.surface, 1.5)
-            }
-        }
-    }
+    // Modulaire ("screwed", kept as the name): square, 3 px corners, no
+    // plate or screws any more (design review).
 
     ClippingRectangle {
         id: art
 
         anchors.centerIn: parent
-        width: root.look === "disc" ? root.size * 0.82 : root.look === "inset" || root.look === "screwed" ? root.size - 12 : root.size
+        width: root.look === "disc" ? root.size * 0.82 : root.look === "inset" ? root.size - 12 : root.size
         height: width
         radius: root.look === "square" ? root.theme.radius.tile : root.look === "inset" ? 2 : root.look === "screwed" ? 3 : width / 2
         color: root.theme.color.surface2

@@ -5,9 +5,10 @@ import qs.theme
 
 // A dashboard module's frame, in its theme's language (style.module):
 // classic card; constellation glass (gradient, accent-tinted edge); facade
-// front panel (2 px bezel, top bevel, screws, silk-screened title);
-// modulaire brushed aluminium with screws and a centered silk title;
-// matrix rounded card on a dot grid. Title shown when tall enough.
+// front panel (metal gradient, bevels, 4 flat screws, silk title at
+// x 40); modulaire aluminium plate (no screws, a sheen, a centered silk
+// title; screen modules in the black finish); matrix rounded card on a
+// dot grid. Title shown when tall enough.
 Item {
     id: root
 
@@ -19,19 +20,28 @@ Item {
     property real titleReserve: 0
     // Size tier (ModuleBase): bigger title, row and corners on big cells.
     property string tier: "normal"
+    // Modulaire: "normal" (aluminium) or "black" (screen modules). Dark
+    // only: in light the modules' text is dark (the theme's ink), it
+    // would vanish on a black plate.
+    property string finish: "normal"
+    readonly property bool dark: theme.variant !== "light"
+    readonly property bool black: look === "modulaire" && finish === "black" && dark
     readonly property real tierScale: tier === "poster" ? 1.6 : tier === "large" ? 1.3 : 1
     readonly property bool titled: !!title && height > 200
     readonly property real titleHeight: !titled ? 0 : tier === "poster" ? 48 : tier === "large" ? 38 : titleText.implicitHeight + 6
+
+    // Façade dark: the mockup's metal front (light keeps its plain panel).
+    readonly property bool facadeMetal: look === "facade" && dark
 
     Rectangle {
         id: face
 
         anchors.fill: parent
-        radius: (root.look === "matrix" ? 28 : root.theme.radius.card) * root.tierScale
+        radius: (root.look === "matrix" ? 28 : root.look === "facade" ? 6 : root.look === "modulaire" ? 3 : root.theme.radius.card) * root.tierScale
         color: root.theme.color.surface
-        border.width: root.look === "facade" ? 2 : root.theme.border.width
+        border.width: root.look === "modulaire" || root.facadeMetal ? 0 : root.look === "facade" ? 2 : root.theme.border.width
         border.color: root.look === "constellation" ? Qt.alpha(root.theme.color.accent, 0.35) : root.theme.color.line
-        gradient: root.look === "constellation" ? glass : root.look === "modulaire" ? alu : null
+        gradient: root.look === "constellation" ? glass : root.black ? blackPlate : root.look === "modulaire" ? alu : root.facadeMetal ? metal : null
 
         Gradient {
             id: glass
@@ -45,39 +55,79 @@ Item {
             }
         }
 
+        // Modulaire aluminium: surface to surface2, top to bottom.
         Gradient {
             id: alu
             GradientStop {
                 position: 0
-                color: Qt.lighter(root.theme.color.surface, 1.12)
-            }
-            GradientStop {
-                position: 0.5
                 color: root.theme.color.surface
             }
             GradientStop {
                 position: 1
-                color: Qt.darker(root.theme.color.surface, 1.1)
+                color: root.theme.color.surface2
+            }
+        }
+
+        // Modulaire black finish (screen modules), both variants.
+        Gradient {
+            id: blackPlate
+            GradientStop {
+                position: 0
+                color: "#2A2B2D"
+            }
+            GradientStop {
+                position: 1
+                color: "#1F2022"
+            }
+        }
+
+        // Façade metal front.
+        Gradient {
+            id: metal
+            GradientStop {
+                position: 0
+                color: "#2B2F31"
+            }
+            GradientStop {
+                position: 0.4
+                color: "#1B1E20"
+            }
+            GradientStop {
+                position: 1
+                color: "#15181A"
             }
         }
     }
 
-    // Brushed metal: fine horizontal strokes.
-    Canvas {
+    // Modulaire: a horizontal sheen across the plate and a 1 px inner line.
+    Rectangle {
         anchors.fill: parent
-        anchors.margins: 2
         visible: root.look === "modulaire"
-        opacity: 0.5
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
-        onPaint: {
-            const ctx = getContext("2d");
-            ctx.clearRect(0, 0, width, height);
-            for (let y = 0; y < height; y += 2) {
-                ctx.fillStyle = (y / 2) % 3 === 0 ? "rgba(255,255,255,0.035)" : "rgba(0,0,0,0.03)";
-                ctx.fillRect(0, y, width, 1);
+        radius: face.radius
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop {
+                position: 0
+                color: "transparent"
+            }
+            GradientStop {
+                position: 0.5
+                color: "#18FFFFFF"
+            }
+            GradientStop {
+                position: 1
+                color: "transparent"
             }
         }
+    }
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: 1
+        visible: root.look === "modulaire"
+        radius: Math.max(0, face.radius - 1)
+        color: "transparent"
+        border.width: 1
+        border.color: root.dark || root.black ? "#14FFFFFF" : "#40000000"
     }
 
     // Dot grid (16 px).
@@ -104,9 +154,26 @@ Item {
         }
     }
 
-    // Top bevel (facade).
+    // Façade dark: bevels (light top, black bottom).
     Rectangle {
-        visible: root.look === "facade"
+        visible: root.facadeMetal
+        x: 3
+        y: 0
+        width: parent.width - 6
+        height: 2
+        color: "#1AFFFFFF"
+    }
+    Rectangle {
+        visible: root.facadeMetal
+        x: 3
+        y: parent.height - 2
+        width: parent.width - 6
+        height: 2
+        color: "black"
+    }
+    // Façade light: the old top bevel.
+    Rectangle {
+        visible: root.look === "facade" && !root.dark
         x: 2
         y: 2
         width: parent.width - 4
@@ -114,29 +181,22 @@ Item {
         color: Qt.alpha("white", 0.12)
     }
 
-    // Screws in the corners.
+    // Façade: 4 flat screws, 18 px in from each corner (Modulaire modules
+    // have none; its hover cards do).
     Repeater {
-        model: root.theme.style.screws ? 4 : 0
+        model: root.look === "facade" ? 4 : 0
 
         Rectangle {
             required property int index
-            readonly property real inset: 9
-            width: 9
-            height: 9
-            radius: 4.5
+            readonly property real inset: 18
+            width: 10
+            height: 10
+            radius: 5
             x: index % 2 === 0 ? inset - width / 2 : root.width - inset - width / 2
             y: index < 2 ? inset - height / 2 : root.height - inset - height / 2
-            color: Qt.darker(root.theme.color.surface, 1.35)
-            border.width: 1
-            border.color: Qt.alpha("black", 0.4)
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: 6
-                height: 1.5
-                rotation: 35 + parent.index * 20
-                color: Qt.alpha("black", 0.5)
-            }
+            color: "#9AA0A3"
+            border.width: 1.5
+            border.color: Qt.alpha("#9AA0A3", 0.45)
         }
     }
 
@@ -148,15 +208,18 @@ Item {
         // Never wider than the panel (long titles end with "…").
         width: Math.min(implicitWidth, parent.width - 36 - root.titleReserve)
         elide: Text.ElideRight
-        // Modulaire: centered, but never under a chip on the right.
-        x: root.look === "modulaire" ? Math.max(18, Math.min((parent.width - width) / 2, parent.width - root.titleReserve - 10 - width)) : 18 * root.tierScale
-        y: 10 * root.tierScale
+        // Modulaire: centered, but never under a chip on the right;
+        // Façade: at 40 (clear of the screw).
+        x: root.look === "modulaire" ? Math.max(18, Math.min((parent.width - width) / 2, parent.width - root.titleReserve - 10 - width)) : root.look === "facade" ? 40 * root.tierScale : 18 * root.tierScale
+        y: (root.look === "modulaire" ? 12 : root.look === "facade" ? 11 : 10) * root.tierScale
         label: true
-        text: root.title
+        text: root.look === "modulaire" || root.look === "facade" ? root.title.toUpperCase() : root.title
         font.family: root.look === "modulaire" ? root.theme.font.mono : root.theme.font.family
+        font.weight: root.look === "facade" ? Font.Bold : Font.Normal
         // The same size on every module (Michroma is wide: a bit smaller).
         font.pixelSize: (root.look === "modulaire" ? 12 : 14) + (root.tier === "poster" ? (root.look === "modulaire" ? 4 : 5) : root.tier === "large" ? 2 : 0)
-        font.letterSpacing: 1.5
-        color: root.look === "facade" ? (root.theme.color.silk ?? root.theme.color.soft) : root.theme.color.soft
+        font.letterSpacing: root.look === "facade" ? 2.8 : root.look === "modulaire" ? 1.7 : 1.5
+        // Silk: Modulaire's ink (light on the black finish), Façade #C9CCC4.
+        color: root.look === "modulaire" ? (root.black ? "#E9E7E1" : root.theme.color.ink) : root.facadeMetal ? Qt.alpha("#C9CCC4", 0.85) : root.look === "facade" ? (root.theme.color.silk ?? root.theme.color.soft) : root.theme.color.soft
     }
 }

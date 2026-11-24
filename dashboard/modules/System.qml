@@ -15,7 +15,8 @@ import qs.theme
 //                  above 85 %, 7-segment values)
 //   constellation  one system of concentric orbits (CPU, GPU, RAM), the
 //                  values listed beside it
-//   modulaire      rotary knobs with their silk label, one LCD under them
+//   modulaire      LED ladders (one per core, then GPU, RAM, T°) over a
+//                  green LCD with the temperatures (design "Système")
 //   matrix         rings of dots (red beyond 90 %)
 // tiny: CPU alone; strip: side by side. Big cells (tiers large / poster):
 // the gauges on top, the last minute's curves (CPU, GPU; poster: RAM)
@@ -38,6 +39,7 @@ ModuleBase {
     ]
     readonly property bool ringLook: look === "modulaire" || look === "matrix"
     readonly property string layout: shape === "tiny" ? "tiny"
+        : look === "modulaire" && (shape !== "strip" || ch >= 150) ? "ladders"
         : shape === "strip" && !(ringLook && ch >= 150) ? "strip"
         : look === "constellation" && shape !== "narrow" ? "orbits"
         : (look === "modulaire" || look === "matrix") && shape !== "narrow" ? "rings"
@@ -50,7 +52,7 @@ ModuleBase {
         { label: "SSD", value: SystemStats.diskTemp },
         { label: "RAM", value: SystemStats.ramTemp }
     ].filter(t => t.value > 0)
-    readonly property bool showTemps: temps.length > 0 && shape !== "tiny" && layout !== "strip" && ch >= 230
+    readonly property bool showTemps: temps.length > 0 && shape !== "tiny" && layout !== "strip" && layout !== "ladders" && ch >= 230
     readonly property real tempsHeight: showTemps ? t3 * 2.6 : 0
     // Big cells: the gauges' band and the poster's right column.
     readonly property real sideWidth: poster ? Math.round(cw * 0.3) : 0
@@ -478,6 +480,118 @@ ModuleBase {
                 font.capitalization: lcd.caps
                 font.pixelSize: Math.min(root.t3, lcd.height * 0.5)
                 color: lcd.ink
+            }
+        }
+    }
+
+    // ladders (modulaire): a ladder per core, then GPU, RAM and the CPU's
+    // temperature (30–100 °C), silk labels under them, a green LCD below.
+    Column {
+        id: ladders
+
+        visible: root.layout === "ladders"
+        anchors.fill: parent
+        anchors.bottomMargin: root.gaugesBottom
+        anchors.rightMargin: root.gaugesRight
+        spacing: root.gap * 0.7
+
+        readonly property real lcdHeight: Math.max(30, root.t3 * 2.2)
+        readonly property real labelHeight: root.t4 * 1.6
+        readonly property real ladderHeight: Math.max(40, height - lcdHeight - labelHeight - spacing * 2)
+        readonly property var singles: [
+            ...(root.gpu ? [{ label: "GPU", value: root.gpu.busy }] : []),
+            { label: "RAM", value: SystemStats.memory },
+            ...(SystemStats.cpuTemp > 0 ? [{ label: "T°", value: (SystemStats.cpuTemp - 30) / 70 }] : [])
+        ]
+        readonly property var cores: SystemStats.cores.length ? SystemStats.cores : [SystemStats.cpu]
+        readonly property real singleWidth: Math.min(28, width * 0.05)
+        readonly property real coresWidth: width - singles.length * (singleWidth + root.gap) - root.gap
+
+        Row {
+            width: parent.width
+            height: ladders.ladderHeight + ladders.labelHeight
+            spacing: root.gap
+
+            Column {
+                width: ladders.coresWidth
+                spacing: 4
+
+                Row {
+                    id: coreRow
+                    readonly property real column: Math.min(22, (width - (ladders.cores.length - 1) * 2) / ladders.cores.length)
+                    width: parent.width
+                    height: ladders.ladderHeight
+                    // Columns spread over the width.
+                    spacing: Math.max(2, (width - ladders.cores.length * column) / Math.max(1, ladders.cores.length - 1))
+
+                    Repeater {
+                        model: ladders.cores
+
+                        LedLadder {
+                            required property real modelData
+                            width: coreRow.column
+                            height: coreRow.height
+                            count: 12
+                            value: modelData
+                        }
+                    }
+                }
+
+                ThemedText {
+                    text: I18n.tr("system.cores", { n: ladders.cores.length })
+                    font.pixelSize: root.t4
+                    color: root.theme.color.ink
+                }
+            }
+
+            Repeater {
+                model: ladders.singles
+
+                Column {
+                    required property var modelData
+                    width: ladders.singleWidth
+                    spacing: 4
+
+                    LedLadder {
+                        width: parent.width
+                        height: ladders.ladderHeight
+                        count: 12
+                        value: parent.modelData.value
+                    }
+
+                    ThemedText {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: parent.modelData.label
+                        font.pixelSize: root.t4
+                        color: root.theme.color.ink
+                    }
+                }
+            }
+        }
+
+        Display {
+            id: ladderLcd
+            width: parent.width
+            height: ladders.lcdHeight
+            tint: "green"
+
+            ThemedText {
+                anchors.fill: parent
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                verticalAlignment: Text.AlignVCenter
+                elide: Text.ElideRight
+                text: [
+                    SystemStats.cpuTemp > 0 ? `CPU ${Math.round(SystemStats.cpuTemp)}°` : `CPU ${Math.round(SystemStats.cpu * 100)}`,
+                    root.gpu?.temp ? `GPU ${Math.round(root.gpu.temp)}°` : "",
+                    SystemStats.diskTemp > 0 ? `SSD ${Math.round(SystemStats.diskTemp)}°` : "",
+                    I18n.tr("system.memory", { used: I18n.number(SystemStats.memoryUsedGiB, 1), total: Math.round(SystemStats.memoryTotalGiB) })
+                ].filter(t => !!t).join(" · ")
+                font.family: ladderLcd.textFont
+                font.capitalization: Font.AllUppercase
+                font.pixelSize: Math.min(root.t3, ladderLcd.height * 0.5)
+                font.weight: Font.Black
+                color: ladderLcd.ink
             }
         }
     }

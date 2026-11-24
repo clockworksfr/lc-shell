@@ -123,7 +123,7 @@ ModuleBase {
     readonly property bool playing: player?.isPlaying ?? false
     readonly property real buttonSize: Math.max(theme.hit, Math.min(72, m * (shape === "tiny" ? 0.34 : 0.24)))
     // Matrix keys are pills (1.5 × as wide as tall).
-    readonly property real keyAspect: theme.style.module === "matrix" ? 1.5 : 1
+    readonly property real keyAspect: theme.style.module === "matrix" || theme.style.module === "modulaire" ? 1.5 : 1
     // Controls go under the track in wide cells (design); strips keep one
     // line (cover, track, spectrum, controls).
     readonly property bool stacked: shape === "wide"
@@ -362,7 +362,7 @@ ModuleBase {
             Cover {
                 readonly property real room: Math.min(root.cw * (root.shape === "narrow" ? 0.9 : 0.7), parent.height)
                 anchors.centerIn: parent
-                visible: shown && room >= 48
+                visible: root.coverShown && shown && room >= 48
                 source: root.player?.trackArtUrl ?? ""
                 playing: root.playing
                 size: Math.max(0, room)
@@ -420,6 +420,7 @@ ModuleBase {
         spacing: root.gap
 
         Cover {
+            visible: root.coverShown
             Layout.alignment: Qt.AlignVCenter
             source: root.player?.trackArtUrl ?? ""
             playing: root.playing
@@ -475,6 +476,7 @@ ModuleBase {
         spacing: root.gap
 
         Cover {
+            visible: root.coverShown
             Layout.alignment: Qt.AlignVCenter
             source: root.player?.trackArtUrl ?? ""
             playing: root.playing
@@ -541,7 +543,8 @@ ModuleBase {
             out.push({ text: Lyrics.lines[i].text || "♪", current: i === at });
         return out;
     }
-    readonly property bool coverShown: theme.style.cover !== "none"
+    // Modulaire's player module has no cover (design "Lecteur").
+    readonly property bool coverShown: theme.style.cover !== "none" && theme.style.module !== "modulaire"
     readonly property real bigCover: !coverShown ? 0 : poster ? Math.min(ch * 0.7, cw * 0.42) : Math.min(ch, cw * 0.36)
     readonly property real bigKey: Math.max(hit, Math.min(96, t2 * 1.5))
 
