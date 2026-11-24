@@ -154,6 +154,8 @@ ModuleBase {
     // columns (but in strips and tiny cells, which have no disc).
     readonly property string screenKind: theme.style.display ?? "none"
     readonly property bool spectrumInside: screenKind === "vfd"
+    // Modulaire (design "Lecteur"): no scope, the LCD fills the module.
+    readonly property bool screenFills: spectrumInside || theme.style.module === "modulaire"
     readonly property bool progressInside: screenKind !== "none"
     readonly property bool ringShowsSound: theme.style.cover === "disc"
 
@@ -174,6 +176,19 @@ ModuleBase {
             id: col
             anchors.fill: parent
             spacing: 2
+
+            // Facade / modulaire: the source line on top of the screen.
+            ThemedText {
+                visible: track.kind !== "none"
+                Layout.fillWidth: true
+                elide: Text.ElideRight
+                text: `SRC ▸ ${track.m.player?.identity ?? ""}${Players.list.length > 1 ? ` ${Players.list.indexOf(track.m.player) + 1}/${Players.list.length}` : ""}`
+                font.family: track.textFont
+                font.capitalization: Font.AllUppercase
+                font.pixelSize: track.m.t4
+                color: track.ink
+                opacity: 0.8
+            }
 
             ThemedText {
                 Layout.fillWidth: true
@@ -305,12 +320,14 @@ ModuleBase {
 
         Track {
             m: root
+            // Modulaire: the play key alone (design "Lecteur").
+            visible: root.theme.style.module !== "modulaire"
 
             withSpectrum: root.spectrumInside
 
             withProgress: root.progressInside
 
-            Layout.fillHeight: root.spectrumInside
+            Layout.fillHeight: root.screenFills
             Layout.fillWidth: true
         }
 
@@ -329,7 +346,7 @@ ModuleBase {
 
             AudioSpectrum {
 
-                visible: !root.spectrumInside
+                visible: !root.screenFills
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 count: 6
@@ -353,6 +370,8 @@ ModuleBase {
         // layout shrinks its slot first, so the keys never leave the cell);
         // hidden when too small.
         Item {
+            // No cover (modulaire): no slot either.
+            visible: root.coverShown
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumHeight: 0
@@ -376,7 +395,7 @@ ModuleBase {
 
             withProgress: root.progressInside
 
-            Layout.fillHeight: root.spectrumInside
+            Layout.fillHeight: root.screenFills
             // In a screen, a moderate title leaves room for the spectrum.
             big: root.shape !== "narrow" && !root.spectrumInside
             Layout.fillWidth: true
@@ -384,7 +403,7 @@ ModuleBase {
 
         AudioSpectrum {
 
-            visible: !root.spectrumInside && !root.ringShowsSound
+            visible: !root.screenFills && !root.ringShowsSound
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.minimumHeight: 16
@@ -439,7 +458,7 @@ ModuleBase {
 
                 withProgress: root.progressInside
 
-                Layout.fillHeight: root.spectrumInside
+                Layout.fillHeight: root.screenFills
                 big: true
                 Layout.fillWidth: true
             }
@@ -447,7 +466,7 @@ ModuleBase {
             // The sound between the track and the progress, in every theme
             // (even where the cover's ring shows it too).
             AudioSpectrum {
-                visible: !root.spectrumInside
+                visible: !root.screenFills
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.minimumHeight: 12
@@ -485,10 +504,10 @@ ModuleBase {
 
         ColumnLayout {
             // The screen (with the spectrum inside) takes the line's room.
-            Layout.fillWidth: root.spectrumInside
+            Layout.fillWidth: root.screenFills
             Layout.preferredWidth: root.cw * 0.3
-            Layout.maximumWidth: root.spectrumInside ? -1 : root.cw * 0.3
-            Layout.fillHeight: root.spectrumInside
+            Layout.maximumWidth: root.screenFills ? -1 : root.cw * 0.3
+            Layout.fillHeight: root.screenFills
             Layout.alignment: Qt.AlignVCenter
             spacing: root.gap / 2
 
@@ -499,7 +518,7 @@ ModuleBase {
 
                 withProgress: root.progressInside
 
-                Layout.fillHeight: root.spectrumInside
+                Layout.fillHeight: root.screenFills
                 Layout.fillWidth: true
             }
 
@@ -514,7 +533,7 @@ ModuleBase {
 
         AudioSpectrum {
 
-            visible: !root.spectrumInside
+            visible: !root.screenFills
             Layout.fillWidth: true
             Layout.fillHeight: true
             count: Math.max(12, Math.min(32, Math.floor(width / 18)))
