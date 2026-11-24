@@ -39,7 +39,8 @@ Singleton {
 
                 const workspace = toplevel.workspace.name;
                 const preset = Dashboard.presetFor(workspace);
-                const grid = Dashboard.grid(preset);
+                const room = Dashboard.area(screen);
+                const grid = Dashboard.grid(preset, room.width, room.height);
                 const cells = Dashboard.cells(preset).map((cell, index) => ({ cell, index })).filter(c => c.cell.type === "window");
                 if (cells.length === 0)
                     continue;
@@ -53,8 +54,8 @@ Singleton {
                 choice = choice ?? cells.find(c => !used.has(c.index)) ?? cells[cells.length - 1];
                 used.add(choice.index);
 
-                const local = Dashboard.rect(choice.cell, grid, screen.width, screen.height);
-                const rect = { x: screen.x + local.x, y: screen.y + local.y, width: local.width, height: local.height };
+                const local = Dashboard.rect(choice.cell, grid, room.width, room.height);
+                const rect = { x: screen.x + room.x + local.x, y: screen.y + room.y + local.y, width: local.width, height: local.height };
                 next[toplevel.address] = { screen: screen.name, workspace: workspace, cell: choice.index, rect: rect };
 
                 const unchanged = previous && JSON.stringify(previous.rect) === JSON.stringify(rect);

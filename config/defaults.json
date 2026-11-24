@@ -40,7 +40,7 @@
     { "match": { "name": "eDP-*" }, "mode": "normal" }
   ],
   "dashboards": {
-    "grid": {"columns": 12, "rows": 4, "gap": 12, "margin": 12},
+    "grid": {"cellWidth": 200, "cellHeight": 165, "gap": 12, "margin": 12},
     "windows": {"enabled": true, "ignore": [], "only": []},
     "presets": {},
     "workspaces": {}

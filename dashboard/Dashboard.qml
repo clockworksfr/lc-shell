@@ -7,7 +7,11 @@ import qs.services
 
 // Dashboards: modules laid out on a grid, shown on a workspace (whatever
 // the screen), under its windows. Settings (`dashboards`):
-//   grid        { columns, rows, gap, margin }   (a preset may override it)
+//   grid        { cellWidth, cellHeight, gap, margin, columns?, rows? }
+//               (a preset may override it). Columns and rows follow the
+//               room: as many cells of about cellWidth × cellHeight as fit
+//               (12 × 4 on a 2560 × 720 screen, 24 × 12 on 5120 × 2160);
+//               a number fixes them.
 //   windows     { enabled, ignore: [classes], only: [classes] }
 //   presets     { "<name>": { cells: [cells], grid? } }
 //   workspaces  { "<workspace name>": "<preset name>" }
@@ -19,7 +23,7 @@ import qs.services
 Singleton {
     id: root
 
-    readonly property var defaultGrid: ({ columns: 12, rows: 4, gap: 12, margin: 12 })
+    readonly property var defaultGrid: ({ cellWidth: 200, cellHeight: 165, gap: 12, margin: 12 })
 
     readonly property var config: Config.data.dashboards ?? {}
     readonly property var presets: config.presets ?? {}
@@ -37,8 +41,26 @@ Singleton {
         return name ? presets[name] : null;
     }
 
-    function grid(preset: var): var {
-        return Object.assign({}, defaultGrid, config.grid ?? {}, preset?.grid ?? {});
+    // The grid on a `width` × `height` area (columns and rows counted).
+    function grid(preset: var, width: real, height: real): var {
+        const g = Object.assign({}, defaultGrid, config.grid ?? {}, preset?.grid ?? {});
+        const count = (size, cell) => Math.max(1, Math.round((size - 2 * g.margin + g.gap) / (cell + g.gap)));
+        if (!(g.columns > 0))
+            g.columns = count(width || 2560, g.cellWidth);
+        if (!(g.rows > 0))
+            g.rows = count(height || 720, g.cellHeight);
+        return g;
+    }
+
+    // The room a dashboard has on a screen (what its bar leaves), local.
+    function area(screen: ShellScreen): var {
+        const r = Hyprland.monitorFor(screen)?.lastIpcObject?.reserved ?? [0, 0, 0, 0];
+        return {
+            x: r[0] ?? 0,
+            y: r[1] ?? 0,
+            width: (screen?.width ?? 0) - (r[0] ?? 0) - (r[2] ?? 0),
+            height: (screen?.height ?? 0) - (r[1] ?? 0) - (r[3] ?? 0)
+        };
     }
 
     function cells(preset: var): var {
@@ -121,15 +143,18 @@ Singleton {
         return !!presetNameFor(ws);
     }
 
-    // Cell rectangle in screen-local pixels.
+    // Cell rectangle in area-local pixels. A cell past the grid (a preset
+    // made on a bigger screen) is pulled back inside.
     function rect(cell: var, grid: var, width: real, height: real): var {
         const cellWidth = (width - 2 * grid.margin - (grid.columns - 1) * grid.gap) / grid.columns;
         const cellHeight = (height - 2 * grid.margin - (grid.rows - 1) * grid.gap) / grid.rows;
-        const w = cell.w ?? 1;
-        const h = cell.h ?? 1;
+        const w = Math.min(cell.w ?? 1, grid.columns);
+        const h = Math.min(cell.h ?? 1, grid.rows);
+        const x = Math.max(0, Math.min(cell.x ?? 0, grid.columns - w));
+        const y = Math.max(0, Math.min(cell.y ?? 0, grid.rows - h));
         return {
-            x: Math.round(grid.margin + (cell.x ?? 0) * (cellWidth + grid.gap)),
-            y: Math.round(grid.margin + (cell.y ?? 0) * (cellHeight + grid.gap)),
+            x: Math.round(grid.margin + x * (cellWidth + grid.gap)),
+            y: Math.round(grid.margin + y * (cellHeight + grid.gap)),
             width: Math.round(w * cellWidth + (w - 1) * grid.gap),
             height: Math.round(h * cellHeight + (h - 1) * grid.gap)
         };

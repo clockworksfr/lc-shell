@@ -32,7 +32,9 @@ Singleton {
     property var redoStack: []
 
     readonly property ShellScreen screen: Quickshell.screens.find(s => s.name === screenName) ?? null
-    readonly property var grid: Dashboard.grid(Dashboard.presets[page] ?? null)
+    // Counted on the room the dashboard has (not the editor's: its bar).
+    readonly property var area: Dashboard.area(screen)
+    readonly property var grid: Dashboard.grid(Dashboard.presets[page] ?? null, area.width, area.height)
     readonly property var cells: pages[page] ?? []
     // Sizes a module snaps to (design study): S, M, L.
     readonly property var sizes: ({ S: { w: 2, h: 1 }, M: { w: 4, h: 2 }, L: { w: 6, h: 3 } })

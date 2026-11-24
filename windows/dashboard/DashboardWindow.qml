@@ -22,7 +22,9 @@ PanelWindow {
     readonly property string workspace: Hyprland.monitorFor(screen)?.activeWorkspace?.name ?? ""
     readonly property var preset: Dashboard.presetFor(workspace)
     readonly property bool shown: !!preset
-    readonly property var grid: Dashboard.grid(preset)
+    // Counted on the screen's room (the same in the editor).
+    readonly property var room: Dashboard.area(screen)
+    readonly property var grid: Dashboard.grid(preset, room.width, room.height)
     // The showcase (tests) replaces the page while it's on.
     readonly property var target: !shown ? [] : Showcase.type ? Showcase.cells : Dashboard.cells(preset)
     property var cells: []
