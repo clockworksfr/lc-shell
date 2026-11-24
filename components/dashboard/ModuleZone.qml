@@ -47,7 +47,7 @@ Item {
         clip: true
 
         Repeater {
-            model: root.look === "matrix" ? Math.floor(root.width / 9) : 0
+            model: root.look === "matrix" && root.visible ? Math.max(0, Math.floor(root.width / 9)) : 0
 
             Rectangle {
                 width: 3
