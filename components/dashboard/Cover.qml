@@ -37,7 +37,8 @@ Item {
     Rectangle {
         visible: root.look === "sphere"
         anchors.centerIn: parent
-        width: root.size * 1.16
+        // Within the cover's box (it overflowed onto the spectrum).
+        width: root.size
         height: width
         radius: width / 2
         color: Qt.alpha(root.theme.color.accent, 0.16)
@@ -94,7 +95,7 @@ Item {
         id: art
 
         anchors.centerIn: parent
-        width: root.look === "disc" ? root.size * 0.82 : root.look === "inset" ? root.size - 12 : root.look === "screwed" ? root.size - 2 * root.bezel : root.size
+        width: root.look === "disc" ? root.size * 0.82 : root.look === "sphere" ? root.size * 0.86 : root.look === "inset" ? root.size - 12 : root.look === "screwed" ? root.size - 2 * root.bezel : root.size
         height: width
         radius: root.look === "square" ? (root.forceLook ? 3 : root.theme.radius.tile) : root.look === "inset" ? 2 : root.look === "screwed" ? 2 : width / 2
         color: root.theme.color.surface2
