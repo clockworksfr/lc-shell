@@ -5,6 +5,7 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import qs.components
 import qs.components.dashboard
+import qs.i18n
 import qs.theme
 
 // Workspaces of this screen (design study 8, § 6): those Hyprland puts
@@ -15,7 +16,10 @@ import qs.theme
 //   facade         7-segment figures in display cells (unlit / busy / lit)
 //   modulaire      hardware keys with a LED (busy green, active orange)
 //   matrix         outlined pills with a LED (active: a glowing bar)
-// tiny: the active one alone.
+// tiny: the active one alone. Big cells: cards (3 × 2), each with its
+// number, its window count and a map of its windows in the screen's
+// proportions with their app icons (never their titles); poster: the
+// apps' names under it.
 ModuleBase {
     id: root
 
@@ -67,6 +71,7 @@ ModuleBase {
     Grid {
         id: grid
 
+        visible: !root.large
         readonly property int rows: Math.ceil((root.shape === "tiny" ? 1 : root.count) / columns)
 
         anchors.fill: parent
@@ -271,6 +276,146 @@ ModuleBase {
                             color: cell.active ? root.theme.color.onAccent : root.theme.color.soft
                         }
                     }
+                }
+            }
+        }
+    }
+
+    // --- Big cells ---
+
+    // Window geometry comes from Hyprland's IPC: refreshed as windows move.
+    Connections {
+        target: Hyprland
+        enabled: root.large
+
+        function onRawEvent(event: HyprlandEvent): void {
+            if (["openwindow", "closewindow", "movewindowv2", "changefloatingmode", "fullscreen", "workspacev2"].includes(event.name))
+                toplevelRefresh.restart();
+        }
+    }
+    Timer {
+        id: toplevelRefresh
+        interval: 150
+        onTriggered: Hyprland.refreshToplevels()
+    }
+    onLargeChanged: if (large) Hyprland.refreshToplevels()
+
+    Grid {
+        id: cards
+
+        visible: root.large
+        anchors.fill: parent
+        columns: Math.min(root.slots.length, root.ratio < 1 ? 2 : 3)
+        spacing: root.gap
+        readonly property int lines: Math.ceil(root.slots.length / columns)
+
+        Repeater {
+            model: root.large ? root.slots : []
+
+            ModuleZone {
+                id: card
+
+                required property var modelData
+                readonly property bool active: !!modelData.ws?.active
+                readonly property var windows: Hyprland.toplevels.values.filter(t => t.workspace?.id === modelData.id)
+                readonly property var classes: [...new Set(windows.map(t => t.lastIpcObject?.class ?? "").filter(c => !!c))]
+
+                width: (cards.width - (cards.columns - 1) * cards.spacing) / cards.columns
+                height: (cards.height - (cards.lines - 1) * cards.spacing) / cards.lines
+                labelSize: root.t4
+                gap: root.gap
+                label: card.windows.length ? I18n.tr("workspaces.windows", { n: card.windows.length }) : I18n.tr("workspaces.empty")
+                opacity: card.windows.length || card.active ? 1 : 0.55
+
+                // The active one: an outline in the signal color.
+                Rectangle {
+                    parent: card
+                    anchors.fill: parent
+                    anchors.margins: -3
+                    visible: card.active
+                    color: "transparent"
+                    radius: root.theme.radius.card + 3
+                    border.width: 2
+                    border.color: root.theme.color.signal ?? root.theme.color.accent
+                }
+
+                // The number, in the theme's display font.
+                ThemedText {
+                    id: cardNumber
+                    text: card.modelData.name
+                    font.family: card.onDisplay ? card.textFont : root.theme.font.display
+                    font.pixelSize: root.t2 * 1.2
+                    font.weight: Font.Bold
+                    color: card.active ? (card.onDisplay ? card.ink : root.theme.color.signal ?? root.theme.color.accent) : card.ink
+                }
+
+                // The screen in miniature, its windows placed in it.
+                Item {
+                    id: map
+
+                    readonly property real sw: Math.max(1, root.screen?.width ?? 1)
+                    readonly property real sh: Math.max(1, root.screen?.height ?? 1)
+                    readonly property real room: parent.height - y - (root.poster ? appNames.height + root.gap * 0.5 : 0)
+                    readonly property real k: Math.min(parent.width / sw, room / sh)
+                    x: (parent.width - width) / 2
+                    y: cardNumber.height + root.gap * 0.5
+                    width: sw * k
+                    height: sh * k
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 4
+                        color: "transparent"
+                        border.width: 1
+                        border.color: Qt.alpha(card.ink, 0.25)
+                    }
+
+                    Repeater {
+                        model: card.windows
+
+                        Rectangle {
+                            id: win
+                            required property var modelData
+                            readonly property var info: modelData.lastIpcObject ?? {}
+                            readonly property var entry: (DesktopEntries.applications.values.length, DesktopEntries.heuristicLookup(info.class ?? ""))
+                            x: ((info.at?.[0] ?? 0) - (root.screen?.x ?? 0)) * map.k
+                            y: ((info.at?.[1] ?? 0) - (root.screen?.y ?? 0)) * map.k
+                            width: Math.max(6, (info.size?.[0] ?? 0) * map.k)
+                            height: Math.max(6, (info.size?.[1] ?? 0) * map.k)
+                            radius: 3
+                            color: Qt.alpha(card.ink, card.onDisplay ? 0.18 : 0.08)
+                            border.width: 1
+                            border.color: Qt.alpha(card.ink, 0.5)
+
+                            AppIcon {
+                                anchors.centerIn: parent
+                                visible: width < parent.width - 4 && height < parent.height - 4
+                                source: win.entry?.icon ? Quickshell.iconPath(win.entry.icon, true) : ""
+                                name: win.entry?.icon ?? ""
+                                size: Math.min(48, parent.width * 0.5, parent.height * 0.5)
+                            }
+                        }
+                    }
+                }
+
+                // Poster: the apps by name (their class, never a title).
+                ThemedText {
+                    id: appNames
+                    visible: root.poster && card.classes.length > 0
+                    anchors.bottom: parent.bottom
+                    width: parent.width
+                    elide: Text.ElideRight
+                    text: card.classes.join(" · ")
+                    font.family: card.textFont
+                    font.pixelSize: root.t4 * 1.1
+                    color: card.soft
+                }
+
+                MouseArea {
+                    parent: card
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: Hyprland.dispatch(`hl.dsp.focus({ workspace = ${card.modelData.id} })`)
                 }
             }
         }
