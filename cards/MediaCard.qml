@@ -53,6 +53,8 @@ Column {
 
         Cover {
             id: cover
+            // Façade cards: a plain square (the frame is the modules').
+            forceLook: root.look === "facade" ? "square" : ""
             source: root.player?.trackArtUrl ?? ""
             playing: root.player?.isPlaying ?? false
             size: 84

@@ -14,7 +14,9 @@ Item {
     id: root
 
     readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
-    readonly property string look: theme.style.cover ?? "square"
+    // A look forced by the caller (Façade's card: a plain square).
+    property string forceLook: ""
+    readonly property string look: forceLook || (theme.style.cover ?? "square")
     readonly property bool shown: look !== "none"
 
     property string source
@@ -94,7 +96,7 @@ Item {
         anchors.centerIn: parent
         width: root.look === "disc" ? root.size * 0.82 : root.look === "inset" ? root.size - 12 : root.look === "screwed" ? root.size - 2 * root.bezel : root.size
         height: width
-        radius: root.look === "square" ? root.theme.radius.tile : root.look === "inset" ? 2 : root.look === "screwed" ? 2 : width / 2
+        radius: root.look === "square" ? (root.forceLook ? 3 : root.theme.radius.tile) : root.look === "inset" ? 2 : root.look === "screwed" ? 2 : width / 2
         color: root.theme.color.surface2
 
         // No art (yet): a soft mint placeholder (design "Média"); the disc

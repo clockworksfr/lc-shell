@@ -33,7 +33,7 @@ Column {
         Repeater {
             model: [
                 { label: I18n.tr("card.download"), glyph: "↓", rate: NetworkService.rxRate, history: NetworkService.rxHistory, color: root.theme.color.accent },
-                { label: I18n.tr("card.upload"), glyph: "↑", rate: NetworkService.txRate, history: NetworkService.txHistory, color: root.theme.color.accent2 }
+                { label: I18n.tr("card.upload"), glyph: "↑", rate: NetworkService.txRate, history: NetworkService.txHistory, color: root.theme.color.vfd ?? root.theme.color.accent2 }
             ]
 
             Rectangle {
@@ -42,7 +42,8 @@ Column {
                 width: (root.width - root.theme.space.s) / 2
                 implicitHeight: tile.implicitHeight + root.theme.space.m * 2
                 radius: root.theme.radius.tile
-                color: root.theme.color.surface2
+                // Façade: the card's block tone.
+                color: root.theme.color.vfd ? root.theme.color.surface3 : root.theme.color.surface2
 
                 Column {
                     id: tile
