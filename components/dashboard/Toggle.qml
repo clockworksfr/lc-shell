@@ -35,7 +35,7 @@ Item {
     readonly property real m: Math.min(width, look === "matrix" ? pill.height : height)
     // Sizes per theme (design review): matrix from the pill's height,
     // modulaire's Michroma smaller, the others from the tile.
-    readonly property real labelSize: look === "matrix" ? clamp(16, pill.height * 0.27, 20)
+    readonly property real labelSize: look === "matrix" ? clamp(14, pill.height * 0.27, 16)
         : look === "modulaire" ? clamp(11, m * 0.1, 16)
         : clamp(15, m * 0.17, 24)
     readonly property real iconSize: look === "matrix" ? pill.height * 0.34 : clamp(22, m * 0.3, 46)
@@ -260,7 +260,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 // The label's letter spacing counted (TextMetrics ignores it):
                 // too narrow a column shrank the text (HorizontalFit).
-                width: Math.max(0, Math.min(room, Math.max(labelMetrics.advanceWidth + root.label.length * root.labelSize * 0.08, pillSub.visible ? subMetrics.advanceWidth : 0) + 2))
+                width: Math.max(0, Math.min(room, Math.max(labelMetrics.advanceWidth + root.label.length * root.labelSize * 0.03, pillSub.visible ? subMetrics.advanceWidth : 0) + 2))
 
                 TextMetrics {
                     id: labelMetrics
@@ -285,7 +285,7 @@ Item {
                     text: root.label
                     font.family: root.theme.font.mono
                     font.capitalization: Font.AllUppercase
-                    font.letterSpacing: root.labelSize * 0.08
+                    font.letterSpacing: root.labelSize * 0.03
                     font.pixelSize: root.labelSize
                     color: root.on ? root.theme.color.bg : root.theme.color.ink
                 }
