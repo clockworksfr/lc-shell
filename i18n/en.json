@@ -349,6 +349,8 @@
   "workspaces.windows": "{n} windows",
   "workspaces.windows.one": "{n} window",
   "workspaces.empty": "empty",
+  "vu.spectrum": "Spectrum",
+  "vu.footer": "Output: {output} · peak {peak} dB",
   "clock.week": "Week {n}",
   "clock.dayOfYear": "day {n} of {total}",
   "clock.yearProgress": "{value} of the year",

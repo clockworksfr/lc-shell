@@ -349,6 +349,8 @@
   "workspaces.windows": "{n} fenêtres",
   "workspaces.windows.one": "{n} fenêtre",
   "workspaces.empty": "vide",
+  "vu.spectrum": "Spectre",
+  "vu.footer": "Sortie : {output} · crête {peak} dB",
   "clock.week": "Semaine {n}",
   "clock.dayOfYear": "jour {n} sur {total}",
   "clock.yearProgress": "{value} de l'année",

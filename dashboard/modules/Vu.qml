@@ -17,6 +17,9 @@ import qs.theme
 //   facade         cream dials with damped needles (+ VFD spectrum)
 //   modulaire      oscilloscope CRT + LED ladders
 //   matrix         a ring of dot rays (box / tall / tiny), dot rows else
+// Big cells: the levels in a band over a 48-band spectrum with its
+// frequency axis (poster: levels left, 64 bands right, the output and
+// the peak under them).
 // Options: preVolume (true: the raw signal, before the output volume).
 ModuleBase {
     id: root
@@ -83,6 +86,10 @@ ModuleBase {
     }
 
     readonly property bool roomy: ch > 220 && shape !== "strip"
+    // Big cells: where the levels go (the rest: spectrum, footer).
+    readonly property real footerHeight: poster ? t3 * 2 : 0
+    readonly property real levelsBottom: poster ? footerHeight + gap : large ? Math.round(ch * 0.5) + gap : 0
+    readonly property real levelsRight: poster ? Math.round(cw * 0.58) + gap : 0
     readonly property var channels: [
         { name: I18n.tr("vu.left"), db: levelL, hold: holdL },
         { name: I18n.tr("vu.right"), db: levelR, hold: holdR }
@@ -261,6 +268,8 @@ ModuleBase {
     ColumnLayout {
         visible: root.look === "classic" || root.look === "constellation" || (root.look === "matrix" && (root.shape === "wide" || root.shape === "strip" || root.shape === "narrow"))
         anchors.fill: parent
+        anchors.bottomMargin: root.levelsBottom
+        anchors.rightMargin: root.levelsRight
         spacing: root.gap / 2
 
         AudioSpectrum {
@@ -301,6 +310,8 @@ ModuleBase {
     GridLayout {
         visible: root.look === "facade"
         anchors.fill: parent
+        anchors.bottomMargin: root.levelsBottom
+        anchors.rightMargin: root.levelsRight
         // Wide / strip: dials then the VFD; box: dials over the VFD;
         // tall / narrow / tiny: stacked.
         columns: root.shape === "wide" || root.shape === "strip" ? 3 : root.shape === "box" ? 2 : 1
@@ -347,6 +358,8 @@ ModuleBase {
     GridLayout {
         visible: root.look === "modulaire"
         anchors.fill: parent
+        anchors.bottomMargin: root.levelsBottom
+        anchors.rightMargin: root.levelsRight
         columns: root.shape === "tall" ? 1 : 3
         columnSpacing: root.gap
         rowSpacing: root.gap
@@ -395,6 +408,8 @@ ModuleBase {
     Item {
         visible: root.look === "matrix" && (root.shape === "box" || root.shape === "tall" || root.shape === "tiny")
         anchors.fill: parent
+        anchors.bottomMargin: root.levelsBottom
+        anchors.rightMargin: root.levelsRight
 
         Item {
             id: ring
@@ -463,5 +478,64 @@ ModuleBase {
                 }
             }
         }
+    }
+
+    // --- Big cells ---
+
+    ModuleZone {
+        id: spectrumZone
+
+        visible: root.large
+        x: root.poster ? root.cw - Math.round(root.cw * 0.58) : 0
+        y: root.poster ? 0 : root.ch - Math.round(root.ch * 0.5)
+        width: root.poster ? Math.round(root.cw * 0.58) : root.cw
+        height: root.poster ? root.ch - root.footerHeight - root.gap : Math.round(root.ch * 0.5)
+        label: I18n.tr("vu.spectrum")
+        labelSize: root.t4
+        gap: root.gap
+        tint: "green"
+
+        AudioSpectrum {
+            width: parent.width
+            height: parent.height - spectrumAxis.height - 4
+            count: root.poster ? 64 : 48
+            color: spectrumZone.onDisplay ? spectrumZone.ink : (root.look === "matrix" || root.look === "facade" ? root.theme.color.ink : root.theme.color.accent)
+        }
+
+        // Frequency axis (log scale, as the bands are).
+        Item {
+            id: spectrumAxis
+            anchors.bottom: parent.bottom
+            width: parent.width
+            height: root.t4 * 1.5
+
+            Repeater {
+                model: ["50 Hz", "200", "1 k", "4 k", "16 kHz"]
+
+                ThemedText {
+                    required property string modelData
+                    required property int index
+                    x: index === 0 ? 0 : index === 4 ? parent.width - width : parent.width * index / 4 - width / 2
+                    anchors.bottom: parent.bottom
+                    label: true
+                    text: modelData
+                    font.family: spectrumZone.onDisplay ? spectrumZone.textFont : root.theme.font.mono
+                    font.pixelSize: root.t4
+                    color: spectrumZone.soft
+                }
+            }
+        }
+    }
+
+    // Poster: the output and the held peak.
+    ThemedText {
+        visible: root.poster
+        y: root.ch - height
+        width: root.cw
+        elide: Text.ElideRight
+        text: I18n.tr("vu.footer", { output: Audio.sinkName, peak: root.label(Math.max(root.holdL, root.holdR)) })
+        font.pixelSize: root.t3
+        font.features: ({ "tnum": 1 })
+        color: root.theme.color.soft
     }
 }
