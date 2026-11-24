@@ -22,6 +22,11 @@ PanelWindow {
         right: true
     }
     color: "transparent"
+    // Modulaire (design "Banque de presets"): black plate, the search and
+    // the results in a green LCD, the current line inverted.
+    readonly property bool mod: theme.style.module === "modulaire"
+    readonly property color lcdInk: "#C6F37A"
+    readonly property color lcdBg: "#1A2410"
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "lc-launcher"
@@ -66,8 +71,36 @@ PanelWindow {
         y: parent.height * 0.2
         width: 640
         height: column.implicitHeight + win.theme.space.m * 2
-        radius: win.theme.radius.panel
+        radius: win.mod ? 3 : win.theme.radius.panel
         color: win.theme.color.surface
+        gradient: win.mod ? blackPlate : null
+        border.width: win.mod ? 1 : 0
+        border.color: "#14FFFFFF"
+
+        Gradient {
+            id: blackPlate
+            GradientStop {
+                position: 0
+                color: "#2A2B2D"
+            }
+            GradientStop {
+                position: 1
+                color: "#1F2022"
+            }
+        }
+
+        // Modulaire: the LCD behind the search and the results.
+        Rectangle {
+            visible: win.mod
+            x: win.theme.space.m - 8
+            y: win.theme.space.m - 6
+            width: parent.width - 2 * x
+            height: parent.height - 2 * y
+            radius: 4
+            color: win.lcdBg
+            border.width: 2
+            border.color: "#80000000"
+        }
 
         // Swallow clicks so they don't reach the close area.
         MouseArea {
@@ -87,17 +120,31 @@ PanelWindow {
                 width: parent.width
                 focus: true
                 text: Launcher.text
-                color: win.theme.color.ink
-                selectionColor: win.theme.color.accent
-                selectedTextColor: win.theme.color.bg
-                font.family: win.theme.font.family
+                color: win.mod ? win.lcdInk : win.theme.color.ink
+                selectionColor: win.mod ? win.lcdInk : win.theme.color.accent
+                selectedTextColor: win.mod ? win.lcdBg : win.theme.color.bg
+                font.family: win.mod ? (win.theme.font.lcd ?? win.theme.font.mono) : win.theme.font.family
+                font.capitalization: win.mod ? Font.AllUppercase : Font.MixedCase
                 font.pixelSize: win.theme.font.sizeL
+                // Modulaire: a "> " prompt.
+                leftPadding: win.mod ? promptText.implicitWidth : 0
+
+                Text {
+                    id: promptText
+                    visible: win.mod
+                    text: "> "
+                    font: input.font
+                    color: win.lcdInk
+                }
                 onTextEdited: Launcher.text = text
 
                 ThemedText {
                     visible: !input.text
+                    x: input.leftPadding
                     text: I18n.tr("launcher.placeholder")
-                    color: win.theme.color.soft
+                    color: win.mod ? Qt.alpha(win.lcdInk, 0.5) : win.theme.color.soft
+                    font.family: win.mod ? (win.theme.font.lcd ?? win.theme.font.mono) : win.theme.font.family
+                    font.capitalization: win.mod ? Font.AllUppercase : Font.MixedCase
                     font.pixelSize: win.theme.font.sizeL
                 }
 
@@ -144,7 +191,7 @@ PanelWindow {
                         required property var modelData
                         text: (modelData.prefix ? `${modelData.prefix} ` : "") + I18n.tr(`launcher.mode.${modelData.id}`)
                         font.pixelSize: win.theme.font.sizeS
-                        color: Launcher.modeId === modelData.id ? win.theme.color.ink : win.theme.color.soft
+                        color: win.mod ? (Launcher.modeId === modelData.id ? win.lcdInk : Qt.alpha(win.lcdInk, 0.5)) : Launcher.modeId === modelData.id ? win.theme.color.ink : win.theme.color.soft
 
                         MouseArea {
                             anchors.fill: parent
@@ -180,8 +227,9 @@ PanelWindow {
 
                     width: list.width
                     height: win.rowHeight
-                    radius: win.theme.radius.control
-                    color: current ? Qt.alpha(win.theme.color.accent, 0.14) : "transparent"
+                    radius: win.mod ? 2 : win.theme.radius.control
+                    color: current ? (win.mod ? win.lcdInk : Qt.alpha(win.theme.color.accent, 0.14)) : "transparent"
+                    readonly property color ink: win.mod ? (current ? win.lcdBg : win.lcdInk) : win.theme.color.ink
 
                     Item {
                         id: iconBox
@@ -227,6 +275,9 @@ PanelWindow {
                             width: parent.width
                             text: row.modelData.title
                             elide: Text.ElideRight
+                            color: row.ink
+                            font.family: win.mod ? (win.theme.font.lcd ?? win.theme.font.mono) : win.theme.font.family
+                            font.capitalization: win.mod ? Font.AllUppercase : Font.MixedCase
                         }
 
                         ThemedText {
@@ -234,7 +285,8 @@ PanelWindow {
                             visible: !!row.modelData.subtitle
                             text: row.modelData.subtitle ?? ""
                             font.pixelSize: win.theme.font.sizeS
-                            color: row.modelData.urgent ? win.theme.color.urgent : win.theme.color.soft
+                            font.family: win.mod ? (win.theme.font.lcd ?? win.theme.font.mono) : win.theme.font.family
+                            color: row.modelData.urgent ? win.theme.color.urgent : win.mod ? Qt.alpha(row.ink, 0.65) : win.theme.color.soft
                             elide: Text.ElideRight
                         }
                     }
@@ -255,7 +307,7 @@ PanelWindow {
                 text: Launcher.modeId === "files" && Launcher.term.length < 2 ? I18n.tr("launcher.minChars", { n: 2 })
                     : Launcher.modeId === "calc" && !Launcher.term ? I18n.tr("launcher.calcHint")
                     : I18n.tr("launcher.noResults")
-                color: win.theme.color.soft
+                color: win.mod ? Qt.alpha(win.lcdInk, 0.5) : win.theme.color.soft
                 font.pixelSize: win.theme.font.sizeS
             }
         }

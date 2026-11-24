@@ -26,7 +26,7 @@ Column {
         HeroText {
             text: I18n.percent(Power.level)
             pixelSize: 40
-            color: Power.low ? root.theme.color.urgent : root.theme.color.ink
+            color: Power.low ? root.theme.color.urgent : root.theme.color.nixie ?? root.theme.color.ink
         }
 
         Column {

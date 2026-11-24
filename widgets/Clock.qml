@@ -128,7 +128,52 @@ TextWidget {
             anchors.verticalCenter: parent.verticalCenter
             spacing: 7
 
+            // Modulaire: LED segments (orange, red past 100 %) and an amber
+            // LCD with the value, instead of the icon and the bar.
+            readonly property bool leds: root.theme.style.module === "modulaire"
+
+            Row {
+                visible: osdRow.leds
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 2
+
+                Repeater {
+                    model: osdRow.leds ? 20 : 0
+
+                    Rectangle {
+                        required property int index
+                        readonly property real at: (index + 0.5) / 20 * (Osd.kind === "volume" ? Audio.maxVolume : 1)
+                        width: (root.osdGauge - 19 * 2) / 20
+                        height: 14
+                        radius: 1
+                        color: Osd.muted || at > Osd.value ? "#3A2C22" : at > 1 ? "#FF3B30" : "#E8742A"
+                    }
+                }
+            }
+
+            Rectangle {
+                visible: osdRow.leds
+                anchors.verticalCenter: parent.verticalCenter
+                width: osdLcd.implicitWidth + 14
+                height: 24
+                radius: 4
+                color: "#2A1606"
+                border.width: 2
+                border.color: "#80000000"
+
+                Text {
+                    id: osdLcd
+                    anchors.centerIn: parent
+                    text: `${Osd.kind === "brightness" ? "LUM" : Osd.kind === "mic" ? "MIC" : "VOL"} ${Osd.muted ? "--" : Math.round(Osd.value * 100)}`
+                    font.family: root.theme.font.lcd ?? root.theme.font.mono
+                    font.pixelSize: 15
+                    font.weight: Font.Black
+                    color: "#FFB35A"
+                }
+            }
+
             Icon {
+                visible: !osdRow.leds
                 anchors.verticalCenter: parent.verticalCenter
                 name: Osd.kind === "brightness" ? "light_mode" : Osd.kind === "mic" ? (Osd.muted ? "mic_off" : "mic") : Osd.muted ? "volume_off" : "volume_up"
                 size: 16
@@ -136,6 +181,7 @@ TextWidget {
             }
 
             Rectangle {
+                visible: !osdRow.leds
                 anchors.verticalCenter: parent.verticalCenter
                 width: root.osdGauge
                 height: 6

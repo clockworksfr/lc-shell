@@ -95,7 +95,7 @@ Column {
                     y: root.theme.space.s + 18
                     text: I18n.percent(modelData.value)
                     pixelSize: 30
-                    color: modelData.value > 0.9 ? root.theme.color.urgent : root.theme.color.ink
+                    color: modelData.value > 0.9 ? root.theme.color.urgent : root.theme.color.nixie ?? root.theme.color.ink
                 }
             }
         }
