@@ -201,7 +201,8 @@ ModuleBase {
             fillAlpha: 0.18
             // Its own scale (upload would flatten under download).
             max: Math.max(16 * 1024, ...lane.history)
-            color: lane.onScreen ? lane.ink : lane.lineColor
+            // The curves keep their colors inside the screens (mockups).
+            color: lane.lineColor
         }
 
         // Big cells: the time axis under the curve.
@@ -259,8 +260,7 @@ ModuleBase {
         id: sharedDisplay
         visible: (root.look === "facade" || root.look === "modulaire") && NetworkService.sourceNames.length > 0 && (root.large || root.shape !== "tiny")
         anchors.fill: parent
-        anchors.margins: -6
-        anchors.bottomMargin: root.poster ? root.connectionHeight + root.gap * 1.5 - 6 : -6
+        anchors.bottomMargin: root.poster ? root.connectionHeight + root.gap * 1.5 : 0
         tint: "green"
     }
 
@@ -268,7 +268,12 @@ ModuleBase {
     Grid {
         visible: (root.large || root.shape !== "tiny") && NetworkService.sourceNames.length > 0
         anchors.fill: parent
-        anchors.bottomMargin: root.poster ? root.connectionHeight + root.gap * 1.5 : 0
+        // Inside the screen: 10 × 14 px of padding (mockups).
+        readonly property bool inset: sharedDisplay.visible
+        anchors.topMargin: inset ? 10 : 0
+        anchors.leftMargin: inset ? 14 : 0
+        anchors.rightMargin: inset ? 14 : 0
+        anchors.bottomMargin: (root.poster ? root.connectionHeight + root.gap * 1.5 : 0) + (inset ? 10 : 0)
         columns: root.stacked ? 1 : 2
         spacing: root.gap * 1.5
 
@@ -281,8 +286,9 @@ ModuleBase {
             Lane {
                 required property var modelData
                 m: root
-                width: root.stacked ? root.cw : (root.cw - root.gap * 1.5) / 2
-                height: (root.stacked ? (root.ch - root.gap * 1.5) / 2 : root.ch) - (root.poster ? root.connectionHeight + root.gap * 1.5 : 0)
+                // The grid's room (inset inside the screens).
+                width: root.stacked ? parent.width : (parent.width - root.gap * 1.5) / 2
+                height: root.stacked ? (parent.height - root.gap * 1.5) / 2 : parent.height
                 glyph: modelData.glyph
                 label: modelData.label
                 rate: modelData.rx ? NetworkService.rxRate : NetworkService.txRate
