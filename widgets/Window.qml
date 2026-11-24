@@ -48,8 +48,19 @@ Item {
     readonly property bool shown: valid
     readonly property int maxWidth: options.maxWidth ?? (size === "extended" ? 720 : 420)
 
-    implicitWidth: vertical ? Math.max(crossSize, 24) : Math.min(row.implicitWidth, maxWidth)
-    implicitHeight: vertical ? 24 : row.implicitHeight
+    // Modulaire: the title in a green LCD, "APP ▸ TITLE" (design "Barre").
+    readonly property bool lcd: theme?.style.module === "modulaire" && !vertical
+    implicitWidth: vertical ? Math.max(crossSize, 24) : Math.min(row.implicitWidth + (lcd ? 20 : 0), maxWidth)
+    implicitHeight: vertical ? 24 : row.implicitHeight + (lcd ? 6 : 0)
+
+    Rectangle {
+        visible: root.lcd && root.valid
+        anchors.fill: parent
+        radius: 4
+        color: "#1A2410"
+        border.width: 2
+        border.color: "#80000000"
+    }
 
     Row {
         id: row
@@ -57,21 +68,21 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         // A position, not a conditional anchor (a removed anchor leaves the
         // row where it was when the bar changes edge).
-        x: root.vertical ? (parent.width - width) / 2 : 0
+        x: root.vertical ? (parent.width - width) / 2 : root.lcd ? 10 : 0
         spacing: 8
 
         AppIcon {
             anchors.verticalCenter: parent.verticalCenter
             size: 18
             name: root.entry?.icon ?? ""
-            visible: !!root.entry?.icon
+            visible: !!root.entry?.icon && !root.lcd
             source: root.entry?.icon ? Quickshell.iconPath(root.entry.icon, true) : ""
         }
 
         // No icon: the app's initial in a small badge.
         Rectangle {
             anchors.verticalCenter: parent.verticalCenter
-            visible: !root.entry?.icon && !!root.appName
+            visible: !root.entry?.icon && !!root.appName && !root.lcd
             width: 18
             height: 18
             radius: 5
@@ -88,15 +99,19 @@ Item {
         ThemedText {
             anchors.verticalCenter: parent.verticalCenter
             visible: !root.vertical
-            width: Math.min(implicitWidth, root.maxWidth - 26)
+            width: Math.min(implicitWidth, root.maxWidth - (root.lcd ? 20 : 26))
             elide: Text.ElideRight
+            font.family: root.lcd ? (root.theme.font.lcd ?? root.theme.font.mono) : (root.theme?.font.family ?? "sans-serif")
+            font.capitalization: root.lcd ? Font.AllUppercase : Font.MixedCase
+            font.pixelSize: root.lcd ? 15 : root.theme?.font.sizeM ?? 14
             // Titles can be private (mail subjects, chats): app name only
             // while the screen is shared.
             text: Screens.sharing ? root.shortName
                 : root.size === "compact" ? root.shortName
                 : root.size === "extended" ? [root.shortName, root.cleanTitle].filter(s => !!s).join(" — ")
+                : root.lcd ? [root.shortName, root.cleanTitle].filter(s => !!s).join(" ▸ ")
                 : root.title || root.appName
-            color: root.theme?.color.soft ?? color
+            color: root.lcd ? "#C6F37A" : root.theme?.color.soft ?? color
         }
     }
 }

@@ -38,7 +38,10 @@ ThemedText {
     // capitals ("BT 2", "NET ↓1,3M"): "phosphor" (Façade: VFD ink, off at
     // 22 %), "led" (Modulaire: a LED before, on / off / alert).
     readonly property string sigilStyle: theme.style.statusSigil ?? ""
-    readonly property bool sigil: !!sigilStyle && !useIcon && !!icon && !vertical && (size !== "extended" || !!microLabel)
+    readonly property bool sigil: !lcd && !!sigilStyle && !useIcon && !!icon && !vertical && (size !== "extended" || !!microLabel)
+    // In a small LCD window (Modulaire media, design "Barre"): "amber" |
+    // "green" | "" (none). The text in the LCD font, uppercase.
+    property string lcd: ""
     // Statuses as label + value (micro stacks or sigils).
     readonly property bool labelled: theme.style.statusStack === true || !!sigilStyle
     readonly property string level: Qt.colorEqual(color, theme.color.urgent) || Qt.colorEqual(color, theme.color.warn ?? "#00000000") ? "alert" : Qt.colorEqual(color, theme.color.soft) ? "off" : "on"
@@ -66,13 +69,26 @@ ThemedText {
     label: stacked && !microStack
     text: useIcon ? iconText : sigil ? (size === "extended" ? `${microLabel} ${fullText}` : compactText.replace(/\n/g, " ")) : microStack ? micro(size === "extended" ? `${microLabel}\n${fullText}` : compactText) : stacked ? compactText : fullText
     textFormat: microStack ? Text.RichText : Text.PlainText
-    leftPadding: useIcon && !vertical ? iconItem.width + (iconText ? 6 : 0) : sigil && sigilStyle === "led" ? 15 : 0
-    topPadding: useIcon && vertical ? iconItem.height + (iconText ? 2 : 0) : 0
-    font.pixelSize: microStack ? 12 : sigil ? (sigilStyle === "led" ? 16 : 12) : vertical || stacked ? theme.font.sizeS : theme.font.sizeM
+    leftPadding: lcd ? 10 : useIcon && !vertical ? iconItem.width + (iconText ? 6 : 0) : sigil && sigilStyle === "led" ? 15 : 0
+    rightPadding: lcd ? 10 : 0
+    bottomPadding: lcd ? 3 : 0
+    topPadding: lcd ? 3 : useIcon && vertical ? iconItem.height + (iconText ? 2 : 0) : 0
+    font.pixelSize: lcd ? 15 : microStack ? 12 : sigil ? (sigilStyle === "led" ? 16 : 12) : vertical || stacked ? theme.font.sizeS : theme.font.sizeM
     font.weight: sigil && (sigilStyle === "phosphor" || sigilStyle === "led") ? Font.DemiBold : Font.Normal
     font.letterSpacing: sigil ? (sigilStyle === "phosphor" ? 1 : 0.6) : 0
     // Façade: a status that's off dims (the VFD's unlit segments).
     opacity: sigil && sigilStyle === "phosphor" && level === "off" ? 0.45 : 1
+
+    // The LCD window behind the text.
+    Rectangle {
+        z: -1
+        visible: !!parent.lcd
+        anchors.fill: parent
+        radius: 4
+        color: parent.lcd === "green" ? "#1A2410" : "#2A1606"
+        border.width: 2
+        border.color: "#80000000"
+    }
 
     // Modulaire: the status LED (on: ok, off: dark, alert: urgent), a soft
     // halo when lit.
@@ -104,8 +120,8 @@ ThemedText {
         }
     }
     // (Every size: extended keeps one line, in the same mono capitals.)
-    font.family: microStatus || sigilStyle === "phosphor" ? theme.font.mono : theme.font.family
-    font.capitalization: microStatus || sigil ? Font.AllUppercase : Font.MixedCase
+    font.family: lcd ? (theme.font.lcd ?? theme.font.mono) : microStatus || sigilStyle === "phosphor" ? theme.font.mono : theme.font.family
+    font.capitalization: lcd || microStatus || sigil ? Font.AllUppercase : Font.MixedCase
     lineHeight: stacked || microStack ? 0.9 : 1
     horizontalAlignment: Text.AlignHCenter
     width: vertical && crossSize > 0 ? crossSize : implicitWidth

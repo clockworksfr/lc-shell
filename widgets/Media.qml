@@ -40,7 +40,8 @@ TextWidget {
     compactText: glyph
     width: vertical ? crossSize : Math.min(implicitWidth, options.maxWidth ?? (size === "extended" ? 560 : 360))
     horizontalAlignment: vertical ? Text.AlignHCenter : Text.AlignLeft
-    color: player?.isPlaying ? theme.color.ink : theme.color.soft
+    lcd: theme.style.module === "modulaire" && !vertical && size !== "compact" ? "amber" : ""
+    color: lcd ? (player?.isPlaying ? "#FFB35A" : Qt.alpha("#FFB35A", 0.6)) : player?.isPlaying ? theme.color.ink : theme.color.soft
 
     icon: player?.isPlaying ? "pause" : "play_arrow"
     iconFilled: true
