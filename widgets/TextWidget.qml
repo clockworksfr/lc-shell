@@ -24,9 +24,7 @@ ThemedText {
     property string icon
     property string iconText
     property bool iconFilled: false
-    // Icon even where statuses are text (the media widget's play / pause).
-    property bool forceIcon: false
-    readonly property bool useIcon: !!icon && (forceIcon || theme.style.statusIcons !== false)
+    readonly property bool useIcon: !!icon && theme.style.statusIcons !== false
 
     // Text mode: compact = label over value (e.g. VOL / 64), like vertical.
     readonly property bool stacked: !useIcon && (vertical || size === "compact")

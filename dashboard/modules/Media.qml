@@ -156,6 +156,9 @@ ModuleBase {
     readonly property bool spectrumInside: screenKind === "vfd"
     // Modulaire (design "Lecteur"): no scope, the LCD fills the module.
     readonly property bool screenFills: spectrumInside || theme.style.module === "modulaire"
+    // Modulaire: the keys span the module (thirds), 40–120 px high.
+    readonly property bool modKeys: theme.style.module === "modulaire"
+    readonly property real modKeyHeight: Math.round(clamp(40, Math.min(ch * 0.24, (cw - 2 * Math.max(8, Math.min(20, cw * 0.03))) / 3 / 1.5), 120))
     readonly property bool progressInside: screenKind !== "none"
     readonly property bool ringShowsSound: theme.style.cover === "disc"
 
@@ -283,14 +286,18 @@ ModuleBase {
         property var m
         property real size: 56
         property bool full: true
+        // Modulaire (design "Lecteur"): three equal keys across this width.
+        property real span: 0
+        readonly property real keyWidth: span > 0 ? (span - 2 * spacing) / 3 : 0
 
-        spacing: transport.size * 0.22
+        spacing: span > 0 ? Math.max(8, Math.min(20, span * 0.03)) : transport.size * 0.22
 
         ModuleButton {
             visible: transport.full
             icon: "skip_previous"
             legend: I18n.tr("media.prev")
-            size: transport.size * 0.85
+            keyWidth: transport.keyWidth
+            size: transport.span > 0 || transport.m.modKeys ? transport.size : transport.size * 0.85
             anchors.verticalCenter: parent.verticalCenter
             onTapped: Players.previous()
         }
@@ -298,6 +305,7 @@ ModuleBase {
             icon: transport.m.playing ? "pause" : "play_arrow"
             legend: I18n.tr("media.play")
             primary: true
+            keyWidth: transport.keyWidth
             size: transport.size
             anchors.verticalCenter: parent.verticalCenter
             onTapped: Players.togglePlaying()
@@ -306,7 +314,8 @@ ModuleBase {
             visible: transport.full
             icon: "skip_next"
             legend: I18n.tr("media.next")
-            size: transport.size * 0.85
+            keyWidth: transport.keyWidth
+            size: transport.span > 0 || transport.m.modKeys ? transport.size : transport.size * 0.85
             anchors.verticalCenter: parent.verticalCenter
             onTapped: Players.next()
         }
@@ -426,8 +435,9 @@ ModuleBase {
         Transport {
             m: root
             Layout.alignment: Qt.AlignHCenter
-            full: root.cw >= root.buttonSize * 3.6 * root.keyAspect
-            size: Math.min(root.buttonSize, root.ch * 0.2, root.cw / (3.6 * root.keyAspect))
+            full: root.modKeys || root.cw >= root.buttonSize * 3.6 * root.keyAspect
+            span: root.modKeys ? root.cw : 0
+            size: root.modKeys ? root.modKeyHeight : Math.min(root.buttonSize, root.ch * 0.2, root.cw / (3.6 * root.keyAspect))
         }
     }
 
@@ -482,8 +492,9 @@ ModuleBase {
 
             Transport {
                 m: root
+                span: root.modKeys ? parent.width : 0
                 // Never cut at the bottom: bounded by the height and width.
-                size: Math.min(root.buttonSize, root.ch * 0.22, (root.cw * 0.64) / (3.9 * root.keyAspect))
+                size: root.modKeys ? root.modKeyHeight : Math.min(root.buttonSize, root.ch * 0.22, (root.cw * 0.64) / (3.9 * root.keyAspect))
             }
         }
     }
@@ -542,7 +553,8 @@ ModuleBase {
         Transport {
             m: root
             Layout.alignment: Qt.AlignVCenter
-            size: Math.min(root.buttonSize, root.ch * 0.8, root.cw * 0.28 / (3.6 * root.keyAspect))
+            // Modulaire strips: keys 80 % of the height, 1.5 : 1.
+            size: root.modKeys ? root.ch * 0.8 : Math.min(root.buttonSize, root.ch * 0.8, root.cw * 0.28 / (3.6 * root.keyAspect))
         }
     }
 

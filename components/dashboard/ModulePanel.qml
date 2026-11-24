@@ -6,8 +6,8 @@ import qs.theme
 // A dashboard module's frame, in its theme's language (style.module):
 // classic card; constellation glass (gradient, accent-tinted edge); facade
 // front panel (metal gradient, bevels, 4 flat screws, silk title at
-// x 40); modulaire aluminium plate (no screws, a sheen, a centered silk
-// title; screen modules in the black finish); matrix rounded card on a
+// x 40); modulaire aluminium plate (four flat screws, a sheen, a centered
+// silk title; screen modules in the black finish); matrix rounded card on a
 // dot grid. Title shown when tall enough.
 Item {
     id: root
@@ -181,22 +181,23 @@ Item {
         color: Qt.alpha("white", 0.12)
     }
 
-    // Façade: 4 flat screws, 18 px in from each corner (Modulaire modules
-    // have none; its hover cards do).
+    // Flat screws in the corners: Façade 10 px, 18 px in; Modulaire 8 px,
+    // 10 px in (as its hover cards; simon's call).
     Repeater {
-        model: root.look === "facade" ? 4 : 0
+        model: root.look === "facade" || root.look === "modulaire" ? 4 : 0
 
         Rectangle {
             required property int index
-            readonly property real inset: 18
-            width: 10
-            height: 10
-            radius: 5
+            readonly property bool mod: root.look === "modulaire"
+            readonly property real inset: mod ? 10 : 18
+            width: mod ? 8 : 10
+            height: width
+            radius: width / 2
             x: index % 2 === 0 ? inset - width / 2 : root.width - inset - width / 2
             y: index < 2 ? inset - height / 2 : root.height - inset - height / 2
-            color: "#9AA0A3"
-            border.width: 1.5
-            border.color: Qt.alpha("#9AA0A3", 0.45)
+            color: mod ? "#8A8F92" : "#9AA0A3"
+            border.width: mod ? 1 : 1.5
+            border.color: Qt.alpha(color, mod ? 0.5 : 0.45)
         }
     }
 

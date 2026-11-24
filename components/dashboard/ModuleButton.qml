@@ -21,8 +21,10 @@ Item {
 
     signal tapped
 
-    // Matrix pills and Modulaire keys are 1.5 × as wide as tall.
-    implicitWidth: look === "matrix" || look === "modulaire" ? size * 1.5 : size
+    // Matrix pills and Modulaire keys are 1.5 × as wide as tall; a given
+    // width instead (Modulaire's player: three keys across the module).
+    property real keyWidth: 0
+    implicitWidth: keyWidth > 0 ? keyWidth : look === "matrix" || look === "modulaire" ? size * 1.5 : size
     implicitHeight: size + (look === "facade" && legend ? legendText.implicitHeight + 4 : 0)
 
     // Modulaire: the key's solid shadow (design .c-btn: 0 4px 0 #000).
@@ -112,7 +114,7 @@ Item {
             anchors.verticalCenterOffset: root.look === "facade" ? 3 : 0
             name: root.icon
             filled: true
-            size: root.size * 0.46
+            size: root.look === "modulaire" ? Math.min(root.size * 0.42, 34) : root.size * 0.46
             color: root.look === "modulaire" ? "#EFEDE6" : root.primary && root.look !== "facade" ? root.theme.color.onAccent : root.theme.color.ink
         }
 
