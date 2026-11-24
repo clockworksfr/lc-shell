@@ -35,7 +35,7 @@ Item {
     readonly property real m: Math.min(width, look === "matrix" ? pill.height : height)
     // Sizes per theme (design review): matrix from the pill's height,
     // modulaire's Michroma smaller, the others from the tile.
-    readonly property real labelSize: look === "matrix" ? clamp(13, pill.height * 0.2, 18)
+    readonly property real labelSize: look === "matrix" ? clamp(15, pill.height * 0.27, 20)
         : look === "modulaire" ? clamp(11, m * 0.1, 16)
         : clamp(15, m * 0.17, 24)
     readonly property real iconSize: look === "matrix" ? pill.height * 0.34 : clamp(22, m * 0.3, 46)
