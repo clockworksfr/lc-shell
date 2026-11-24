@@ -7,6 +7,8 @@ import qs.components
 // clipped to the bar's width. Never rotated. Blocks pick their text by
 // `size` too (compact: the value alone, extended: with context).
 ThemedText {
+    id: textWidget
+
     property ShellScreen screen
     property var options: ({})
     property bool vertical: false
@@ -135,8 +137,8 @@ ThemedText {
     property bool stableWidth: false
     TextMetrics {
         id: widest
-        font: parent.font
-        text: parent.stableWidth && parent.textFormat !== Text.RichText ? parent.text.replace(/[0-9]/g, "8") : ""
+        font: textWidget.font
+        text: textWidget.stableWidth && textWidget.textFormat !== Text.RichText ? textWidget.text.replace(/[0-9]/g, "8") : ""
     }
     font.features: stableWidth ? ({ "tnum": 1 }) : ({})
     width: vertical && crossSize > 0 ? crossSize : stableWidth && widest.text ? Math.max(implicitWidth, Math.ceil(widest.advanceWidth) + leftPadding + rightPadding) : implicitWidth
