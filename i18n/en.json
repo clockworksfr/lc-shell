@@ -351,6 +351,7 @@
   "workspaces.empty": "empty",
   "vu.spectrum": "Spectrum",
   "vu.footer": "Output: {output} · peak {peak} dB",
+  "hue.colorTitle": "Color",
   "clock.week": "Week {n}",
   "clock.dayOfYear": "day {n} of {total}",
   "clock.yearProgress": "{value} of the year",

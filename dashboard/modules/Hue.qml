@@ -20,6 +20,8 @@ import qs.theme
 //           ≥ 1000 × 400 (and in the panel, `full`)
 // More (and the last scene slot when scenes overflow) opens everything in
 // a panel over the screen; the color swatch opens the color panel.
+// Big cells (tiers large / poster): the three columns at bigger targets;
+// poster: a fourth, the selected room's color (the theme's picker).
 ModuleBase {
     id: root
 
@@ -29,10 +31,10 @@ ModuleBase {
     property string selectedId: ""
 
     readonly property string look: theme.style.module ?? "classic"
-    readonly property real hit: Math.max(36, theme.hit)
+    readonly property real hit: poster ? (theme.touch ? 88 : 64) : large ? (theme.touch ? 76 : 56) : Math.max(36, theme.hit)
     readonly property var selected: HueBridge.room(selectedId) ?? HueBridge.rooms.find(r => r.on) ?? HueBridge.rooms[0] ?? null
     readonly property string mode: !HueBridge.loaded ? "state"
-        : full || drawer || (shape === "wide" && ch >= 400 && cw >= 1000) ? "three"
+        : full || drawer || large || (shape === "wide" && ch >= 400 && cw >= 1000) ? "three"
         : shape === "tiny" ? "tiny"
         : shape === "narrow" ? "list"
         : (shape === "strip" || shape === "wide") && ch < 200 ? "row"
@@ -500,7 +502,7 @@ ModuleBase {
     component SectionLabel: ThemedText {
         property var m
         label: true
-        font.pixelSize: Math.min(m.t4, 12)
+        font.pixelSize: m.large ? m.t4 : Math.min(m.t4, 12)
         font.letterSpacing: 1
         font.capitalization: Font.AllUppercase
         color: m.theme.color.soft
@@ -784,7 +786,7 @@ ModuleBase {
         RoomList {
             id: threeRooms
             m: root
-            width: Math.min(320, parent.width * 0.3)
+            width: root.large ? parent.width * (root.poster ? 0.18 : 0.26) : Math.min(320, parent.width * 0.3)
             height: parent.height
         }
 
@@ -797,7 +799,7 @@ ModuleBase {
         RoomSections {
             id: threeDetail
             m: root
-            width: (parent.width - threeRooms.width - 2 - parent.spacing * 4) * 0.58
+            width: (parent.width - threeRooms.width - colorColumn.room - 2 - parent.spacing * 4) * 0.58
             height: parent.height
         }
 
@@ -809,7 +811,7 @@ ModuleBase {
 
         // Its lights (under the close button of the panels).
         Column {
-            width: parent.width - threeRooms.width - threeDetail.width - 2 - parent.spacing * 4
+            width: parent.width - threeRooms.width - threeDetail.width - colorColumn.room - 2 - parent.spacing * 4
             height: parent.height
             spacing: 8
 
@@ -825,6 +827,34 @@ ModuleBase {
                 m: root
                 width: parent.width
                 height: parent.height - y
+            }
+        }
+
+        // Poster: the room's color (or its white).
+        Column {
+            id: colorColumn
+
+            readonly property real room: root.poster ? Math.round(parent.width * 0.34) + parent.spacing * 2 + 1 : 0
+            visible: root.poster
+            clip: true
+            width: Math.max(0, room - parent.spacing * 2 - 1)
+            height: parent.height
+            spacing: 8
+
+            SectionLabel {
+                m: root
+                width: parent.width
+                text: I18n.tr("hue.colorTitle")
+                bottomPadding: 4
+            }
+
+            HueColorPicker {
+                width: parent.width
+                height: parent.height - y
+                title: root.selected?.name ?? ""
+                current: root.selected?.color || "#FFE9D2"
+                onColorPicked: hex => root.selected && HueBridge.setRoomColor(root.selected.id, hex)
+                onWhitePicked: kelvin => root.selected && HueBridge.setRoomWhite(root.selected.id, kelvin)
             }
         }
     }
