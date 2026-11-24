@@ -554,7 +554,7 @@ ModuleBase {
             m: root
             Layout.alignment: Qt.AlignVCenter
             // Modulaire strips: keys 80 % of the height, 1.5 : 1.
-            size: root.modKeys ? root.ch * 0.8 : Math.min(root.buttonSize, root.ch * 0.8, root.cw * 0.28 / (3.6 * root.keyAspect))
+            size: root.modKeys ? Math.min(root.ch * 0.8, root.cw * 0.36 / 5) : Math.min(root.buttonSize, root.ch * 0.8, root.cw * 0.28 / (3.6 * root.keyAspect))
         }
     }
 
@@ -574,8 +574,9 @@ ModuleBase {
             out.push({ text: Lyrics.lines[i].text || "♪", current: i === at });
         return out;
     }
-    // Modulaire's player module has no cover (design "Lecteur").
-    readonly property bool coverShown: theme.style.cover !== "none" && theme.style.module !== "modulaire"
+    // The cover in every theme with one (Modulaire too: simon's call, over
+    // the "Lecteur" mockup).
+    readonly property bool coverShown: theme.style.cover !== "none"
     readonly property real bigCover: !coverShown ? 0 : poster ? Math.min(ch * 0.7, cw * 0.42) : Math.min(ch, cw * 0.36)
     readonly property real bigKey: Math.max(hit, Math.min(96, t2 * 1.5))
 
