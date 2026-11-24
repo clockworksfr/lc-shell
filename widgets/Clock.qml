@@ -29,7 +29,7 @@ TextWidget {
     // shell's own fonts). The widget's own text is empty, its padding the
     // pair's width.
     // Modulaire: the time in a Nixie window (design "Barre"): dark glass,
-    // orange glowing digits, no colon.
+    // orange glowing digits, the colon kept between hours and minutes.
     readonly property bool nixie: figure && theme.style.module === "modulaire"
     readonly property bool pair: figure && (!!datePart || nixie)
     fullText: pair ? "" : I18n.locale.toString(clock.date, format)
@@ -71,7 +71,7 @@ TextWidget {
             ThemedText {
                 id: timeText
                 anchors.centerIn: parent
-                text: root.nixie ? I18n.locale.toString(clock.date, root.format).replace(/:/g, "") : I18n.locale.toString(clock.date, root.format)
+                text: I18n.locale.toString(clock.date, root.format)
                 font.family: root.theme.font.display
                 font.weight: root.theme.font.displayWeight ?? Font.Normal
                 font.pixelSize: root.nixie ? Math.round(root.figureSize * 0.82) : root.figureSize

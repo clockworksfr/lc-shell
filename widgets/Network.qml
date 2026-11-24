@@ -9,6 +9,9 @@ import qs.services
 TextWidget {
     id: root
 
+    // The rate changes every second: never move the neighbours.
+    stableWidth: true
+
     // Right-click menu (the bar's widget menu).
     readonly property var contextActions: [
         ...(NetworkService.wifi ? [{ id: "wifi", icon: NetworkService.wifiEnabled ? "wifi_off" : "wifi", text: I18n.tr(NetworkService.wifiEnabled ? "ctx.wifiOff" : "ctx.wifiOn") }] : []),

@@ -124,7 +124,16 @@ ThemedText {
     font.capitalization: lcd || microStatus || sigil ? Font.AllUppercase : Font.MixedCase
     lineHeight: stacked || microStack ? 0.9 : 1
     horizontalAlignment: Text.AlignHCenter
-    width: vertical && crossSize > 0 ? crossSize : implicitWidth
+    // Values that change all the time (rates, signal): tabular figures, and
+    // a width that only grows (the widest seen), so the neighbours never
+    // move as the value changes. Reset when the size or the bar changes.
+    property bool stableWidth: false
+    property real widestSeen: 0
+    onImplicitWidthChanged: if (stableWidth && implicitWidth > widestSeen) widestSeen = implicitWidth
+    onSizeChanged: widestSeen = 0
+    onVerticalChanged: widestSeen = 0
+    font.features: stableWidth ? ({ "tnum": 1 }) : ({})
+    width: vertical && crossSize > 0 ? crossSize : stableWidth ? Math.max(implicitWidth, widestSeen) : implicitWidth
     elide: Text.ElideRight
 
     Icon {
