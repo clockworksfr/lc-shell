@@ -330,6 +330,8 @@
   "dashEdit.workspacePage": "Espace {name}",
   "dashEdit.addPage": "Page pour l'espace {name}",
   "dashEdit.removePage": "Supprimer cette page",
+  "dashEdit.tierLarge": "Grand",
+  "dashEdit.tierPoster": "Affiche",
   "dashEdit.remove": "Retirer",
   "dashEdit.addModule": "Module",
   "dashEdit.closePalette": "Fermer",

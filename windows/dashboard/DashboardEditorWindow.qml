@@ -79,9 +79,57 @@ PanelWindow {
             onClicked: DashboardEditor.selected = -1
         }
 
-        // Grid.
+        // Grid: cell outlines; on big grids (more than 12 × 4) a dot at
+        // each corner and a line every 4 cells instead (288 outlines would
+        // blur together).
+        readonly property bool dense: win.grid.columns > 12 || win.grid.rows > 4
+
         Repeater {
-            model: win.grid.columns * win.grid.rows
+            model: area.dense ? (win.grid.columns + 1) * (win.grid.rows + 1) : 0
+
+            Rectangle {
+                required property int index
+                readonly property int cx: index % (win.grid.columns + 1)
+                readonly property int cy: Math.floor(index / (win.grid.columns + 1))
+                readonly property bool major: cx % 4 === 0 && cy % 4 === 0
+                readonly property var s: win.cellSize()
+                width: major ? 6 : 4
+                height: width
+                radius: width / 2
+                x: win.grid.margin + cx * (s.w + win.grid.gap) - win.grid.gap / 2 - width / 2
+                y: win.grid.margin + cy * (s.h + win.grid.gap) - win.grid.gap / 2 - height / 2
+                color: Qt.alpha(win.theme.color.accent, major ? 0.6 : 0.35)
+            }
+        }
+
+        Repeater {
+            model: area.dense ? Math.max(0, Math.ceil(win.grid.columns / 4) - 1) : 0
+
+            Rectangle {
+                required property int index
+                readonly property var s: win.cellSize()
+                x: win.grid.margin + (index + 1) * 4 * (s.w + win.grid.gap) - win.grid.gap / 2
+                width: 1
+                height: area.height
+                color: Qt.alpha(win.theme.color.accent, 0.14)
+            }
+        }
+
+        Repeater {
+            model: area.dense ? Math.max(0, Math.ceil(win.grid.rows / 4) - 1) : 0
+
+            Rectangle {
+                required property int index
+                readonly property var s: win.cellSize()
+                y: win.grid.margin + (index + 1) * 4 * (s.h + win.grid.gap) - win.grid.gap / 2
+                width: area.width
+                height: 1
+                color: Qt.alpha(win.theme.color.accent, 0.14)
+            }
+        }
+
+        Repeater {
+            model: area.dense ? 0 : win.grid.columns * win.grid.rows
 
             Rectangle {
                 required property int index
@@ -318,15 +366,24 @@ PanelWindow {
                 font.weight: Font.DemiBold
             }
 
+            // Its size, and the module's tier from it (large, poster).
+            ThemedText {
+                anchors.verticalCenter: parent.verticalCenter
+                readonly property var r: bottom.cell ? Dashboard.rect(bottom.cell, win.grid, Dashboard.area(win.screen).width, Dashboard.area(win.screen).height) : null
+                readonly property real side: r ? Math.min(r.width, r.height) : 0
+                text: !bottom.cell ? "" : `${bottom.cell.w} × ${bottom.cell.h}` + (side >= 1240 ? ` · ${I18n.tr("dashEdit.tierPoster")}` : side >= 760 ? ` · ${I18n.tr("dashEdit.tierLarge")}` : "")
+                color: win.theme.color.soft
+            }
+
             Repeater {
-                model: ["S", "M", "L"]
+                model: DashboardEditor.sizeKeys
 
                 Button {
                     required property string modelData
                     anchors.verticalCenter: parent.verticalCenter
                     readonly property var size: DashboardEditor.sizes[modelData]
                     primary: !!bottom.cell && bottom.cell.w === size.w && bottom.cell.h === size.h
-                    text: `${modelData} · ${size.w}×${size.h}`
+                    text: `${modelData === "P" ? I18n.tr("dashEdit.tierPoster") : modelData} · ${size.w}×${size.h}`
                     onClicked: DashboardEditor.resizeTo(DashboardEditor.selected, modelData)
                 }
             }
