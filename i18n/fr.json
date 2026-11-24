@@ -35,6 +35,7 @@
   "action.sink.keywords": "audio son sortie haut-parleur casque",
   "action.source": "Entrée audio : {name}",
   "action.source.keywords": "audio entrée micro microphone",
+  "media.paused": "en pause",
   "media.noPlayer": "Aucun lecteur",
   "tile.window": "fenêtre",
   "system.avgPeak": "moy. {avg} · pic {peak}",

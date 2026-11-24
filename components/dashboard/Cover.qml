@@ -72,6 +72,27 @@ Item {
         radius: root.look === "square" ? root.theme.radius.tile : root.look === "inset" ? 2 : root.look === "screwed" ? 3 : width / 2
         color: root.theme.color.surface2
 
+        // No art (yet): a soft mint placeholder (design "Média"); the disc
+        // keeps its own dark body.
+        Rectangle {
+            anchors.fill: parent
+            visible: image.status !== Image.Ready && root.look !== "disc"
+            gradient: Gradient {
+                GradientStop {
+                    position: 0
+                    color: "#D9EFE6"
+                }
+                GradientStop {
+                    position: 0.45
+                    color: "#5FA58E"
+                }
+                GradientStop {
+                    position: 1
+                    color: "#1D4A42"
+                }
+            }
+        }
+
         Image {
             id: image
             anchors.fill: parent

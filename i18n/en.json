@@ -35,6 +35,7 @@
   "action.sink.keywords": "audio sound output speaker headphones headset",
   "action.source": "Audio input: {name}",
   "action.source.keywords": "audio input microphone mic",
+  "media.paused": "paused",
   "media.noPlayer": "No player",
   "tile.window": "window",
   "system.avgPeak": "avg {avg} · peak {peak}",
