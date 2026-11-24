@@ -258,7 +258,9 @@ Item {
                 readonly property real room: pill.width - pill.height * 0.6 - pillIcon.width - pill.height * 0.16
 
                 anchors.verticalCenter: parent.verticalCenter
-                width: Math.max(0, Math.min(room, Math.max(labelMetrics.advanceWidth, pillSub.visible ? subMetrics.advanceWidth : 0) + 2))
+                // The label's letter spacing counted (TextMetrics ignores it):
+                // too narrow a column shrank the text (HorizontalFit).
+                width: Math.max(0, Math.min(room, Math.max(labelMetrics.advanceWidth + root.label.length * root.labelSize * 0.08, pillSub.visible ? subMetrics.advanceWidth : 0) + 2))
 
                 TextMetrics {
                     id: labelMetrics
