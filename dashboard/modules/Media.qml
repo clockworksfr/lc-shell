@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Services.Mpris
 import qs.components
 import qs.components.dashboard
 import qs.i18n
@@ -16,7 +17,10 @@ import qs.theme
 //   strip  one line: cover, track over the progress, spectrum, transport
 //   box / tall  cover on top, track, spectrum filling, progress, transport
 // Themes without cover art (facade, modulaire) show the track in their
-// display (VFD, amber LCD).
+// display (VFD, amber LCD). Big cells (tiers large / poster): cover,
+// title / artist / album, player chips, a few lyric lines, the spectrum,
+// progress, shuffle / previous / play / next / repeat and the volume
+// (poster: the cover as hero with progress and keys under it).
 ModuleBase {
     id: root
 
@@ -295,7 +299,7 @@ ModuleBase {
 
     // tiny: track, progress, play beside a small spectrum.
     ColumnLayout {
-        visible: !!root.player && root.shape === "tiny"
+        visible: !!root.player && !root.large && root.shape === "tiny"
         anchors.fill: parent
         spacing: root.gap / 2
 
@@ -341,7 +345,7 @@ ModuleBase {
 
     // narrow / box / tall: a column; the spectrum takes the room left.
     ColumnLayout {
-        visible: !!root.player && (root.shape === "narrow" || root.shape === "box" || root.shape === "tall")
+        visible: !!root.player && !root.large && (root.shape === "narrow" || root.shape === "box" || root.shape === "tall")
         anchors.fill: parent
         spacing: root.gap / 1.5
 
@@ -411,7 +415,7 @@ ModuleBase {
     // wide: cover left; track, spectrum, progress, transport under one
     // another.
     RowLayout {
-        visible: !!root.player && root.stacked
+        visible: !!root.player && !root.large && root.stacked
         anchors.fill: parent
         spacing: root.gap
 
@@ -466,7 +470,7 @@ ModuleBase {
 
     // strip: one line.
     RowLayout {
-        visible: !!root.player && root.shape === "strip" && !root.stacked
+        visible: !!root.player && !root.large && root.shape === "strip" && !root.stacked
         anchors.fill: parent
         spacing: root.gap
 
@@ -518,6 +522,249 @@ ModuleBase {
             m: root
             Layout.alignment: Qt.AlignVCenter
             size: Math.min(root.buttonSize, root.ch * 0.8, root.cw * 0.28 / (3.6 * root.keyAspect))
+        }
+    }
+
+    // --- Big cells ---
+
+    // Lyrics are fetched while a big player shows them.
+    readonly property bool wantsLyrics: large && !!player
+    onWantsLyricsChanged: Lyrics.refCount += wantsLyrics ? 1 : -1
+    Component.onDestruction: if (wantsLyrics) Lyrics.refCount--
+    readonly property int lyricLines: poster ? 5 : 3
+    readonly property var lyricShown: {
+        if (Lyrics.status !== "found")
+            return [];
+        const at = Math.max(0, Lyrics.index), out = [];
+        const from = Math.max(0, Math.min(at - Math.floor(lyricLines / 2), Lyrics.lines.length - lyricLines));
+        for (let i = from; i < Math.min(Lyrics.lines.length, from + lyricLines); i++)
+            out.push({ text: Lyrics.lines[i].text || "♪", current: i === at });
+        return out;
+    }
+    readonly property bool coverShown: theme.style.cover !== "none"
+    readonly property real bigCover: !coverShown ? 0 : poster ? Math.min(ch * 0.7, cw * 0.42) : Math.min(ch, cw * 0.36)
+    readonly property real bigKey: Math.max(hit, Math.min(96, t2 * 1.5))
+
+    // Shuffle, previous, play, next, repeat.
+    component BigKeys: Row {
+        id: keys
+
+        property var m
+        spacing: keys.m.bigKey * 0.24
+
+        ModuleButton {
+            visible: keys.m.player?.shuffleSupported ?? false
+            anchors.verticalCenter: parent.verticalCenter
+            icon: "shuffle"
+            size: keys.m.bigKey * 0.7
+            opacity: keys.m.player?.shuffle ? 1 : 0.45
+            onTapped: keys.m.player.shuffle = !keys.m.player.shuffle
+        }
+        ModuleButton {
+            anchors.verticalCenter: parent.verticalCenter
+            icon: "skip_previous"
+            legend: I18n.tr("media.prev")
+            size: keys.m.bigKey * 0.85
+            onTapped: Players.previous()
+        }
+        ModuleButton {
+            anchors.verticalCenter: parent.verticalCenter
+            icon: keys.m.playing ? "pause" : "play_arrow"
+            legend: I18n.tr("media.play")
+            primary: true
+            size: keys.m.bigKey
+            onTapped: Players.togglePlaying()
+        }
+        ModuleButton {
+            anchors.verticalCenter: parent.verticalCenter
+            icon: "skip_next"
+            legend: I18n.tr("media.next")
+            size: keys.m.bigKey * 0.85
+            onTapped: Players.next()
+        }
+        ModuleButton {
+            visible: keys.m.player?.loopSupported ?? false
+            anchors.verticalCenter: parent.verticalCenter
+            icon: keys.m.player?.loopState === MprisLoopState.Track ? "repeat_one" : "repeat"
+            size: keys.m.bigKey * 0.7
+            opacity: (keys.m.player?.loopState ?? MprisLoopState.None) !== MprisLoopState.None ? 1 : 0.45
+            onTapped: keys.m.player.loopState = keys.m.player.loopState === MprisLoopState.None ? MprisLoopState.Playlist : keys.m.player.loopState === MprisLoopState.Playlist ? MprisLoopState.Track : MprisLoopState.None
+        }
+    }
+
+    // The player's volume (when it has one).
+    component BigVolume: Row {
+        id: vol
+
+        property var m
+        visible: vol.m.player?.volumeSupported ?? false
+        spacing: vol.m.gap * 0.6
+
+        Icon {
+            id: volIcon
+            anchors.verticalCenter: parent.verticalCenter
+            name: "volume_up"
+            size: vol.m.t3 * 1.2
+            color: vol.m.theme.color.soft
+        }
+
+        Slider {
+            anchors.verticalCenter: parent.verticalCenter
+            width: vol.width - volIcon.width - vol.spacing
+            value: vol.m.player?.volume ?? 0
+            onMoved: v => vol.m.player.volume = v
+        }
+    }
+
+    Item {
+        id: big
+
+        visible: !!root.player && root.large
+        anchors.fill: parent
+
+        // Cover (left); poster: progress and keys under it.
+        Column {
+            id: bigLeft
+
+            visible: root.coverShown
+            width: root.bigCover
+            anchors.verticalCenter: root.poster ? parent.verticalCenter : undefined
+            spacing: root.gap
+
+            Cover {
+                source: root.player?.trackArtUrl ?? ""
+                playing: root.playing
+                size: root.bigCover
+            }
+
+            Progress {
+                visible: root.poster
+                m: root
+                width: parent.width
+            }
+
+            BigKeys {
+                visible: root.poster
+                m: root
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+        }
+
+        ColumnLayout {
+            x: root.coverShown ? bigLeft.width + root.gap * 1.5 : 0
+            width: parent.width - x
+            height: parent.height
+            spacing: root.gap * 0.7
+
+            Track {
+                m: root
+                big: true
+                withProgress: false
+                withSpectrum: false
+                Layout.fillWidth: true
+            }
+
+            ThemedText {
+                Layout.fillWidth: true
+                visible: !!root.player?.trackAlbum
+                elide: Text.ElideRight
+                text: root.player?.trackAlbum ?? ""
+                font.pixelSize: root.t3
+                color: root.theme.color.soft
+            }
+
+            // Players: the one shown first, tap another to pin it.
+            Flow {
+                Layout.fillWidth: true
+                visible: Players.list.length > 1
+                spacing: root.gap * 0.5
+
+                Repeater {
+                    model: [...Players.list].sort((a, b) => (b === root.player) - (a === root.player))
+
+                    Rectangle {
+                        required property var modelData
+                        readonly property bool current: modelData === root.player
+                        width: chipText.implicitWidth + root.t4 * 2
+                        height: root.t4 * 2.2
+                        radius: height / 2
+                        color: current ? Qt.alpha(root.theme.color.signal ?? root.theme.color.accent, 0.16) : "transparent"
+                        border.width: 1
+                        border.color: current ? (root.theme.color.signal ?? root.theme.color.accent) : root.theme.color.line
+
+                        ThemedText {
+                            id: chipText
+                            anchors.centerIn: parent
+                            label: true
+                            text: parent.modelData.identity || parent.modelData.desktopEntry || "?"
+                            font.pixelSize: root.t4
+                            color: parent.current ? root.theme.color.ink : root.theme.color.soft
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: Players.choose(parent.modelData)
+                        }
+                    }
+                }
+            }
+
+            // A few lyric lines, the sung one in ink.
+            Column {
+                Layout.fillWidth: true
+                visible: root.lyricShown.length > 0
+                spacing: root.gap * 0.25
+
+                Repeater {
+                    model: root.lyricShown
+
+                    ThemedText {
+                        required property var modelData
+                        width: parent.width
+                        elide: Text.ElideRight
+                        text: modelData.text
+                        font.family: root.theme.font.lyric ?? root.theme.font.family
+                        font.capitalization: root.theme.font.lyricCaps ? Font.AllUppercase : Font.MixedCase
+                        font.pixelSize: root.t3 * (modelData.current ? 1.15 : 1)
+                        font.weight: modelData.current ? Font.DemiBold : Font.Normal
+                        color: modelData.current ? root.theme.color.ink : root.theme.color.soft
+                        opacity: modelData.current ? 1 : 0.6
+                    }
+                }
+            }
+
+            AudioSpectrum {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumHeight: root.t2
+                count: root.poster ? 64 : Math.max(16, Math.min(48, Math.floor(width / 18)))
+            }
+
+            Progress {
+                visible: !root.poster || !root.coverShown
+                m: root
+                Layout.fillWidth: true
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Math.max(bigKeys.height, bigVolume.height)
+
+                BigKeys {
+                    id: bigKeys
+                    visible: !root.poster || !root.coverShown
+                    m: root
+                }
+
+                BigVolume {
+                    id: bigVolume
+                    m: root
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.min(parent.width * 0.35, 420)
+                }
+            }
         }
     }
 }

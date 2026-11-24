@@ -153,3 +153,6 @@ wifi_1_bar
 wifi_2_bar
 wifi_lock
 wifi_off
+shuffle
+repeat
+repeat_one

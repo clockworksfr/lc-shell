@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs.components
+import qs.components.dashboard
 import qs.i18n
 import qs.services
 import qs.theme
@@ -9,12 +10,13 @@ import qs.theme
 // with the song. Always the previous and next lines at least (up to three
 // on each side in tall cells), every line whole: lines wrap, and the size
 // is the largest at which the whole block fits the cell. Plain (unsynced)
-// lyrics scroll freely.
+// lyrics scroll freely. Big cells: 7 lines (poster 11), the track and
+// its time on top, the progress at the bottom.
 ModuleBase {
     id: root
 
     // Lines shown on each side of the current one.
-    readonly property int side: shape === "tiny" || shape === "strip" || shape === "wide" ? 1 : Math.max(1, Math.min(3, Math.floor((ch / (t2 * 2.4) - 1) / 2)))
+    readonly property int side: poster ? 5 : large ? 3 : shape === "tiny" || shape === "strip" || shape === "wide" ? 1 : Math.max(1, Math.min(3, Math.floor((ch / (t2 * 2.4) - 1) / 2)))
     readonly property int current: Math.max(0, Lyrics.index)
     // The lines in view, from `side` before the current one to `side` after.
     readonly property var shown: {
@@ -27,13 +29,20 @@ ModuleBase {
     readonly property real spacingFactor: 0.3
     // Matrix: room on both sides for the red dot (kept symmetric).
     readonly property bool dotted: theme.style.module === "matrix"
-    readonly property real maxSize: Math.max(15, t2 * 1.3)
+    // The sung line (1.25 ×): 44–64 px on large cells, 64–96 on posters.
+    readonly property real maxSize: poster ? clamp(64, m * 0.07, 96) / 1.25 : large ? clamp(44, m * 0.058, 64) / 1.25 : Math.max(15, t2 * 1.3)
+    // Big cells: the header and the progress take their share.
+    readonly property real headerHeight: large ? t3 * 1.6 : 0
+    readonly property real footerHeight: large ? t4 * 2.4 : 0
+    readonly property real linesTop: large ? headerHeight + gap : 0
+    readonly property real linesHeight: ch - (large ? headerHeight + footerHeight + 2 * gap : 0)
+    readonly property real length: Lyrics.length
     // Advance (at 100 px) of each shown line, from the measures below.
     property var advances: []
     // Largest size at which every shown line, wrapped, fits the height
     // (the current line is 1.25 × and bold).
     readonly property real lineSize: {
-        const w = Math.max(1, cw), h = Math.max(1, ch);
+        const w = Math.max(1, cw), h = Math.max(1, linesHeight);
         for (let size = Math.floor(maxSize); size > 9; size--) {
             let total = 0;
             for (let i = 0; i < shown.length; i++) {
@@ -109,10 +118,51 @@ ModuleBase {
         }
     }
 
+    // Big cells: the track and its time.
+    Item {
+        visible: root.large && !!Lyrics.player
+        width: parent.width
+        height: root.headerHeight
+
+        ThemedText {
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - headerTime.width - root.gap
+            elide: Text.ElideRight
+            text: [Lyrics.title, Lyrics.artist].filter(t => !!t).join(" · ")
+            font.pixelSize: root.t3
+            font.weight: Font.DemiBold
+            color: root.theme.color.ink
+        }
+
+        ThemedText {
+            id: headerTime
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.length > 0
+            text: `${Math.floor(Lyrics.position / 60)}:${String(Math.floor(Lyrics.position % 60)).padStart(2, "0")} / ${Math.floor(root.length / 60)}:${String(Math.floor(root.length % 60)).padStart(2, "0")}`
+            font.family: root.theme.font.mono
+            font.pixelSize: root.t4
+            font.features: ({ "tnum": 1 })
+            color: root.theme.color.soft
+        }
+    }
+
+    // Big cells: the progress.
+    Gauge {
+        visible: root.large && root.length > 0
+        y: parent.height - root.footerHeight / 2 - height / 2
+        width: parent.width
+        value: Math.min(1, Lyrics.position / Math.max(1, root.length))
+        color: root.theme.color.signal ?? root.theme.color.accent
+        alarm: 2
+    }
+
     Item {
         id: synced
 
-        anchors.fill: parent
+        y: root.linesTop
+        width: parent.width
+        height: root.linesHeight
         visible: Lyrics.status === "found"
         clip: true
 
@@ -160,7 +210,8 @@ ModuleBase {
                     font.pixelSize: distance === 0 ? root.lineSize * 1.25 : root.lineSize
                     font.weight: distance === 0 ? Font.DemiBold : Font.Normal
                     color: distance === 0 ? root.theme.color.ink : root.theme.color.soft
-                    opacity: Math.max(0.3, 1 - distance * 0.22)
+                    // Posters fade further (5 lines each side).
+                    opacity: Math.max(root.poster ? 0.18 : 0.3, 1 - distance * (root.poster ? 0.16 : 0.22))
 
                     // Matrix: a red dot before the sung line (its first row).
                     Rectangle {
