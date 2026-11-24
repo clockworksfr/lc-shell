@@ -52,6 +52,23 @@ Singleton {
         return g;
     }
 
+    // Monitors' reserved room (bars) is only known after a refresh; again
+    // when layers come and go (a bar shown or hidden).
+    Component.onCompleted: Hyprland.refreshMonitors()
+    Connections {
+        target: Hyprland
+
+        function onRawEvent(event: HyprlandEvent): void {
+            if (["openlayer", "closelayer", "monitoraddedv2", "configreloaded"].includes(event.name))
+                reserveRefresh.restart();
+        }
+    }
+    Timer {
+        id: reserveRefresh
+        interval: 300
+        onTriggered: Hyprland.refreshMonitors()
+    }
+
     // The room a dashboard has on a screen (what its bar leaves), local.
     function area(screen: ShellScreen): var {
         const r = Hyprland.monitorFor(screen)?.lastIpcObject?.reserved ?? [0, 0, 0, 0];
