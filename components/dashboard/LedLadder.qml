@@ -13,7 +13,8 @@ Item {
     property real value: 0
     property bool vertical: true
     property int count: Math.max(8, Math.min(16, Math.floor((vertical ? height : width) / 18)))
-    readonly property real ledSize: Math.min(vertical ? width : height, 18) * 0.8
+    // Fits both ways (never past the ladder's length, 3 px gaps at least).
+    readonly property real ledSize: Math.max(2, Math.min(Math.min(vertical ? width : height, 18) * 0.8, ((vertical ? height : width) - (count - 1) * 3) / count))
 
     Grid {
         anchors.centerIn: parent

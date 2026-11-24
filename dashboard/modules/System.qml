@@ -484,8 +484,9 @@ ModuleBase {
         }
     }
 
-    // ladders (modulaire): a ladder per core, then GPU, RAM and the CPU's
-    // temperature (30–100 °C), silk labels under them, a green LCD below.
+    // ladders (modulaire, design "Système"): a ladder per core, then GPU,
+    // RAM and the CPU's temperature (30–100 °C), one silk label row under
+    // them, a two-line green LCD below (temperatures, network).
     Column {
         id: ladders
 
@@ -493,10 +494,10 @@ ModuleBase {
         anchors.fill: parent
         anchors.bottomMargin: root.gaugesBottom
         anchors.rightMargin: root.gaugesRight
-        spacing: root.gap * 0.7
+        spacing: 10
 
-        readonly property real lcdHeight: Math.max(30, root.t3 * 2.2)
-        readonly property real labelHeight: root.t4 * 1.6
+        readonly property real lcdHeight: Math.min(height * 0.36, root.t3 * 4.6)
+        readonly property real labelHeight: Math.max(12, root.t4) * 1.4
         readonly property real ladderHeight: Math.max(40, height - lcdHeight - labelHeight - spacing * 2)
         readonly property var singles: [
             ...(root.gpu ? [{ label: "GPU", value: root.gpu.busy }] : []),
@@ -504,68 +505,70 @@ ModuleBase {
             ...(SystemStats.cpuTemp > 0 ? [{ label: "T°", value: (SystemStats.cpuTemp - 30) / 70 }] : [])
         ]
         readonly property var cores: SystemStats.cores.length ? SystemStats.cores : [SystemStats.cpu]
-        readonly property real singleWidth: Math.min(28, width * 0.05)
-        readonly property real coresWidth: width - singles.length * (singleWidth + root.gap) - root.gap
+        readonly property real gapX: width * 0.04
+        readonly property real singleWidth: width * 0.07
+        readonly property real coresWidth: width - singles.length * (singleWidth + gapX)
+
+        Component.onCompleted: NetworkService.watchers++
+        Component.onDestruction: NetworkService.watchers--
 
         Row {
             width: parent.width
-            height: ladders.ladderHeight + ladders.labelHeight
-            spacing: root.gap
+            height: ladders.ladderHeight
+            spacing: ladders.gapX
 
-            Column {
+            Row {
+                id: coreRow
+                readonly property real column: Math.min(22, (ladders.coresWidth - (ladders.cores.length - 1) * 2) / ladders.cores.length)
                 width: ladders.coresWidth
-                spacing: 4
+                height: parent.height
+                // Columns spread over the width.
+                spacing: Math.max(2, (width - ladders.cores.length * column) / Math.max(1, ladders.cores.length - 1))
 
-                Row {
-                    id: coreRow
-                    readonly property real column: Math.min(22, (width - (ladders.cores.length - 1) * 2) / ladders.cores.length)
-                    width: parent.width
-                    height: ladders.ladderHeight
-                    // Columns spread over the width.
-                    spacing: Math.max(2, (width - ladders.cores.length * column) / Math.max(1, ladders.cores.length - 1))
+                Repeater {
+                    model: ladders.cores
 
-                    Repeater {
-                        model: ladders.cores
-
-                        LedLadder {
-                            required property real modelData
-                            width: coreRow.column
-                            height: coreRow.height
-                            count: 12
-                            value: modelData
-                        }
+                    LedLadder {
+                        required property real modelData
+                        width: coreRow.column
+                        height: coreRow.height
+                        count: 12
+                        value: modelData
                     }
-                }
-
-                ThemedText {
-                    text: I18n.tr("system.cores", { n: ladders.cores.length })
-                    font.pixelSize: root.t4
-                    color: root.theme.color.ink
                 }
             }
 
             Repeater {
                 model: ladders.singles
 
-                Column {
+                LedLadder {
                     required property var modelData
                     width: ladders.singleWidth
-                    spacing: 4
-
-                    LedLadder {
-                        width: parent.width
-                        height: ladders.ladderHeight
-                        count: 12
-                        value: parent.modelData.value
-                    }
-
-                    ThemedText {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: parent.modelData.label
-                        font.pixelSize: root.t4
-                        color: root.theme.color.ink
-                    }
+                    height: parent.height
+                    count: 12
+                    value: modelData.value
                 }
+            }
+        }
+
+        // One silk label row: the cores left, the singles right.
+        Item {
+            width: parent.width
+            height: ladders.labelHeight
+
+            ThemedText {
+                anchors.verticalCenter: parent.verticalCenter
+                text: I18n.tr("system.cores", { n: ladders.cores.length })
+                font.pixelSize: Math.max(12, root.t4)
+                color: root.theme.color.ink
+            }
+
+            ThemedText {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                text: ladders.singles.map(s => s.label).join(" · ")
+                font.pixelSize: Math.max(12, root.t4)
+                color: root.theme.color.ink
             }
         }
 
@@ -575,23 +578,34 @@ ModuleBase {
             height: ladders.lcdHeight
             tint: "green"
 
-            ThemedText {
-                anchors.fill: parent
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-                verticalAlignment: Text.AlignVCenter
-                elide: Text.ElideRight
-                text: [
-                    SystemStats.cpuTemp > 0 ? `CPU ${Math.round(SystemStats.cpuTemp)}°` : `CPU ${Math.round(SystemStats.cpu * 100)}`,
-                    root.gpu?.temp ? `GPU ${Math.round(root.gpu.temp)}°` : "",
-                    SystemStats.diskTemp > 0 ? `SSD ${Math.round(SystemStats.diskTemp)}°` : "",
-                    I18n.tr("system.memory", { used: I18n.number(SystemStats.memoryUsedGiB, 1), total: Math.round(SystemStats.memoryTotalGiB) })
-                ].filter(t => !!t).join(" · ")
-                font.family: ladderLcd.textFont
-                font.capitalization: Font.AllUppercase
-                font.pixelSize: Math.min(root.t3, ladderLcd.height * 0.5)
-                font.weight: Font.Black
-                color: ladderLcd.ink
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                x: 12
+                width: parent.width - 24
+                spacing: 2
+
+                Repeater {
+                    model: [
+                        [
+                            SystemStats.cpuTemp > 0 ? `CPU ${Math.round(SystemStats.cpuTemp)}°` : `CPU ${Math.round(SystemStats.cpu * 100)} %`,
+                            root.gpu?.temp ? `GPU ${Math.round(root.gpu.temp)}°` : "",
+                            I18n.tr("system.memory", { used: I18n.number(SystemStats.memoryUsedGiB, 1), total: Math.round(SystemStats.memoryTotalGiB) })
+                        ].filter(t => !!t).join(" · "),
+                        `NET ↓${I18n.bytes(NetworkService.rxRate, true)} ↑${I18n.bytes(NetworkService.txRate, true)}`
+                    ]
+
+                    ThemedText {
+                        required property string modelData
+                        width: parent.width
+                        elide: Text.ElideRight
+                        text: modelData
+                        font.family: ladderLcd.textFont
+                        font.capitalization: Font.AllUppercase
+                        font.pixelSize: Math.min(root.t3, (ladderLcd.height - 20) / 2.9)
+                        font.weight: Font.Black
+                        color: ladderLcd.ink
+                    }
+                }
             }
         }
     }
