@@ -33,14 +33,15 @@ TextWidget {
     fullText: names.join(" · ") || I18n.tr("bar.modesNone")
     compactText: I18n.tr("bar.v.modes", { value: names.join(" · ") || "–" })
     microLabel: I18n.tr("bar.v.modes", { value: "" }).split("\n")[0]
-    color: shown ? theme.color.accent : theme.color.soft
+    // LED statuses (Modulaire): silk text, the LED carries the state.
+    color: shown ? (sigilStyle === "led" ? theme.color.ink : theme.color.accent) : theme.color.soft
 
     // Icons: the first active mode, the second beside it.
     icon: caffeine || !dnd ? "coffee" : "do_not_disturb_on"
     iconFilled: true
     iconText: ""
     readonly property real iconSize: theme.font.sizeL + 3
-    leftPadding: useIcon && !vertical ? (caffeine && dnd ? iconSize * 2 + 4 : iconSize) : 0
+    leftPadding: useIcon && !vertical ? (caffeine && dnd ? iconSize * 2 + 4 : iconSize) : sigil && sigilStyle === "led" ? 15 : 0
 
     Icon {
         visible: root.useIcon && root.caffeine && root.dnd

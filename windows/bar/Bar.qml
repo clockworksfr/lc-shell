@@ -119,6 +119,14 @@ PanelWindow {
         }
     }
 
+    // In a frame, the rails on the bar's side only (design: the thin sides
+    // stay plain case).
+    BarRails {
+        visible: bar.framed && !!bar.look.rails
+        anchors.fill: parent
+        vertical: bar.vertical
+    }
+
     // Right click on the bar (or a widget that doesn't use it): menu
     // (edit the bar, bar settings, settings).
     MouseArea {
