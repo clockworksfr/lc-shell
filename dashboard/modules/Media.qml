@@ -446,7 +446,8 @@ ModuleBase {
     RowLayout {
         visible: !!root.player && !root.large && root.stacked
         anchors.fill: parent
-        spacing: root.gap
+        // Round covers (halo, ring of dots) need more room beside them.
+        spacing: root.gap * (root.theme.style.cover === "sphere" || root.theme.style.cover === "disc" ? 2 : 1)
 
         Cover {
             visible: root.coverShown
