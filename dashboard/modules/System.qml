@@ -502,7 +502,8 @@ ModuleBase {
         readonly property var singles: [
             ...(root.gpu ? [{ label: "GPU", value: root.gpu.busy }] : []),
             { label: "RAM", value: SystemStats.memory },
-            ...(SystemStats.cpuTemp > 0 ? [{ label: "T°", value: (SystemStats.cpuTemp - 30) / 70 }] : [])
+            // The CPU's temperature, 30 to 100 °C.
+            ...(SystemStats.cpuTemp > 0 ? [{ label: I18n.tr("system.cpuTempShort"), value: (SystemStats.cpuTemp - 30) / 70 }] : [])
         ]
         readonly property var cores: SystemStats.cores.length ? SystemStats.cores : [SystemStats.cpu]
         readonly property real gapX: width * 0.04
@@ -551,24 +552,39 @@ ModuleBase {
             }
         }
 
-        // One silk label row: the cores left, the singles right.
-        Item {
+        // Silk labels, each under its ladder(s).
+        Row {
             width: parent.width
             height: ladders.labelHeight
+            spacing: ladders.gapX
 
-            ThemedText {
-                anchors.verticalCenter: parent.verticalCenter
-                text: I18n.tr("system.cores", { n: ladders.cores.length })
-                font.pixelSize: Math.max(12, root.t4)
-                color: root.theme.color.ink
+            Item {
+                width: ladders.coresWidth
+                height: parent.height
+
+                ThemedText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: I18n.tr("system.cores", { n: ladders.cores.length })
+                    font.pixelSize: Math.max(12, root.t4)
+                    color: root.theme.color.ink
+                }
             }
 
-            ThemedText {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                text: ladders.singles.map(s => s.label).join(" · ")
-                font.pixelSize: Math.max(12, root.t4)
-                color: root.theme.color.ink
+            Repeater {
+                model: ladders.singles
+
+                Item {
+                    required property var modelData
+                    width: ladders.singleWidth
+                    height: parent.height
+
+                    ThemedText {
+                        anchors.centerIn: parent
+                        text: parent.modelData.label
+                        font.pixelSize: Math.max(12, root.t4)
+                        color: root.theme.color.ink
+                    }
+                }
             }
         }
 

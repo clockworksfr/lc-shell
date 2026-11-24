@@ -45,6 +45,7 @@
   "system.load": "Load",
   "system.temp": "Temperature",
   "system.cores": "CPU · {n} cores",
+  "system.cpuTempShort": "CPU T°",
   "system.memory": "{used} / {total} GiB",
   "theme.classic": "Classic",
   "theme.matrix": "Matrix",
