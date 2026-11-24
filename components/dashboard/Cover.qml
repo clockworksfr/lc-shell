@@ -60,16 +60,41 @@ Item {
         }
     }
 
-    // Modulaire ("screwed", kept as the name): square, 3 px corners, no
-    // plate or screws any more (design review).
+    // Modulaire ("screwed"): the art in a recessed black bezel, like the
+    // module's screens (inner shadow, glass sheen on top), four small flat
+    // screws on the bezel's corners.
+    readonly property real bezel: look === "screwed" ? Math.max(6, Math.round(size * 0.07)) : 0
+    Rectangle {
+        visible: root.look === "screwed"
+        anchors.fill: parent
+        radius: 6
+        color: "#111212"
+        border.width: 1
+        border.color: "#14FFFFFF"
+
+        Repeater {
+            model: 4
+
+            Rectangle {
+                required property int index
+                readonly property real inset: root.bezel / 2
+                width: Math.max(4, Math.min(7, root.bezel * 0.6))
+                height: width
+                radius: width / 2
+                x: index % 2 === 0 ? inset - width / 2 : root.size - inset - width / 2
+                y: index < 2 ? inset - height / 2 : root.size - inset - height / 2
+                color: "#8A8F92"
+            }
+        }
+    }
 
     ClippingRectangle {
         id: art
 
         anchors.centerIn: parent
-        width: root.look === "disc" ? root.size * 0.82 : root.look === "inset" ? root.size - 12 : root.size
+        width: root.look === "disc" ? root.size * 0.82 : root.look === "inset" ? root.size - 12 : root.look === "screwed" ? root.size - 2 * root.bezel : root.size
         height: width
-        radius: root.look === "square" ? root.theme.radius.tile : root.look === "inset" ? 2 : root.look === "screwed" ? 3 : width / 2
+        radius: root.look === "square" ? root.theme.radius.tile : root.look === "inset" ? 2 : root.look === "screwed" ? 2 : width / 2
         color: root.theme.color.surface2
 
         // No art (yet): a soft mint placeholder (design "Média"); the disc
@@ -107,6 +132,36 @@ Item {
                 to: 360
                 duration: 8000
                 loops: Animation.Infinite
+            }
+        }
+    }
+
+    // Modulaire: the screen's inner shadow and a glass sheen over the art.
+    Repeater {
+        model: root.look === "screwed" ? 3 : 0
+
+        Rectangle {
+            required property int index
+            anchors.fill: art
+            anchors.margins: index * 2
+            radius: Math.max(0, 2 - index)
+            color: "transparent"
+            border.width: 2
+            border.color: Qt.alpha("black", [0.55, 0.28, 0.1][index])
+        }
+    }
+    Rectangle {
+        visible: root.look === "screwed"
+        anchors.fill: art
+        radius: art.radius
+        gradient: Gradient {
+            GradientStop {
+                position: 0
+                color: "#22FFFFFF"
+            }
+            GradientStop {
+                position: 0.35
+                color: "transparent"
             }
         }
     }
