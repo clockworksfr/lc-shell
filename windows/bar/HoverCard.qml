@@ -41,7 +41,26 @@ PanelWindow {
         pinned = true;
     }
 
-    readonly property var theme: host?.theme ?? Themes.fallback
+    // Themes with card tokens (Façade, design "Survol"): silk text and
+    // their own surfaces in cards; the VFD's ink kept as `vfd` (screens,
+    // progress, sliders) and as the accent.
+    readonly property var baseTheme: host?.theme ?? Themes.fallback
+    readonly property var theme: {
+        const t = baseTheme;
+        const c = t.color;
+        if (!c.cardInk)
+            return t;
+        return Object.assign({}, t, {
+            color: Object.assign({}, c, {
+                vfd: c.ink,
+                ink: c.cardInk,
+                soft: c.cardSoft,
+                surface: c.card,
+                surface2: c.cardBubble,
+                surface3: c.cardBlock
+            })
+        });
+    }
     readonly property string edge: host?.edge ?? "top"
     readonly property bool sideways: edge === "left" || edge === "right"
     readonly property real fillet: theme.drawer.fillet

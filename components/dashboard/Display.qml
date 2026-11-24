@@ -15,8 +15,8 @@ Item {
     readonly property string kind: screen ? (theme.style.display ?? "none") : "none"
     // LCD tint: "green" (system, weather) or "amber" (player, lyrics).
     property string tint: "green"
-    readonly property color ink: kind === "lcd" ? (tint === "amber" ? (theme.color.lcdAmberInk ?? "#2A1A05") : (theme.color.lcdInk ?? "#1A2410")) : theme.color.ink
-    readonly property color soft: kind === "lcd" ? Qt.alpha(ink, 0.65) : theme.color.soft
+    readonly property color ink: kind === "lcd" ? (tint === "amber" ? (theme.color.lcdAmberInk ?? "#2A1A05") : (theme.color.lcdInk ?? "#1A2410")) : kind === "vfd" ? (theme.color.vfd ?? theme.color.ink) : theme.color.ink
+    readonly property color soft: kind === "lcd" || (kind === "vfd" && !!theme.color.vfd) ? Qt.alpha(ink, 0.6) : theme.color.soft
     readonly property real inset: kind === "none" ? 0 : 10
     // Text inside a display: the theme's screen font (square dots), upper
     // case; outside one, the theme's text (or lyric) font.

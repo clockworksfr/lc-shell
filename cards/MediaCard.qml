@@ -188,7 +188,7 @@ Column {
                         radius: root.look === "matrix" ? 2.6 : 1
                         color: root.look === "matrix" ? (lit ? root.theme.color.ink : root.theme.color.line)
                             : root.look === "modulaire" ? (lit ? "#46C46A" : "#3A2C22")
-                            : (lit ? root.theme.color.ink : root.theme.color.ghost ?? Qt.alpha(root.theme.color.ink, 0.15))
+                            : (lit ? (root.theme.color.vfd ?? root.theme.color.ink) : Qt.alpha(root.theme.color.vfd ?? root.theme.color.ink, 0.085))
                     }
                 }
             }

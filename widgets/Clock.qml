@@ -49,9 +49,12 @@ TextWidget {
             // On the time's baseline (Matrix), centered by the Nixie window.
             y: root.windowed ? (timeBox.height - height) / 2 + timeBox.y : timeBox.y + timeText.y + timeText.baselineOffset - baselineOffset
             text: I18n.locale.toString(clock.date, root.datePart)
-            font.family: root.theme.font.display
-            font.pixelSize: Math.round(root.figureSize * 0.6)
-            color: root.theme.color.soft
+            // Façade: the date silk-screened (7 segments can't spell it).
+            font.family: root.vfdClock ? root.theme.font.family : root.theme.font.display
+            font.weight: root.vfdClock ? Font.Bold : Font.Normal
+            font.capitalization: root.vfdClock ? Font.AllUppercase : Font.MixedCase
+            font.pixelSize: root.vfdClock ? 13 : Math.round(root.figureSize * 0.6)
+            color: root.vfdClock ? (root.theme.color.silk ?? root.theme.color.soft) : root.theme.color.soft
         }
 
         Item {

@@ -35,7 +35,8 @@ Item {
         width: 40
         height: 22
         radius: root.theme.radius.full
-        color: root.checked ? root.theme.color.accent : root.theme.color.surface3
+        // Façade cards: the unlit track in the bubble tone (surface2).
+        color: root.checked ? root.theme.color.accent : root.theme.color.vfd ? root.theme.color.surface2 : root.theme.color.surface3
 
         Rectangle {
             x: root.checked ? parent.width - width - 3 : 3

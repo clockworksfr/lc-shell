@@ -23,12 +23,14 @@ Item {
     signal moved(real value)
 
     readonly property real ratio: Math.max(0, Math.min(1, (value - from) / (to - from)))
-    readonly property bool fader: look === "facade" || look === "modulaire"
+    // Façade in cards (design "Survol"): a segmented VFD bar, no cap.
+    readonly property bool segmented: look === "facade" && !!theme.color.vfd
+    readonly property bool fader: (look === "facade" && !segmented) || look === "modulaire"
     readonly property color handleColor: dimmed ? theme.color.soft : theme.color.signal ?? theme.color.ink
     readonly property int dots: Math.max(1, Math.floor((width + 7) / 9))
 
     implicitWidth: 200
-    implicitHeight: look === "matrix" ? 34 : look === "modulaire" ? 30 : look === "classic" ? 22 : 20
+    implicitHeight: segmented ? 22 : look === "matrix" ? 34 : look === "modulaire" ? 30 : look === "classic" ? 22 : 20
 
     function valueAt(x: real): real {
         return from + Math.max(0, Math.min(1, x / width)) * (to - from);
@@ -38,7 +40,7 @@ Item {
     Rectangle {
         id: track
 
-        visible: root.look !== "matrix"
+        visible: root.look !== "matrix" && !root.segmented
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width
         height: root.look === "classic" ? 8 : root.look === "constellation" ? 2 : root.look === "modulaire" ? 12 : root.look === "facade" ? 8 : 6
@@ -75,9 +77,30 @@ Item {
         }
     }
 
+    // Façade cards: VFD cells, 7 px with 3 px gaps, lit up to the value.
+    Row {
+        visible: root.segmented
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: 3
+
+        Repeater {
+            model: root.segmented ? Math.max(1, Math.floor((root.width + 3) / 10)) : 0
+
+            Rectangle {
+                required property int index
+                readonly property int cells: Math.max(1, Math.floor((root.width + 3) / 10))
+                width: 7
+                height: Math.min(root.height, 22)
+                radius: 1
+                color: (index + 0.5) / cells <= root.ratio ? (root.dimmed ? Qt.alpha(root.theme.color.vfd, 0.4) : root.theme.color.vfd) : Qt.alpha(root.theme.color.vfd ?? "#6EF3D6", 0.085)
+            }
+        }
+    }
+
     // Handle.
     Item {
         id: handle
+        visible: !root.segmented
 
         readonly property real w: root.look === "matrix" ? 16 : root.look === "modulaire" ? 28 : root.look === "facade" ? 30 : root.look === "classic" ? 22 : 12
         readonly property real h: root.look === "matrix" ? 34 : root.look === "modulaire" ? 30 : root.look === "facade" ? 18 : w

@@ -45,6 +45,9 @@ QtObject {
                 text: header.title
                 font.pixelSize: 16
                 font.weight: Font.DemiBold
+                // Façade: condensed capitals (design "Survol").
+                font.capitalization: header.theme.style.module === "facade" ? Font.AllUppercase : Font.MixedCase
+                font.letterSpacing: header.theme.style.module === "facade" ? 1 : 0
                 elide: Text.ElideRight
             }
 
@@ -138,9 +141,9 @@ QtObject {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             // Modulaire: a 34 px square bubble (design review).
-            width: line.look === "modulaire" ? 34 : 30
+            width: line.look === "modulaire" || line.look === "facade" ? 34 : 30
             height: width
-            radius: line.look === "modulaire" ? 3 : line.look === "facade" ? 5 : 15
+            radius: line.look === "modulaire" || line.look === "facade" ? 3 : 15
             color: line.active ? (line.look === "matrix" ? line.theme.color.ink : line.theme.color.accent) : line.look === "modulaire" ? (line.theme.variant === "light" ? "#24000000" : "#1AFFFFFF") : line.theme.color.surface2
             border.width: line.look === "matrix" && !line.active ? 1 : 0
             border.color: line.theme.color.line
@@ -280,10 +283,33 @@ QtObject {
         implicitHeight: 26
         radius: look === "facade" || look === "modulaire" ? 4 : height / 2
         color: current ? (look === "matrix" ? theme.color.ink : theme.color.accent) : area.containsMouse ? theme.color.surface3 : "transparent"
-        border.width: current || look === "modulaire" ? 0 : 1
+        border.width: current || look === "modulaire" || look === "facade" ? 0 : 1
         border.color: look === "matrix" ? theme.color.ink : theme.color.line
-        // Modulaire: a key (dark, or orange when current), both variants.
-        gradient: look !== "modulaire" ? null : current ? orangeKey : greyKey
+        // Modulaire: a key (dark, or orange when current), both variants;
+        // Façade: a metal key (light keys in the light variant), the
+        // current one ringed in the VFD color.
+        gradient: look === "facade" ? (theme.variant === "light" ? lightKey : greyKey) : look !== "modulaire" ? null : current ? orangeKey : greyKey
+
+        Gradient {
+            id: lightKey
+            GradientStop {
+                position: 0
+                color: "#F2F3EF"
+            }
+            GradientStop {
+                position: 1
+                color: "#C9CAC6"
+            }
+        }
+        Rectangle {
+            visible: button.look === "facade" && button.current
+            anchors.fill: parent
+            anchors.margins: 2
+            radius: 3
+            color: "transparent"
+            border.width: 2
+            border.color: button.theme.color.vfd ?? button.theme.color.accent
+        }
 
         Gradient {
             id: greyKey
@@ -309,20 +335,20 @@ QtObject {
         }
         // Its light top edge and the black edge under it.
         Rectangle {
-            visible: button.look === "modulaire"
+            visible: button.look === "modulaire" || button.look === "facade"
             x: 2
             y: 1
             width: parent.width - 4
             height: 1
-            color: "#30FFFFFF"
+            color: button.look === "facade" && button.theme.variant === "light" ? "white" : "#30FFFFFF"
         }
         Rectangle {
-            visible: button.look === "modulaire"
+            visible: button.look === "modulaire" || button.look === "facade"
             x: 1
             y: parent.height
             width: parent.width - 2
             height: 2
-            color: "black"
+            color: button.look === "facade" && button.theme.variant === "light" ? "#7D8083" : "black"
         }
 
         ThemedText {
@@ -334,7 +360,7 @@ QtObject {
             font.family: button.look === "matrix" ? button.theme.font.mono : button.theme.font.family
             font.letterSpacing: button.look === "modulaire" ? 1 : 0
             font.capitalization: button.look === "classic" || button.look === "constellation" ? Font.MixedCase : Font.AllUppercase
-            color: button.look === "modulaire" ? (button.current ? "white" : "#E5E8E1") : button.current ? (button.look === "matrix" ? button.theme.color.bg : button.theme.color.onAccent) : button.theme.color.ink
+            color: button.look === "modulaire" ? (button.current ? "white" : "#E5E8E1") : button.look === "facade" ? (button.theme.variant === "light" ? "#1E2022" : "#E5E8E1") : button.current ? (button.look === "matrix" ? button.theme.color.bg : button.theme.color.onAccent) : button.theme.color.ink
         }
 
         MouseArea {
@@ -478,11 +504,14 @@ QtObject {
     component Sub: ThemedText {
         readonly property var theme: QsWindow.window?.theme ?? Themes.fallback
         readonly property bool silk: theme.style.module === "modulaire"
+        readonly property bool facade: theme.style.module === "facade"
         topPadding: 6
-        font.family: theme.font.mono
+        // Façade: condensed 700 11 px (design "Survol").
+        font.family: facade ? theme.font.family : theme.font.mono
+        font.weight: facade ? Font.Bold : Font.Normal
         // Modulaire: a Michroma eyebrow, silk at 62 %.
-        font.pixelSize: silk ? 9 : 10
-        font.letterSpacing: silk ? 1.3 : 0.8
+        font.pixelSize: silk ? 9 : facade ? 11 : 10
+        font.letterSpacing: silk ? 1.3 : facade ? 2 : 0.8
         font.capitalization: Font.AllUppercase
         color: silk ? Qt.alpha(theme.color.ink, 0.62) : theme.color.soft
     }
