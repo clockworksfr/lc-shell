@@ -91,13 +91,39 @@ PanelWindow {
     WlrLayershell.namespace: "lc-bar"
 
     // "full": one band. Docked, the border is a single line on the inner edge.
+    // Façade: a metal case gradient, its edge drawn on every free side;
+    // docked and centered, its corners away from the edge rounded.
+    readonly property bool metalCase: !!theme.color.caseTop
+    readonly property bool centeredDock: !look.floating && fixedLength > 0 && metalCase
+    Gradient {
+        id: caseGradient
+        orientation: bar.vertical ? Gradient.Horizontal : Gradient.Vertical
+        GradientStop {
+            position: 0
+            color: bar.theme.color.caseTop ?? "transparent"
+        }
+        GradientStop {
+            position: 0.55
+            color: bar.theme.color.caseMid ?? "transparent"
+        }
+        GradientStop {
+            position: 1
+            color: bar.theme.color.caseBottom ?? "transparent"
+        }
+    }
+
     Rectangle {
         anchors.fill: parent
         visible: !bar.islands && !bar.framed
-        radius: bar.look.floating ? bar.look.radius : 0
+        radius: bar.look.floating || bar.centeredDock ? bar.look.radius : 0
+        topLeftRadius: bar.centeredDock && (bar.edge === "top" || bar.edge === "left") ? 0 : radius
+        topRightRadius: bar.centeredDock && (bar.edge === "top" || bar.edge === "right") ? 0 : radius
+        bottomLeftRadius: bar.centeredDock && (bar.edge === "bottom" || bar.edge === "left") ? 0 : radius
+        bottomRightRadius: bar.centeredDock && (bar.edge === "bottom" || bar.edge === "right") ? 0 : radius
         color: Qt.alpha(bar.look.caseColor || bar.theme.color.surface, bar.look.opacity)
-        border.width: bar.look.floating ? bar.look.border : 0
-        border.color: bar.look.caseColor ? "black" : bar.theme.color.line
+        gradient: bar.metalCase ? caseGradient : null
+        border.width: bar.look.floating || bar.centeredDock ? bar.look.border : 0
+        border.color: bar.metalCase ? bar.theme.color.caseEdge : bar.look.caseColor ? "black" : bar.theme.color.line
         clip: bar.look.rails && radius > 0
 
         Glass {}
@@ -109,14 +135,31 @@ PanelWindow {
             radius: parent.radius
         }
 
+        // Façade: a light top bevel.
         Rectangle {
-            visible: !bar.look.floating && bar.look.border > 0
-            color: bar.theme.color.line
+            visible: bar.metalCase && !bar.vertical
+            x: parent.radius
+            y: parent.border.width
+            width: parent.width - 2 * parent.radius
+            height: 1
+            color: bar.theme.variant === "light" ? "#4DFFFFFF" : "#1FFFFFFF"
+        }
+
+        Rectangle {
+            visible: !bar.look.floating && !bar.centeredDock && bar.look.border > 0
+            color: bar.metalCase ? bar.theme.color.caseEdge : bar.theme.color.line
             x: bar.edge === "left" ? parent.width - width : 0
             y: bar.edge === "top" ? parent.height - height : 0
             width: bar.vertical ? bar.look.border : parent.width
             height: bar.vertical ? parent.height : bar.look.border
         }
+    }
+
+    // In a frame, the case gradient on the bar's side (Façade).
+    Rectangle {
+        visible: bar.framed && bar.metalCase
+        anchors.fill: parent
+        gradient: caseGradient
     }
 
     // In a frame, the rails on the bar's side only (design: the thin sides

@@ -37,6 +37,9 @@ Singleton {
         "ibm-plex-mono/IBMPlexMono-Medium.ttf",
         "dseg/DSEG7Classic-Bold.ttf",
         "dseg/DSEG7Classic-BoldItalic.ttf",
+        // Façade's VFD text (14 segments: letters too).
+        "dseg/DSEG14Classic-Bold.ttf",
+        "dseg/DSEG14Classic-BoldItalic.ttf",
         "barlow-condensed/BarlowCondensed-Regular.ttf",
         "barlow-condensed/BarlowCondensed-Medium.ttf",
         "barlow-condensed/BarlowCondensed-SemiBold.ttf",

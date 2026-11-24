@@ -47,7 +47,7 @@ PanelWindow {
         ShapePath {
             fillRule: ShapePath.OddEvenFill
             // The bar's case color where the theme has one (Modulaire).
-            fillColor: Qt.alpha(win.theme.bar?.caseColor || win.theme.color.surface, win.fillOpacity)
+            fillColor: Qt.alpha(win.theme.color.caseFlat ?? (win.theme.bar?.caseColor || win.theme.color.surface), win.fillOpacity)
             strokeWidth: -1
             PathSvg {
                 path: `M 0 0 H ${win.width} V ${win.height} H 0 Z ${win.innerPath}`
@@ -56,7 +56,7 @@ PanelWindow {
 
         ShapePath {
             fillColor: "transparent"
-            strokeColor: win.outline > 0 ? win.theme.color.line : "transparent"
+            strokeColor: win.outline > 0 ? (win.theme.color.caseEdge ?? win.theme.color.line) : "transparent"
             strokeWidth: win.outline
             PathSvg {
                 path: win.innerPath

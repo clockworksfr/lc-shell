@@ -87,6 +87,7 @@
   "notif.empty": "Aucune notification",
   "bar.notifs": "notif",
   "bar.notifsCount": "notif {n}",
+  "bar.channel": "Canal",
   "bar.dnd": "silence",
   "time.now": "à l'instant",
   "time.minutesAgo": "il y a {n} min",

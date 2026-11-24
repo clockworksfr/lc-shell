@@ -31,7 +31,10 @@ TextWidget {
     // Modulaire: the time in a Nixie window (design "Barre"): dark glass,
     // orange glowing digits, the colon kept between hours and minutes.
     readonly property bool nixie: figure && theme.style.module === "modulaire"
-    readonly property bool pair: figure && (!!datePart || nixie)
+    // Façade: the time in a VFD window, unlit "88:88" segments behind it.
+    readonly property bool vfdClock: figure && theme.style.module === "facade"
+    readonly property bool windowed: nixie || vfdClock
+    readonly property bool pair: figure && (!!datePart || windowed)
     fullText: pair ? "" : I18n.locale.toString(clock.date, format)
     leftPadding: pair ? pairRow.implicitWidth : 0
 
@@ -44,7 +47,7 @@ TextWidget {
         ThemedText {
             visible: !!root.datePart
             // On the time's baseline (Matrix), centered by the Nixie window.
-            y: root.nixie ? (timeBox.height - height) / 2 + timeBox.y : timeBox.y + timeText.y + timeText.baselineOffset - baselineOffset
+            y: root.windowed ? (timeBox.height - height) / 2 + timeBox.y : timeBox.y + timeText.y + timeText.baselineOffset - baselineOffset
             text: I18n.locale.toString(clock.date, root.datePart)
             font.family: root.theme.font.display
             font.pixelSize: Math.round(root.figureSize * 0.6)
@@ -53,19 +56,28 @@ TextWidget {
 
         Item {
             id: timeBox
-            implicitWidth: timeText.implicitWidth + (root.nixie ? 16 : 0)
-            implicitHeight: timeText.implicitHeight + (root.nixie ? 6 : 0)
+            implicitWidth: timeText.implicitWidth + (root.windowed ? 16 : 0)
+            implicitHeight: timeText.implicitHeight + (root.windowed ? 6 : 0)
             width: implicitWidth
             height: implicitHeight
 
-            // The Nixie window.
+            // The Nixie window (Modulaire) or the VFD (Façade).
             Rectangle {
-                visible: root.nixie
+                visible: root.windowed
                 anchors.fill: parent
-                radius: 5
-                color: "#120C09"
-                border.width: 2
-                border.color: "#000000"
+                radius: root.vfdClock ? 4 : 5
+                color: root.vfdClock ? (root.theme.color.screen ?? "#030505") : "#120C09"
+                border.width: root.vfdClock && root.theme.variant === "light" ? 1 : 2
+                border.color: root.vfdClock ? (root.theme.color.screenEdge ?? "#000000") : "#000000"
+            }
+
+            // Façade: the unlit segments.
+            Text {
+                visible: root.vfdClock
+                anchors.centerIn: parent
+                text: timeText.text.replace(/[0-9]/g, "8")
+                font: timeText.font
+                color: root.theme.color.ghost ?? "transparent"
             }
 
             ThemedText {
@@ -79,11 +91,12 @@ TextWidget {
                 font.features: ({ "tnum": 1 })
                 color: root.nixie ? "#FF8A2A" : root.theme.color.ink
 
-                layer.enabled: root.nixie
+                // Glow: Nixie orange; Façade's phosphor (dark only).
+                layer.enabled: root.nixie || (root.vfdClock && Qt.color(root.theme.color.glow ?? "#00000000").a > 0)
                 layer.effect: MultiEffect {
                     autoPaddingEnabled: true
                     shadowEnabled: true
-                    shadowColor: "#FF6A00"
+                    shadowColor: root.nixie ? "#FF6A00" : (root.theme.color.glow ?? "transparent")
                     shadowBlur: 0.6
                     blurMax: 16
                     shadowHorizontalOffset: 0

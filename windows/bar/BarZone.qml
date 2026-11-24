@@ -30,7 +30,7 @@ Item {
     // of the bar thick, 19 px padding at its ends, radius 6 (4 if the bar
     // is rounded).
     readonly property bool plates: !!look.plates
-    readonly property real plateInset: plates ? 19 : 0
+    readonly property real plateInset: plates ? (theme.style.module === "facade" ? 15 : 19) : 0
     readonly property real plateRadius: Math.min(look.radius > 0 ? look.radius : 6, host.thickness * 0.37)
     readonly property Item plus: plusTarget
 
@@ -123,8 +123,27 @@ Item {
                     bottomLeftRadius: (group.edge === "top" && group.squareLow) || (group.edge === "right" && group.squareHigh) ? 0 : radius
                     bottomRightRadius: (group.edge === "top" && group.squareHigh) || (group.edge === "left" && group.squareHigh) ? 0 : radius
                     color: Qt.alpha(zone.look.caseColor || zone.theme.color.surface, zone.look.opacity)
+                    // Façade: each island its own metal case.
+                    gradient: zone.theme.color.caseTop ? islandCase : null
                     border.width: zone.look.border
-                    border.color: zone.look.caseColor ? "black" : zone.theme.color.line
+                    border.color: zone.theme.color.caseEdge ?? (zone.look.caseColor ? "black" : zone.theme.color.line)
+
+                    Gradient {
+                        id: islandCase
+                        orientation: zone.vertical ? Gradient.Horizontal : Gradient.Vertical
+                        GradientStop {
+                            position: 0
+                            color: zone.theme.color.caseTop ?? "transparent"
+                        }
+                        GradientStop {
+                            position: 0.55
+                            color: zone.theme.color.caseMid ?? "transparent"
+                        }
+                        GradientStop {
+                            position: 1
+                            color: zone.theme.color.caseBottom ?? "transparent"
+                        }
+                    }
                     clip: !!zone.look.rails && radius > 0
 
                     Glass {}
@@ -144,7 +163,12 @@ Item {
                     width: zone.vertical ? zone.host.thickness * 0.74 : blocks.implicitWidth + zone.plateInset * 2
                     height: zone.vertical ? blocks.implicitHeight + zone.plateInset * 2 : zone.host.thickness * 0.74
                     radius: zone.plateRadius
-                    gradient: Gradient {
+                    // Modulaire: aluminium; Façade: a flat plate.
+                    color: zone.theme.color.plate ?? zone.theme.color.surface
+                    gradient: zone.theme.style.module === "modulaire" ? aluPlate : null
+
+                    Gradient {
+                        id: aluPlate
                         GradientStop {
                             position: 0
                             color: zone.theme.color.surface

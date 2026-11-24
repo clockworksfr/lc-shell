@@ -49,7 +49,8 @@ Item {
     readonly property int maxWidth: options.maxWidth ?? (size === "extended" ? 720 : 420)
 
     // Modulaire: the title in a green LCD, "APP ▸ TITLE" (design "Barre").
-    readonly property bool lcd: theme?.style.module === "modulaire" && !vertical
+    readonly property bool lcd: (theme?.style.module === "modulaire" || theme?.style.module === "facade") && !vertical
+    readonly property bool vfd: theme?.style.module === "facade"
     implicitWidth: vertical ? Math.max(crossSize, 24) : Math.min(row.implicitWidth + (lcd ? 20 : 0), maxWidth)
     implicitHeight: vertical ? 24 : row.implicitHeight + (lcd ? 6 : 0)
 
@@ -57,7 +58,7 @@ Item {
         visible: root.lcd && root.valid
         anchors.fill: parent
         radius: 4
-        color: "#1A2410"
+        color: root.vfd ? (root.theme.color.screen ?? "#030505") : "#1A2410"
         border.width: 2
         border.color: "#80000000"
     }
@@ -111,7 +112,7 @@ Item {
                 : root.size === "extended" ? [root.shortName, root.cleanTitle].filter(s => !!s).join(" — ")
                 : root.lcd ? [root.shortName, root.cleanTitle].filter(s => !!s).join(" ▸ ")
                 : root.title || root.appName
-            color: root.lcd ? "#C6F37A" : root.theme?.color.soft ?? color
+            color: root.lcd ? (root.vfd ? root.theme.color.ink : "#C6F37A") : root.theme?.color.soft ?? color
         }
     }
 }

@@ -36,7 +36,23 @@ Singleton {
                     screen: "#030505",
                     screenEdge: "#000000",
                     glass: "#00000000",
-                    star: "#00000000"
+                    star: "#00000000",
+                    // Bar case (design "Barre"): a dark metal gradient, a
+                    // 2 px black edge; the zones' plates; a frame's thin
+                    // sides.
+                    caseTop: "#2A2D2F",
+                    caseMid: "#151718",
+                    caseBottom: "#0D0F10",
+                    caseEdge: "#000000",
+                    caseFlat: "#16181A",
+                    plate: "#24282A",
+                    // Hover cards (design "Survol"): silk text, blocks,
+                    // bubbles and tracks.
+                    card: "#16181A",
+                    cardBlock: "#24282A",
+                    cardBubble: "#2E3335",
+                    cardInk: "#C9CCC4",
+                    cardSoft: "#8E928C"
                 },
                 light: {
                     bg: "#C9CCC6",
@@ -48,7 +64,8 @@ Singleton {
                     ghost: "#141D2618",
                     silk: "#1E2022",
                     line: "#8F9295",
-                    accent: "#1E8C7B",
+                    // The light VFD's ink (design; simon's choice).
+                    accent: "#1D2618",
                     onAccent: "#FFFFFF",
                     urgent: "#C8392C",
                     warn: "#A85A00",
@@ -58,7 +75,18 @@ Singleton {
                     glass: "#00000000",
                     star: "#00000000",
                     screen: "#B6BEA1",
-                    screenEdge: "#6F7468"
+                    screenEdge: "#6F7468",
+                    caseTop: "#E2E3E0",
+                    caseMid: "#D6D7D4",
+                    caseBottom: "#CDCECB",
+                    caseEdge: "#8F9295",
+                    caseFlat: "#D4D5D2",
+                    plate: "#C3C5C1",
+                    card: "#D4D5D2",
+                    cardBlock: "#C9CAC6",
+                    cardBubble: "#BFC1BD",
+                    cardInk: "#1E2022",
+                    cardSoft: "#4C5052"
                 }
             },
             font: {
@@ -68,9 +96,10 @@ Singleton {
                 displayWeight: 700,
                 // Slanted segments, like the theme's presentation tab.
                 displayItalic: true,
-                // Text inside the VFD: square dots, upper case.
-                lcd: "Doto LCD",
-                lyric: "Doto LCD",
+                // Text inside the VFD: 14 segments, upper case (Doto is
+                // Matrix's).
+                lcd: "DSEG14 Classic",
+                lyric: "DSEG14 Classic",
                 lyricCaps: true,
                 heroScale: 0.74,
                 sizeS: 12,
@@ -88,7 +117,8 @@ Singleton {
                 width: 2
             },
             drawer: {
-                fillet: 6
+                // Cards hang straight under the bar (no fillets).
+                fillet: 0
             },
             motion: {
                 fast: 100,
@@ -100,17 +130,18 @@ Singleton {
             },
             bar: {
                 // A centered front panel / rail (the mockup's bar tab).
-                length: 0.62,
+                length: 0.66,
                 height: 44,
-                verticalWidth: 56,
+                verticalWidth: 64,
+                plates: true,
                 style: "full",
                 floating: false,
                 margin: 0,
                 radius: 6,
                 opacity: 1,
                 border: 2,
-                padding: 12,
-                spacing: 14,
+                padding: 16,
+                spacing: 13,
                 screenCorners: 0
             },
             style: {

@@ -40,7 +40,8 @@ ThemedText {
     readonly property string sigilStyle: theme.style.statusSigil ?? ""
     readonly property bool sigil: !lcd && !!sigilStyle && !useIcon && !!icon && !vertical && (size !== "extended" || !!microLabel)
     // In a small LCD window (Modulaire media, design "Barre"): "amber" |
-    // "green" | "" (none). The text in the LCD font, uppercase.
+    // "green" | "vfd" (Façade) | "" (none). The text in the LCD font,
+    // uppercase.
     property string lcd: ""
     // Statuses as label + value (micro stacks or sigils).
     readonly property bool labelled: theme.style.statusStack === true || !!sigilStyle
@@ -74,10 +75,12 @@ ThemedText {
     bottomPadding: lcd ? 3 : 0
     topPadding: lcd ? 3 : useIcon && vertical ? iconItem.height + (iconText ? 2 : 0) : 0
     font.pixelSize: lcd ? 15 : microStack ? 12 : sigil ? (sigilStyle === "led" ? 16 : 12) : vertical || stacked ? theme.font.sizeS : theme.font.sizeM
-    font.weight: sigil && (sigilStyle === "phosphor" || sigilStyle === "led") ? Font.DemiBold : Font.Normal
+    // Façade annunciators: IBM Plex Sans Condensed 700 (design "Barre").
+    font.weight: sigil && sigilStyle === "phosphor" ? Font.Bold : sigil && sigilStyle === "led" ? Font.DemiBold : Font.Normal
     font.letterSpacing: sigil ? (sigilStyle === "phosphor" ? 1 : 0.6) : 0
     // Façade: a status that's off dims (the VFD's unlit segments).
-    opacity: sigil && sigilStyle === "phosphor" && level === "off" ? 0.45 : 1
+    // An unlit annunciator: the VFD's ghost (≈ 9 %).
+    opacity: sigil && sigilStyle === "phosphor" && level === "off" ? 0.12 : 1
 
     // The LCD window behind the text.
     Rectangle {
@@ -85,7 +88,8 @@ ThemedText {
         visible: !!parent.lcd
         anchors.fill: parent
         radius: 4
-        color: parent.lcd === "green" ? "#1A2410" : "#2A1606"
+        // "vfd": Façade's screen (black glass, the light grey-green).
+        color: parent.lcd === "vfd" ? (parent.theme.color.screen ?? "#030505") : parent.lcd === "green" ? "#1A2410" : "#2A1606"
         border.width: 2
         border.color: "#80000000"
     }
@@ -120,7 +124,7 @@ ThemedText {
         }
     }
     // (Every size: extended keeps one line, in the same mono capitals.)
-    font.family: lcd ? (theme.font.lcd ?? theme.font.mono) : microStatus || sigilStyle === "phosphor" ? theme.font.mono : theme.font.family
+    font.family: lcd ? (theme.font.lcd ?? theme.font.mono) : microStatus ? theme.font.mono : theme.font.family
     font.capitalization: lcd || microStatus || sigil ? Font.AllUppercase : Font.MixedCase
     lineHeight: stacked || microStack ? 0.9 : 1
     horizontalAlignment: Text.AlignHCenter

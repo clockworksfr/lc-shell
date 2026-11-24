@@ -3,6 +3,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Hyprland
 import qs.components
+import qs.i18n
 import qs.theme
 
 // Workspaces of the screen the block is on (special workspaces excluded).
@@ -33,6 +34,11 @@ Grid {
     // workspace, a round LED (active orange, urgent red, occupied dim
     // amber, empty brown) and its number in Barlow Condensed.
     readonly property bool sequencer: theme.style.workspaces === "sequencer"
+    // "segments" (Façade, design "Barre"): a silk "CANAL" label, then a
+    // VFD window with one 7-segment digit per workspace (active lit,
+    // occupied dim, empty unlit, urgent amber).
+    readonly property bool segments: theme.style.workspaces === "segments" && !vertical
+    readonly property var segmentIds: numberedIds
     readonly property var numberedIds: {
         const ids = workspaces.map(ws => ws.id);
         if (!ids.length)
@@ -43,7 +49,7 @@ Grid {
     }
     readonly property int cell: (crossSize > 0 ? crossSize : theme.bar.height - theme.space.s)
 
-    columns: vertical ? 1 : Math.max(1, numbered ? numberedIds.length : workspaces.length)
+    columns: vertical ? 1 : segments ? 2 : Math.max(1, numbered ? numberedIds.length : workspaces.length)
     spacing: sequencer ? 16 : numbered ? 14 : dots ? theme.space.s : theme.space.xs
     horizontalItemAlignment: Grid.AlignHCenter
     verticalItemAlignment: Grid.AlignVCenter
@@ -135,7 +141,7 @@ Grid {
     }
 
     Repeater {
-        model: root.numbered ? [] : root.workspaces
+        model: root.numbered || root.segments ? [] : root.workspaces
 
         Rectangle {
             id: item
@@ -206,6 +212,89 @@ Grid {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: Hyprland.dispatch(`hl.dsp.focus({ workspace = ${item.modelData.id} })`)
                 onWheel: wheel => Hyprland.dispatch(`hl.dsp.focus({ workspace = "${wheel.angleDelta.y > 0 ? "m-1" : "m+1"}" })`)
+            }
+        }
+    }
+
+    // --- Façade: "CANAL" and the VFD digits ---
+
+    ThemedText {
+        visible: root.segments
+        text: I18n.tr("bar.channel")
+        font.family: root.theme.font.family
+        font.weight: Font.Bold
+        font.pixelSize: 12
+        font.letterSpacing: 1.9
+        font.capitalization: Font.AllUppercase
+        color: root.theme.color.silk ?? root.theme.color.soft
+        opacity: 0.8
+    }
+
+    Rectangle {
+        visible: root.segments
+        implicitWidth: digitRow.implicitWidth + 20
+        implicitHeight: digitRow.implicitHeight + 6
+        radius: 4
+        color: root.theme.color.screen ?? "#030505"
+        border.width: root.theme.variant === "light" ? 1 : 2
+        border.color: root.theme.color.screenEdge ?? "#000000"
+
+        Row {
+            id: digitRow
+            anchors.centerIn: parent
+            spacing: 11
+
+            Repeater {
+                model: root.segments ? root.segmentIds : []
+
+                Item {
+                    id: digit
+
+                    required property int modelData
+                    readonly property var ws: root.workspaces.find(w => w.id === modelData) ?? null
+                    readonly property bool active: ws?.active ?? false
+                    implicitWidth: lit.implicitWidth
+                    implicitHeight: lit.implicitHeight
+
+                    // The unlit segments.
+                    Text {
+                        anchors.fill: lit
+                        text: String(digit.modelData).replace(/[0-9]/g, "8")
+                        font: lit.font
+                        color: root.theme.color.ghost ?? "transparent"
+                    }
+
+                    Text {
+                        id: lit
+                        text: digit.modelData
+                        font.family: root.theme.font.display
+                        font.weight: Font.Bold
+                        font.italic: !!root.theme.font.displayItalic
+                        font.pixelSize: 20
+                        color: digit.ws?.urgent ? (root.theme.color.warn ?? root.theme.color.urgent)
+                            : digit.active ? root.theme.color.ink
+                            : digit.ws ? Qt.alpha(root.theme.color.ink, 0.42)
+                            : "transparent"
+
+                        layer.enabled: (digit.active || !!digit.ws?.urgent) && Qt.color(root.theme.color.glow ?? "#00000000").a > 0
+                        layer.effect: MultiEffect {
+                            autoPaddingEnabled: true
+                            shadowEnabled: true
+                            shadowColor: digit.ws?.urgent ? (root.theme.color.warn ?? "transparent") : (root.theme.color.glow ?? "transparent")
+                            shadowBlur: 0.5
+                            blurMax: 10
+                            shadowHorizontalOffset: 0
+                            shadowVerticalOffset: 0
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.margins: -5
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Hyprland.dispatch(`hl.dsp.focus({ workspace = ${digit.modelData} })`)
+                    }
+                }
             }
         }
     }
