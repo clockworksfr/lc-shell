@@ -238,6 +238,43 @@ PanelWindow {
             }
         }
 
+        // Modulaire: an aluminium plate with four flat screws (design
+        // .hct-modulaire .hc).
+        Rectangle {
+            visible: root.theme.style.module === "modulaire"
+            anchors.fill: parent
+            radius: 3
+            gradient: Gradient {
+                GradientStop {
+                    position: 0
+                    color: root.theme.color.surface
+                }
+                GradientStop {
+                    position: 1
+                    color: root.theme.color.surface2
+                }
+            }
+            border.width: 1
+            border.color: root.theme.variant === "light" ? "#40000000" : "#1AFFFFFF"
+
+            Repeater {
+                model: 4
+
+                Rectangle {
+                    required property int index
+                    readonly property real inset: 10
+                    width: 8
+                    height: 8
+                    radius: 4
+                    x: index % 2 === 0 ? inset - width / 2 : parent.width - inset - width / 2
+                    y: index < 2 ? inset - height / 2 : parent.height - inset - height / 2
+                    color: "#8A8F92"
+                    border.width: 1
+                    border.color: Qt.alpha("#8A8F92", 0.5)
+                }
+            }
+        }
+
         Item {
             id: content
 

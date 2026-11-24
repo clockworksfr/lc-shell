@@ -87,7 +87,8 @@ Singleton {
                 width: 1
             },
             drawer: {
-                fillet: 4
+                // Cards hang straight under their plate (no fillets).
+                fillet: 0
             },
             motion: {
                 fast: 120,
@@ -125,6 +126,7 @@ Singleton {
                 brushed: true,
                 screws: true,
                 module: "modulaire",
+                // Square covers, 3 px corners (no screws any more).
                 cover: "screwed",
                 ring: "knob",
                 display: "lcd"
