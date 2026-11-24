@@ -54,7 +54,12 @@ ModuleBase {
     readonly property int total: 8
     readonly property int levels: large ? 3 : 2
     // Poster: the audio devices' column.
-    readonly property real devicesWidth: poster && !full ? Math.round(cw * 0.34) : 0
+    // Big cells (design review): tiles on top (60 %, poster 50 %), then a
+    // levels zone; poster: the audio outputs and inputs beside it (thirds).
+    readonly property bool bigLayout: large && !full
+    readonly property real zonesTop: bigLayout ? Math.round(ch * (poster ? 0.5 : 0.6)) + gap : 0
+    readonly property real zoneWidth: poster ? (cw - 2 * gap) / 3 : cw
+    readonly property real devicesWidth: 0
     // Strips, wide and narrow cells: compact rows (52 px, a comfortable
     // touch target), so even a one-unit-high cell holds two rows of buttons.
     readonly property bool compact: shape === "strip" || shape === "wide" || shape === "narrow"
@@ -72,7 +77,7 @@ ModuleBase {
     readonly property real sliderRow: large ? hit : Math.max(48, theme.hit * 0.75)
     readonly property real sliderBlock: levels * sliderRow + levels * gap
     // Wide cells: the sliders in a column on the right of the tiles.
-    readonly property bool sideSliders: !full && !large && ((shape === "wide" && cw >= 620) || (shape === "strip" && cw >= 900)) && ch >= sliderBlock - gap
+    readonly property bool sideSliders: !full && !large && ((shape === "wide" && cw >= 780 && ch > 250) || (shape === "strip" && cw >= 900)) && ch >= sliderBlock - gap
     readonly property real sideWidth: Math.min(cw * 0.36, 420)
     readonly property real tilesWidth: sideSliders ? cw - sideWidth - gap * 1.5 : devicesWidth > 0 ? cw - devicesWidth - gap * 1.5 : cw
     // Sliders under the tiles: always in the panel; in the cell when the
@@ -81,6 +86,7 @@ ModuleBase {
     // In the panel: rows of a fixed height, the sliders right under them.
     readonly property real fullRow: Math.max(64, theme.hit)
     readonly property real tilesHeight: full ? Math.ceil(total / cols) * (fullRow + gap) - gap
+        : bigLayout ? zonesTop - gap
         : sliders && !sideSliders ? ch - sliderBlock : ch
     readonly property int rows: shape === "tiny" ? 1
         : full ? Math.ceil(total / cols)
@@ -111,7 +117,7 @@ ModuleBase {
 
                 width: grid.cellW
                 height: grid.cellH
-                opacity: modelData.placeholder ? 0.5 : 1
+                opacity: modelData.placeholder ? 0.45 : 1
                 plain: modelData.id === "more" || !!modelData.placeholder
                 icon: modelData.icon
                 label: modelData.label
@@ -125,9 +131,10 @@ ModuleBase {
     // Volume (the icon mutes) and brightness, under the tiles.
     Column {
         visible: root.sliders
-        x: root.sideSliders ? parent.width - width : 0
-        y: root.sideSliders ? (parent.height - height) / 2 : root.full ? root.tilesHeight + root.gap * 1.5 : parent.height - height
-        width: root.sideSliders ? root.sideWidth : root.tilesWidth
+        x: root.sideSliders ? parent.width - width : root.bigLayout ? levelsZone.body.x : 0
+        y: root.sideSliders ? (parent.height - height) / 2 : root.full ? root.tilesHeight + root.gap * 1.5 : root.bigLayout ? levelsZone.y + levelsZone.body.y + (levelsZone.body.height - height) / 2 : parent.height - height
+        width: root.sideSliders ? root.sideWidth : root.bigLayout ? levelsZone.body.width : root.tilesWidth
+        z: 1
         spacing: root.gap
 
         Repeater {
@@ -189,12 +196,25 @@ ModuleBase {
         }
     }
 
+    // Big cells: the levels' zone (the sliders sit over it).
+    ModuleZone {
+        id: levelsZone
+        visible: root.bigLayout
+        y: root.zonesTop
+        width: root.zoneWidth
+        height: root.ch - y
+        label: I18n.tr("toggles.levels")
+        labelSize: root.t4
+        gap: root.gap
+    }
+
     // Poster: audio outputs and inputs, the default one checked.
-    Column {
-        visible: root.devicesWidth > 0
-        x: parent.width - width
-        width: root.devicesWidth
-        height: parent.height
+    Row {
+        visible: root.bigLayout && root.poster
+        x: root.zoneWidth + root.gap
+        y: root.zonesTop
+        width: root.cw - x
+        height: root.ch - y
         spacing: root.gap
 
         Repeater {
@@ -206,8 +226,8 @@ ModuleBase {
             ModuleZone {
                 id: devZone
                 required property var modelData
-                width: parent.width
-                height: (parent.height - parent.spacing) / 2
+                width: root.zoneWidth
+                height: parent.height
                 label: modelData.label
                 labelSize: root.t4
                 gap: root.gap
@@ -238,7 +258,7 @@ ModuleBase {
                                 x: 6
                                 name: devRow.current ? "radio_button_checked" : "radio_button_unchecked"
                                 size: root.t3 * 1.1
-                                color: devRow.current ? (root.theme.color.signal ?? root.theme.color.accent) : root.theme.color.soft
+                                color: devRow.current ? (root.look === "matrix" ? root.theme.color.ink : root.theme.color.accent) : root.theme.color.soft
                             }
 
                             ThemedText {

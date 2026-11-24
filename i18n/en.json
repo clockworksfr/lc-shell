@@ -869,6 +869,7 @@
   "hue.lampCount.other": "{n} lights",
   "toggles.outputs": "Audio output",
   "toggles.inputs": "Audio input",
+  "toggles.levels": "Levels",
   "toggles.caffeine": "Caffeine",
   "toggles.awake": "Stays awake",
   "notifications.app": "Application",
