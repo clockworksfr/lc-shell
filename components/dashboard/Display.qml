@@ -35,7 +35,7 @@ Item {
         border.width: root.kind === "lcd" ? 0 : root.kind === "vfd" && root.theme.variant === "light" ? 1 : 2
         border.color: root.kind === "vfd" ? (root.theme.color.screenEdge ?? Qt.alpha("black", 0.6)) : Qt.alpha("black", 0.6)
 
-        // LCD inner shadow (design: inset 0 0 10px #000), in three rings.
+        // LCD inner shadow (inset 0 0 10px #000), in three rings.
         Repeater {
             model: root.kind === "lcd" ? 3 : 0
 

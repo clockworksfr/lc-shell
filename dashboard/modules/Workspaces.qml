@@ -8,7 +8,7 @@ import qs.components.dashboard
 import qs.i18n
 import qs.theme
 
-// Workspaces of this screen (design study 8, § 6): those Hyprland puts
+// Workspaces of this screen: those Hyprland puts
 // on it by its rules, plus any other open there, and empty ones (dimmed)
 // up to 6 to keep the bearings. Tap: go there. In each theme's language:
 //   classic        tiles; the active one filled; a dot per window
@@ -167,7 +167,7 @@ ModuleBase {
                     width: root.look === "matrix" && cell.active ? 22 : root.look === "matrix" ? 8 : 10
                     height: root.look === "matrix" ? 8 : 10
                     radius: height / 2
-                    // Modulaire: a sequencer step (design .c-step): active
+                    // Modulaire: a sequencer step: active
                     // orange, urgent red, occupied dim amber, empty brown.
                     color: root.look === "modulaire"
                         ? (cell.urgent ? "#FF3B30" : cell.active ? "#E8742A" : cell.busy ? "#7A4A2A" : "#3B2A24")

@@ -3,7 +3,7 @@ import Quickshell
 import qs.components
 import qs.theme
 
-// A quick-settings tile in the theme's language (design study 9):
+// A quick-settings tile in the theme's language:
 //   classic        tile: icon on top, label and sub-label at the bottom;
 //                  accent fill when on
 //   constellation  centered; accent → accent2 gradient when on
@@ -33,7 +33,7 @@ Item {
         return Math.max(low, Math.min(high, value));
     }
     readonly property real m: Math.min(width, look === "matrix" ? pill.height : height)
-    // Sizes per theme (design review): matrix from the pill's height,
+    // Sizes per theme: matrix from the pill's height,
     // modulaire's Michroma smaller, the others from the tile.
     readonly property real labelSize: look === "matrix" ? clamp(14, pill.height * 0.27, 16)
         : look === "modulaire" ? clamp(11, m * 0.1, 16)
@@ -231,7 +231,7 @@ Item {
         visible: root.look === "matrix"
         anchors.centerIn: parent
         width: parent.width
-        // 56–96 px high, centered in its cell (design review).
+        // 56–96 px high, centered in its cell.
         height: Math.min(parent.height, root.clamp(56, Math.min(parent.height, parent.width * 0.45), 96))
         radius: height / 2
         color: root.on ? root.theme.color.ink : area.pressed ? Qt.alpha(root.theme.color.ink, 0.12) : "transparent"
@@ -290,7 +290,7 @@ Item {
                     color: root.on ? root.theme.color.bg : root.theme.color.ink
                 }
 
-                // No sub-label in Matrix (design review).
+                // No sub-label in Matrix.
                 ThemedText {
                     id: pillSub
                     visible: false

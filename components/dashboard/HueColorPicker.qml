@@ -5,7 +5,7 @@ import qs.i18n
 import qs.services
 import qs.theme
 
-// Color of a room or a light (design-hue § 6): a hue wheel (saturation
+// Color of a room or a light: a hue wheel (saturation
 // toward the center; Matrix: rings of dots), white from 2200 to 6500 K,
 // favorites. Sends while dragging (the service throttles) and on release.
 Item {

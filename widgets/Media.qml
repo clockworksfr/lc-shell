@@ -40,7 +40,7 @@ TextWidget {
     compactText: glyph
     width: vertical ? crossSize : Math.min(implicitWidth, options.maxWidth ?? (size === "extended" ? 560 : 360))
     horizontalAlignment: vertical ? Text.AlignHCenter : Text.AlignLeft
-    // Modulaire: an amber LCD; Façade: a VFD (design "Bar").
+    // Modulaire: an amber LCD; Façade: a VFD.
     lcd: !vertical && size !== "compact" ? (theme.style.module === "modulaire" ? "amber" : theme.style.module === "facade" ? "vfd" : "") : ""
     readonly property color lcdInk: lcd === "vfd" ? theme.color.ink : "#FFB35A"
     color: lcd ? (player?.isPlaying ? lcdInk : Qt.alpha(lcdInk, 0.6)) : player?.isPlaying ? theme.color.ink : theme.color.soft

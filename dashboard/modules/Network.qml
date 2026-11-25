@@ -67,7 +67,7 @@ ModuleBase {
         parent: root
         // Beside the title only when there's room for both.
         visible: root.inner.y > root.pad + 1 && root.width >= width + 150
-        // A small pill on the title row (design review): surface fill,
+        // A small pill on the title row: surface fill,
         // line border, 12 px ink text with its "⌄".
         x: root.width - width - 14
         y: 8
@@ -134,7 +134,7 @@ ModuleBase {
         readonly property var laneScreen: lane.m.sharedScreen
         readonly property color ink: onScreen ? laneScreen.ink : lane.m.theme.color.ink
         readonly property color soft: onScreen ? laneScreen.soft : lane.m.theme.color.soft
-        // Figure size per shape (design review).
+        // Figure size per shape.
         readonly property real figurePx: lane.big ? Math.min(lane.m.heroMax * 0.6, lane.height * 0.3)
             : lane.m.shape === "box" || lane.m.shape === "tall" ? Math.min(lane.m.ch, lane.m.cw) * 0.12
             : lane.m.shape === "wide" || lane.m.shape === "strip" ? Math.min(lane.m.ch * 0.2, lane.m.cw * 0.06)
@@ -201,7 +201,7 @@ ModuleBase {
             fillAlpha: 0.18
             // Its own scale (upload would flatten under download).
             max: Math.max(16 * 1024, ...lane.history)
-            // The curves keep their colors inside the screens (mockups).
+            // The curves keep their colors inside the screens.
             color: lane.lineColor
         }
 
@@ -268,7 +268,7 @@ ModuleBase {
     Grid {
         visible: (root.large || root.shape !== "tiny") && NetworkService.sourceNames.length > 0
         anchors.fill: parent
-        // Inside the screen: 10 × 14 px of padding (mockups).
+        // Inside the screen: 10 × 14 px of padding.
         readonly property bool inset: sharedDisplay.visible
         anchors.topMargin: inset ? 10 : 0
         anchors.leftMargin: inset ? 14 : 0

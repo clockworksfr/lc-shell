@@ -9,7 +9,7 @@ import qs.services
 import qs.settings
 import qs.theme
 
-// Philips Hue lights (design-hue): A rooms (theme tiles), B the selected
+// Philips Hue lights: A rooms (theme tiles), B the selected
 // room (brightness, color, scenes), C its lights. By shape:
 //   tiny    one "Lights" tile: opens the panel
 //   narrow  A in a column, More last
@@ -663,7 +663,7 @@ ModuleBase {
             width: sections.width
             spacing: sections.m.gap
 
-            // The room, its lights on on the right (design: HHEAD).
+            // The room, its lights on on the right.
             Item {
                 width: parent.width
                 height: roomTitle.implicitHeight

@@ -7,7 +7,7 @@ import qs.services
 import qs.settings
 import qs.theme
 
-// Building blocks of the status cards (design-status-widgets, width 380):
+// Building blocks of the status cards (380 px wide):
 //   Header   title 16 px, state in soft, the master switch on the right
 //   Line     44 px: round icon (30 px), name and sub-label, a control on
 //            the right (the theme's switch, a small button or a text)
@@ -45,7 +45,7 @@ QtObject {
                 text: header.title
                 font.pixelSize: 16
                 font.weight: Font.DemiBold
-                // Façade: condensed capitals (design "Hover cards").
+                // Façade: condensed capitals.
                 font.capitalization: header.theme.style.module === "facade" ? Font.AllUppercase : Font.MixedCase
                 font.letterSpacing: header.theme.style.module === "facade" ? 1 : 0
                 elide: Text.ElideRight
@@ -140,7 +140,7 @@ QtObject {
             id: bubble
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            // Modulaire: a 34 px square bubble (design review).
+            // Modulaire: a 34 px square bubble.
             width: line.look === "modulaire" || line.look === "facade" ? 34 : 30
             height: width
             radius: line.look === "modulaire" || line.look === "facade" ? 3 : 15
@@ -506,7 +506,7 @@ QtObject {
         readonly property bool silk: theme.style.module === "modulaire"
         readonly property bool facade: theme.style.module === "facade"
         topPadding: 6
-        // Façade: condensed 700 11 px (design "Hover cards").
+        // Façade: condensed 700 11 px.
         font.family: facade ? theme.font.family : theme.font.mono
         font.weight: facade ? Font.Bold : Font.Normal
         // Modulaire: a Michroma eyebrow, silk at 62 %.

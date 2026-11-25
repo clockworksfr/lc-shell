@@ -3,7 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// Classique moderne: the default theme (docs/themes.md, section 1).
+// Classique moderne: the default theme (docs/themes.md).
 // Not yet implemented from the spec: shadows, icon font, dynamic center
 // island, component variants beyond tokens.
 Singleton {

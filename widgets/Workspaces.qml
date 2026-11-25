@@ -30,11 +30,11 @@ Grid {
     // "numbered" (Matrix): a dot and its number per workspace, empty ones
     // in between (and up to five) shown dim; dots only on a vertical bar.
     readonly property bool numbered: (theme.style.workspaces === "numbered" || sequencer) && !vertical
-    // "sequencer" (Modulaire, design "Bar"): a sequencer step per
+    // "sequencer" (Modulaire): a sequencer step per
     // workspace, a round LED (active orange, urgent red, occupied dim
     // amber, empty brown) and its number in Barlow Condensed.
     readonly property bool sequencer: theme.style.workspaces === "sequencer"
-    // "segments" (Façade, design "Bar"): a silk "CANAL" label, then a
+    // "segments" (Façade): a silk "CANAL" label, then a
     // VFD window with one 7-segment digit per workspace (active lit,
     // occupied dim, empty unlit, urgent amber).
     readonly property bool segments: theme.style.workspaces === "segments" && !vertical

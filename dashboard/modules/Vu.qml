@@ -8,7 +8,7 @@ import qs.i18n
 import qs.services
 import qs.theme
 
-// VU meter of the default output (design study 8, § 5): left / right
+// VU meter of the default output: left / right
 // peaks in dB (−48..+3) after the output volume, peaks held 1.2 s then
 // falling 12 dB/s, values ("−6") and a dB scale when there is room, in
 // each theme's language:

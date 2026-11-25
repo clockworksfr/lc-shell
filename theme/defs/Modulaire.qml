@@ -5,7 +5,7 @@ import Quickshell
 
 // Modulaire: Eurorack synth panel (brushed aluminium, screws in the
 // corners), orange Nixie numerals with a halo, LEDs, Michroma labels.
-// docs/themes.md section 4, tokens from design study 6.
+// docs/themes.md.
 // Fonts bundled: Barlow Condensed, Michroma, Nixie One. Extra colors:
 // ghost (unlit), nixie (tube glow), lcd / lcdInk (small LCD), glow.
 Singleton {
@@ -99,7 +99,7 @@ Singleton {
                 stagger: 25
             },
             bar: {
-                // A centered rack case (design "Bar"): dark case, two
+                // A centered rack case: dark case, two
                 // perforated rails, one aluminium plate per group.
                 length: 0.66,
                 height: 56,

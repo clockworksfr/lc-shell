@@ -118,7 +118,7 @@ Item {
         }
     }
 
-    // Knob (design .c-knob): a full cap (default #2B2C2E, or a colored one),
+    // Knob: a full cap (default #2B2C2E, or a colored one),
     // a highlight up-left, a dark rim, a drop shadow, a cream index from
     // −135° to +135°. No ticks.
     property color capColor: "#2B2C2E"

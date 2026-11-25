@@ -5,7 +5,7 @@ import qs.i18n
 import qs.services
 import qs.theme
 
-// Date and week, time with seconds, month calendar (hover cards mockup):
+// Date and week, time with seconds, month calendar:
 // arrows or wheel for other months, a click on the month back to today.
 // (Events: later, with an agenda.)
 Column {

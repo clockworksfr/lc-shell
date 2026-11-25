@@ -9,14 +9,14 @@ import qs.i18n
 import qs.services
 import qs.theme
 
-// CPU, GPU, memory, iGPU (design study 8, § 4), by theme:
+// CPU, GPU, memory, iGPU, by theme:
 //   classic        rows: label, gauge, value aligned right (+ temperature)
 //   facade         the same rows inside the VFD (cell bargraphs, amber
 //                  above 85 %, 7-segment values)
 //   constellation  one system of concentric orbits (CPU, GPU, RAM), the
 //                  values listed beside it
 //   modulaire      LED ladders (one per core, then GPU, RAM, T°) over a
-//                  green LCD with the temperatures (design "System")
+//                  green LCD with the temperatures
 //   matrix         rings of dots (red beyond 90 %)
 // tiny: CPU alone; strip: side by side. Big cells (tiers large / poster):
 // the gauges on top, the last minute's curves (CPU, GPU; poster: RAM)
@@ -484,7 +484,7 @@ ModuleBase {
         }
     }
 
-    // ladders (modulaire, design "System"): a ladder per core, then GPU,
+    // ladders (modulaire): a ladder per core, then GPU,
     // RAM and the CPU's temperature (30–100 °C), one silk label row under
     // them, a two-line green LCD below (temperatures, network).
     Column {

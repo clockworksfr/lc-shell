@@ -41,7 +41,7 @@ ThemedText {
     // 22 %), "led" (Modulaire: a LED before, on / off / alert).
     readonly property string sigilStyle: theme.style.statusSigil ?? ""
     readonly property bool sigil: !lcd && !!sigilStyle && !useIcon && !!icon && !vertical && (size !== "extended" || !!microLabel)
-    // In a small LCD window (Modulaire media, design "Bar"): "amber" |
+    // In a small LCD window (Modulaire media): "amber" |
     // "green" | "vfd" (Façade) | "" (none). The text in the LCD font,
     // uppercase.
     property string lcd: ""
@@ -77,7 +77,7 @@ ThemedText {
     bottomPadding: lcd ? 3 : 0
     topPadding: lcd ? 3 : useIcon && vertical ? iconItem.height + (iconText ? 2 : 0) : 0
     font.pixelSize: lcd ? 15 : microStack ? 12 : sigil ? (sigilStyle === "led" ? 16 : 12) : vertical || stacked ? theme.font.sizeS : theme.font.sizeM
-    // Façade annunciators: IBM Plex Sans Condensed 700 (design "Bar").
+    // Façade annunciators: IBM Plex Sans Condensed 700.
     font.weight: sigil && sigilStyle === "phosphor" ? Font.Bold : sigil && sigilStyle === "led" ? Font.DemiBold : Font.Normal
     font.letterSpacing: sigil ? (sigilStyle === "phosphor" ? 1 : 0.6) : 0
     // Façade: a status that's off dims (the VFD's unlit segments).
@@ -104,7 +104,7 @@ ThemedText {
         height: 8
         anchors.verticalCenter: parent.verticalCenter
 
-        // The mockup's LED colors in both variants (the case stays dark).
+        // The LED colors in both variants (the case stays dark).
         readonly property color lit: parent.level === "alert" ? "#FF3B30" : "#46C46A"
 
         Repeater {

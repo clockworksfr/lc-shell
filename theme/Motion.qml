@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.services
 
-// Animation timing shared by every surface (design study, "Animations").
+// Animation timing shared by every surface.
 //
 // - Per theme: theme.motion { fast, base, slow, easing, overshoot, stagger }.
 // - Reduced motion (setting appearance.reducedMotion, else GNOME's

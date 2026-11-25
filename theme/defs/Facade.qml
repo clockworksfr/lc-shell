@@ -5,7 +5,7 @@ import Quickshell
 
 // Façade: hi-fi amplifier front, VFD display (cyan phosphor, glowing in
 // the dark variant; green LCD in the light one), condensed labels, 2 px
-// black bezels. docs/themes.md section 3, tokens from design study 6.
+// black bezels. docs/themes.md.
 // Fonts bundled: IBM Plex Sans Condensed, IBM Plex Mono, DSEG7 Classic.
 // Extra colors: ghost (unlit segments), silk (screen-printed labels),
 // glow (phosphor halo).
@@ -37,7 +37,7 @@ Singleton {
                     screenEdge: "#000000",
                     glass: "#00000000",
                     star: "#00000000",
-                    // Bar case (design "Bar"): a dark metal gradient, a
+                    // Bar case: a dark metal gradient, a
                     // 2 px black edge; the zones' plates; a frame's thin
                     // sides.
                     caseTop: "#2A2D2F",
@@ -46,7 +46,7 @@ Singleton {
                     caseEdge: "#000000",
                     caseFlat: "#16181A",
                     plate: "#24282A",
-                    // Hover cards (design "Hover cards"): silk text, blocks,
+                    // Hover cards: silk text, blocks,
                     // bubbles and tracks.
                     card: "#16181A",
                     cardBlock: "#24282A",
@@ -64,7 +64,7 @@ Singleton {
                     ghost: "#141D2618",
                     silk: "#1E2022",
                     line: "#8F9295",
-                    // The light VFD's ink (design).
+                    // The light VFD's ink.
                     accent: "#1D2618",
                     onAccent: "#FFFFFF",
                     urgent: "#C8392C",
@@ -129,7 +129,7 @@ Singleton {
                 stagger: 15
             },
             bar: {
-                // A centered front panel / rail (the mockup's bar tab).
+                // A centered front panel / rail.
                 length: 0.66,
                 height: 44,
                 verticalWidth: 64,

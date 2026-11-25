@@ -97,7 +97,7 @@ Singleton {
             border: {
                 width: 0
             },
-            // Animation tokens (docs/animations in the design study):
+            // Animation tokens:
             // fast / base / slow durations (ms), entry easing and overshoot,
             // stagger between rows (ms). Exits: InCubic, 0.75 × duration.
             motion: {

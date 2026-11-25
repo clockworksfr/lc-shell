@@ -3,7 +3,7 @@ import Quickshell
 import qs.components
 import qs.theme
 
-// Building blocks of the Hue module (design-hue § 5), in the theme's
+// Building blocks of the Hue module, in the theme's
 // language: Swatch (a color, round or square), Switch (on / off, touch
 // area of `hit`), Key (a scene button, active state per theme).
 QtObject {

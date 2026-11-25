@@ -30,7 +30,7 @@ Item {
     readonly property bool titled: !!title && height > 200
     readonly property real titleHeight: !titled ? 0 : tier === "poster" ? 48 : tier === "large" ? 38 : titleText.implicitHeight + 6
 
-    // Façade dark: the mockup's metal front (light keeps its plain panel).
+    // Façade dark: a metal front (light keeps its plain panel).
     readonly property bool facadeMetal: look === "facade" && dark
 
     Rectangle {

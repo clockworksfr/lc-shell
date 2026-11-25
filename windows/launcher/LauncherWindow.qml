@@ -22,7 +22,7 @@ PanelWindow {
         right: true
     }
     color: "transparent"
-    // Modulaire (design "Banque de presets"): black plate, the search and
+    // Modulaire: black plate, the search and
     // the results in a green LCD, the current line inverted.
     readonly property bool mod: theme.style.module === "modulaire"
     readonly property color lcdInk: "#C6F37A"

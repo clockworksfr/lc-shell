@@ -8,8 +8,7 @@ import qs.dashboard.modules
 import qs.i18n
 import qs.theme
 
-// Dashboard editor, on the "modules" screen itself (design study,
-// "Dashboard editor"): the page's cells over a grid; drag a cell to move
+// Dashboard editor, on the "modules" screen itself: the page's cells over a grid; drag a cell to move
 // it, its corner to resize it (snapped to the grid; red where it would
 // cover another cell); bottom bar: pages, inspector of the selected cell
 // (S / M / L, remove), add a module or a window cell, undo / redo,

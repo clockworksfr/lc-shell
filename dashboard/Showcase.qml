@@ -3,7 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// Dashboard showcase (tests, design reviews): while `type` is set, the
+// Dashboard showcase (tests, screenshots): while `type` is set, the
 // dashboard shows that module alone at many cell shapes (wide, box, tiny,
 // narrow, tall, strip…), keeping the showcase and theme buttons in the
 // bottom-right corner. next() steps through the module types, then off.

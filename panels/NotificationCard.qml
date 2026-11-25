@@ -10,7 +10,7 @@ import qs.services
 import qs.theme
 
 // One notification (popups and the notification panel), in the theme's
-// language (design mockups):
+// language:
 //   classic        panel card: app icon, app name (bold), text soft
 //   constellation  glass card with an accent rim; spaced capitals label
 //   facade         VFD window: "MSG ▸ APP" in dots, glowing phosphor text

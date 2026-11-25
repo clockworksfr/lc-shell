@@ -10,7 +10,7 @@ import qs.panels
 import qs.services
 import qs.theme
 
-// Quick settings (design study 9): do not disturb, microphone, Wi-Fi,
+// Quick settings: do not disturb, microphone, Wi-Fi,
 // Bluetooth, dark mode, screen recording (placeholder), as theme tiles
 // (Toggle), plus volume and brightness sliders. Every size reaches every
 // setting: what doesn't fit goes behind a "More" tile (last slot) that
@@ -54,7 +54,7 @@ ModuleBase {
     readonly property int total: 8
     readonly property int levels: large ? 3 : 2
     // Poster: the audio devices' column.
-    // Big cells (design review): tiles on top (60 %, poster 50 %), then a
+    // Big cells: tiles on top (60 %, poster 50 %), then a
     // levels zone; poster: the audio outputs and inputs beside it (thirds).
     readonly property bool bigLayout: large && !full
     readonly property real zonesTop: bigLayout ? Math.round(ch * (poster ? 0.5 : 0.6)) + gap : 0

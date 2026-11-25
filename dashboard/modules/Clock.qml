@@ -141,7 +141,7 @@ ModuleBase {
                 m: root
                 visible: root.shape === "wide" && root.ch >= 240 && wideDate.width >= 230
                 width: parent.width
-                // Day cells about as tall as wide (design study).
+                // Day cells about as tall as wide.
                 height: Math.min(root.ch * 0.4, (width - 6 * spacing) / 7 * 1.3)
             }
         }
@@ -203,7 +203,7 @@ ModuleBase {
             m: root
             visible: !root.roomy
             width: parent.width
-            // Day cells about as tall as wide (design study).
+            // Day cells about as tall as wide.
             height: Math.max(48, Math.min(root.inner.height * 0.45, (width - 6 * spacing) / 7 * 1.3))
         }
 
@@ -397,7 +397,7 @@ ModuleBase {
         font.capitalization: Font.Capitalize
     }
 
-    // 7 equal cells, today lit (design review): matrix outlined pills,
+    // 7 equal cells, today lit: matrix outlined pills,
     // today in the signal color; classic surface cells, today accent;
     // constellation today in the accent gradient; facade display cells,
     // today ink; modulaire dark cells with light digits (both variants),

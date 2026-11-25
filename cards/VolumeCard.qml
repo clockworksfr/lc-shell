@@ -6,7 +6,7 @@ import qs.i18n
 import qs.services
 import qs.theme
 
-// Sound (status widgets mockup): volume, outputs (radio lines),
+// Sound: volume, outputs (radio lines),
 // per-application volumes, input (level, live meter, devices).
 Column {
     id: root

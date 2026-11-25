@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 
 // Matrix: monochrome, dot-matrix numerals, a single red accent
-// (Nothing Phone spirit). The author's own design language, docs/themes.md section 5.
+// (Nothing Phone spirit). The author's own design language, docs/themes.md.
 // Fonts bundled: Space Grotesk, Space Mono, Doto Matrix (static Doto,
 // wght 900, ROND 100, made with tools/instance-font.py).
 Singleton {
@@ -29,7 +29,7 @@ Singleton {
                     accent2: "#8C8C8C",
                     // Glow of dot-matrix figures (dark only).
                     glow: "#B3F2F2F2",
-                    // Red touches beyond alerts (design: today, active
+                    // Red touches beyond alerts (today, active
                     // workspace, play, progress head, slider handle).
                     signal: "#E5323A"
                 },
@@ -103,13 +103,13 @@ Singleton {
                 // Matrix statuses are text (label over value), no icons.
                 statusIcons: false,
                 appIcons: "mono",
-                // Dots with their number, empty ones dim (as in the mockup).
+                // Dots with their number, empty ones dim.
                 workspaces: "numbered",
                 module: "matrix",
                 cover: "disc",
                 ring: "dots",
                 // The bar's clock: the time alone, in the display font
-                // (Doto, ~2/3 of the bar), as in the mockup.
+                // (Doto, ~2/3 of the bar).
                 barClock: "display",
                 // Statuses as micro labels over their value ("VOL / 64").
                 statusStack: true

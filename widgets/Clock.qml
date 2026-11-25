@@ -28,7 +28,7 @@ TextWidget {
     // date smaller and soft, the time big (rich text can't reach the
     // shell's own fonts). The widget's own text is empty, its padding the
     // pair's width.
-    // Modulaire: the time in a Nixie window (design "Bar"): dark glass,
+    // Modulaire: the time in a Nixie window: dark glass,
     // orange glowing digits, the colon kept between hours and minutes.
     readonly property bool nixie: figure && theme.style.module === "modulaire"
     // Façade: the time in a VFD window, unlit "88:88" segments behind it.
@@ -108,7 +108,7 @@ TextWidget {
             }
         }
     }
-    // --- OSD in the clock (animations mockup) ---
+    // --- OSD in the clock ---
     // Volume, mic or brightness changing on this screen: the clock widens
     // for a gauge (fast), which follows the value (80 ms, linear), then
     // retracts 1.2 s after the last change (base). No popup on this screen.
@@ -221,7 +221,7 @@ TextWidget {
         }
     }
 
-    // ~2/3 of the bar's thickness (27 px in a 40 px bar, the mockup).
+    // ~2/3 of the bar's thickness (27 px in a 40 px bar).
     readonly property int figureSize: Math.round(Math.max(18, theme.bar.height * 0.68))
 
     font.family: figure ? theme.font.display : theme.font.family

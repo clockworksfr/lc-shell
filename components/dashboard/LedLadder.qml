@@ -4,7 +4,7 @@ import qs.theme
 
 // A ladder of round LEDs (modulaire), lit up to `value` (0..1): green,
 // yellow from 70 %, red from 85 % (#FF3B30), each with a halo; unlit
-// warm brown #3A2C22 (design .c-led).
+// warm brown #3A2C22.
 // Vertical by default (bottom to top).
 Item {
     id: root

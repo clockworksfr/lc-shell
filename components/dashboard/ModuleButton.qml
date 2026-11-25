@@ -27,7 +27,7 @@ Item {
     implicitWidth: keyWidth > 0 ? keyWidth : look === "matrix" || look === "modulaire" ? size * 1.5 : size
     implicitHeight: size + (look === "facade" && legend ? legendText.implicitHeight + 4 : 0)
 
-    // Modulaire: the key's solid shadow (design .c-btn: 0 4px 0 #000).
+    // Modulaire: the key's solid shadow (0 4px 0 #000).
     Rectangle {
         visible: root.look === "modulaire"
         y: 4

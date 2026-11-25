@@ -4,7 +4,7 @@ import qs.components.dashboard
 import qs.i18n
 import qs.theme
 
-// Common base of dashboard modules (design study 7): the theme's frame
+// Common base of dashboard modules: the theme's frame
 // (ModulePanel, with its title when the cell is tall enough), and the
 // content area's shape, which picks the layout:
 //   tiny   (≤ 220 × 200)  the main figure alone
@@ -15,7 +15,7 @@ import qs.theme
 //   strip  (≥ 4)          one line, items added while they fit
 // Type scale from the content's smaller side: t2 title, t3 text, t4
 // label; the main figure is sized per shape with figure(hk, wk).
-// Size tier on top of the shape (design "Large sizes"), from the
+// Size tier on top of the shape, from the
 // cell's smaller outer side: normal (< 760, the Xeneon), large (760 to
 // 1239, e.g. 8 × 6 on a 5K screen), poster (≥ 1240, e.g. 12 × 8). Body
 // text grows a little, the main figure a lot; the room goes to content

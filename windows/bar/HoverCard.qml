@@ -41,7 +41,7 @@ PanelWindow {
         pinned = true;
     }
 
-    // Themes with card tokens (Façade, design "Hover cards"): silk text and
+    // Themes with card tokens (Façade): silk text and
     // their own surfaces in cards; the VFD's ink kept as `vfd` (screens,
     // progress, sliders) and as the accent.
     readonly property var baseTheme: host?.theme ?? Themes.fallback
@@ -257,8 +257,7 @@ PanelWindow {
             }
         }
 
-        // Modulaire: an aluminium plate with four flat screws (design
-        // .hct-modulaire .hc).
+        // Modulaire: an aluminium plate with four flat screws.
         Rectangle {
             visible: root.theme.style.module === "modulaire"
             anchors.fill: parent

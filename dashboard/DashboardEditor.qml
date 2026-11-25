@@ -6,7 +6,7 @@ import Quickshell.Hyprland
 import qs.i18n
 import qs.services
 
-// Dashboard edit mode (design study, "Dashboard editor"): the dashboard
+// Dashboard edit mode: the dashboard
 // of one workspace, on the screen showing it. Presets (named layouts) are
 // edited in a draft along with which preset each workspace uses; "done"
 // saves both (dashboards.presets / .workspaces), "discard" drops them.
@@ -36,7 +36,7 @@ Singleton {
     readonly property var area: Dashboard.area(screen)
     readonly property var grid: Dashboard.grid(Dashboard.presets[page] ?? null, area.width, area.height)
     readonly property var cells: pages[page] ?? []
-    // Sizes a module snaps to (design study): S, M, L.
+    // Sizes a module snaps to: S, M, L.
     readonly property var sizes: ({ S: { w: 2, h: 1 }, M: { w: 4, h: 2 }, L: { w: 6, h: 3 }, XL: { w: 8, h: 6 }, P: { w: 12, h: 8 } })
     // The sizes this grid has room for (XL and poster on big screens).
     readonly property var sizeKeys: ["S", "M", "L", "XL", "P"].filter(k => sizes[k].w <= grid.columns && sizes[k].h <= grid.rows)

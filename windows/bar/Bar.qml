@@ -162,8 +162,8 @@ PanelWindow {
         gradient: caseGradient
     }
 
-    // In a frame, the rails on the bar's side only (design: the thin sides
-    // stay plain case).
+    // In a frame, the rails on the bar's side only (the thin
+    // sides stay plain case).
     BarRails {
         visible: bar.framed && !!bar.look.rails
         anchors.fill: parent
@@ -266,8 +266,7 @@ PanelWindow {
     // Centered on the widget, body kept 8 px from the screen's edges. In
     // islands, when the island can't grow far enough on a side (screen or
     // bar end), the body aligns with the island's end there, without a
-    // fillet, and that corner of the island turns square (design study,
-    // case B).
+    // fillet, and that corner of the island turns square.
     function drawerPlace(slot: Item, bodyLen: real, fillet: real): var {
         const p = slot.mapToItem(contentItem, 0, 0);
         const center = vertical ? p.y + slot.height / 2 : p.x + slot.width / 2;

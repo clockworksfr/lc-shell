@@ -6,7 +6,7 @@ import Quickshell
 // Constellation (replaces Ligne): floating glass islands, space mood,
 // stars, comet progress, orbits. Concept inspired by Nebula
 // (github.com/LilaccFlowerr/Nebula, AGPL-3.0; no code taken).
-// docs/themes.md, section 2. Night = dark variant, dawn = light.
+// docs/themes.md. Night = dark variant, dawn = light.
 Singleton {
     readonly property var definition: ({
             id: "constellation",
