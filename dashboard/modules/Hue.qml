@@ -6,6 +6,7 @@ import qs.components
 import qs.components.dashboard
 import qs.i18n
 import qs.services
+import qs.settings
 import qs.theme
 
 // Philips Hue lights (design-hue): A rooms (theme tiles), B the selected
@@ -56,7 +57,7 @@ ModuleBase {
         HueBridge.picker = { kind: kind, id: id, name: name, screen: screenName };
     }
 
-    // States: no binary, bridge silent, nothing yet, no rooms.
+    // States: no paired bridge, bridge silent, nothing yet, no rooms.
     Column {
         anchors.centerIn: parent
         width: parent.width
@@ -74,9 +75,18 @@ ModuleBase {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
-            text: !HueBridge.available ? I18n.tr("hue.noBinary") : HueBridge.loaded ? I18n.tr("hue.noRooms") : HueBridge.lastError ? I18n.tr("hue.noBridge") : I18n.tr("hue.loading")
+            text: !HueBridge.available || HueBridge.lastError === "unauthorized" ? I18n.tr("hue.notPaired") : HueBridge.loaded ? I18n.tr("hue.noRooms") : HueBridge.lastError ? I18n.tr("hue.noBridge") : I18n.tr("hue.loading")
             font.pixelSize: root.t3
             color: root.theme.color.soft
+        }
+
+        // Pairing happens in Settings › Lights.
+        Button {
+            anchors.horizontalCenter: parent.horizontalCenter
+            visible: (!HueBridge.available || HueBridge.lastError === "unauthorized") && root.ch > 140
+            icon: "settings"
+            text: I18n.tr("hue.setUp")
+            onClicked: Settings.open("lights")
         }
     }
 

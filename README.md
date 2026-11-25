@@ -45,7 +45,7 @@ It provides a bar, dashboards, a launcher, a lock screen, notifications, OSDs, a
 | `tailscale` | Tailscale status in the VPN controls |
 | `hyprlock` | Fallback lock screen when the shell isn't running (`contrib/hypr/lock-and-dpms.sh`) |
 | `playerctl` | Media keys in `contrib/hypr/shell.lua` |
-| `huectl` in `~/.local/bin` | Philips Hue lights (module, widget, panel). This CLI is not part of this repository |
+| `avahi` (`avahi-browse`) | Finding Philips Hue bridges on the local network (mDNS) |
 
 On Arch Linux:
 
@@ -53,7 +53,7 @@ On Arch Linux:
 paru -S quickshell-git
 sudo pacman -S --needed pipewire wireplumber networkmanager bluez upower power-profiles-daemon \
     python curl wl-clipboard grim fd libqalculate cava brightnessctl ddcutil lm_sensors \
-    libnotify playerctl hyprlock
+    libnotify playerctl hyprlock avahi
 ```
 
 Fonts and icons are bundled: no font package is needed.
@@ -194,7 +194,7 @@ Edit them in Settings › Dashboard, or with the dashboard editor: drag, resize,
 | `network` | Traffic graphs and connection |
 | `vu` | VU meter of the default output |
 | `toggles` | Quick settings |
-| `hue` | Philips Hue rooms and scenes |
+| `hue` | Philips Hue rooms and scenes (pair the bridge in Settings › Lights) |
 | `workspaces` | Workspaces |
 | `window` | Window slot |
 | `themeSwitch` | Theme switcher |
@@ -206,6 +206,7 @@ Edit them in Settings › Dashboard, or with the dashboard editor: drag, resize,
 
 - **Weather:** [Open-Meteo](https://open-meteo.com), no API key. Weather stays off until you pick a place in Settings › Weather, and only that place's coordinates are sent.
 - **Lyrics:** [LRCLIB](https://lrclib.net). Only the artist, title and duration are sent, and lyrics are cached locally.
+- **Philips Hue:** the bridge is reached on your local network only. Pair it in Settings › Lights; [discovery.meethue.com](https://discovery.meethue.com) is asked only when you click "Find bridges". Credentials are kept in `~/.config/lc/hue.json` (mode 600).
 
 ## Lock screen and idle
 

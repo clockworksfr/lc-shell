@@ -14,7 +14,7 @@ Singleton {
     // Text in the settings search.
     property string query: ""
 
-    readonly property var pages: ["appearance", "bar", "screens", "dashboard", "wallpaper", "notifications", "modes", "network", "bluetooth", "sound", "clipboard", "screenshot", "lock", "weather", "system", "shortcuts"]
+    readonly property var pages: ["appearance", "bar", "screens", "dashboard", "wallpaper", "notifications", "modes", "network", "bluetooth", "sound", "clipboard", "screenshot", "lock", "weather", "lights", "system", "shortcuts"]
     readonly property var icons: ({
             appearance: "palette",
             bar: "toolbar",
@@ -30,6 +30,7 @@ Singleton {
             screenshot: "screenshot_region",
             lock: "lock",
             weather: "partly_cloudy_day",
+            lights: "lightbulb",
             system: "settings_accessibility",
             shortcuts: "keyboard"
         })

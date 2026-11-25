@@ -7,7 +7,8 @@ import qs.services
 
 // Philips Hue: a bulb and the rooms on. Click (or Super+U): the lights
 // drawer (rooms, the selected room, its lights), the Hue module at
-// pointer sizes. Hidden without huectl.
+// pointer sizes. Without a paired bridge: "Lights", dimmed; the drawer
+// points to Settings › Lights.
 TextWidget {
     id: root
 
@@ -18,9 +19,9 @@ TextWidget {
             HueBridge.allOff();
     }
 
-    readonly property bool shown: HueBridge.available
+    readonly property bool shown: true
 
-    fullText: HueBridge.roomsOn > 0 ? I18n.tr("bar.lightsOn", { n: HueBridge.roomsOn }) : I18n.tr("bar.lightsOff")
+    fullText: !HueBridge.available ? I18n.tr("bar.lights") : HueBridge.roomsOn > 0 ? I18n.tr("bar.lightsOn", { n: HueBridge.roomsOn }) : I18n.tr("bar.lightsOff")
     compactText: `${HueBridge.roomsOn}`
     color: HueBridge.roomsOn > 0 ? theme.color.ink : theme.color.soft
 
