@@ -39,15 +39,18 @@ Singleton {
     }
 
     // `mode` "modules" + touch: dashboard targets (72) instead of 48.
-    function resolve(id: string, touch: bool, mode: string): var {
+    // `screenVariant`: a screen profile's own "dark" / "light", over the
+    // global one.
+    function resolve(id: string, touch: bool, mode: string, screenVariant): var {
         const definition = definitions[id] ?? definitions.classic;
         const merged = deepMerge(Base.definition, definition);
+        const v = screenVariant === "dark" || screenVariant === "light" ? screenVariant : variant;
         return {
             id: definition.id,
             name: definition.name,
-            variant: variant,
+            variant: v,
             touch: touch,
-            color: merged.palettes[variant],
+            color: merged.palettes[v],
             font: merged.font,
             space: merged.space,
             radius: merged.radius,

@@ -24,7 +24,7 @@ Scope {
 
     readonly property var profile: Config.forScreen(modelData)
     readonly property bool normal: profile.mode === "normal"
-    readonly property var theme: Themes.resolve(profile.theme ?? Themes.themeFor(profile.mode), profile.touch, profile.mode)
+    readonly property var theme: Themes.resolve(profile.theme ?? Themes.themeFor(profile.mode), profile.touch, profile.mode, profile.variant)
     readonly property bool fullscreen: Screens.hasFullscreen(modelData.name)
     readonly property var barLook: Object.assign({}, theme.bar, profile.bar ?? {})
     readonly property bool hasBar: normal && !!profile.bar && ShellState.barVisible
@@ -128,7 +128,8 @@ Scope {
     property bool dashboardLoaded: false
     onShowsDashboardChanged: if (showsDashboard) dashboardLoaded = true
     Component.onCompleted: if (showsDashboard) dashboardLoaded = true
-    readonly property var dashboardTheme: Themes.resolve(Themes.themeFor("modules"), profile.touch, "modules")
+    // A profile's `theme` covers its dashboards too.
+    readonly property var dashboardTheme: Themes.resolve(profile.theme ?? Themes.themeFor("modules"), profile.touch, "modules", profile.variant)
 
     LazyLoader {
         active: root.dashboardLoaded

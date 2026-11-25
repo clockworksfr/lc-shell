@@ -63,7 +63,7 @@ Fonts and icons are bundled: no font package is needed.
 Quickshell looks for named configurations in `~/.config/quickshell/<name>`. Clone the repository there under the name `lc`:
 
 ```sh
-git clone https://github.com/<owner>/lc-shell ~/.config/quickshell/lc
+git clone https://github.com/clockworksfr/lc-shell ~/.config/quickshell/lc
 qs -c lc
 ```
 
