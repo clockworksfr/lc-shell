@@ -1,58 +1,58 @@
-# Architecture cible
+# Target architecture
 
-État des décisions au 22/11/2026. Ce document décrit où va le shell ; le README décrit ce qui existe.
+This document describes where the shell is heading; the README describes what exists today.
 
-## Écrans : profils et modes
+## Screens: profiles and modes
 
-Chaque écran est reconnu par son **modèle** (`ShellScreen.model`, ex. `DELL U4025QW`, `XENEON EDGE`), pas par son connecteur : avec l'eGPU, `DP-1`/`HDMI-A-1` changent. Le connecteur reste utilisable en secours (`eDP-*` pour l'écran interne).
+Each screen is identified by its **model** (`ShellScreen.model`, e.g. `XENEON EDGE`), not by its connector: connector names such as `DP-1` / `HDMI-A-1` can change (for instance with an eGPU). The connector is still usable as a fallback (`eDP-*` for a laptop's internal panel).
 
-Un **profil** associe un écran à :
+A **profile** associates a screen with:
 
-- un **mode** :
-  - `normal` — barre permanente, rendu classique (DP-1, écran interne du portable, tout écran inconnu) ;
-  - `modules` — tableau de bord de modules avec des cases fenêtre (Xeneon) ;
-- un **thème** (sinon celui du mode) ;
-- `touch` — cibles agrandies, rien qui ne dépende du survol (aucun écran tactile utilisable aujourd'hui, mais prévu) ;
-- des surcharges (barre, OSD…).
+- a **mode**:
+  - `normal` — permanent bar, classic layout (main monitor, laptop internal panel, any unknown screen);
+  - `modules` — dashboard of modules with window slots (Xeneon);
+- a **theme** (otherwise the mode's theme);
+- `touch` — enlarged targets, nothing that depends on hover (no touch screen is usable today, but it is planned for);
+- overrides (bar, OSD…).
 
-## Thèmes
+## Themes
 
-- Thèmes prévus : **Classique moderne** (défaut et base), **Constellation** (remplace Ligne, inspiré de Nebula), **Façade**, **Modulaire**, **Matrix**. Spécification : [`themes.md`](themes.md). Décision du 22/11 : on part sur les propositions de design telles quelles, Classique moderne partout pour commencer (écrans normaux et modules), on peaufine ensuite.
-- Chaque thème a une variante **claire** et **sombre**. Bascule : manuelle, horaires fixes, ou lever/coucher du soleil (calcul local, sans réseau). IPC pour les binds. Réglage dans l'app de paramètres (fin du projet) ; par défaut identique sur tous les écrans, réglable par écran ensuite.
-- Thème choisi par mode (`normal` → Classique, `modules` → Façade par défaut), surchargeable par profil d'écran.
-- Un thème = des tokens (palette par variante, polices statiques, rayons, bordures, espacements) + des **axes de style** pour les composants (forme des curseurs, des jauges, des espaces de travail, de l'horloge…) + les **valeurs par défaut de la barre**. Aucun composant ne teste le nom d'un thème : il lit des tokens et des axes.
-- Portée : chaque fenêtre porte le thème de son écran (`window.theme`) ; les composants le retrouvent par `QsWindow.window`. Un même composant peut donc s'afficher en Classique sur DP-1 et en Façade sur le Xeneon.
+- Planned themes: **Classic** (default and base), **Constellation** (replaces Ligne, inspired by Nebula), **Façade**, **Modulaire**, **Matrix**. Specification: [`themes.md`](themes.md). Decision: start from the design proposals as they are, with Classic everywhere to begin with (normal and modules screens), and refine afterwards.
+- Each theme has a **light** and a **dark** variant. Switching: manual, fixed times, or sunrise/sunset (computed locally, no network). IPC for keybinds. Configured in the settings app (end of the project); identical on all screens by default, configurable per screen later.
+- Theme chosen per mode (`normal` → Classic, `modules` → Façade by default), overridable per screen profile.
+- A theme = tokens (palette per variant, static fonts, radii, borders, spacing) + component **style axes** (shape of sliders, gauges, workspaces, clock…) + the **bar defaults**. No component tests a theme's name: it reads tokens and axes.
+- Scope: each window carries its screen's theme (`window.theme`); components find it through `QsWindow.window`. The same component can therefore render as Classic on the main monitor and as Façade on the Xeneon.
 
-## Barre (écrans normaux)
+## Bar (normal screens)
 
-Toujours présente. Agencement des widgets dans `left` / `center` / `right`, et rendu paramétrable, chaque thème fournissant ses défauts :
+Always present. Widget layout in `left` / `center` / `right`, with configurable rendering, each theme providing its own defaults:
 
-| Paramètre | Valeurs |
+| Parameter | Values |
 |---|---|
-| `style` | `full` (une bande) · `islands` (un îlot par zone) |
-| `floating` | décollée des bords (marge) ou collée |
-| `margin`, `radius`, `opacity`, `border` | nombres |
-| `screenCorners` | rayon des coins d'écran arrondis (0 = aucun) |
+| `style` | `full` (one strip) · `islands` (one island per zone) |
+| `floating` | detached from the edges (margin) or attached |
+| `margin`, `radius`, `opacity`, `border` | numbers |
+| `screenCorners` | radius of the rounded screen corners (0 = none) |
 
-## Mode modules
+## Modules mode
 
-- Une **grille libre** de cases. Une case est soit un **module** (média, paroles, monitoring, VU…), soit une **case fenêtre**.
-- Les **espaces de travail Hyprland** de cet écran sont des **pages de modules** : chaque espace de travail a sa propre grille. Changer d'espace de travail change de page.
-- Une fenêtre arrivant sur un espace de travail de l'écran modules est rendue flottante et placée par le shell dans une case fenêtre libre (règles poussées via `hl.dsp.window.float/move/resize`). N'importe quelle fenêtre Hyprland peut y aller (kitty, btop…).
-- Les modules sont dessinés sur la couche `bottom`, sous les fenêtres.
-- Une interface d'édition permettra de choisir, placer et redimensionner modules et cases fenêtre.
+- A **free grid** of slots. A slot is either a **module** (media, lyrics, monitoring, VU…) or a **window slot**.
+- The **Hyprland workspaces** of this screen are **module pages**: each workspace has its own grid. Switching workspace switches page.
+- A window arriving on a workspace of the modules screen is made floating and placed by the shell in a free window slot (rules pushed through `hl.dsp.window.float/move/resize`). Any Hyprland window can go there (kitty, btop…).
+- Modules are drawn on the `bottom` layer, beneath windows.
+- An editing interface will let the user choose, place and resize modules and window slots.
 
-## Plein écran
+## Fullscreen
 
-Rien d'**automatique** ne s'affiche au-dessus d'un jeu en plein écran (`HyprlandWorkspace.hasFullscreen`) : l'OSD et les notifications sont redirigés vers un écran modules s'il y en a un, sinon retenus. Ce qui est appelé explicitement (lanceur, panneaux) reste autorisé.
+Nothing **automatic** is shown above a fullscreen game (`HyprlandWorkspace.hasFullscreen`): the OSD and notifications are redirected to a modules screen if there is one, otherwise held back. Things invoked explicitly (launcher, panels) are still allowed.
 
 ## Phases
 
-Fait : socle (1), jetons du thème Classique (2, partiel), premier jet du mode modules (3), langues EN/FR. Notifications (5) écrites et testées en essai contrôlé (Caelestia arrêté une minute) ; bascule définitive à décider. Barre sur les 4 bords et mode cadre faits (tiroirs fusionnés au cadre : plus tard, avec le design). Fond d'écran, paroles/VU, config en deux couches, app de paramètres, verrouillage et inactivité écrits (verrouillage réel non testé : nécessite simon). Priorité actuelle : **fonctionnalités brutes** ; le design se peaufine après.
+Done: foundation (1), Classic theme tokens (2, partial), first pass of modules mode (3), EN/FR languages. Notifications (5) written and tested in a controlled trial (with Caelestia stopped for a minute); final switch-over still to be decided. Bar on all 4 edges and frame mode done (drawers merged into the frame: later, with the design). Wallpaper, lyrics/VU, two-layer config, settings app, lock and idle written (actual locking not yet tested: needs a manual test session). Current priority: **raw features**; the design gets polished afterwards.
 
 
-1. **Socle** — profils d'écran par modèle, registre de thèmes avec clair/sombre programmable, thème par fenêtre, styles de barre, politique plein écran, indicateur tactile.
-2. **Thèmes** — implémentation des cinq thèmes d'après la spécification de l'artifact (polices, palettes, composants).
-3. **Mode modules** — grille, pages par espace de travail, cases fenêtre, premiers modules (média, paroles, monitoring, VU).
-4. **Éditeur** — interface pour gérer modules et barre ; écran de paramètres (aussi accessible depuis le lanceur).
-5. **Notifications** (bascule depuis Caelestia), fond d'écran, puis inactivité et verrouillage en dernier.
+1. **Foundation** — screen profiles by model, theme registry with schedulable light/dark, per-window theme, bar styles, fullscreen policy, touch flag.
+2. **Themes** — implementation of the five themes from the design study's specification (fonts, palettes, components).
+3. **Modules mode** — grid, pages per workspace, window slots, first modules (media, lyrics, monitoring, VU).
+4. **Editor** — interface to manage modules and the bar; settings screen (also reachable from the launcher).
+5. **Notifications** (switch-over from Caelestia), wallpaper, then idle and lock last.

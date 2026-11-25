@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 
 // Matrix: monochrome, dot-matrix numerals, a single red accent
-// (Nothing Phone spirit). simon's own DA, docs/themes.md section 5.
+// (Nothing Phone spirit). The author's own design language, docs/themes.md section 5.
 // Fonts bundled: Space Grotesk, Space Mono, Doto Matrix (static Doto,
 // wght 900, ROND 100, made with tools/instance-font.py).
 Singleton {

@@ -4,69 +4,69 @@
   "size": 64,
   "motif": "#FFFFFF",
   "opacity": 0.1,
-  "why": "ardoise sarcelle, plus claire et plus froide que le graphite neutre de l'interface"
+  "why": "teal slate, lighter and cooler than the UI's neutral graphite"
  },
  "classic-light": {
   "base": "#B7C9C6",
   "size": 64,
   "motif": "#0B2A26",
   "opacity": 0.12,
-  "why": "sauge grisée, plus sombre que les surfaces quasi blanches"
+  "why": "greyed sage, darker than the near-white surfaces"
  },
  "constellation-dark": {
   "base": "#2B2552",
   "size": 128,
   "motif": "#FFFFFF",
   "opacity": 0.45,
-  "why": "violet profond, plus clair et plus chaud que le bleu nuit des îlots"
+  "why": "deep violet, lighter and warmer than the islands' midnight blue"
  },
  "constellation-light": {
   "base": "#C8C2E6",
   "size": 128,
   "motif": "#FFFFFF",
   "opacity": 0.75,
-  "why": "lavande moyenne, nettement plus sombre que le blanc bleuté"
+  "why": "mid lavender, clearly darker than the bluish white"
  },
  "facade-dark": {
   "base": "#2C3538",
   "size": 48,
   "motif": "#000000",
   "opacity": 0.26,
-  "why": "gris acier bleuté, plus clair que la façade noire et les afficheurs"
+  "why": "bluish steel grey, lighter than the black front and the displays"
  },
  "facade-light": {
   "base": "#9AA5A7",
   "size": 48,
   "motif": "#1B2426",
   "opacity": 0.15,
-  "why": "gris bleu, plus sombre et plus froid que l'aluminium clair"
+  "why": "blue grey, darker and cooler than the light aluminium"
  },
  "modulaire-dark": {
   "base": "#3A342E",
   "size": 96,
   "motif": "#000000",
   "opacity": 0.26,
-  "why": "brun fumé, plus clair et plus chaud que l'anthracite des panneaux"
+  "why": "smoky brown, lighter and warmer than the panels' anthracite"
  },
  "modulaire-light": {
   "base": "#9CA6AC",
   "size": 96,
   "motif": "#1A1F22",
   "opacity": 0.15,
-  "why": "acier froid, sous le beige chaud des panneaux"
+  "why": "cool steel, below the panels' warm beige"
  },
  "matrix-dark": {
   "base": "#25272B",
   "size": 64,
   "motif": "#FFFFFF",
   "opacity": 0.16,
-  "why": "gris froid moyen, bien au-dessus du quasi-noir des surfaces"
+  "why": "mid cool grey, well above the near-black surfaces"
  },
  "matrix-light": {
   "base": "#BBBCB8",
   "size": 64,
   "motif": "#000000",
   "opacity": 0.16,
-  "why": "gris moyen, sous le blanc cassé des surfaces"
+  "why": "mid grey, below the off-white surfaces"
  }
 }

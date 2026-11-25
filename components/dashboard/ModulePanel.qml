@@ -182,7 +182,7 @@ Item {
     }
 
     // Flat screws in the corners: Façade 10 px, 18 px in; Modulaire 8 px,
-    // 10 px in (as its hover cards; simon's call).
+    // 10 px in (as its hover cards).
     Repeater {
         model: root.look === "facade" || root.look === "modulaire" ? 4 : 0
 

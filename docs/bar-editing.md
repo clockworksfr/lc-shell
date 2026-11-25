@@ -1,79 +1,78 @@
-# Barre : édition et cartes de survol (étude v4)
+# Bar: editing and hover cards (study v4)
 
-Spécification issue de l'étude de design (artifact « lc-shell rendus », onglets Édition et Survol). À adapter au modèle de config existant (profils d'écrans dans `screens[]`, config par mode) plutôt qu'à la structure `bar.screens` proposée par l'étude.
+Specification derived from the design study (mockups “lc-shell renders”, Edit and Hover tabs). To be adapted to the existing config model (screen profiles in `screens[]`, per-mode config) rather than to the `bar.screens` structure proposed by the study.
 
-## Modèle de données
+## Data model
 
-- Zones `start`, `center`, `end` (en vertical : haut, milieu, bas).
-- Une zone = liste de **groupes** ; un groupe = un îlot (disposition îlots) ou une capsule / un séparateur (barre complète, cadre).
-- Widget : `{ id, type, size, options }` ; `id` stable (type + compteur) ; `size` = `compact` | `normal` | `extended`. Ordre = ordre des tableaux.
-- Types : `workspaces`, `window`, `clock`, `media`, `volume`, `network`, `bluetooth`, `battery`, `notifications`, `tray`, `system`, `weather`, `dynamicIsland`.
-- Vertical : `window` forcé compact ; `media`, `notifications`, `clock` limités à `normal` (taille refusée → taille autorisée suivante).
-- Widget envoyé vers un écran modules : devient un module (S = 2×1, M = 4×2, L = 6×3) à la première case libre.
-- Écriture à « Terminé », atomique (fichier temporaire + renommage) ; la config reste rechargée à chaud.
-- Compatibilité : un widget écrit comme simple chaîne (`"clock"`) reste accepté.
+- Zones `start`, `center`, `end` (vertical: top, middle, bottom).
+- A zone = a list of **groups**; a group = an island (islands layout) or a capsule / a separator (full bar, frame).
+- Widget: `{ id, type, size, options }`; stable `id` (type + counter); `size` = `compact` | `normal` | `extended`. Order = array order.
+- Types: `workspaces`, `window`, `clock`, `media`, `volume`, `network`, `bluetooth`, `battery`, `notifications`, `tray`, `system`, `weather`, `dynamicIsland`.
+- Vertical: `window` forced to compact; `media`, `notifications`, `clock` capped at `normal` (refused size → next allowed size).
+- Widget sent to a modules screen: becomes a module (S = 2×1, M = 4×2, L = 6×3) in the first free slot.
+- Written on “Done”, atomically (temporary file + rename); the config is still hot-reloaded.
+- Compatibility: a widget written as a plain string (`"clock"`) is still accepted.
 
-## Mode édition
+## Edit mode
 
-- **Entrée** : clic droit sur la barre → menu (« Modifier la barre », « Réglages de la barre », « Paramètres ») ; appui long 600 ms sur un widget (tactile) ; raccourci (proposé : `Super + Alt + E`) ; Paramètres › Barre ; IPC `bar edit`. Toutes les barres passent en édition ; cartes de survol désactivées.
-- **Affichage** : zones en pointillé accent 55 % + fond accent 7 % + étiquette mono 10 px ; chaque widget a une poignée ⋮⋮, une pastille S/M/L et une croix (20 px, 48 au doigt) ; barre d'outils flottante sous la barre de l'écran actif : Annuler, Rétablir, Palette, Valeurs du thème, Abandonner, Terminé, vignettes d'écrans.
-- **Glisser** : seuil 4 px (souris), 300 ms d'appui (doigt) ; widget soulevé échelle 1,05, rotation −1,5°, opacité 0,92, fantôme 35 % à sa place ; curseur d'insertion 3 px accent, voisins qui s'écartent en 160 ms ; insertion avant le premier widget dont le milieu dépasse le pointeur.
-- **Cibles** : entre widgets, tête/fin de zone, « + Nouvel îlot » / « + Groupe », palette (= retirer), vignette d'écran (= déplacer vers cet écran ; pas de glisser entre surfaces layer-shell) ; cible refusée bordée de rouge avec la raison.
-- **Taille** : pastille S → M → L (en bas à droite du widget, la croix en haut à gauche : jamais de chevauchement entre voisins ; 28 px sur écran tactile) ; `+` / `−`.
-- **Inspecteur** (clic ; feuille du bas au doigt) : tailles avec aperçu, options du widget, « Déplacer vers… », « Retirer ».
-- **Palette** : widgets absents, aperçu, recherche ; glisser vers une zone ou « + » puis la zone.
-- **Annulation** : 50 instantanés, `Ctrl+Z` / `Ctrl+Maj+Z` ; « Abandonner » restaure l'état d'entrée ; après « Terminé », toast « Annuler » 8 s.
-- **Sortie** : Terminé, Échap, clic hors barre et barre d'outils (changements gardés) ; un plein écran qui démarre ferme l'édition en enregistrant.
-- **Clavier** : Tab choisit un widget ; ← / → déplacent (et changent de zone en bout de zone) ; Suppr retire ; Entrée ouvre l'inspecteur.
-- **Cadre** : widgets seulement dans le côté de la barre.
+- **Entry**: right-click on the bar → menu (“Edit the bar”, “Bar settings”, “Settings”); 600 ms long press on a widget (touch); shortcut (proposed: `Super + Alt + E`); Settings › Bar; IPC `bar edit`. All bars enter edit mode; hover cards are disabled.
+- **Display**: zones with a dotted accent outline at 55% + accent background at 7% + 10 px mono label; each widget has a ⋮⋮ handle, an S/M/L badge and a close cross (20 px, 48 for touch); a floating toolbar under the bar of the active screen: Undo, Redo, Palette, Theme values, Discard, Done, screen thumbnails.
+- **Drag**: 4 px threshold (mouse), 300 ms press (touch); lifted widget at scale 1.05, rotation −1.5°, opacity 0.92, 35% ghost left in its place; 3 px accent insertion caret, neighbours moving apart in 160 ms; insertion before the first widget whose midpoint is past the pointer.
+- **Targets**: between widgets, start/end of a zone, “+ New island” / “+ Group”, palette (= remove), screen thumbnail (= move to that screen; no dragging between layer-shell surfaces); a refused target gets a red outline with the reason.
+- **Size**: S → M → L badge (bottom right of the widget, the cross at top left: never overlapping between neighbours; 28 px on a touch screen); `+` / `−`.
+- **Inspector** (click; bottom sheet on touch): sizes with preview, widget options, “Move to…”, “Remove”.
+- **Palette**: missing widgets, preview, search; drag to a zone, or “+” then the zone.
+- **Undo**: 50 snapshots, `Ctrl+Z` / `Ctrl+Shift+Z`; “Discard” restores the state on entry; after “Done”, an “Undo” toast for 8 s.
+- **Exit**: Done, Esc, click outside the bar and toolbar (changes kept); a fullscreen window starting closes edit mode and saves.
+- **Keyboard**: Tab selects a widget; ← / → move it (and change zone at the end of a zone); Delete removes; Enter opens the inspector.
+- **Frame**: widgets only on the bar side.
 
-## Cartes de survol
+## Hover cards
 
-### Règles communes
+### Common rules
 
-- Apparition après 350 ms d'immobilité : le tiroir sort de la barre. Carte ouverte (ou fermée depuis moins de 600 ms) : un autre widget s'affiche sans attente, le tiroir **ne se referme pas** : il glisse et se redimensionne jusqu'au nouveau widget (durée `base` du thème) pendant que le contenu passe en fondu enchaîné. Surface layer-shell persistante le long de la barre, entrée limitée au tiroir. Sortie : grâce 250 ms, puis fondu 120 ms ; le pointeur sur la carte la garde.
-- Clic : la carte grandit en panneau complet (220 ms). Toucher : 1er appui = carte, 2e / « Ouvrir » = panneau, appui long = édition. Clavier : focus = carte, Entrée = panneau, Échap = fermer. Les contrôles de la carte marchent sans ouvrir le panneau.
-- Jamais en plein écran, en édition, pendant un glisser.
-- 380 px de large (360 sur le portable), ≤ 60 % de la hauteur de l'écran ; marge intérieure 16, écart 12.
-- Placement : sous la barre (haut), au-dessus et sections inversées (bas), à côté et centrée verticalement (gauche/droite), tiroir fusionné (cadre) ; bornée à 8 px des bords.
-- Attache par thème : Classique 8 px d'écart, rayon 20 ; Constellation col 64×12, rayon 24 ; Façade carte suspendue, coins hauts carrés ; Modulaire panneau vissé ; Matrix 8 px, contour 1, rayon 28.
+- Appears after 350 ms without movement: the drawer slides out of the bar. With a card open (or closed less than 600 ms ago), another widget's card shows without delay and the drawer **does not close**: it slides and resizes to the new widget (theme `base` duration) while the content cross-fades. Persistent layer-shell surface along the bar, input limited to the drawer. Exit: 250 ms grace period, then a 120 ms fade; the pointer over the card keeps it open.
+- Click: the card grows into the full panel (220 ms). Touch: 1st tap = card, 2nd tap / “Open” = panel, long press = edit mode. Keyboard: focus = card, Enter = panel, Esc = close. The card's controls work without opening the panel.
+- Never in fullscreen, in edit mode, or during a drag.
+- 380 px wide (360 on a laptop), ≤ 60% of the screen height; inner padding 16, gap 12.
+- Placement: below the bar (top), above it with sections reversed (bottom), beside it and vertically centred (left/right), merged drawer (frame); kept 8 px from the edges.
+- Attachment per theme: Classic 8 px gap, radius 20; Constellation 64×12 neck, radius 24; Façade hanging card, square top corners; Modulaire screwed-on panel; Matrix 8 px, 1 px outline, radius 28.
 
-### Cartes
+### Cards
 
-1. **Espaces de travail** (Hyprland workspaces + clients) : « Espace N », écran, nombre de fenêtres ; aperçu schématique aux proportions de l'écran (rectangles avec icône et titre, fenêtre focalisée cernée) ; vignettes des espaces ; « clic : y aller · glisser une fenêtre ici ».
-2. **Horloge et calendrier** (heure, agenda iCal/CalDAV, second fuseau optionnel) : date longue + semaine, puce du second fuseau ; grande heure, secondes atténuées ; mini-mois (colonne semaines, semaine teintée, jour plein, points d'événements) ; deux prochains événements ; molette = mois.
-3. **Média** (MPRIS, paroles en cache) : pochette 84 px, source « 1/3 », titre, artiste, album ; progression cliquable avec temps écoulé/restant ; trois lignes de paroles ; précédent / lecture (64 px) / suivant ; puces des sources.
-4. **Volume** (PipeWire) : sortie, curseur 28 px avec valeur ; applis avec mini-barres ; micro avec niveau en direct ; puces de sortie ; molette ±2 %, clic milieu = muet.
-5. **Réseau** (NetworkManager, compteurs `/sys/class/net` sur 60 s, VPN) : signal (dBm, bande, canal) ; modules réception/envoi avec courbe ; IP locale, latence passerelle ; VPN ; hors ligne : dernier réseau + « Réessayer ».
-6. **Bluetooth** (BlueZ, UPower) : une ligne par appareil (anneau de batterie, nom, %, autonomie, « bas » < 20 %, « Connecter » si déconnecté).
-7. **Batterie** (UPower, power-profiles-daemon) : grand %, état, autonomie ; courbe 6 h + projection pointillée + repère « maintenant » ; profils ; santé, cycles.
-8. **Notifications** : titre + badge + bascule ne pas déranger ; 3 dernières groupées « ×n » ; « Tout effacer » ; glisser pour ignorer.
-9. **Tray** (StatusNotifierItem) : icône, nom, état, infobulle, puces des actions du menu ; clic = ouvrir, clic droit = menu.
-10. **Système** (`/proc`, amdgpu sysfs/hwmon, sans réveiller l'eGPU) : modules CPU / GPU (valeur, température, courbe 60 s) ; barres RAM et VRAM ; 3 processus les plus gourmands ; ventilateurs ; clic = btop.
-11. **Météo** (open-meteo, en cache) : grand chiffre, condition, ressenti, vent ; 6 prochaines heures + probabilité de pluie ; source et heure du relevé ; hors ligne : dernière donnée datée.
+1. **Workspaces** (Hyprland workspaces + clients): “Workspace N”, screen, window count; schematic preview with the screen's proportions (rectangles with icon and title, focused window outlined); workspace thumbnails; “click: go there · drag a window here”.
+2. **Clock and calendar** (time, iCal/CalDAV agenda, optional second time zone): long date + week number, chip for the second time zone; large time, dimmed seconds; mini month (week-number column, tinted current week, filled current day, event dots); next two events; scroll wheel = month.
+3. **Media** (MPRIS, cached lyrics): 84 px cover, source “1/3”, title, artist, album; clickable progress with elapsed/remaining time; three lines of lyrics; previous / play (64 px) / next; source chips.
+4. **Volume** (PipeWire): output, 28 px slider with value; apps with mini bars; microphone with live level; output chips; scroll wheel ±2%, middle click = mute.
+5. **Network** (NetworkManager, `/sys/class/net` counters over 60 s, VPN): signal (dBm, band, channel); download/upload modules with a graph; local IP, gateway latency; VPN; offline: last network + “Retry”.
+6. **Bluetooth** (BlueZ, UPower): one row per device (battery ring, name, %, remaining time, “low” < 20%, “Connect” if disconnected).
+7. **Battery** (UPower, power-profiles-daemon): large %, state, remaining time; 6 h graph + dotted projection + “now” marker; profiles; health, cycles.
+8. **Notifications**: title + badge + do-not-disturb toggle; last 3, grouped “×n”; “Clear all”; swipe to dismiss.
+9. **Tray** (StatusNotifierItem): icon, name, status, tooltip, menu action chips; click = open, right-click = menu.
+10. **System** (`/proc`, amdgpu sysfs/hwmon, without waking the eGPU): CPU / GPU modules (value, temperature, 60 s graph); RAM and VRAM bars; top 3 processes; fans; click = btop.
+11. **Weather** (open-meteo, cached): large figure, condition, feels-like, wind; next 6 hours + chance of rain; source and time of the reading; offline: last data with its timestamp.
 
-12. **Fenêtre active** (Hyprland toplevels) : icône, appli, espace de travail et écran ; titre complet ; autres fenêtres de l'appli (clic : y aller) ; actions Flottante, Plein écran, Épingler, Fermer (second clic pour confirmer) ; « Déplacer vers » un espace de travail. Pendant un partage d'écran (évènement Hyprland `screencast`), titres masqués dans la barre et la carte.
+12. **Active window** (Hyprland toplevels): icon, app, workspace and screen; full title; the app's other windows (click: go there); actions Floating, Fullscreen, Pin, Close (second click to confirm); “Move to” a workspace. During screen sharing (Hyprland `screencast` event), titles are hidden in the bar and the card.
 
-### Déclinaison par thème
+### Per-theme variants
 
-| Thème | Progression | Grands chiffres | Labels |
+| Theme | Progress | Large figures | Labels |
 |---|---|---|---|
-| Classique moderne | pilule | Figtree 700 | JetBrains Mono majuscules |
-| Constellation | comète (2 px + tête) | Outfit 200–300 | Outfit, lettres espacées |
-| Façade | segments VFD / LCD | Doto dans un afficheur | Plex Condensed |
-| Modulaire | échelle de LED | Nixie | Michroma |
-| Matrix | points de 6 px | Doto Matrix | Space Mono majuscules |
+| Classic | pill | Figtree 700 | JetBrains Mono uppercase |
+| Constellation | comet (2 px + head) | Outfit 200–300 | Outfit, letter-spaced |
+| Façade | VFD / LCD segments | Doto in a display | Plex Condensed |
+| Modulaire | LED ladder | Nixie | Michroma |
+| Matrix | 6 px dots | Doto Matrix | Space Mono uppercase |
 
-## Implémenté (design 5)
+## Implemented (design 5)
 
-- Barre d'outils (`windows/bar/EditToolbar.qml`) : actions (annuler, rétablir, abandonner, terminé) ; inspecteur du widget sélectionné avec ses trois tailles en aperçu vivant, la zone, « Vers <écran> » (autres écrans normaux avec barre ; annulable en une fois) et « Retirer » ; palette des widgets absents avec aperçu et recherche.
-- Après « Terminé » : toast « Barre enregistrée · Annuler » 8 s (`EditToast.qml`, barre de temps, pause au survol) ; « Annuler » remet les barres d'avant l'enregistrement.
-- IPC : `bar select <type>`, `bar resize <compact|normal|extended>`, `bar undoSave`.
-- Pas encore : widget soulevé (échelle, rotation), cible refusée avec sa raison, envoi vers un écran modules (en module), hachures du cadre, feuille du bas au doigt.
+- Toolbar (`windows/bar/EditToolbar.qml`): actions (undo, redo, discard, done); inspector for the selected widget with its three sizes as live previews, the zone, “To <screen>” (other normal screens with a bar; undoable in one step) and “Remove”; palette of missing widgets with preview and search.
+- After “Done”: “Bar saved · Undo” toast for 8 s (`EditToast.qml`, timer bar, paused on hover); “Undo” restores the bars as they were before saving.
+- IPC: `bar select <type>`, `bar resize <compact|normal|extended>`, `bar undoSave`.
+- Not yet: lifted widget (scale, rotation), refused target with its reason, sending to a modules screen (as a module), frame hatching, bottom sheet on touch.
 
-## Widgets ajoutés
+## Added widgets
 
-- `system` : CPU (compact), + GPU (normal), + températures et RAM (étendu) ; rouge au-delà de 90 % ; clic = `system.monitorCommand` (par défaut `kitty -e btop`). Carte : CPU et GPU (charge, température, dernière minute), mémoire, 3 processus les plus gourmands.
-- `dynamicIsland` : l'activité la plus importante, sinon l'heure — partage d'écran (rouge), micro utilisé par une appli, morceau en lecture (clic = lecture / pause). Sa carte suit : celle du média pendant la lecture, sinon celle de l'horloge.
-- Tray : une carte par icône survolée (nom, état, info-bulle, premières actions du menu en puces, « Ouvrir », « Menu ») ; sans icône survolée, la liste de toutes.
-
+- `system`: CPU (compact), + GPU (normal), + temperatures and RAM (extended); red above 90%; click = `system.monitorCommand` (default `kitty -e btop`). Card: CPU and GPU (load, temperature, last minute), memory, top 3 processes.
+- `dynamicIsland`: the most important activity, otherwise the time — screen sharing (red), microphone in use by an app, track playing (click = play / pause). Its card follows suit: the media card during playback, otherwise the clock card.
+- Tray: one card per hovered icon (name, status, tooltip, first menu actions as chips, “Open”, “Menu”); with no icon hovered, the list of all of them.

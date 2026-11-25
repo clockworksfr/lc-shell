@@ -100,7 +100,7 @@ Item {
         radius: root.look === "square" ? (root.forceLook ? 3 : root.theme.radius.tile) : root.look === "inset" ? 2 : root.look === "screwed" ? 2 : width / 2
         color: root.theme.color.surface2
 
-        // No art (yet): a soft mint placeholder (design "Média"); the disc
+        // No art (yet): a soft mint placeholder (design "Media"); the disc
         // keeps its own dark body.
         Rectangle {
             anchors.fill: parent

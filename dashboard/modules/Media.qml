@@ -154,7 +154,7 @@ ModuleBase {
     // columns (but in strips and tiny cells, which have no disc).
     readonly property string screenKind: theme.style.display ?? "none"
     readonly property bool spectrumInside: screenKind === "vfd"
-    // Modulaire (design "Lecteur"): no scope, the LCD fills the module.
+    // Modulaire (design "Player"): no scope, the LCD fills the module.
     readonly property bool screenFills: spectrumInside || theme.style.module === "modulaire"
     // Modulaire: the keys span the module (thirds), 40–120 px high.
     readonly property bool modKeys: theme.style.module === "modulaire"
@@ -286,7 +286,7 @@ ModuleBase {
         property var m
         property real size: 56
         property bool full: true
-        // Modulaire (design "Lecteur"): three equal keys across this width.
+        // Modulaire (design "Player"): three equal keys across this width.
         property real span: 0
         readonly property real keyWidth: span > 0 ? (span - 2 * spacing) / 3 : 0
 
@@ -329,7 +329,7 @@ ModuleBase {
 
         Track {
             m: root
-            // Modulaire: the play key alone (design "Lecteur").
+            // Modulaire: the play key alone (design "Player").
             visible: root.theme.style.module !== "modulaire"
 
             withSpectrum: root.spectrumInside
@@ -575,8 +575,8 @@ ModuleBase {
             out.push({ text: Lyrics.lines[i].text || "♪", current: i === at });
         return out;
     }
-    // The cover in every theme with one (Modulaire too: simon's call, over
-    // the "Lecteur" mockup).
+    // The cover in every theme with one (Modulaire too, over the "Player"
+    // mockup).
     readonly property bool coverShown: theme.style.cover !== "none"
     readonly property real bigCover: !coverShown ? 0 : poster ? Math.min(ch * 0.7, cw * 0.42) : Math.min(ch, cw * 0.36)
     readonly property real bigKey: Math.max(hit, Math.min(96, t2 * 1.5))

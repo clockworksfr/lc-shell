@@ -1,164 +1,268 @@
 # lc-shell
 
-Shell Wayland perso, écrit de zéro sur [Quickshell](https://quickshell.org) (sans plugin C++).
+A Wayland desktop shell for [Hyprland](https://hyprland.org), written from scratch in QML on [Quickshell](https://quickshell.org), with no C++ plugin.
+
+It provides a bar, dashboards, a launcher, a lock screen, notifications, OSDs, a clipboard manager, a screenshot tool and a settings app. All of them follow one of five themes, in light and dark variants.
+
+- **Multi-screen:** every screen has its own profile, recognised by its model, with its own bar, theme and dashboards. It was designed around a 5K ultrawide and a 2560×720 touch strip, the Corsair Xeneon Edge.
+- **Five themes:** Classic, Constellation, Façade, Modulaire and Matrix. Each one is a full design language, not just a palette. Light and dark switch by hand, on a schedule or with the sun.
+- **Bar:** on any screen edge, full width or as islands, floating or framing the desktop. It has 17 widgets in three sizes, and you edit it in place by dragging widgets. Hover cards show details, and clicking opens the full panel.
+- **Dashboards:** grids of resizable modules bound to workspaces:
+  - clock, weather, media, synced lyrics, system, network, VU meter and spectrum;
+  - quick settings, Philips Hue lights, workspaces and window slots.
+  - Modules redesign themselves for larger cells.
+- **Launcher:** applications, actions, emoji, files, a calculator and wallpapers.
+- **Lock screen and idle:** a PAM lock screen with a safe preview, idle rules, and turning screens off or suspending after locking.
+- **Notifications:** a notification server with history, Do Not Disturb, and no popups over full-screen windows.
+- **Clipboard manager:** history with pins, tags, previews and direct paste. Copies flagged as sensitive by password managers are ignored.
+- **Screenshot tool:** frozen screens, area or window selection, and annotation in place.
+- **Settings app:** applied live, with keyboard search.
+- **Languages:** English and French interface.
+
+> [!NOTE]
+> This is a personal shell, shared as-is. It targets Hyprland only and follows recent Quickshell and Hyprland releases closely. Expect rough edges outside the setup it was built on.
+
+## Requirements
+
+**Required:**
+
+- **Hyprland 0.57+.** Some features use the Lua configuration: the lock shortcut applied by the shell and the bindings in `contrib/hypr/`.
+- **[Quickshell](https://quickshell.org) 0.3+**, a recent git build (`Quickshell.Networking` is required). On Arch: `quickshell-git` from the AUR.
+- **PipeWire** with WirePlumber, **NetworkManager**, **BlueZ**, **UPower** and **power-profiles-daemon**, used through Quickshell's services.
+- `python3`, `curl`, `wl-clipboard`, `grim`.
+
+**Optional, enabling specific features:**
+
+| Package | Used for |
+|---|---|
+| `fd` | File search in the launcher |
+| `libqalculate` (`qalc`) | Calculator in the launcher |
+| `cava` | Audio spectrum (media and VU modules) |
+| `brightnessctl` | Laptop backlight |
+| `ddcutil` | Brightness of external monitors (DDC/CI) |
+| `lm_sensors` | CPU temperatures |
+| `libnotify` (`notify-send`) | Notifications sent by the shell's scripts |
+| `tailscale` | Tailscale status in the VPN controls |
+| `hyprlock` | Fallback lock screen when the shell isn't running (`contrib/hypr/lock-and-dpms.sh`) |
+| `playerctl` | Media keys in `contrib/hypr/shell.lua` |
+| `huectl` in `~/.local/bin` | Philips Hue lights (module, widget, panel). This CLI is not part of this repository |
+
+On Arch Linux:
 
 ```sh
-qs -c lc            # ~/.config/quickshell/lc -> ce repo
-qs -c lc ipc show   # liste des commandes IPC
+paru -S quickshell-git
+sudo pacman -S --needed pipewire wireplumber networkmanager bluez upower power-profiles-daemon \
+    python curl wl-clipboard grim fd libqalculate cava brightnessctl ddcutil lm_sensors \
+    libnotify playerctl hyprlock
 ```
 
-Architecture cible et décisions : [`docs/architecture.md`](docs/architecture.md).
+Fonts and icons are bundled: no font package is needed.
 
-## Structure
+## Installation
 
-| Dossier | Rôle |
-|---|---|
-| `shell.qml` | Point d'entrée : une `ScreenScope` par écran (`Variants` sur `Quickshell.screens`) |
-| `modules/` | Fenêtres par écran (`bar/`, `osd/`, `launcher/`), selon le profil de l'écran |
-| `widgets/` | Widgets de barre + `Registry` nom → fichier |
-| `i18n/` | Langue de l'interface : `I18n` + `en.json`, `fr.json` |
-| `launcher/` | Lanceur : état, recherche, fournisseurs (applis, emoji, fichiers, calcul, actions) |
-| `panels/` | Contenus de popups : audio, réseau, Bluetooth, énergie |
-| `services/` | Singletons : `Config`, `Screens`, `Audio`, `Players`, `Brightness`, `Osd`, `NetworkService`, `BluetoothService`, `Power`, `SystemStats`, IPC… |
-| `assets/fonts/` | Polices statiques embarquées (OFL) : Figtree, JetBrains Mono |
-| `theme/` | `Themes` (registre, clair/sombre, programmation), `defs/` (un fichier par thème) |
-| `components/` | Composants de base, qui lisent le thème de leur fenêtre |
-| `config/defaults.json` | Valeurs par défaut (génériques), rechargées à chaud |
+Quickshell looks for named configurations in `~/.config/quickshell/<name>`. Clone the repository there under the name `lc`:
+
+```sh
+git clone https://github.com/<owner>/lc-shell ~/.config/quickshell/lc
+qs -c lc
+```
+
+You can also clone it anywhere else and symlink it to `~/.config/quickshell/lc`. Quickshell reloads the shell whenever a file changes.
+
+Only one desktop shell should run at a time. Stop any other bar, notification daemon or wallpaper tool first. lc-shell's notification server waits until the `org.freedesktop.Notifications` name is free.
+
+### Starting it with Hyprland
+
+`contrib/hypr/` contains a ready-made set of bindings and helpers:
+
+- **`shell.lua`:** global shortcuts for the launcher, clipboard, screenshots, notifications, theme and lock, plus media keys, and it starts the shell at login.
+- **`lc-shell-loop.sh`:** restarts the shell if it stops, which the lock screen relies on.
+- **`lock-and-dpms.sh`:** locks, then turns the screens off after a few seconds, falling back to `hyprlock`.
+
+```sh
+sh ~/.config/quickshell/lc/contrib/hypr/install.sh   # copies them to ~/.config/hypr (backups: *.orig)
+```
+
+Then load the bindings from your `hyprland.lua`:
+
+```lua
+require("shell")
+```
+
+You can also start it yourself with `exec-once = qs -c lc` (or `hl.exec_cmd("qs -c lc")`) and bind only the global shortcuts you want (see [Shortcuts](#global-shortcuts)).
+
+For the lock screen to survive a shell crash, set `allow_session_lock_restore = true` in the `misc` section of your Hyprland config. With it, a restarted shell takes the lock back.
+
+### Updating
+
+```sh
+git -C ~/.config/quickshell/lc pull
+```
+
+Hot reload picks up most changes. After an update that adds fonts or singletons, restart the shell (`qs -c lc kill`, then start it again).
 
 ## Configuration
 
-Deux couches, rechargées à chaud :
+Most settings are available in the **Settings** app (`Super+Space`, then "Settings", or `qs -c lc ipc call settings toggle`). Settings apply live.
 
-- `config/defaults.json` (repo) : valeurs par défaut génériques ;
-- `~/.config/lc/settings.json` (`$XDG_CONFIG_HOME`) : **tes réglages**, superposés aux défauts. Écrit aussi par le shell (IPC, app de paramètres). Les objets se fusionnent clé par clé ; les listes (widgets, écrans, pages) remplacent.
+Configuration has two layers, both reloaded live:
 
-Exemple de réglages :
+- `config/defaults.json` (in the repository): generic defaults. Don't edit it.
+- `~/.config/lc/settings.json` (`$XDG_CONFIG_HOME/lc`): **your settings**, merged over the defaults. The Settings app and IPC write to it too. Objects merge key by key; lists (widgets, screens, cells) replace.
+
+Example:
 
 ```json
 {
+  "language": "auto",
   "appearance": {
     "variant": "auto",
-    "schedule": { "type": "time", "light": "07:30", "dark": "19:30" },
-    "themes": { "normal": "classic", "modules": "matrix" }
+    "schedule": { "type": "sun", "latitude": 48.85, "longitude": 2.35 },
+    "themes": { "normal": "constellation", "modules": "matrix" }
   },
   "modes": {
-    "normal": { "bar": { "left": ["workspaces"], "center": ["clock"], "right": ["media", "volume"] }, "osd": {} },
-    "modules": { "osd": {} }
+    "normal": {
+      "bar": {
+        "position": "top",
+        "style": "islands",
+        "floating": true,
+        "left": ["workspaces", "window"],
+        "center": ["clock"],
+        "right": ["tray", "media", "network", "bluetooth", "battery", "volume", "notifications"]
+      },
+      "osd": { "position": "bottom", "margin": 80 }
+    }
   },
   "screens": [
-    { "match": { "model": "XENEON EDGE" }, "mode": "modules", "touch": true },
-    { "match": { "name": "eDP-*" }, "mode": "normal" }
+    { "match": { "model": "XENEON EDGE" }, "touch": true, "bar": null },
+    { "match": { "name": "eDP-*" }, "theme": "classic" }
   ]
 }
 ```
 
-- **Écrans** : reconnus par `model` (stable, contrairement au connecteur avec l'eGPU) ou par `name` (motif, `eDP-*`). Le premier profil qui correspond gagne ; un écran inconnu est `normal`.
-- **Modes** : `normal` (barre permanente) ou `modules` (tableau de bord, voir plus bas). La config d'un module (`bar`, `osd`) vient du mode, surchargée clé par clé par le profil ; `null` le désactive.
-- **Thèmes** : un par mode (`appearance.themes`), surchargeable par profil (`"theme": "matrix"`). Disponibles : `classic` (défaut, jetons de la spec), `matrix` (palettes ; polices pas encore embarquées).
-- **Clair/sombre** : `variant` = `dark`, `light` ou `auto` ; en `auto`, `schedule` = horaires fixes (`type: "time"`) ou soleil (`type: "sun"`, `latitude`, `longitude`, calcul local).
-- **Barre** : sur n'importe quel bord, `position` = `top`/`bottom`/`left`/`right`. Widgets dans `left`/`center`/`right` (sur une barre verticale : du haut vers le bas ; `start`/`center`/`end` accepté). Rendu fourni par le thème, surchargeable : `style` (`full`/`islands`), `floating`, `margin`, `radius`, `opacity`, `border`, `padding`, `spacing`, `height` (épaisseur horizontale), `verticalWidth` (épaisseur verticale), `screenCorners` (rayon des coins d'écran, 0 = aucun).
-- **Cadre** : `"frame": true` (ou `{ "enabled": true, "thickness": 8 | { "top": …, "left": … }, "innerRadius": 18, "outline": 1 }`) dans la config de la barre. Un anneau entoure le bureau, la barre en est le côté épais (collée, sans îlots) ; les autres côtés réservent leur épaisseur. Dessiné sous les fenêtres, invisible aux clics, retiré en plein écran. Actif par défaut dans Matrix. Les coins d'écran (noirs, façon bord d'écran) suivent : `screenCorners`, ou automatique avec le cadre.
-- **Mode édition** : clic droit sur la barre (hors widgets) ou `bar edit`. Glisser un widget (curseur d'insertion), « + » en fin de zone pour un nouvel îlot, clic pour sélectionner (taille S/M/L, zone, retrait), palette d'ajout, annuler / rétablir, abandonner, terminé (Échap). Les changements vont dans le profil de l'écran. Une zone peut contenir plusieurs groupes (îlots) : liste de listes dans `settings.json`.
-- **Cartes de survol** : 350 ms sur un widget affichent sa carte (horloge et calendrier, média et paroles, volume par appli et micro, débit réseau, Bluetooth et batteries, batterie et historique, notifications, tray, espaces de travail) ; un clic ouvre le panneau complet.
-- **Barre verticale** : widgets empilés et compacts (libellé puis valeur, jamais de texte pivoté), horloge sur deux lignes (`verticalFormat`), espaces de travail et tray en colonne. Les panneaux s'ouvrent vers l'intérieur de l'écran ; notifications et OSD s'écartent de la barre.
-- Widgets (taille `size` : `compact` / `normal` / `extended`) :
-  - `workspaces`, `clock` (`format`), `media` (`maxWidth`) ;
-  - `volume` — clic : panneau audio (volumes, périphériques), clic milieu : muet, molette : volume ;
-  - `tray` — clic : activer, clic droit : menu, clic milieu : action secondaire (`showPassive`) ;
-  - `network` — clic : panneau (filaire, interrupteur Wi-Fi, réseaux, mot de passe à la volée) ;
-  - `bluetooth` — clic : panneau (interrupteur, appareils ; un nouvel appareil est appairé, approuvé et connecté) ; masqué sans adaptateur ;
-  - `battery` — clic : panneau (autonomie, profil d'énergie) ; masqué sans batterie ;
-  - `notifications` — non lues ; clic : historique (ne pas déranger, tout effacer), clic milieu : ne pas déranger. Un nom inconnu s'affiche `?nom` en rouge. Ajouter un widget : `widgets/Xxx.qml` (propriétés `screen`, `options`) + `widgets/Registry.qml`.
-- **Plein écran** : rien d'automatique (OSD, bientôt notifications) ne s'affiche au-dessus ; c'est redirigé vers un écran `modules` ou retenu. Le lanceur, appelé explicitement, reste autorisé.
+- **Screens:** a profile is recognised by `model`, which stays stable even when the connector changes (with an eGPU, for example), or by `name` (a connector pattern such as `eDP-*`). The first matching profile wins. A profile overrides the mode's `bar` and `osd` key by key, and `null` disables one. It can also set `theme`, `touch` and `frame`.
+- **Themes:** `classic` (the default), `constellation`, `facade`, `modulaire` and `matrix`. `appearance.themes.normal` applies to bars and panels, and `appearance.themes.modules` to dashboards. A screen profile can override both with `"theme"`.
+- **Light and dark:** `variant` is `dark`, `light` or `auto`. With `auto`, `schedule` uses fixed times (`"type": "time", "light": "07:30", "dark": "19:30"`) or the sun (`"type": "sun"`, `latitude`, `longitude`, computed locally).
+- **Bar:**
+  - `position` puts it on any edge: `top`, `bottom`, `left` or `right`.
+  - Widgets go in `left`, `center` and `right` (from top to bottom on a vertical bar). A zone can hold several islands, as a list of lists.
+  - The theme sets the bar's look, which you can override with `style` (`full` or `islands`), `floating`, `margin`, `radius`, `opacity`, `border`, `padding`, `spacing`, `height`, `verticalWidth`, `length` and `screenCorners`.
+- **Frame:** `"frame": true`, or `{ "enabled": true, "thickness": 8, "innerRadius": 18, "outline": 1 }`, draws a ring around the desktop. The bar is its thick side. The frame is drawn under windows and hidden in full screen.
+- **Bar editing:** right-click the bar outside its widgets, or run `qs -c lc ipc call bar edit`. Then:
+  - drag widgets to move them, and use "+" at the end of a zone to start a new island;
+  - click a widget for its size (S/M/L), zone or removal, and open a palette to add widgets;
+  - undo, redo or discard, and finish with Esc.
+  - Changes go to the screen's profile.
+- **Widgets:** `workspaces`, `window`, `clock`, `media`, `volume`, `network`, `wifi`, `bluetooth`, `battery`, `system`, `weather`, `notifications`, `tray`, `quickSettings`, `lights`, `modes` and `dynamicIsland`.
+  - Hovering one for 350 ms shows its card, and clicking opens its full panel.
+  - An unknown name shows as `?name` in red.
 
-## Paramètres
+See [`docs/bar-editing.md`](docs/bar-editing.md) and [`docs/themes.md`](docs/themes.md) for more.
 
-`qs -c lc ipc call settings toggle` (ou `openPage <page>`), ou « Paramètres » dans le lanceur. Fenêtre normale, réglages appliqués en direct et écrits dans `settings.json` :
+## Dashboards
 
-- **Apparence** : thème des écrans normaux / modules, clair / sombre / automatique, bascule à heures fixes ou au soleil (latitude, longitude) ;
-- **Écrans** : par écran branché — mode, thème, tactile, position de la barre, cadre (profil créé au besoin, repéré par le modèle) ;
-- **Barre** : rendu (style, flottante, opacité, position, cadre) et widgets par zone (monter, descendre, changer de zone, retirer, ajouter) ;
-- **Fond d'écran** : activation, dossier, grille de choix, au hasard ;
-- **Général** : langue, ne pas déranger, rangement des fenêtres du tableau de bord.
+A dashboard is a grid of modules drawn under the windows, on the `bottom` layer. Dashboards are saved as **presets** and bound to **workspaces**: when a workspace bound to a preset is active, its screen shows that dashboard.
 
-## Verrouillage et inactivité
-
-Tout se règle dans Paramètres › Verrouillage (ou `settings.json`, sections `lock` et `idle`).
-
-- **Raccourci** (`lock.shortcut`, `SUPER + Escape` par défaut) : lc-shell l'applique lui-même à Hyprland (`hyprctl eval` : `hl.unbind` puis `hl.bind` vers `lc:lock`), à la place du raccourci de la config sur les mêmes touches, et le réapplique après chaque rechargement de la config. Le raccourci de `shell.lua` (`lock-and-dpms.sh`, repli sur hyprlock) reste ainsi le secours quand lc-shell ne tourne pas.
-- **Après le verrouillage** (`lock.afterLock` : `screensOff` / `suspend` / `none`, `lock.afterLockDelay` en secondes, 5 par défaut) : au raccourci ou par IPC, les écrans s'éteignent (ou la machine se met en veille) au bout du délai, affiché sur le panneau ; annulé si on tape ou bouge la souris entre-temps. Les écrans se rallument au clavier ou à la souris (`misc.{mouse_move,key_press}_enables_dpms`).
-- **Panneau** (`ext-session-lock`, une surface par écran) : fond d'écran flouté (`lock.blur`), heure, date, photo (`~/.face`, sinon l'initiale ; `lock.avatar`), nom, champ mot de passe (Verr. Maj signalé, secousse en cas d'erreur), batterie (`lock.battery`) et boutons veille / redémarrer / éteindre à double clic (`lock.power`). Authentification PAM (`lock.pamService`, `hyprlock` par défaut).
-- **Aperçu** : `qs -c lc ipc call lock preview`, bouton Aperçu des paramètres ou « Aperçu du verrouillage » dans le lanceur — même écran dans une fenêtre, vrai contrôle PAM, rien n'est verrouillé. Attention : les échecs comptent pour `pam_faillock` (3 = compte bloqué 10 min).
-- **Autres déclencheurs** : `loginctl lock-session` (logind, écouté via `gdbus monitor`), l'inactivité, avant la mise en veille (`lock.beforeSleep` : verrou « delay » de `systemd-inhibit` relâché une fois l'écran verrouillé affiché).
-- **Inactivité** (`idle`, secondes, 0 = jamais ; reprise des règles Caelestia) : `lock` 900, `screenOff` 930, `lockedScreenOff` 30 (écrans éteints après 30 s sans activité sur l'écran verrouillé), `suspend` 1800. `inhibitWhenAudio` (oui) : rien tant qu'un lecteur MPRIS joue ; `inhibitWhenCharging` (non) : rien sur secteur. Les inhibiteurs sont respectés (`idle_inhibit fullscreen` de Hyprland, applis).
-- **Sécurité** : si le shell plante verrouillé, Hyprland garde la session verrouillée (écran rouge). Avec `allow_session_lock_restore = true` dans la section `misc` de `hyprland.lua`, le shell relancé reprend le verrou : un marqueur (`$XDG_RUNTIME_DIR/lc-shell-locked`) lui dit de reverrouiller. Depuis un TTY : `hyprlock` (avec `WAYLAND_DISPLAY` / `HYPRLAND_INSTANCE_SIGNATURE` de la session).
-
-## Langues
-
-Interface en anglais et en français. `"language"` dans `settings.json` : `auto` (suit la locale du système), `en` ou `fr` ; `"locale"` pour forcer le format des dates et nombres (ex. `en_GB`). Bascule à chaud : `qs -c lc ipc call i18n set en|fr|auto`.
-
-- Textes : `i18n/<langue>.json`, clés plates (`"osd.volume": "Volume"`) avec `{paramètres}`, rechargés à chaud. Clé manquante : repli sur l'anglais, puis sur la clé elle-même.
-- Dans le code : `I18n.tr("clé", { n: 2 })`, `I18n.percent(0.42)`, `I18n.number(x, 1)`, `I18n.locale` pour les dates. Aucun texte visible en dur.
-- Recherche du lanceur (actions, emoji) dans toutes les langues à la fois : « veille » et « sleep » trouvent la même action.
-- Ajouter une langue : copier `en.json`, traduire, ajouter le code dans `I18n.languages` (et les annotations CLDR dans `tools/gen-emoji.py`).
-
-## Mode modules (tableau de bord)
-
-`modes.modules.dashboard` (surchargeable par écran) :
+Edit them in Settings › Dashboard, or with the dashboard editor: drag, resize, add and remove modules. The grid adapts to the free space of each screen.
 
 ```json
-"dashboard": {
-  "grid": { "columns": 12, "rows": 4, "gap": 12, "margin": 12 },
+"dashboards": {
+  "grid": { "cellWidth": 200, "cellHeight": 165, "gap": 12, "margin": 12 },
   "windows": { "enabled": true, "ignore": ["steam"], "only": [] },
-  "pages": {
-    "default": [
-      { "type": "clock",  "x": 0, "y": 0, "w": 3, "h": 2 },
-      { "type": "window", "x": 3, "y": 0, "w": 6, "h": 4 }
-    ],
-    "8": [ ... ]
-  }
+  "presets": {
+    "Desk": {
+      "cells": [
+        { "type": "clock",  "x": 0, "y": 0, "w": 3, "h": 2 },
+        { "type": "media",  "x": 3, "y": 0, "w": 3, "h": 2 },
+        { "type": "window", "x": 6, "y": 0, "w": 6, "h": 4 }
+      ]
+    }
+  },
+  "workspaces": { "7": "Desk" }
 }
 ```
 
-- Chaque espace de travail Hyprland de l'écran est une **page** : `pages["<nom de l'espace de travail>"]`, sinon `pages.default`.
-- Modules : `clock` (`format`), `media`, `system` (CPU, RAM, GPU, températures), `workspaces`, `window`, `lyrics` (paroles synchronisées via lrclib.net — seuls artiste, titre et durée sont envoyés ; cache local), `vu` (VU-mètre de la sortie par défaut, échelle en dB, crête retenue ; barres dans le sens long du module), `weather` (météo).
-- Météo (widget `weather`, carte, module `weather`) : open-meteo.com, sans clé. Désactivée tant qu'aucun lieu n'est choisi dans Paramètres › Général › Météo ; seules les coordonnées du lieu choisi sont envoyées (et le nom tapé lors de la recherche). Relevé toutes les 15 min, dernier relevé en cache, daté hors ligne.
-- **Cases fenêtre** (`"type": "window"`) : toute fenêtre arrivant sur un espace de travail de cet écran est rendue flottante et placée dans la première case libre (les suivantes s'empilent dans la dernière). Repartie vers un écran normal, elle redevient tuilée. Les fenêtres plein écran ne sont pas touchées. `windows.ignore` / `only` filtrent par classe.
-- Le tableau de bord est sur la couche `bottom`, sous les fenêtres.
+**Modules:**
 
-## Lanceur
+| Module | Shows |
+|---|---|
+| `clock` | Time, date and calendar |
+| `weather` | Current conditions and forecast |
+| `media` | Player with cover art and controls |
+| `lyrics` | Synced lyrics |
+| `system` | CPU, GPU, RAM, temperatures and processes |
+| `network` | Traffic graphs and connection |
+| `vu` | VU meter of the default output |
+| `toggles` | Quick settings |
+| `hue` | Philips Hue rooms and scenes |
+| `workspaces` | Workspaces |
+| `window` | Window slot |
+| `themeSwitch` | Theme switcher |
 
-`qs -c lc ipc call launcher toggle`, ou `openWith ":"` pour ouvrir directement un mode.
+- Modules adapt to their size: from a single cell up to large and "poster" layouts with more detail.
+- **Window slots:** a window that opens on a workspace of that screen becomes floating and is placed in the first free `window` cell. Full-screen windows are left alone. `windows.ignore` and `windows.only` filter windows by class.
 
-| Préfixe | Mode | Entrée | Maj+Entrée / clic droit |
+**Online services:**
+
+- **Weather:** [Open-Meteo](https://open-meteo.com), no API key. Weather stays off until you pick a place in Settings › Weather, and only that place's coordinates are sent.
+- **Lyrics:** [LRCLIB](https://lrclib.net). Only the artist, title and duration are sent, and lyrics are cached locally.
+
+## Lock screen and idle
+
+Configure it in Settings › Lock, or in the `lock` and `idle` sections of `settings.json`.
+
+- **Shortcut:** `lock.shortcut` defaults to `SUPER + Escape`. The shell binds it in Hyprland itself, through `hyprctl eval`, and binds it again after every config reload.
+- **After locking:** `lock.afterLock` is `screensOff`, `suspend` or `none`, after `lock.afterLockDelay` seconds (5 by default). Typing or moving the mouse cancels it.
+- **Lock screen:** one surface per screen (`ext-session-lock`) with:
+  - a blurred wallpaper, the time and date;
+  - your picture (`~/.face`) and name;
+  - the password field (with a Caps Lock warning), battery, and power buttons that need a double click.
+  - Authentication uses PAM: `lock.pamService`, `hyprlock` by default.
+- **Preview:** `qs -c lc ipc call lock preview` shows the same screen in a window. It checks your password for real but locks nothing. Failed attempts still count towards `pam_faillock`.
+- **Other triggers:** `loginctl lock-session`, idle, and before suspend (`lock.beforeSleep`, using a `systemd-inhibit` delay lock).
+- **Idle**, in seconds (0 means never):
+  - `lock` 900, `screenOff` 930, `lockedScreenOff` 30, `suspend` 1800;
+  - `inhibitWhenAudio` keeps the session awake while an MPRIS player is playing;
+  - `inhibitWhenCharging` does the same on AC power;
+  - idle inhibitors from apps and Hyprland are respected;
+  - the "caffeine" toggle in quick settings keeps the session awake until you turn it off.
+
+## Launcher
+
+`Super+Space` (`lc:launcher`), `qs -c lc ipc call launcher toggle`, or `openWith ":"` to open it directly in a mode.
+
+| Prefix | Mode | Enter | Shift+Enter / right-click |
 |---|---|---|---|
-| (aucun) | Applis, actions, calcul si l'entrée ressemble à une opération | lancer | |
-| `:` | Emoji (noms français, CLDR) | taper + copier | copier seulement |
-| `/` | Fichiers de `~` (`fd`, sans cachés ni ignorés) | ouvrir | ouvrir le dossier |
-| `=` | Calcul `qalc` (unités, devises…) | copier le résultat | |
-| `>` | Actions : verrouiller, veille, quitter, redémarrer, éteindre, recharger, sortie/entrée audio | exécuter | |
-| `@` | Fonds d'écran (miniatures) | tous les écrans | cet écran seulement |
+| (none) | Apps, actions, and calculation when the input looks like one | launch | |
+| `:` | Emoji (English and French names, CLDR) | type and copy | copy only |
+| `/` | Files in `~` (`fd`, no hidden or ignored files) | open | open the folder |
+| `=` | Calculator (`qalc`: units, currencies…) | copy the result | |
+| `>` | Actions: lock, suspend, log out, reboot, power off, reload, audio output/input | run | |
+| `@` | Wallpapers | all screens | this screen only |
+| `+` | Clipboard history | paste | copy |
 
-Tab change de mode. Les actions destructrices demandent une seconde validation. Verrouillage et veille passent par logind (`loginctl lock-session`, `systemctl suspend`) : ils marchent avec l'écran de verrouillage qui écoute logind, quel qu'il soit. L'historique d'usage (classement) est dans `~/.local/state/quickshell/…/launcher-usage.json`.
+Tab switches modes. Destructive actions ask for confirmation. Results are ranked by usage.
 
-Les choix faits par IPC (thème, variante, langue) sont écrits dans `settings.json`.
+## Clipboard
 
-## Presse-papier
+`Super+Shift+V` (`lc:clipboard`) opens the history on the active screen.
 
-Gestionnaire d'historique façon Paste / Copyous : **Super+Maj+V** (raccourci global `lc:clipboard`), sur l'écran actif.
-
-- **Capture** : `wl-paste --watch` lance `clipboard/capture.py` (Python, sans dépendance) à chaque copie ; il choisit le type le plus utile (fichiers, image, texte) et range le contenu dans `$XDG_DATA_HOME/lc/clipboard/` (`index.json` + `blobs/`, dossier en 700). Même contenu = même élément, remonté en tête. Appli source = fenêtre focalisée au moment de la copie.
-- **Types** reconnus et prévisualisés : texte, code (police mono), lien (domaine), couleur (pastille, hex / rgb / hsl), caractère ou emoji, image (miniature, dimensions), fichiers (`text/uri-list`, miniature si image).
-- **Organisation** : onglets Tout / Épinglés / un par tag, filtre par type, recherche (texte, appli, tags). Épingler = garder indéfiniment ; tags colorés (9 couleurs) créés depuis le gestionnaire (clic droit, Ctrl+T, « + ») ou les paramètres, gardés indéfiniment eux aussi par défaut.
-- **Coller** : Entrée copie l'élément puis l'envoie à la fenêtre qui avait le focus (`hl.dsp.send_shortcut`, Ctrl+Maj+V dans les terminaux listés) ; Maj+Entrée fait l'inverse (copie seule) ; Ctrl+Entrée colle les chemins de fichiers en texte ; Ctrl+1…9 ; Espace : grand aperçu au texte sélectionnable.
-- **Confidentialité** : copies marquées sensibles par les gestionnaires de mots de passe ignorées (`CLIPBOARD_STATE`, `x-kde-passwordManagerHint`), applis ignorées, pause « incognito » (`lc:clipboardIncognito`, Ctrl+I, IPC) non mémorisée.
-- Réglages (Paramètres › Presse-papier, ou `settings.json`) :
+- **Capture:** `wl-paste --watch` runs `clipboard/capture.py` (Python, no dependencies) on every copy. It keeps the most useful type and stores it in `$XDG_DATA_HOME/lc/clipboard/`, a mode-700 folder. The same content is never stored twice: it moves back to the top.
+- **Types:** text, code, links, colours, emoji, images and files, each with a preview.
+- **Organising:** tabs (All, Pinned, one per tag), type filter and search. Pinned and tagged items are kept indefinitely.
+- **Pasting:**
+  - Enter copies the item and pastes it into the previously focused window (Ctrl+Shift+V in the listed terminals);
+  - Shift+Enter only copies;
+  - Ctrl+1…9 picks an item, and Space opens a large preview.
+- **Privacy:**
+  - copies flagged as sensitive by password managers are ignored (`x-kde-passwordManagerHint`);
+  - so are copies from the apps listed in `ignoreApps`;
+  - an "incognito" pause (`lc:clipboardIncognito`, Ctrl+I) stops recording.
 
 ```json
 "clipboard": {
   "enabled": true,
   "position": "bottom",
-  "cardSize": "m",
   "maxItems": 500,
   "maxDays": 0,
   "keepTagged": true,
@@ -170,106 +274,132 @@ Gestionnaire d'historique façon Paste / Copyous : **Super+Maj+V** (raccourci gl
 }
 ```
 
-`position` : `bottom` / `top` (bande de cartes), `left` / `right` (colonne), `center` (liste + grand aperçu), `pointer` (colonne compacte sous la souris). `maxItems` et `maxDays` (0 = sans limite) ne touchent jamais les éléments épinglés (ni les tagués avec `keepTagged`). Le mode `+` du lanceur lit le même historique. Tests : `LC_CLIPBOARD_DIR=<dossier>` (autre stockage), `LC_CLIPBOARD_CAPTURE=0` (sans capture).
+`position` sets where the history opens:
+- `bottom` or `top`: a strip of cards;
+- `left` or `right`: a column;
+- `center`: a list with a large preview;
+- `pointer`: a compact column under the mouse.
 
-## Captures d'écran
+## Screenshots
 
-**Impr. écran** (`lc:screenshot`) fige tous les écrans (une image `grim` de chacun) et ouvre l'éditeur par-dessus :
+`Print` (`lc:screenshot`) freezes every screen and opens the editor over them.
 
-- **Sélection** : glisser pour une zone, cliquer pour la fenêtre sous le pointeur (mise en avant au survol, d'après `hyprctl clients`), Ctrl+A pour tout l'écran. Loupe avec les coordonnées en pixels réels. Poignées et flèches (Maj : ×10, Alt : redimensionner) pour ajuster ; clic droit pour recommencer.
-- **Annotation sur place** : zone (V), crayon (P), surligneur (H), ligne (L), flèche (A), rectangle (R), ellipse (E), texte (T), numéros qui s'incrémentent (N), pixellisation (M). 8 couleurs (1…8), 3 épaisseurs ([ ], molette), remplissage (F), Maj pour les angles de 45° et les carrés, Ctrl+Z / Ctrl+Maj+Z.
-- **Résultat** : la zone et ses annotations, rendues à la résolution réelle de l'écran. Entrée copie (ou enregistre, selon `enterAction`), Ctrl+C copie, Ctrl+S enregistre (et copie avec `copyOnSave`), Échap ferme. Une notification propose ensuite Annoter (rouvre l'image dans l'éditeur), Enregistrer ou Ouvrir / Dossier.
-- **Directes** : Maj+Impr. écran (`lc:screenshotScreen`, l'écran actif) et Ctrl+Impr. écran (`lc:screenshotWindow`, la fenêtre active) copient tout de suite, avec la même notification.
-- IPC : `qs -c lc ipc call shell screenshot`, `screenshotScreen`, `screenshotWindow`, `screenshotEdit <fichier>` (annoter une image existante).
-- Réglages (Paramètres › Captures d'écran, ou `settings.json`) :
+- **Selection:**
+  - drag for an area, click for the window under the pointer, or press Ctrl+A for the whole screen;
+  - a magnifier shows real pixel coordinates;
+  - handles and arrow keys adjust the selection.
+- **Annotation:** pen, highlighter, line, arrow, rectangle, ellipse, text, numbered steps and pixelation. There are 8 colours and 3 widths, with undo and redo.
+- **Result:** rendered at the screen's real resolution.
+  - Enter copies, Ctrl+S saves.
+  - A notification then offers Annotate, Save or Open.
+- **Immediate shots:** `Shift+Print` captures the focused screen and `Ctrl+Print` the active window. Both are copied right away.
+- **Settings:** in the `screenshot` section (`dir`, `fileName`, `enterAction`, `copyOnSave`…). The default folder is `~/Pictures/Screenshots` (XDG pictures folder).
 
-```json
-"screenshot": {
-  "dir": "",
-  "fileName": "screenshot_{date}_{time}",
-  "enterAction": "copy",
-  "copyOnSave": true,
-  "notify": true,
-  "pickWindows": true,
-  "magnifier": true
-}
-```
+## Notifications and OSD
 
-`dir` vide = `Images/Screenshots` (dossier XDG des images) ; `enterAction` : `copy`, `save` ou `both`. Les images figées et les captures copiées restent dans `~/.cache/quickshell/…/screenshots/`.
+- **Notification server:** lc-shell has its own `org.freedesktop.Notifications` server.
+  - Popups appear on the active screen and pause while hovered. Critical notifications stay until you close them.
+  - No popups appear over a full-screen window: they move to another screen or wait.
+  - With Do Not Disturb, notifications go to the history only. The history keeps 100 notifications across restarts.
+  - Bodies are shown as plain text, so no remote images are loaded.
+- **OSD:** the OSD reacts to **changes** in PipeWire and the backlight, not to keys. Your volume and brightness bindings can therefore stay on `wpctl` and `brightnessctl`, and keep working while the shell is stopped. External monitors (DDC/CI) go through the `brightness` IPC.
 
-## Fond d'écran
+## Languages
 
-`"wallpaper": { "enabled": true, "directory": "~/Images/Wallpapers" }`. Une image par écran (repéré par son modèle) ou une pour tous, gardée dans `…/wallpaper.json` ; sans image, la couleur de fond du thème. Changement en fondu enchaîné, image décodée à la taille de l'écran. Choix dans le lanceur (`@`) ou par IPC. Tant que Caelestia dessine aussi son fond, `"enabled": false` évite la superposition.
+The interface is in English or French. Set `"language"` to `auto` (follows the system locale), `en` or `fr`, and `"locale"` to force a date and number format (for example `en_GB`). Switch live with `qs -c lc ipc call i18n set en|fr|auto`.
 
-## Notifications
-
-Serveur `org.freedesktop.Notifications` intégré. Un seul processus peut le détenir : tant que Caelestia tourne, celui de lc-shell attend (avertissement dans le journal) et prend le relais dès que le nom se libère.
-
-- Popups en haut à droite de l'écran actif, sous la barre ; 6 s par défaut (ou le délai demandé par l'appli), en pause au survol ; les critiques restent jusqu'à fermeture.
-- Jamais au-dessus d'un plein écran : redirigées vers un écran `modules`, sinon mises en attente jusqu'à ce qu'un écran se libère.
-- Ne pas déranger : plus de popups (sauf critiques), tout reste dans l'historique.
-- Corps affiché en texte brut (balisage retiré : aucune image distante chargée). Actions de l'appli en boutons, clic sur la carte = action par défaut.
-- Historique (100 max) conservé entre les redémarrages dans `…/notifications.json`.
-
-## OSD et touches multimédia
-
-L'OSD réagit aux **changements** (PipeWire, sysfs du rétroéclairage) et non aux touches : les binds peuvent rester sur `wpctl`/`brightnessctl` et continuent de marcher shell arrêté. Les écrans externes (DDC/CI) ne passent que par l'IPC `brightness`.
+Strings live in `i18n/<lang>.json`. Missing keys fall back to English. To add a language:
+1. Copy `en.json` and translate it.
+2. Add the code to `I18n.languages`.
+3. For emoji names, add the CLDR annotations to `tools/gen-emoji.py`.
 
 ## IPC
 
-| Commande | Effet |
+`qs -c lc ipc show` lists every target and function. The main ones:
+
+| Command | Effect |
 |---|---|
-| `qs -c lc ipc call bar toggle` / `open` / `close` | Afficher ou masquer les barres |
-| `qs -c lc ipc call launcher toggle` / `openWith <texte>` / `close` | Lanceur |
-| `qs -c lc ipc call audio increment` / `decrement` / `toggleMute` / `toggleMicMute` | Volume de la sortie par défaut |
-| `qs -c lc ipc call media togglePlaying` / `next` / `previous` / `cycle` / `info` | Lecteur actif (`cycle` change de lecteur, `info` le décrit) |
-| `qs -c lc ipc call lyrics status` / `current` | Paroles (état, ligne en cours) |
-| `qs -c lc ipc call brightness increment` / `decrement` | Luminosité de l'écran focalisé (rétroéclairage ou DDC/CI) |
-| `qs -c lc ipc call theme set <id>` / `setModules <id>` / `list` | Thème des écrans normaux / modules |
-| `qs -c lc ipc call theme variant dark\|light\|auto` / `toggleVariant` | Clair / sombre |
-| `qs -c lc ipc call i18n set en\|fr\|auto` / `get` | Langue de l'interface |
-| `qs -c lc ipc call notifs toggleDnd` / `clear` / `markRead` | Notifications |
-| `qs -c lc ipc call wallpaper set <chemin>` / `setHere <chemin>` / `random` / `get` | Fond d'écran (tous / écran actif) |
-| `qs -c lc ipc call settings toggle` / `openPage <page>` / `close` | Paramètres |
-| `qs -c lc ipc call lock lock` / `preview` / `isLocked` | Verrouillage |
-| `qs -c lc ipc call clipboard toggle` / `open` / `close` | Gestionnaire du presse-papier |
-| `qs -c lc ipc call clipboard pause` / `resume` / `togglePause` / `isPaused` | Pause de l'enregistrement (incognito) |
-| `qs -c lc ipc call clipboard copy <n>` / `paste <n>` / `clear` / `clearAll` / `count` / `list` | n-ième élément (1 = le plus récent), effacer (hors épinglés et tagués / tout), diagnostic (sans contenu) |
-| `qs -c lc ipc call bar edit` / `done` / `discard` | Mode édition de la barre |
-| `qs -c lc ipc call bar panel <widget>` / `panelOn <widget> <écran>` / `showCard <widget>` / `hideCard` / `blocks` / `card` | Panneaux, cartes, diagnostic |
-| `qs -c lc ipc call shell reload` | Rechargement complet (nécessaire après modification d'un `.js`) |
+| `bar toggle` / `edit` / `panel <widget>` | Bars, edit mode, panels |
+| `launcher toggle` / `openWith <text>` | Launcher |
+| `settings toggle` / `openPage <page>` | Settings |
+| `audio increment` / `decrement` / `toggleMute` / `toggleMicMute` | Default output volume |
+| `media togglePlaying` / `next` / `previous` / `cycle` | Active player |
+| `brightness increment` / `decrement` | Brightness of the focused screen |
+| `theme set <id>` / `setModules <id>` / `variant dark\|light\|auto` / `toggleVariant` | Themes |
+| `i18n set en\|fr\|auto` | Interface language |
+| `notifs toggleDnd` / `clear` | Notifications |
+| `wallpaper set <path>` / `setHere <path>` / `random` | Wallpaper (all screens / active screen) |
+| `lock lock` / `preview` / `isLocked` | Lock screen |
+| `clipboard toggle` / `togglePause` / `clear` | Clipboard |
+| `shell screenshot` / `screenshotScreen` / `screenshotWindow` / `screenshotEdit <file>` | Screenshots |
+| `shell reload` | Full reload |
 
-## Développement
+Prefix every command with `qs -c lc ipc call`, for example `qs -c lc ipc call theme set matrix`.
 
-- Quickshell recharge le shell à chaque modification d'un fichier du dossier. Un **nouveau singleton** (`pragma Singleton`) ajouté à un module déjà chargé n'est pas pris en compte par ce rechargement : redémarrer le processus.
-- Tester une configuration via `~/.config/lc/settings.json` (hors du dossier du shell) plutôt qu'en modifiant `config/defaults.json`.
-- Les popups (panneaux, cartes de survol) d'une barre ne s'affichent que si la barre a le pointeur : pour des captures, placer le curseur sur la barre avant `bar panelOn` / `bar showCard`.
-- Diagnostic : `bar blocks` (géométrie des widgets), `bar card` (carte de survol), `media info`, `lyrics status`, `qs log -c lc`.
-- PipeWire : ne pas filtrer une liste suivie par `PwObjectTracker` sur des propriétés qui changent une fois le nœud suivi (boucle → plantage du module).
+## Global shortcuts
 
-## Raccourcis
-
-Raccourcis globaux Hyprland (instantanés, sans processus lancé), à lier dans la config Hyprland avec le dispatcher `global`, par exemple en Lua :
+These are Hyprland global shortcuts: they are instant and start no process. Bind them with the `global` dispatcher:
 
 ```lua
 hl.bind("SUPER + Space", hl.dsp.global("lc:launcher"))
 ```
 
-| Nom | Action |
+| Name | Action |
 |---|---|
-| `lc:launcher` | Ouvrir / fermer le lanceur |
-| `lc:emoji` | Lanceur sur la recherche d'emoji |
-| `lc:files` | Lanceur sur la recherche de fichiers |
-| `lc:clipboard` | Gestionnaire du presse-papier (Super+Maj+V) |
-| `lc:clipboardIncognito` | Presse-papier : pause / reprise de l'enregistrement |
-| `lc:settings` | Ouvrir / fermer les paramètres |
-| `lc:editBar` | Modifier la barre |
-| `lc:clearNotifs` | Effacer les notifications |
-| `lc:dnd` | Ne pas déranger |
+| `lc:launcher` / `lc:emoji` / `lc:files` | Launcher (on emoji / file search) |
+| `lc:clipboard` / `lc:clipboardIncognito` | Clipboard history / pause recording |
+| `lc:screenshot` / `lc:screenshotScreen` / `lc:screenshotWindow` | Screenshots |
+| `lc:notifications` / `lc:clearNotifs` / `lc:dnd` | Notifications |
+| `lc:media` | Media card (player, lyrics) |
+| `lc:settings` / `lc:editBar` | Settings / bar edit mode |
+| `lc:toggleVariant` / `lc:nextTheme` | Light/dark, next theme |
+| `lc:lock` | Lock |
 
-Les mêmes actions existent en IPC : `qs -c lc ipc call launcher toggle`, `settings toggle`, `bar edit`, etc.
+## Project layout
 
-Autres raccourcis globaux : `lc:screenshot` (zone ou fenêtre puis annotation, écrans figés), `lc:screenshotScreen`, `lc:screenshotWindow`, `lc:notifications`, `lc:media`, `lc:toggleVariant`, `lc:nextTheme`, `lc:lock`.
+| Path | Contents |
+|---|---|
+| `shell.qml` | Entry point: one `ScreenScope` per screen |
+| `windows/` | Per-screen windows: bar, dashboard, launcher, OSD, notifications, clipboard, screenshot, wallpaper |
+| `widgets/` | Bar widgets, plus `Registry.qml` (name → file) |
+| `dashboard/` | Dashboard logic and `modules/` (with their own `Registry.qml`) |
+| `cards/`, `panels/` | Hover cards and the panels they open |
+| `components/` | Shared components; they read the theme of their window |
+| `services/` | Singletons: config, screens, audio, players, network, Bluetooth, power, weather, IPC… |
+| `theme/` | Theme registry, light/dark scheduling, `defs/` (one file per theme) |
+| `settings/`, `lock/`, `launcher/`, `clipboard/` | Settings app, lock screen, launcher providers, clipboard capture |
+| `i18n/` | `en.json`, `fr.json` |
+| `config/defaults.json` | Default settings |
+| `assets/` | Bundled fonts, icon fonts, shaders, theme wallpapers |
+| `tools/` | Generators: icon font subset, emoji data, settings search index, wallpaper tiles, shaders |
+| `contrib/hypr/` | Hyprland bindings and helper scripts |
+| `docs/` | Architecture, themes, bar editing |
 
-`contrib/hypr/` : la reprise des raccourcis de la config Caelestia de simon (`shell.lua`, `lock-and-dpms.sh` avec repli sur hyprlock) et `install.sh`, qui les installe dans `~/.config/hypr` en gardant les versions Caelestia à côté (`shell-caelestia.lua`, `lock-and-dpms-caelestia.sh`).
+## Development
 
+- Quickshell reloads the shell on every file change. A **new singleton** (`pragma Singleton`) or a new bundled font needs a full restart.
+- Test settings in `~/.config/lc/settings.json` rather than in `config/defaults.json`.
+- To add a widget, write `widgets/Xxx.qml` (properties `screen`, `options`) and register it in `widgets/Registry.qml`. Dashboard modules work the same way in `dashboard/modules/`.
+- Icons come from a subset of Material Symbols. To use a new icon, add its name to `tools/icons.txt` and run `tools/gen-icons.py`.
+- **Diagnostics:**
+  - `qs log -c lc` for the log;
+  - `qs -c lc ipc call bar blocks` for widget geometry;
+  - `media info` and `lyrics status` for the player and lyrics.
+- Popups (panels, hover cards) only open while their bar has the pointer.
+
+## Credits
+
+lc-shell is built on [Quickshell](https://quickshell.org). Its code was written from scratch; some defaults, like the idle timings, were inspired by [Caelestia](https://github.com/caelestia-dots/shell).
+
+Bundled assets keep their own licenses (see the license file next to each):
+
+- **Fonts, SIL Open Font License 1.1:**
+  - Barlow Condensed, Doto (static instances renamed "Doto Matrix" / "Doto LCD"), DSEG7 / DSEG14 Classic;
+  - Figtree, Geist Mono, IBM Plex Mono, IBM Plex Sans Condensed;
+  - JetBrains Mono, Michroma, Nixie One, Outfit, Space Grotesk, Space Mono.
+- **Icons:** a subset of [Material Symbols](https://github.com/google/material-design-icons) (Apache License 2.0).
+- **Emoji data:** Unicode emoji and CLDR annotations (Unicode License v3; see `launcher/data/README.md`).
+
+## License
+
+[MIT](LICENSE) for the code. Bundled third-party assets keep their own licenses, listed above.

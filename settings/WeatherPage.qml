@@ -62,7 +62,7 @@ Column {
             TextField {
                 implicitWidth: 300
                 text: Config.get("weather.localSite") ?? ""
-                placeholder: "https://www.meteo-biarritz.com"
+                placeholder: "https://www.meteo-<city>.com"
                 onCommitted: text => Config.set("weather.localSite", text.trim())
             }
         }

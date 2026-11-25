@@ -17,7 +17,7 @@ Singleton {
     readonly property bool enabled: !!location && (Config.get("weather.enabled") ?? true)
     readonly property bool imperial: Config.get("weather.units") === "imperial"
     // "openmeteo": forecast and conditions from Open-Meteo. "local": a
-    // Météo-villes site (meteo-biarritz.com…, `weather.localSite`) for the
+    // Météo-villes site (meteo-<city>.com, `weather.localSite`) for the
     // live station readings and the rain within the hour (its umbrellas,
     // Météo-France style levels), over Open-Meteo's forecast (the same
     // AROME model those sites show); Open-Meteo whenever the site is silent.
@@ -158,7 +158,7 @@ Singleton {
         return I18n.tr(`weather.dir.${["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.round(((degrees % 360) + 360) % 360 / 45) % 8]}`);
     }
 
-    // "Pas de pluie dans l'heure", "Pluie vers 20:15", "Pluie jusqu'à 20:30".
+    // "No rain within the hour", "Rain around 20:15", "Rain until 20:30".
     // The next rain episode within the hour: { start, end (0: lasts past
     // the hour), level (its heaviest), desc }, or null.
     readonly property var rainEpisode: {
@@ -174,8 +174,8 @@ Singleton {
         return { start: steps[i].time, end: j < steps.length ? steps[j].time : 0, level: top.level, desc: top.desc || I18n.tr(`weather.rain.level${top.level}`) };
     }
 
-    // "Pas de pluie dans l'heure", "Pluie faible de 21:05 à 21:30",
-    // "Pluie modérée jusqu'à 21:30", "Pluie forte toute l'heure".
+    // "No rain within the hour", "Light rain from 21:05 to 21:30",
+    // "Moderate rain until 21:30", "Heavy rain all hour" (in the UI language).
     function rainText(): string {
         if (rainSoon === "dry")
             return I18n.tr("weather.rain.dry");

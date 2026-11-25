@@ -1,60 +1,60 @@
-# Besoins et décisions
+# Design goals and requirements
 
-Ce que simon a demandé et décidé, dans l'ordre où c'est arrivé (22/11/2026). Référence pour vérifier que l'implémentation colle au besoin, pas seulement aux maquettes. Le comment est dans [`architecture.md`](architecture.md), [`themes.md`](themes.md), [`bar-editing.md`](bar-editing.md).
+The requirements and decisions behind lc-shell. Use this document to check that the implementation matches the actual needs, not just the mockups. The how is described in [`architecture.md`](architecture.md), [`themes.md`](themes.md) and [`bar-editing.md`](bar-editing.md).
 
-## Contexte
+## Context
 
-- Arch, Hyprland 0.57 en **config Lua** (`hl.dsp.*`, plus de `hyprctl keyword`).
-- Portable Framework + eGPU RX 9070 : écrans branchés/débranchés à chaud ; connecteurs instables → écrans reconnus par **modèle**.
-- Écrans : DP-1 Dell U4025QW 5120×2160 (principal) ; HDMI-A-1 Corsair Xeneon Edge 2560×720 (tactile matériellement, pas encore sous Linux) ; écran interne du portable (eDP).
-- Joue en plein écran à la manette.
-- Shell actuel : fork de Caelestia, qui doit **continuer à tourner** pendant le développement ; bascule par étapes.
+- Arch, Hyprland 0.57 with **Lua config** (`hl.dsp.*`, no more `hyprctl keyword`).
+- Laptop + eGPU setups: screens are hot-plugged and unplugged; connector names are unstable → screens are identified by **model**.
+- Designed around a 5K ultrawide as the main monitor, a Corsair Xeneon Edge 2560×720 touch screen (touch-capable hardware, not yet working under Linux) and a laptop's internal panel (eDP).
+- Fullscreen gaming with a controller is a core use case.
+- lc-shell is developed while an existing shell (a Caelestia fork) **keeps running**; the switch-over happens in stages.
 
-## Règles de fond
+## Ground rules
 
-1. **Quickshell nu**, écrit de zéro. **Aucun code** de Caelestia (GPL-3), de la config d'outfoxxed (sans licence) ni de Nebula (AGPL-3.0) : on s'en inspire seulement. Licence de lc-shell non choisie (rester libre de publier en MIT).
-2. **Plus de structure imposée** : agencement des widgets libre, par écran.
-3. **Rien au-dessus d'un jeu en plein écran** pour ce qui est automatique (OSD, notifications, coins, cadre) ; ce qui est appelé explicitement (lanceur, panneaux) reste permis.
-4. **Multilingue** dès maintenant : anglais et français pour commencer.
-5. **Tactile** à prévoir (grandes cibles, rien qui ne dépende du survol).
-6. Touches multimédia via `wpctl` / `brightnessctl` (marchent shell arrêté) ; l'OSD réagit aux changements.
-7. Verrouillage et inactivité **en dernier**, hyprlock en secours ; un crash verrouillé = écran rouge.
-8. Priorité aux **fonctionnalités brutes** ; le design se peaufine ensuite. simon vérifiera tout à la fin.
+1. **Bare Quickshell**, written from scratch. **No code** from Caelestia (GPL-3), from outfoxxed's config (no license) or from Nebula (AGPL-3.0): they are inspiration only. lc-shell itself is published under the MIT license.
+2. **No imposed structure**: free widget layout, per screen.
+3. **Nothing above a fullscreen game** for anything automatic (OSD, notifications, corners, frame); things invoked explicitly (launcher, panels) are still allowed.
+4. **Multilingual** from the start: English and French to begin with.
+5. **Touch** must be planned for (large targets, nothing that depends on hover).
+6. Media keys go through `wpctl` / `brightnessctl` (they work with the shell stopped); the OSD reacts to the changes.
+7. Lock and idle come **last**, with hyprlock as a fallback; a crash while locked = red screen.
+8. **Raw features** first; the design gets polished afterwards, with a full review at the end.
 
-## Fonctionnalités demandées
+## Required features
 
-- Barre (permanente sur les écrans « normaux ») ; OSD volume/luminosité ; lanceur ; notifications (un seul serveur possible → bascule d'un coup) ; fond d'écran ; inactivité et verrouillage ; IPC pour les binds.
-- Audio : choix des entrées et sorties.
-- Lanceur : applis + actions (emoji, recherche de fichiers, calculatrice, verrouillage, mise en veille…), puis l'écran de paramètres.
-- Widgets cités : audio, paroles, monitoring, notifications, espaces de travail (liste ouverte).
+- Bar (permanent on “normal” screens); volume/brightness OSD; launcher; notifications (only one notification server can run → switch over in one go); wallpaper; idle and lock; IPC for keybinds.
+- Audio: choice of inputs and outputs.
+- Launcher: apps + actions (emoji, file search, calculator, lock, suspend…), then the settings screen.
+- Widgets mentioned: audio, lyrics, monitoring, notifications, workspaces (open-ended list).
 
-## Rendu et thèmes
+## Rendering and themes
 
-- Propositions de l'étude de design validées comme base. Sérigraphie écarté ; Ligne remplacé par un thème inspiré de **Nebula** (→ Constellation).
-- Thèmes au choix : **Classique moderne** (défaut, pour commencer partout), Constellation, Façade, Modulaire, **Matrix** (DA de simon dans son fork).
-- **Clair / sombre** pour chaque thème, bascule programmable : heures fixes ou lever/coucher du soleil ; par défaut identique partout, réglable par écran plus tard ; réglage dans l'app de paramètres (faite à la fin).
+- The design study's proposals are approved as the base. The Sérigraphie proposal was dropped; Ligne was replaced by a theme inspired by **Nebula** (→ Constellation).
+- Selectable themes: **Classic** (default, used everywhere to start with), Constellation, Façade, Modulaire, **Matrix** (the author's own design language).
+- **Light / dark** for every theme, with a schedulable switch: fixed times or sunrise/sunset; identical everywhere by default, configurable per screen later; set in the settings app (built at the end).
 
-## Écrans et barre
+## Screens and bar
 
-- Deux **modes d'écran**, attribuables par écran :
-  - **normal** : barre permanente, rendu classique ; l'écran interne du portable est toujours normal ;
-  - **modules** : tableau de bord de modules (Xeneon), avec une interface pour choisir/redimensionner les modules.
-- L'écran modules a des **espaces de travail** : grille libre, **cases fenêtre** où n'importe quelle fenêtre Hyprland peut aller (kitty sur l'écran déporté) ; idéalement des espaces de travail de modules (une page par espace de travail).
-- Barre agençable : îlots, barre complète, flottante ou non, arrondis, transparence, bordures, coins… (défauts par thème, surchargeables) ; **mode « cadre »** comme Caelestia ; barre **sur le côté de son choix**.
-- Chaque élément de la barre : **réagençable, redimensionnable, déplaçable** vers un autre endroit ; **détail au survol**, soigné (« assez sympa »).
-- Un widget **fenêtre active** (titre de la fenêtre) ; l'emplacement par défaut de la date et de l'heure est à revoir en conséquence (l'agencement restant libre).
-- Barre : **pleine largeur** ou **largeur fixe centrée**.
-- Notifications en haut à droite par défaut, **position réglable**.
-- Ouverture des widgets en **tiroir** plutôt qu'en bulles flottantes, un tiroir qui **fusionne avec le widget et sa bordure**, « comme si sa zone s'agrandissait » (dans l'esprit de Caelestia et Nebula).
-- **Animations** soignées à l'ouverture des fenêtres et des menus, pas de simples fondus.
-- **Icônes d'applis recolorables** selon le thème (barre, cartes).
+- Two **screen modes**, assignable per screen:
+  - **normal**: permanent bar, classic layout; a laptop's internal panel is always normal;
+  - **modules**: dashboard of modules (Xeneon), with an interface to choose/resize modules.
+- The modules screen has **workspaces**: a free grid, with **window slots** where any Hyprland window can go (e.g. kitty on the secondary screen); ideally module workspaces (one page per workspace).
+- Configurable bar: islands, full bar, floating or not, rounding, transparency, borders, corners… (defaults per theme, overridable); a **“frame” mode**, inspired by Caelestia's; bar **on any edge**.
+- Every bar element: **rearrangeable, resizable, movable** elsewhere; polished **details on hover**.
+- An **active window** widget (window title); the default placement of the date and time should be revisited accordingly (the layout remaining free).
+- Bar: **full width** or **fixed width, centred**.
+- Notifications at the top right by default, **configurable position**.
+- Widgets open as **drawers** rather than floating bubbles: a drawer that **merges with the widget and its border**, “as if its area were growing” (in the spirit of Caelestia and Nebula).
+- Polished **animations** when windows and menus open, not just plain fades.
+- **App icons recolourable** to match the theme (bar, cards).
 
-## Vocabulaire
+## Vocabulary
 
-- **widget** : élément de la barre ; **module** : élément de l'écran modules (tableau de bord).
+- **widget**: a bar element; **module**: an element of the modules screen (dashboard).
 
 ## Organisation
 
-- Développement à côté de Caelestia (`qs -c lc`, lien `~/.config/quickshell/lc`).
-- Réglages de simon hors du repo (`~/.config/lc/settings.json`), défauts génériques dans le repo.
-- Relecture prévue par l'agent de design : conformité à la spec, qualité, cohérence, adéquation au besoin et au contexte.
+- Developed alongside the existing shell (`qs -c lc`, symlink `~/.config/quickshell/lc`).
+- User settings live outside the repo (`~/.config/lc/settings.json`); the repo ships generic defaults.
+- A design review is planned: compliance with the spec, quality, consistency, fit with the requirements and context.

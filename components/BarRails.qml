@@ -1,7 +1,7 @@
 import QtQuick
 
 // Two perforated metal rails along a bar case's long edges (Modulaire,
-// design "Barre"): 6 px, a brushed gradient, holes every 20 px. Inset by
+// design "Bar"): 6 px, a brushed gradient, holes every 20 px. Inset by
 // the case's corner radius along the bar.
 Item {
     id: root

@@ -37,7 +37,7 @@ Singleton {
                     screenEdge: "#000000",
                     glass: "#00000000",
                     star: "#00000000",
-                    // Bar case (design "Barre"): a dark metal gradient, a
+                    // Bar case (design "Bar"): a dark metal gradient, a
                     // 2 px black edge; the zones' plates; a frame's thin
                     // sides.
                     caseTop: "#2A2D2F",
@@ -46,7 +46,7 @@ Singleton {
                     caseEdge: "#000000",
                     caseFlat: "#16181A",
                     plate: "#24282A",
-                    // Hover cards (design "Survol"): silk text, blocks,
+                    // Hover cards (design "Hover cards"): silk text, blocks,
                     // bubbles and tracks.
                     card: "#16181A",
                     cardBlock: "#24282A",
@@ -64,7 +64,7 @@ Singleton {
                     ghost: "#141D2618",
                     silk: "#1E2022",
                     line: "#8F9295",
-                    // The light VFD's ink (design; simon's choice).
+                    // The light VFD's ink (design).
                     accent: "#1D2618",
                     onAccent: "#FFFFFF",
                     urgent: "#C8392C",

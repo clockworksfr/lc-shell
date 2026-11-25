@@ -48,7 +48,7 @@ Item {
     readonly property bool shown: valid
     readonly property int maxWidth: options.maxWidth ?? (size === "extended" ? 720 : 420)
 
-    // Modulaire: the title in a green LCD, "APP ▸ TITLE" (design "Barre").
+    // Modulaire: the title in a green LCD, "APP ▸ TITLE" (design "Bar").
     readonly property bool lcd: (theme?.style.module === "modulaire" || theme?.style.module === "facade") && !vertical
     readonly property bool vfd: theme?.style.module === "facade"
     implicitWidth: vertical ? Math.max(crossSize, 24) : Math.min(row.implicitWidth + (lcd ? 20 : 0), maxWidth)

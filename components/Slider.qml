@@ -23,7 +23,7 @@ Item {
     signal moved(real value)
 
     readonly property real ratio: Math.max(0, Math.min(1, (value - from) / (to - from)))
-    // Façade in cards (design "Survol"): a segmented VFD bar, no cap.
+    // Façade in cards (design "Hover cards"): a segmented VFD bar, no cap.
     readonly property bool segmented: look === "facade" && !!theme.color.vfd
     readonly property bool fader: (look === "facade" && !segmented) || look === "modulaire"
     readonly property color handleColor: dimmed ? theme.color.soft : theme.color.signal ?? theme.color.ink

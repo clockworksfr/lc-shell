@@ -1,7 +1,7 @@
 #!/bin/sh
-# Lance lc-shell et le relance s'il s'arrête (plantage, `kill`) : le
-# verrouillage en dépend (allow_session_lock_restore, reverrouillage au
-# redémarrage). Pour l'arrêter vraiment : pkill -f lc-shell-loop, puis qs -c lc kill.
+# Starts lc-shell and restarts it if it stops (crash, `kill`): the lock
+# screen relies on it (allow_session_lock_restore, relocking on restart).
+# To really stop it: pkill -f lc-shell-loop, then qs -c lc kill.
 while :; do
     qs -c lc
     sleep 2

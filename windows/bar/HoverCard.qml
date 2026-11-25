@@ -41,7 +41,7 @@ PanelWindow {
         pinned = true;
     }
 
-    // Themes with card tokens (Façade, design "Survol"): silk text and
+    // Themes with card tokens (Façade, design "Hover cards"): silk text and
     // their own surfaces in cards; the VFD's ink kept as `vfd` (screens,
     // progress, sliders) and as the accent.
     readonly property var baseTheme: host?.theme ?? Themes.fallback

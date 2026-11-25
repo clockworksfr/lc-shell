@@ -99,7 +99,7 @@ Singleton {
                 stagger: 25
             },
             bar: {
-                // A centered rack case (design "Barre"): dark case, two
+                // A centered rack case (design "Bar"): dark case, two
                 // perforated rails, one aluminium plate per group.
                 length: 0.66,
                 height: 56,

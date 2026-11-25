@@ -3,7 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// Hover card of each bar block type (docs/bar-editing.md, "Cartes").
+// Hover card of each bar block type (docs/bar-editing.md, "Cards").
 // A card gets `block` (the bar block item) and `screen`.
 Singleton {
     readonly property var cards: ({

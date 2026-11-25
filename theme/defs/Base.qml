@@ -152,7 +152,7 @@ Singleton {
                 // a frame).
                 length: 0,
                 // Frame around the screen, the bar being its thick side
-                // (docs/themes.md, "Cadre"). `frame: true` in settings is
+                // (docs/themes.md, "Frame"). `frame: true` in settings is
                 // a shorthand for { enabled: true }.
                 frame: {
                     enabled: false,

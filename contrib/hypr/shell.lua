@@ -1,18 +1,19 @@
--- ~~~ Shell de bureau — lc-shell ~~~
--- Remplace la version Caelestia (gardée dans shell-caelestia.lua).
+-- ~~~ Desktop shell: lc-shell ~~~
+-- Hyprland (Lua config, 0.57+) bindings for lc-shell. Load it from
+-- hyprland.lua with `require("shell")`.
 --
--- POINT D'ABSTRACTION : tout ce qui dépend du shell (barre, lanceur, OSD,
--- notifications, capture d'écran, verrouillage) vit ICI et nulle part
--- ailleurs. hyprland.lua ne connaît que `require("shell")`.
+-- Everything that depends on the desktop shell (bar, launcher, OSD,
+-- notifications, screenshots, lock screen) lives here and nowhere else, so
+-- switching shells means swapping this one file.
 --
--- Raccourcis : `global` (raccourcis globaux Hyprland, appid « lc ») —
--- instantané, pas de process lancé. `hyprctl globalshortcuts` les liste ;
--- Paramètres › Raccourcis de lc-shell aussi.
+-- Most bindings use `global` (Hyprland global shortcuts, app id "lc"):
+-- instant, no process started. `hyprctl globalshortcuts` lists them, and so
+-- does lc-shell's Settings > Shortcuts page.
 
--- Fichier chargé à part : les `local` de hyprland.lua n'y sont pas visibles.
+-- Loaded separately: the `local`s of hyprland.lua aren't visible here.
 local mod = "SUPER"
 
--- hl.bind avec une description, lue par la cheatsheet (keybinds.sh).
+-- hl.bind with a description (shown by cheatsheets that read them).
 local function bind(keys, dispatcher, desc, opts)
     local o = { desc = desc }
     for k, v in pairs(opts or {}) do o[k] = v end
@@ -22,78 +23,62 @@ end
 local exec = hl.dsp.exec_cmd
 local lc = function(name) return hl.dsp.global("lc:" .. name) end
 
---- Démarrage
--- Lancé explicitement parce qu'on est en session Hyprland "nue"
--- (graphical-session.target inactif, cf. hyprland.lua).
+--- Startup
 hl.on("hyprland.start", function()
-    -- lc-shell, relancé s'il s'arrête (plantage, `kill`) : indispensable au
-    -- verrouillage (allow_session_lock_restore + reverrouillage au redémarrage).
-    -- Pour l'arrêter vraiment : pkill -f lc-shell-loop, puis qs -c lc kill.
+    -- lc-shell, restarted if it stops (crash, `kill`): the lock screen
+    -- relies on it (allow_session_lock_restore + relocking on restart).
+    -- To really stop it: pkill -f lc-shell-loop, then qs -c lc kill.
     hl.exec_cmd("~/.config/hypr/lc-shell-loop.sh")
-
-    -- Presse-papier : plus de cliphist, lc-shell enregistre lui-même
-    -- l'historique (wl-paste --watch lancé par le shell).
-
-    -- Philips Hue : dans lc-shell (module Lumières, widget « lights »,
-    -- Super+U). L'ancien panneau `qs -c hue` n'est plus lancé.
 end)
 
---- Raccourcis
+--- Shell
 
-bind(mod .. " + Space", lc("launcher"), "Lanceur d'applications")
-bind(mod .. " + A",     lc("launcher"), "Lanceur d'applications")
+bind(mod .. " + Space", lc("launcher"), "Application launcher")
 
--- Super+U : « U » et « Hue » se prononcent pareil. Le tiroir du widget
--- Lumières sur l'écran actif, ou un panneau centré s'il n'est pas dans la barre.
-bind(mod .. " + U",         exec("qs -c lc ipc call bar panel lights"), "Lumières (Philips Hue)")
-bind(mod .. " + SHIFT + U", exec("~/.local/bin/huectl group 1 toggle"), "Hue : Salon on/off")
+-- The Lights drawer (Philips Hue) on the active screen, or a centred panel
+-- when the widget isn't in the bar.
+bind(mod .. " + U", exec("qs -c lc ipc call bar panel lights"), "Lights (Philips Hue)")
 
--- Caelestia avait une sidebar et un dashboard ; lc-shell ouvre à la place le
--- panneau des notifications et la carte média (lecteur, paroles).
-bind(mod .. " + S",     lc("notifications"), "Panneau des notifications")
-bind(mod .. " + comma", lc("media"),         "Carte média (lecteur, paroles)")
+bind(mod .. " + S",     lc("notifications"), "Notifications panel")
+bind(mod .. " + comma", lc("media"),         "Media card (player, lyrics)")
 
--- Gestionnaire du presse-papier de lc-shell (historique, épinglés, collage
--- direct) ; pause « incognito » de l'enregistrement. Emoji : dans le lanceur.
-bind(mod .. " + SHIFT + V",        lc("clipboard"),          "Historique du presse-papier")
-bind(mod .. " + CTRL + SHIFT + V", lc("clipboardIncognito"), "Presse-papier : pause / reprise")
-bind(mod .. " + period",           lc("emoji"),              "Sélecteur d'emoji")
+-- Clipboard history (pins, tags, direct paste) and its "incognito" pause.
+bind(mod .. " + SHIFT + V",        lc("clipboard"),          "Clipboard history")
+bind(mod .. " + CTRL + SHIFT + V", lc("clipboardIncognito"), "Clipboard: pause / resume recording")
+bind(mod .. " + period",           lc("emoji"),              "Emoji picker")
 
--- Capture d'écran (outil de lc-shell) : zone ou fenêtre choisie sur les
--- écrans figés, copiée dans le presse-papier, puis notification Annoter
--- (éditeur intégré) / Enregistrer / Ouvrir.
-bind("Print",         lc("screenshot"),       "Capture d'une zone")
-bind("SHIFT + Print", lc("screenshotScreen"), "Capture de l'écran ayant le focus")
-bind("CTRL + Print",  lc("screenshotWindow"), "Capture de la fenêtre active")
+-- Screenshots: an area or window picked on frozen screens, copied, then a
+-- notification offers Annotate / Save / Open.
+bind("Print",         lc("screenshot"),       "Screenshot of an area or window")
+bind("SHIFT + Print", lc("screenshotScreen"), "Screenshot of the focused screen")
+bind("CTRL + Print",  lc("screenshotWindow"), "Screenshot of the active window")
 
--- Verrouille, puis éteint tous les écrans 5 s plus tard (le script vérifie
--- qu'on est toujours verrouillé ; hyprlock si lc-shell ne répond pas).
--- Chemin absolu : les binds Hyprland n'ont pas ~/.local/bin dans leur PATH.
-bind(mod .. " + Escape", exec("/home/simon/.config/hypr/lock-and-dpms.sh"), "Verrouiller + éteindre les écrans")
+-- Lock, then turn every screen off 5 s later (the script checks the session
+-- is still locked; falls back to hyprlock if lc-shell doesn't answer).
+-- lc-shell also applies its own lock shortcut (Settings > Lock), replacing
+-- this one while it runs: this binding is the fallback.
+bind(mod .. " + Escape", exec("~/.config/hypr/lock-and-dpms.sh"), "Lock and turn screens off")
 
-bind(mod .. " + SHIFT + N", lc("clearNotifs"), "Effacer les notifications")
-bind(mod .. " + CTRL + N",  lc("dnd"),         "Ne pas déranger")
+bind(mod .. " + SHIFT + N", lc("clearNotifs"), "Clear notifications")
+bind(mod .. " + CTRL + N",  lc("dnd"),         "Do not disturb")
 
-bind(mod .. " + slash", exec("bash ~/.config/hypr/keybinds.sh"), "Cheatsheet des raccourcis")
+-- lc-shell's theme only: light / dark, and next theme (Classic,
+-- Constellation, Façade, Modulaire, Matrix).
+bind(mod .. " + SHIFT + T", lc("toggleVariant"), "Light / dark theme")
+bind(mod .. " + CTRL + T",  lc("nextTheme"),     "Next theme")
 
--- Thème de lc-shell : clair / sombre, et thème suivant (Classique,
--- Constellation, Façade, Modulaire, Matrix). Le reste du système n'est pas
--- touché.
-bind(mod .. " + SHIFT + T", lc("toggleVariant"), "Thème clair / sombre")
-bind(mod .. " + CTRL + T",  lc("nextTheme"),     "Thème suivant")
+--- Media keys
+-- Driven by wpctl / brightnessctl / playerctl rather than the shell:
+-- lc-shell shows its OSD by watching PipeWire and the backlight, so the OSD
+-- still appears, and the keys keep working while the shell is stopped.
+bind("XF86AudioRaiseVolume",  exec("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), "Volume up",   { locked = true, repeating = true })
+bind("XF86AudioLowerVolume",  exec("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        "Volume down", { locked = true, repeating = true })
+bind("XF86AudioMute",         exec("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),       "Mute",        { locked = true })
+bind("XF86MonBrightnessUp",   exec("brightnessctl set 5%+"), "Brightness up",   { locked = true, repeating = true })
+bind("XF86MonBrightnessDown", exec("brightnessctl set 5%-"), "Brightness down", { locked = true, repeating = true })
 
---- Touches multimédia
--- Pilotées par wpctl/brightnessctl plutôt que par le shell : lc-shell affiche
--- son OSD en écoutant PipeWire/backlight, donc l'OSD marche quand même, et les
--- touches continuent de fonctionner si le shell est arrêté.
-bind("XF86AudioRaiseVolume",  exec("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), "Volume +", { locked = true, repeating = true })
-bind("XF86AudioLowerVolume",  exec("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        "Volume -", { locked = true, repeating = true })
-bind("XF86AudioMute",         exec("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),       "Muet",     { locked = true })
-bind("XF86MonBrightnessUp",   exec("brightnessctl set 5%+"), "Luminosité +", { locked = true, repeating = true })
-bind("XF86MonBrightnessDown", exec("brightnessctl set 5%-"), "Luminosité -", { locked = true, repeating = true })
-
-bind("XF86AudioPlay",  exec("playerctl play-pause"), "Lecture / pause", { locked = true })
-bind("XF86AudioPause", exec("playerctl play-pause"), "Lecture / pause", { locked = true })
-bind("XF86AudioNext",  exec("playerctl next"),       "Piste suivante",  { locked = true })
-bind("XF86AudioPrev",  exec("playerctl previous"),   "Piste précédente", { locked = true })
-bind("XF86AudioStop",  exec("playerctl stop"),       "Stop",            { locked = true })
+bind("XF86AudioPlay",  exec("playerctl play-pause"), "Play / pause",   { locked = true })
+bind("XF86AudioPause", exec("playerctl play-pause"), "Play / pause",   { locked = true })
+bind("XF86AudioNext",  exec("playerctl next"),       "Next track",     { locked = true })
+bind("XF86AudioPrev",  exec("playerctl previous"),   "Previous track", { locked = true })
+bind("XF86AudioStop",  exec("playerctl stop"),       "Stop",           { locked = true })

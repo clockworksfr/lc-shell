@@ -16,7 +16,7 @@ import qs.theme
 //   constellation  one system of concentric orbits (CPU, GPU, RAM), the
 //                  values listed beside it
 //   modulaire      LED ladders (one per core, then GPU, RAM, T°) over a
-//                  green LCD with the temperatures (design "Système")
+//                  green LCD with the temperatures (design "System")
 //   matrix         rings of dots (red beyond 90 %)
 // tiny: CPU alone; strip: side by side. Big cells (tiers large / poster):
 // the gauges on top, the last minute's curves (CPU, GPU; poster: RAM)
@@ -484,7 +484,7 @@ ModuleBase {
         }
     }
 
-    // ladders (modulaire, design "Système"): a ladder per core, then GPU,
+    // ladders (modulaire, design "System"): a ladder per core, then GPU,
     // RAM and the CPU's temperature (30–100 °C), one silk label row under
     // them, a two-line green LCD below (temperatures, network).
     Column {

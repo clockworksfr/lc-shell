@@ -26,7 +26,7 @@ Item {
     readonly property bool empty: groups.every(g => g.length === 0)
     // Gap between islands (or between groups of a full bar).
     readonly property int groupGap: islands ? look.margin || theme.space.s : look.spacing * 2
-    // Modulaire: each group on an aluminium plate (design "Barre"): 74 %
+    // Modulaire: each group on an aluminium plate (design "Bar"): 74 %
     // of the bar thick, 19 px padding at its ends, radius 6 (4 if the bar
     // is rounded).
     readonly property bool plates: !!look.plates

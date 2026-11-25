@@ -28,7 +28,7 @@ TextWidget {
     // date smaller and soft, the time big (rich text can't reach the
     // shell's own fonts). The widget's own text is empty, its padding the
     // pair's width.
-    // Modulaire: the time in a Nixie window (design "Barre"): dark glass,
+    // Modulaire: the time in a Nixie window (design "Bar"): dark glass,
     // orange glowing digits, the colon kept between hours and minutes.
     readonly property bool nixie: figure && theme.style.module === "modulaire"
     // Façade: the time in a VFD window, unlit "88:88" segments behind it.

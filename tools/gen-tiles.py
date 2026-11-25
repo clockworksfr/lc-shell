@@ -17,24 +17,24 @@ os.makedirs(OUT, exist_ok=True)
 # theme -> variant -> (base, size, motif color, motif opacity, why)
 SPEC = {
     'classic': {
-        'dark': ('#22343A', 64, '#FFFFFF', 0.10, 'ardoise sarcelle, plus claire et plus froide que le graphite neutre de l\'interface'),
-        'light': ('#B7C9C6', 64, '#0B2A26', 0.12, 'sauge grisée, plus sombre que les surfaces quasi blanches'),
+        'dark': ('#22343A', 64, '#FFFFFF', 0.10, 'teal slate, lighter and cooler than the UI's neutral graphite'),
+        'light': ('#B7C9C6', 64, '#0B2A26', 0.12, 'greyed sage, darker than the near-white surfaces'),
     },
     'constellation': {
-        'dark': ('#2B2552', 128, '#FFFFFF', 0.45, 'violet profond, plus clair et plus chaud que le bleu nuit des îlots'),
-        'light': ('#C8C2E6', 128, '#FFFFFF', 0.75, 'lavande moyenne, nettement plus sombre que le blanc bleuté'),
+        'dark': ('#2B2552', 128, '#FFFFFF', 0.45, 'deep violet, lighter and warmer than the islands' midnight blue'),
+        'light': ('#C8C2E6', 128, '#FFFFFF', 0.75, 'mid lavender, clearly darker than the bluish white'),
     },
     'facade': {
-        'dark': ('#2C3538', 48, '#000000', 0.26, 'gris acier bleuté, plus clair que la façade noire et les afficheurs'),
-        'light': ('#9AA5A7', 48, '#1B2426', 0.15, 'gris bleu, plus sombre et plus froid que l\'aluminium clair'),
+        'dark': ('#2C3538', 48, '#000000', 0.26, 'bluish steel grey, lighter than the black front and the displays'),
+        'light': ('#9AA5A7', 48, '#1B2426', 0.15, 'blue grey, darker and cooler than the light aluminium'),
     },
     'modulaire': {
-        'dark': ('#3A342E', 96, '#000000', 0.26, 'brun fumé, plus clair et plus chaud que l\'anthracite des panneaux'),
-        'light': ('#9CA6AC', 96, '#1A1F22', 0.15, 'acier froid, sous le beige chaud des panneaux'),
+        'dark': ('#3A342E', 96, '#000000', 0.26, 'smoky brown, lighter and warmer than the panels' anthracite'),
+        'light': ('#9CA6AC', 96, '#1A1F22', 0.15, 'cool steel, below the panels' warm beige'),
     },
     'matrix': {
-        'dark': ('#25272B', 64, '#FFFFFF', 0.16, 'gris froid moyen, bien au-dessus du quasi-noir des surfaces'),
-        'light': ('#BBBCB8', 64, '#000000', 0.16, 'gris moyen, sous le blanc cassé des surfaces'),
+        'dark': ('#25272B', 64, '#FFFFFF', 0.16, 'mid cool grey, well above the near-black surfaces'),
+        'light': ('#BBBCB8', 64, '#000000', 0.16, 'mid grey, below the off-white surfaces'),
     },
 }
 

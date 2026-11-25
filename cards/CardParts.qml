@@ -45,7 +45,7 @@ QtObject {
                 text: header.title
                 font.pixelSize: 16
                 font.weight: Font.DemiBold
-                // Façade: condensed capitals (design "Survol").
+                // Façade: condensed capitals (design "Hover cards").
                 font.capitalization: header.theme.style.module === "facade" ? Font.AllUppercase : Font.MixedCase
                 font.letterSpacing: header.theme.style.module === "facade" ? 1 : 0
                 elide: Text.ElideRight
@@ -506,7 +506,7 @@ QtObject {
         readonly property bool silk: theme.style.module === "modulaire"
         readonly property bool facade: theme.style.module === "facade"
         topPadding: 6
-        // Façade: condensed 700 11 px (design "Survol").
+        // Façade: condensed 700 11 px (design "Hover cards").
         font.family: facade ? theme.font.family : theme.font.mono
         font.weight: facade ? Font.Bold : Font.Normal
         // Modulaire: a Michroma eyebrow, silk at 62 %.

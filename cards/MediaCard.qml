@@ -6,7 +6,7 @@ import qs.i18n
 import qs.services
 import qs.theme
 
-// Media card (design "3. Média"): the theme's cover (84 px) beside the
+// Media card (design "3. Media"): the theme's cover (84 px) beside the
 // source, the title and "Artist · Album"; a seekable progress in the
 // theme's language with its times; three lyric lines (left aligned; in
 // the theme's screen in Façade / Modulaire); previous / play / next as the
