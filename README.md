@@ -4,9 +4,11 @@ A Wayland desktop shell for [Hyprland](https://hyprland.org), written from scrat
 
 It provides a bar, dashboards, a launcher, a lock screen, notifications, OSDs, a clipboard manager, a screenshot tool and a settings app. All of them follow one of five themes, in light and dark variants.
 
+![lc-shell with the Constellation theme: bar, dashboard modules and a terminal](docs/screenshots/constellation-dark.webp)
+
 - **Multi-screen:** every screen has its own profile, recognised by its model, with its own bar, theme and dashboards. It was designed around a 5K ultrawide and a 2560×720 touch strip, the Corsair Xeneon Edge.
 - **Five themes:** Classic, Constellation, Façade, Modulaire and Matrix. Each one is a full design language, not just a palette. Light and dark switch by hand, on a schedule or with the sun.
-- **Bar:** on any screen edge, full width or as islands, floating or framing the desktop. It has 17 widgets in three sizes, and you edit it in place by dragging widgets. Hover cards show details, and clicking opens the full panel.
+- **Bar:** on any screen edge, full width or as islands, floating or framing the desktop. It has 17 widgets in three sizes, and you edit it in place by dragging widgets. Hover cards show details; clicking pins the card or opens the widget's panel.
 - **Dashboards:** grids of resizable modules bound to workspaces:
   - clock, weather, media, synced lyrics, system, network, VU meter and spectrum;
   - quick settings, Philips Hue lights, workspaces and window slots.
@@ -21,6 +23,22 @@ It provides a bar, dashboards, a launcher, a lock screen, notifications, OSDs, a
 
 > [!NOTE]
 > This is a personal shell, shared as-is. It targets Hyprland only and follows recent Quickshell and Hyprland releases closely. Expect rough edges outside the setup it was built on.
+
+## Themes
+
+Every screenshot shows the same bar and dashboard on a 1920×1080 screen. Only the theme and variant change.
+
+| | |
+|---|---|
+| ![Classic, dark](docs/screenshots/classic-dark.webp) **Classic**, dark | ![Classic, light](docs/screenshots/classic-light.webp) **Classic**, light |
+| ![Constellation, dark](docs/screenshots/constellation-dark.webp) **Constellation**, dark | ![Constellation, light](docs/screenshots/constellation-light.webp) **Constellation**, light |
+| ![Matrix, dark](docs/screenshots/matrix-dark.webp) **Matrix**, dark | ![Matrix, light](docs/screenshots/matrix-light.webp) **Matrix**, light |
+| ![Façade, dark](docs/screenshots/facade-dark.webp) **Façade**, dark | ![Modulaire, dark](docs/screenshots/modulaire-dark.webp) **Modulaire**, dark |
+
+Hover cards follow the theme too. Below are the media card and the clock card in Constellation, Matrix, Façade, Modulaire and Classic (light):
+
+![Media hover cards in five themes](docs/screenshots/cards-media.webp)
+![Clock hover cards in five themes](docs/screenshots/cards-clock.webp)
 
 ## Requirements
 
