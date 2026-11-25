@@ -140,21 +140,21 @@ Example:
 }
 ```
 
-- **Screens:** a profile is recognised by `model`, which stays stable even when the connector changes (with an eGPU, for example), or by `name` (a connector pattern such as `eDP-*`). The first matching profile wins. A profile overrides the mode's `bar` and `osd` key by key, and `null` disables one. It can also set `theme`, `touch` and `frame`.
-- **Themes:** `classic` (the default), `constellation`, `facade`, `modulaire` and `matrix`. `appearance.themes.normal` applies to bars and panels, and `appearance.themes.modules` to dashboards. A screen profile can override both with `"theme"`.
+- **Screens:** a profile is recognised by `model`, which stays stable even when the connector changes (with an eGPU, for example), or by `name` (a connector pattern such as `eDP-*`). The first matching profile wins. A profile overrides the mode's `bar` and `osd` key by key, and `null` disables one. It can also set `theme` (bar, panels and the screen's dashboards), `variant` (`dark` or `light`, for that screen only) and `touch`.
+- **Themes:** `classic` (the default), `constellation`, `facade`, `modulaire` and `matrix`. `appearance.themes.normal` applies to bars and panels, and `appearance.themes.modules` to dashboards. A screen profile can override both with `"theme"`, and the light/dark variant with `"variant"`.
 - **Light and dark:** `variant` is `dark`, `light` or `auto`. With `auto`, `schedule` uses fixed times (`"type": "time", "light": "07:30", "dark": "19:30"`) or the sun (`"type": "sun"`, `latitude`, `longitude`, computed locally).
 - **Bar:**
   - `position` puts it on any edge: `top`, `bottom`, `left` or `right`.
   - Widgets go in `left`, `center` and `right` (from top to bottom on a vertical bar). A zone can hold several islands, as a list of lists.
   - The theme sets the bar's look, which you can override with `style` (`full` or `islands`), `floating`, `margin`, `radius`, `opacity`, `border`, `padding`, `spacing`, `height`, `verticalWidth`, `length` and `screenCorners`.
-- **Frame:** `"frame": true`, or `{ "enabled": true, "thickness": 8, "innerRadius": 18, "outline": 1 }`, draws a ring around the desktop. The bar is its thick side. The frame is drawn under windows and hidden in full screen.
+- **Frame:** `"frame": true` in the bar config, or `{ "enabled": true, "thickness": 8, "innerRadius": 18, "outline": 1 }`, draws a ring around the desktop. The bar is its thick side. The frame is drawn under windows and hidden in full screen.
 - **Bar editing:** right-click the bar outside its widgets, or run `qs -c lc ipc call bar edit`. Then:
   - drag widgets to move them, and use "+" at the end of a zone to start a new island;
   - click a widget for its size (S/M/L), zone or removal, and open a palette to add widgets;
   - undo, redo or discard, and finish with Esc.
   - Changes go to the screen's profile.
 - **Widgets:** `workspaces`, `window`, `clock`, `media`, `volume`, `network`, `wifi`, `bluetooth`, `battery`, `system`, `weather`, `notifications`, `tray`, `quickSettings`, `lights`, `modes` and `dynamicIsland`.
-  - Hovering one for 350 ms shows its card, and clicking opens its full panel.
+  - Hovering one for 350 ms shows its card. Clicking pins the card or opens the widget's panel, depending on the widget.
   - An unknown name shows as `?name` in red.
 
 See [`docs/bar-editing.md`](docs/bar-editing.md) and [`docs/themes.md`](docs/themes.md) for more.
@@ -383,9 +383,8 @@ hl.bind("SUPER + Space", hl.dsp.global("lc:launcher"))
 - Icons come from a subset of Material Symbols. To use a new icon, add its name to `tools/icons.txt` and run `tools/gen-icons.py`.
 - **Diagnostics:**
   - `qs log -c lc` for the log;
-  - `qs -c lc ipc call bar blocks` for widget geometry;
+  - `qs -c lc ipc call bar widgets` and `bar geometry <screen>` for widget geometry;
   - `media info` and `lyrics status` for the player and lyrics.
-- Popups (panels, hover cards) only open while their bar has the pointer.
 
 ## Credits
 

@@ -1,32 +1,64 @@
-# Theme specification
+# Themes
 
-Derived from the design study (mockups: “lc-shell renders”, v2). Serves as the reference for phase 2 (implementation in `theme/defs/`). The values are design choices; no code is taken from Caelestia, and the components mentioned are to be recreated.
+lc-shell has five themes: **Classic**, **Constellation**, **Façade**, **Modulaire** and **Matrix**. Each one is a full design language (fonts, shapes, bar, component styles, motion), not just a palette, and each has a light and a dark variant.
+
+A theme is a definition file in `theme/defs/` that only lists what differs from `theme/defs/Base.qml`; `Themes.resolve()` deep-merges the two. Components never test a theme's id: they read tokens and **style axes**, so the differences below are all data. See [`architecture.md`](architecture.md#themes) for how themes are chosen per screen and for dashboards.
+
+Colours below are written as in the definitions: `#RRGGBB`, or `#AARRGGBB` (Qt's order, alpha first) for translucent ones.
 
 ## Common rules
 
-- **Colour roles**: `bg` (background/desktop), `surface`, `surface2`, `surface3`, `ink`, `soft` (dimmed ink), `line`, `accent`, `onAccent`, `urgent`, `warn`, `ok`, plus roles specific to some themes (`ghost`, `silk`, `vu`…).
-- **Layers**: bar and screen corners on `top`. Never `overlay` when the active workspace has a fullscreen window.
-- **Densities**: compact 32, normal 40, touch 56 (48 targets). Modules mode: targets ≥ 72.
-- **Fonts**: static files only (Qt ignores variable axes); instantiate variable fonts with `fontTools varLib.instancer`.
-- **Textures and effects**: disabled during a fullscreen game.
+- **Colour roles**: `bg` (desktop background), `surface`, `surface2`, `surface3`, `ink`, `soft` (dimmed ink), `line`, `accent`, `accent2` (second accent: gradients, comets), `onAccent`, `urgent`, `warn`, `ok`, plus `glass`, `star`, `glow` (glow of large figures; transparent = none) and `ghost` (unlit segments behind figures). Some themes add their own roles (`silk`, `nixie`, `lcd`, `signal`…).
+- **Hit targets** (`hit`): 24 px with a pointer, 48 px on touch screens, 72 px on touch dashboards.
+- **Fonts**: bundled static files only (`assets/fonts`, registered by `theme/Fonts.qml`), since Qt ignores the axes of variable fonts. Variable fonts are instantiated with `tools/instance-font.py`, e.g. Doto → “Doto Matrix” and “Doto LCD”.
+- **Icons**: one icon font for every theme, a subset of Material Symbols Rounded (outlined and filled), built by `tools/gen-icons.py`.
+- **Wallpaper**: each theme ships a light and a dark tiled wallpaper (`assets/wallpapers`), shown when no image is chosen (`wallpaper.themeDefaults`).
+- **Fullscreen**: on a screen showing a fullscreen window, nothing automatic is drawn and all animations take 0 ms.
 
-## Bar axes (overridable per screen)
+## Bar settings
+
+Theme defaults, overridable in the bar config of `modes.normal` or of a screen profile:
+
+| Key | Values | Base default |
+|---|---|---|
+| `position` | `top` · `bottom` · `left` · `right` | `top` |
+| `style` | `full` (one band) · `islands` (one background per group) | `full` |
+| `floating` | detached from the screen edges by `margin` | `false` |
+| `margin` | px | 0 |
+| `radius` | px | 0 |
+| `opacity` | background opacity, 0–1 (content stays opaque) | 1 |
+| `border` | px, colour `line` | 0 |
+| `padding`, `spacing` | px, inside the band or each island / between widgets | 8, 18 |
+| `height` | thickness of a horizontal bar, px | 32 |
+| `verticalWidth` | thickness of a vertical bar, px | 48 |
+| `length` | 0 = full length; px, or a share of the edge below 1 (centred bar) | 0 |
+| `screenCorners` | radius of the rounded screen corners, 0 = none | 0 |
+| `frame` | see [Frame](#frame) | off |
+
+Theme-only keys: `caseColor` (a case colour instead of `surface`), `rails` (perforated rails along the long edges) and `plates` (each group on its own plate).
+
+## Style axes
 
 | Axis | Values |
 |---|---|
-| `layout` | `islands` · `full` · `center` (fixed width, centred) |
-| `floating` | 0/1, `margin` 0–24 |
-| `radius` | 0–24; attached: only the corners on the windows side |
-| `concave` | 0/1, concave corners (attached only) |
-| `groups` | `bare` · `caps` (capsules) |
-| `opacity` | 0–100 |
-| `border` | 0/1/2 px, colour `line` |
-| `screenCorners` | 0/12/14/20 |
-| `height` | 32/40/44/56 |
-| `position` | top/bottom |
-| `autoHide` | no/smart |
+| `workspaces` | `labels` (numbers) · `dots` (active = a pill, lying on a horizontal bar, standing on a vertical one) · `stars` (dots, active = four-pointed star) · `segments` (a VFD window, one 7-segment digit per workspace) · `sequencer` (one step per workspace: a round LED and its number) · `numbered` (a dot and its number per workspace, empty ones in between shown dim) |
+| `module` | frame of dashboard modules: `classic` · `constellation` · `facade` · `modulaire` · `matrix` |
+| `cover` | album art: `square` (rounded) · `sphere` (round planet with a halo) · `disc` (round, turning while playing, ringed with dots following the sound) · `inset` (square, recessed in a black frame) · `screwed` (square, 3 px corners) · `none` |
+| `ring` | round gauges: `arc` (thick 270° arc) · `orbit` (thin circle, gradient arc, a planet at the value) · `knob` (rotary knob, cream index) · `dots` (36 dots, the lit ones glowing) · `vu` (a VU dial for audio, else `arc`) |
+| `display` | display windows inside modules: `none` · `vfd` (black glass, static scan lines, phosphor ink) · `lcd` (green or amber LCD, dark ink) |
+| `appIcons` | `native` · `tinted` · `mono` (see [App icons](#app-icons)) |
+| `labelCase` | `none` · `upper` (small labels) |
+| `statusIcons` | status widgets as icon + value (`true`) or as text |
+| `statusSigil` | text statuses as one-line mono sigils (“BT 2”, “NET ↓1,3M”): `phosphor` (VFD ink, dimmed when off) · `led` (a status LED before the text) |
+| `statusStack` | text statuses as a small soft label over the value (“VOL / 64”) |
+| `barClock` | `display`: the bar's clock in the display font |
+| `glass` | a glass highlight over the top of islands and panels |
+| `ghostDigits` | unlit segments (“88:88”) behind large figures |
+| `scanlines`, `screws`, `brushed` | VFD scan lines, screws on module plates, brushed aluminium |
 
 ## 1. Classic (default)
+
+Clean and neutral: soft rounded shapes, a jade accent, floating islands.
 
 | Role | Dark | Light |
 |---|---|---|
@@ -37,34 +69,25 @@ Derived from the design study (mockups: “lc-shell renders”, v2). Serves as t
 | ink | #E9ECEF | #14171B |
 | soft | #A1A9B3 | #56606B |
 | line | #2B3038 | #D5DAE1 |
-| accent (jade) | #5FD0A8 | #0E7A5C |
+| accent, accent2 (jade) | #5FD0A8 | #0E7A5C |
 | onAccent | #06281D | #FFFFFF |
 | urgent | #FF6B5E | #C8372D |
 | warn | #F2C14E | #9A6A00 |
 | ok | #8BD17C | #2E7D3A |
 
-- **Fonts**: Figtree 400/500/600/700 (OFL, github.com/erikdkennedy/figtree) · JetBrains Mono 400/500/600 (OFL) · Material Symbols Rounded, instances FILL 0 and 1, wght 400, opsz 24 (Apache 2.0).
-- **Shapes**: radii island 14, control 10, module 16, panel 20, Xeneon card 28, pill-shaped buttons and sliders. 1 px `line` border on islands and panels, 0 on cards; urgent = 4 px inner edge. Spacing 4/8/12/16/24/32. Shadow 0 4 18 #0000008C (dark) / #1A2A3A2E (light), panels 0 14 40. Animations 160–220 ms OutCubic, no bounce.
-- **Bar**: floating islands, margin 8, height 40, radius 14, opacity 94%, border 1, bare groups, screen corners 14.
-- **Textures**: none; option: accent derived from the wallpaper.
-- **Components**:
-  - Workspaces: 8 px dots, active = 27×8 accent pill, occupied = ink at 55%, empty = `line`, urgent = `urgent`.
-  - Clock: Figtree SemiBold 15, tabular figures, date in `soft`, centre island.
-  - Dynamic centre island, by priority: OSD (1.2 s) > recording > timer > new track (3 s) > time; width animated over 200 ms.
-  - Sliders: 44 px pill in panels, 14 px in modules, icon and value inside the track.
-  - Progress: rounded 6–8 px bar.
-  - Toggles: 112 px two-line modules, active = accent background.
-  - Notifications: panel with radius 20, grouped by app.
-  - Drawers: slide out of their island.
+- **Fonts**: Figtree (text and figures, 700 for large figures) · JetBrains Mono. Sizes 12 / 14 / 17 / 28.
+- **Shapes**: radii control 10, tile 16, panel 20, card 28; 1 px borders; spacing 4 / 8 / 12 / 16 / 24 / 32.
+- **Bar**: floating islands, margin 8, height 40 (vertical 56), radius 14, opacity 0.94, border 1, padding 14, spacing 18, screen corners 14.
+- **Components**: workspaces as dots (active = accent pill); classic module cards; square rounded covers; thick arc gauges; pill progress bars; round buttons (accent when primary); quick-settings tiles with the icon on top and an accent fill when on; native app icons.
 
-## 2. Constellation (replaces Ligne, study v4)
+## 2. Constellation
 
-Concept inspired by Nebula (github.com/LilaccFlowerr/Nebula, **AGPL-3.0**: concept only, no code taken): floating islands with fixed roles, popups joined to their island by a concave neck, tinted glass without blur, space theme. Differences: fixed palette (no matugen), constellation and stars, comet, orbits, Outfit instead of Inter.
+Space mood: floating islands of tinted glass (no blur), stars, comets and orbits. The concept is inspired by [Nebula](https://github.com/LilaccFlowerr/Nebula) (AGPL-3.0; concept only, no code taken): floating islands with fixed roles and drawers joined to their island by concave fillets. It differs by a fixed palette, constellations, comets and orbits, and Outfit instead of Inter. The dark variant is “night”, the light one “dawn”.
 
-| Role | Night | Dawn |
+| Role | Night (dark) | Dawn (light) |
 |---|---|---|
 | bg | #0B0E1A | #EEF0F8 |
-| surface (86% night, 90% dawn) | #141A2B | #FFFFFF |
+| surface | #141A2B | #FFFFFF |
 | surface2 | #1C2338 | #F3F4FB |
 | surface3 | #262E47 | #E4E7F4 |
 | ink | #E6E9F5 | #171B2E |
@@ -76,205 +99,216 @@ Concept inspired by Nebula (github.com/LilaccFlowerr/Nebula, **AGPL-3.0**: conce
 | urgent | #FF7A8A | #C93A4E |
 | warn | #FFD27A | #956400 |
 | ok | #7EE0B5 | #23805B |
-| glass (top highlight) | #FFFFFF14 | #FFFFFF99 |
-| star | #FFFFFFB0 | #3A46808A |
+| glass (top highlight) | #14FFFFFF | #99FFFFFF |
+| star | #B0FFFFFF | #8A3A4680 |
 
-- **Fonts**: Outfit 200/300/400/500/600 (OFL, github.com/Outfitio/Outfit-Fonts) · Geist Mono 400/500 (OFL, github.com/vercel/geist-font) · Material Symbols Rounded FILL 1 wght 400 opsz 24.
-- **Shapes**: pill-shaped islands, buttons and sliders; cards 24; modules 22–28; inner controls 16. 1 px border, accent at 16–22%; urgent = 3 px edge + pink glow. 64×12 neck (two concave arcs, r 12). Spacing 6/10/14/20/28. Shadow 0 6 26 #00000080 (night) / #2A3A8A26 (dawn). Motion 200–260 ms OutQuint.
-- **Bar**: floating islands, margin 10, height 44, radius 22, opacity 86%, outline 1, bare groups, screen corners 18. Frame (off): thickness 8, inner radius 22, outer corners 30. Vertical: 52 px, time on two lines in Outfit 300.
-- **Textures**: glass = surface at 86% + 8% white highlight over the top 58%, no blur; star field in a Canvas painted once (140 and 97 px grids), optional, never redrawn during a game; glows (≤ 16 px) limited to the active star, the comet and the cover art.
-- **Components**: workspaces = constellation (empty: 1.5 px circle; occupied: dot; active: 4-pointed accent star with glow; urgent: ringed pink dot; glowing gradient thread); clock in Outfit 300 (200 when large); progress = comet (2 px stroke, accent2 → accent trail, 10 px head); gradient pill sliders; primary button with a 135° gradient; monitoring as orbits (planet at value × 360°); cards and drawers joined by a neck.
-- **Xeneon**: media (round cover with glow, lyrics, comet, 110–130 px buttons), CPU/GPU/RAM orbits, Outfit 200 clock + weather + agenda, do-not-disturb / microphone / replay / timer modules, urgent card with a pink edge.
+- **Fonts**: Outfit (300 for large figures, slightly widened: `heroScale` 1.04) · Geist Mono. Sizes 12 / 14 / 17 / 28.
+- **Shapes**: radii control 16, tile 22, panel 24, card 24; 1 px borders; spacing 6 / 10 / 14 / 20 / 28 / 36; drawer fillet 14.
+- **Bar**: floating islands, margin 10, height 44 (vertical 52), radius 22, opacity 0.86, border 1, padding 16, spacing 20, screen corners 18. Frame off by default (thickness 8, inner radius 22).
+- **Components**:
+  - workspaces as a constellation of dots, with a four-pointed accent star for the active one;
+  - glass module panels (gradient, accent-tinted edge) and a glass highlight on islands and panels;
+  - round “sphere” covers with a halo;
+  - orbit gauges (a planet at the value);
+  - comet progress (2 px line, glowing head);
+  - round buttons with a gradient, quick-settings tiles with an `accent` → `accent2` gradient when on;
+  - thin glowing spectrum lines;
+  - app icons tinted with the accent.
 
-## 3. Façade (hi-fi amplifier, VFD display)
+## 3. Façade
 
-| Role | Dark (VFD) | Light (aluminium + LCD) |
+A hi-fi amplifier front panel: metal case, condensed silk-screened labels, a VFD display with cyan phosphor that glows in the dark variant, and a grey-green LCD in the light one.
+
+| Role | Dark (VFD) | Light (LCD) |
 |---|---|---|
 | bg | #0D1112 | #C9CCC6 |
 | surface (faceplate) | #1B1E20 | #D7D8D5 |
-| surface2 (glass/LCD) | #030505 | #B6BEA1 |
-| surface3 (modules, keys) | #2B2F31 | #D4D5D2 |
-| ink | #6EF3D6 (phosphor) | #1D2618 (segments) |
-| soft | #6EF3D66B | #1D261873 |
-| ghost (unlit segments) | #6EF3D616 | #1D261814 |
-| silk (silkscreen) | #C9CCC4 | #1E2022 |
+| surface2 (glass / LCD) | #030505 | #B6BEA1 |
+| surface3 | #2B2F31 | #C3C5C0 |
+| ink (phosphor / segments) | #6EF3D6 | #1D2618 |
+| soft | #996EF3D6 | #A61D2618 |
+| ghost (unlit segments) | #1A6EF3D6 | #141D2618 |
+| silk (silk-screen) | #C9CCC4 | #1E2022 |
 | line | #000000 | #8F9295 |
-| accent | #6EF3D6 | #1E8C7B |
-| urgent (amber) | #FFB547 | #A85A00 |
-| critical | #FF4A3D | #C8392C |
-| vu (dial) | #F1DFAE | #F1DFAE |
+| accent | #6EF3D6 | #1D2618 |
+| accent2 | #F1DFAE | #1E2022 |
+| onAccent | #030505 | #FFFFFF |
+| urgent | #FF4A3D | #C8392C |
+| warn (amber) | #FFB547 | #A85A00 |
+| ok | #6EF3D6 | #2E7D3A |
+| glow | #8C6EF3D6 | transparent |
 
-- **Fonts**: DSEG7 Classic Bold/Regular, DSEG14 Classic Bold (OFL, github.com/keshikan/DSEG) · static Doto wght 900 ROND 0 (OFL, github.com/oliverlalan/Doto), falling back to DotGothic16 · IBM Plex Sans Condensed 500/600/700.
-- **Shapes**: radii display 4, module 6, key 8; bar 0 at the top, 6 at the bottom. Border 2 px #000 (dark) / 1 px #8F9295 (light); 1 px top bevel, white at 12–30%. Spacing 8/14/24; Ø 10 screws 18 px from the corners; Xeneon keys 140×120.
-- **Bar**: centred, fixed width 2560, attached, height 44, bottom radius 6, opaque, border 2, capsule groups, square corners.
-- **Textures**: dark = VFD mesh as a static ShaderEffect (1 px line every 3 px, white at 2–3%), 8% ghost segments (“88:88” under the value), glow = text doubled at 50% + 0.35 em shadow. Light = brushed aluminium (1 px streaks at 3%), no glow.
+Extra roles: `screen` / `screenEdge` (display windows), `caseTop` / `caseMid` / `caseBottom` / `caseEdge` / `caseFlat` (the bar's metal case gradient and edge, the frame's thin sides), `plate` (zone plates), and `card`, `cardBlock`, `cardBubble`, `cardInk`, `cardSoft` (hover cards, which use silk text on their own surfaces while keeping the VFD ink for displays, progress and sliders).
+
+- **Fonts**: IBM Plex Sans Condensed · IBM Plex Mono · DSEG7 Classic, bold italic, for large figures (narrowed: `heroScale` 0.74) · DSEG14 Classic for text inside displays and for lyrics, in uppercase. Sizes 12 / 14 / 17 / 28.
+- **Shapes**: radii control 8, tile / panel / card 6; 2 px borders; cards hang straight under the bar (drawer fillet 0).
+- **Bar**: a centred front panel covering 66% of the edge (`length` 0.66), docked, height 44 (vertical 64), radius 6 on the corners away from the edge, opaque, border 2, padding 16, spacing 13, no screen corners. The case is a metal gradient with a black edge and a light top bevel, and each group sits on its own plate.
 - **Components**:
-  - Workspaces: 7-segment; active lit with glow, occupied 42%, empty ghost, urgent amber.
-  - Lit/ghost indicator lights: BT, VPN, REC, MSG, NET, GAME.
-  - Clock: DSEG7.
-  - Sliders: fader (56×30 knob, 4 px rail) or 24-cell bar graph.
-  - Progress: 8/6 dashes.
-  - Damped-needle VU meter (SmoothedAnimation 0.25 s) + spectrum in columns of dots.
-  - Buttons: rectangular keys with LEDs.
-  - Notifications: scrolling in the display + list in Plex Condensed.
+  - the bar clock in DSEG7;
+  - workspaces as 7-segment digits in a VFD window, after a silk-screened label (active lit, occupied dim, empty unlit, urgent amber);
+  - statuses as phosphor sigils, dimmed to the ghost colour when off;
+  - large figures with unlit “88:88” segments behind them and a phosphor glow;
+  - VFD display windows with static scan lines;
+  - module frames as front panels (metal gradient, bevels, four flat screws, silk title);
+  - “inset” covers in a recessed black frame;
+  - bar-graph gauges (unlit cells as ghosts);
+  - a cream VU dial with a damped needle (about 0.25 s) and a red zone from 0 to +3 dB;
+  - segmented spectrum columns;
+  - hardware keys with a LED as buttons and quick-settings tiles (amber LED when on);
+  - app icons tinted.
 
-## 4. Modulaire (Eurorack synth)
+## 4. Modulaire
+
+A Eurorack synth: brushed aluminium plates screwed into a dark rack case, orange Nixie numerals with a halo, LEDs, small LCD windows, Michroma labels.
 
 | Role | Dark (black anodised) | Light (aluminium) |
 |---|---|---|
 | bg | #141617 | #D6D3CC |
 | surface → surface2 (panel gradient) | #2B2C2E → #1D1E20 | #D3D0C8 → #BCB8AE |
-| case (case, rails) | #111212 | #191A1A |
-| ink (silkscreen) | #E9E7E1 | #18181A |
-| line | #FFFFFF14 | #00000040 |
+| surface3 | #111212 | #A9A59A |
+| ink (silk-screen) | #E9E7E1 | #18181A |
+| soft | #A9A69E | #4E4C47 |
+| line | #14FFFFFF | #40000000 |
+| ghost | #1AFF8A2A | #14C95E1A |
+| accent (audio) | #E8742A | #C95E1A |
+| accent2 (network) | #5AA0FF | #2F6FB5 |
+| onAccent | #111212 | #FFFFFF |
+| urgent | #D2332B | #B82A23 |
+| warn (system) | #E5C230 | #8A7210 |
+| ok (LED) | #46C46A | #2E8F4C |
+| nixie | #FF8A2A | #E8742A |
+| glow | #EEFF8A2A | #AAFF8A2A |
+| glass | #0DFFFFFF | #40FFFFFF |
 
-Shared: LCD #1A2410 on #C6F37A, Nixie #FF8A2A, audio (accent) #E8742A, system #E5C230, alert #D2332B, green LED #46C46A, network #5AA0FF (dark) / #2F6FB5 (light).
+Both variants: green LCD `lcdInk` #C6F37A on `lcd` #1A2410, amber LCD `lcdAmberInk` #FFB35A on `lcdAmber` #2A1606.
 
-- **Fonts**: Michroma, Barlow Condensed 500/600/700, Nixie One, static Doto (LCD). OFL.
-- **Shapes**: radii module 3, button 8, CRT 18; round knobs and jacks. 1 px inner border; 6 px (1U) and 26 px (3U) rails drilled every 20 px. 1 HP = 20 px, 8 px between modules; 180×120 transport buttons.
-- **Bar**: centred 2800 px 1U rail, attached, height 56, radius 0, opaque, no border, groups = modules, square corners.
-- **Textures**: brushed aluminium (vertical 1 px streaks at 2–3% + 10% central highlight), corner screws, Nixie glow (three orange shadows), LEDs with a 0.6 em glow, cables as Shape/PathCubic 11 px (16 px outline). LEDs at 4 Hz, 1 Hz during a game.
-- **Components**: workspaces as a 9-step sequencer; Nixie clock; fader + rotary knob (vertical drag), flat sliders on a laptop; LED ladders (green, yellow ≥ 70%, red ≥ 85%); OSD as an LED ring + “VOL 64” LCD; audio patching: Ø 46 jacks (96 hit area), one cable = one PipeWire link.
+- **Fonts**: Barlow Condensed · Michroma (mono role) · Nixie One for large figures, in `nixie` orange with a glow · Doto LCD for LCD windows and lyrics, in uppercase. Sizes 13 / 15 / 18 / 30.
+- **Shapes**: radii control 8, tile / panel / card 3; 1 px borders; cards hang straight under their plate (drawer fillet 0), as an aluminium plate with four flat screws.
+- **Bar**: a centred rack case covering 66% of the edge (`length` 0.66), docked, height 56 (vertical 72), radius 0, opaque, no border, padding 14, spacing 17, no screen corners. The case colour is #141515, with two perforated, brushed rails along the long edges (6 px, holes every 20 px) and each group on its own aluminium plate.
+- **Components**:
+  - the bar clock in Nixie One;
+  - workspaces as a 9-step sequencer: a round LED per workspace (active orange, urgent red, occupied dim amber, empty brown) and its number in Barlow Condensed;
+  - statuses as a LED (on / off / alert) followed by a silk-screened sigil;
+  - LCD windows (the media widget in an amber LCD);
+  - module frames as aluminium plates with four flat screws, a sheen and a centred silk title;
+  - square covers with 3 px corners;
+  - rotary-knob gauges and LED ladders (green, yellow from 70%, red from 85%);
+  - an oscilloscope spectrum on a dark CRT;
+  - square keys (orange when primary);
+  - quick settings as vertical levers (up = on) under a green LED;
+  - native app icons.
 
-## 5. Matrix (the author's own design language, Nothing-inspired)
+## 5. Matrix
+
+Monochrome with dot-matrix numerals and a single red signal colour, in the spirit of Nothing's design. This is the author's own design language.
 
 | Role | Dark | Light |
 |---|---|---|
+| bg (dot-grid background) | #080808 | #E4E4E2 |
 | surface | #0B0B0B | #F2F2F0 |
-| surfaceDim (background) | #080808 | #E4E4E2 |
-| containers 0–4 | #000000 #121212 #1A1A1A #222222 #2C2C2C | #FFFFFF #FAFAF9 #FFFFFF #ECECEA #E3E3E0 |
+| surface2 | #121212 | #FFFFFF |
+| surface3 | #1A1A1A | #ECECEA |
 | ink | #F2F2F2 | #111111 |
 | soft | #8C8C8C | #7A7A78 |
 | line | #262626 | #DCDCD9 |
-| secondary | #A6A6A6 | #5C5C5A |
-| red accent (alerts) | #D71921 | #D71921 |
-| error | #E5323A | #D71921 |
-| success | #8FCB9F | #3E7D52 |
+| accent (= ink) | #F2F2F2 | #111111 |
+| accent2 | #8C8C8C | #7A7A78 |
+| onAccent | #0B0B0B | #F2F2F0 |
+| urgent | #E5323A | #D71921 |
+| warn | #A6A6A6 | #5C5C5A |
+| ok | #8FCB9F | #3E7D52 |
+| signal (red touches) | #E5323A | #D71921 |
+| glow (dot figures) | #B3F2F2F2 | transparent |
 
-Alert = red with #FFFFFF text.
+Ink is the accent; red is kept for alerts and a few `signal` touches (today, the active workspace, play, progress head, slider handle).
 
-- **Fonts**: Doto Matrix = static Doto wght 900 ROND 100 (OFL) · Space Grotesk 400/500/600 static (OFL) · Space Mono Regular/Bold (OFL) · Material Symbols Sharp FILL 0 wght 400 opsz 24.
-- **Shapes**: pill for all controls; cards radius 28; 1 px `line` outline on controls, cards, notifications; tonal buttons as outline only. 46×104 pill slider (radius 23), 40 pill toggle (radius 20), 6 px dots, modules 16 apart.
-- **Bar**: full, attached, height 40, opaque (`surface`), bare groups, no border, screen corners 20. Workspaces on the left, clock in the centre, status on the right.
-- **Textures**: dot grid (pitch 16, radius 1.1, ink at 16% in light / 13% in dark, on `surfaceDim`), painted once; glow on the active LED in dark mode only (blur 0.8, max 6).
+- **Fonts**: Space Grotesk · Space Mono · Doto Matrix (static Doto, round dots) for large figures (`heroScale` 0.8) and lyrics. Base sizes.
+- **Shapes**: pill-shaped controls (radius 999); tiles, panels and cards radius 28; 1 px outlines; drawer fillet 12.
+- **Bar**: full and docked, height 40 (vertical 56), opaque, no border, spacing 22, screen corners 32. **Frame on** by default (thickness 10, inner radius 24, no outline).
 - **Components**:
-  - Space Mono uppercase labels; figures in Doto Matrix; dotted progress.
-  - Dashboard of modules: clock, week, weather in dot glyphs, dot rings, media with a disc and dotted progress, pill sliders and toggles that invert.
-  - Dot-ring visualiser; idle animation in dots; dot-grid background.
-  - States: label at 80% in `soft` above the value, value in red on alert; 0.68/0.8 scale below 900 px of height.
-  - Workspaces: 6×6 LEDs (`line` when empty, ink when occupied), active = 14×6 bar, 8 px before a Space Mono number.
-  - Notifications: mono header with an 8 px red dot, short title in Doto (22), actions = ink pill + outline pill, 3 px light strip at 40% width, red if critical.
-  - To recreate in lc-shell: dot arc, dot equaliser, dot icons, dot grid, Matrix stat.
+  - small labels in uppercase;
+  - statuses as micro stacks, a small soft label over the value (“VOL / 64”), with no icons;
+  - the bar clock alone, in Doto Matrix;
+  - workspaces as dots with their number (empty ones in between dimmed);
+  - module cards on a dot grid;
+  - “disc” covers turning while playing;
+  - gauges as rings of 36 dots;
+  - 5 px dotted progress;
+  - outlined pill buttons (filled with ink when primary), pill-shaped quick-settings tiles that fill with ink when on;
+  - spectrum as columns of dots;
+  - glow on dot figures in the dark variant only;
+  - monochrome app icons.
 
-## Frame and bar position (study v3)
+## Frame
 
-### Axes (Classic defaults)
+`bar.frame` draws a ring around the desktop, the bar being its thick side.
 
-| Axis | Values | Default |
+| Key | Values | Base default |
 |---|---|---|
-| `bar.position` | `top` · `bottom` · `left` · `right` | `top` |
-| `bar.frame.enabled` | boolean | `false` |
-| `bar.frame.thickness` | 4–16, overridable per side (`top`/`bottom`/`left`/`right`, 0 allowed) | 8 |
-| `bar.frame.innerRadius` | 4–32 | 18 |
-| `bar.frame.opacity` | 0–100 (always the bar's) | 100 |
-| `bar.frame.outline` | 0/1/2 px, colour `line` | 1 |
-| `bar.frame.color` | role | `surface` |
-| `bar.verticalWidth` | 48 compact · 56 normal · 72 touch | 56 |
-| `screenCorners` | `auto` with the frame = min(innerRadius + thickness, 32) | — |
+| `enabled` | boolean (`"frame": true` is shorthand for `{ "enabled": true }`) | `false` |
+| `thickness` | px, or per side `{ "top", "bottom", "left", "right" }` (0 allowed) | 8 |
+| `innerRadius` | px | 18 |
+| `outline` | px, line along the inner edge | 1 |
 
-### Per-theme defaults
+Per-theme defaults:
 
-| Theme | Frame | Thickness | Inner radius | Opacity | Outline | Outer corners | Vertical width |
-|---|---|---|---|---|---|---|---|
-| Classic | no | 8 | 18 | 100 | 1 | 26 | 56 |
-| Constellation | no | 8 | 22 | 86 | 1 | 30 | 52 |
-| Façade | no | 12 | 6 | 100 | 2 | 18 | 64 |
-| Modulaire | no | 14 | 4 | 100 | 0 | 18 | 72 |
-| Matrix | **yes** | 10 | 24 | 100 | 0 | 32 | 56 |
+| Theme | Frame | Thickness | Inner radius | Outline |
+|---|---|---|---|---|
+| Classic | off | 8 | 18 | 1 |
+| Constellation | off | 8 | 22 | 1 |
+| Façade | off | 8 | 18 | 1 |
+| Modulaire | off | 8 | 18 | 1 |
+| Matrix | **on** | 10 | 24 | 0 |
 
-Default position `top` everywhere.
+- **Drawing**: one surface on the `bottom` layer (under windows, above the wallpaper), click-through. It fills the screen minus a rounded inner rectangle (even-odd fill), with the bar's opacity.
+  - Fill colour: `caseFlat` (Façade), the bar's `caseColor` (Modulaire), otherwise `surface`.
+  - Outline colour: `caseEdge` where the theme has one, otherwise `line`.
+- **Reservation**: the bar reserves its own side. Each other side with a thickness above 0 gets an invisible `FrameEdge` surface with `exclusiveZone` = its thickness.
+- **Bar in a frame**: docked, no islands, no floating, full length. Façade keeps its case gradient on the bar side, and Modulaire keeps its rails on the bar side only.
+- **Concentric corners**: set `innerRadius` to about Hyprland's `rounding` + `gaps_out` (e.g. 10 + 8 = 18) so window corners follow the frame.
+- **Screen corners**: the theme's `screenCorners` when above 0. Otherwise, with a frame, min(`innerRadius` + thickness, 32).
+- **Fullscreen**: the frame and its reservations are removed while a fullscreen window is shown on that screen. A maximised window keeps them.
 
-### Layer-shell geometry
+## Drawers
 
-- **Without frame**: one bar surface anchored to its edge and to the two neighbouring edges; `exclusiveZone` = margin + thickness (Classic floating islands: 8 + 40 = 48 horizontally, 8 + 56 = 64 vertically); Hyprland adds `gaps_out`.
-- **With frame**:
-  - Reservation: four invisible surfaces without input, one per edge (anchored to that edge and its neighbours), `exclusiveZone` = thickness of that side; the bar side reserves the bar's thickness.
-  - Drawing: one fullscreen surface on the `top` layer, `exclusionMode: Ignore`, even-odd ring = outer rectangle (outer-corner radius) minus inner rectangle (`innerRadius`). Input mask = bar side + open drawers.
-  - `innerRadius` ≈ Hyprland `rounding` + `gaps_out` (10 + 8 = 18) for concentric corners.
-  - In frame mode: islands, floating and auto-hide are ignored, margin 0; bare or capsule groups depending on the theme.
-- **Merged drawer** (coordinates: u along the edge, v inwards; v0 = thickness of the side, p = position, L = length, d = depth, rf = rd = max(8, innerRadius)): start at (p − rf, v0 − 2); concave arc rf to (p, v0 + rf); line to (p, v0 + d − rd); convex arc to (p + rd, v0 + d); line to (p + L − rd, v0 + d); convex arc to (p + L, v0 + d − rd); line to (p + L, v0 + rf); concave arc to (p + L + rf, v0); close inside the frame. Screen: top (u, v), bottom (u, H − v), left (v, u), right (W − v, u); bottom and left: arc direction reversed. Opening: d from 0 to its value in 200 ms OutCubic, fixed fillets, content fades in from 60%. Rendering: even-odd `Shape` or SDF in a `ShaderEffect`.
-- **Fullscreen** (window in mode 2 on the active workspace): thicknesses animated to 0 over 180 ms, reservations at 0, empty mask, drawers closed; never `overlay`. A maximised window (mode 1) keeps the frame.
-- **Xeneon in modules mode**: no frame by default; with a frame, the modules become the thick sides (window area = the hole). While a game runs on the main monitor, the Xeneon keeps its frame and receives OSD and urgent items.
+Panels and hover cards come out of the bar as **merged drawers** (`components/DrawerFrame.qml`):
 
-### Vertical bar (top to bottom)
-
-1. Launcher (square button as wide as the bar).
-2. Active app icon, then stacked workspaces (scroll wheel beyond 10). Classic: 8 px dots, active = upright 8 × 27 pill.
-3. Spacer.
-4. Clock on two lines (HH / MM, tabular figures), optional date (0.7 em).
-5. Spacer.
-6. Media: 32 px cover with a progress ring; the title moves into the drawer.
-7. Status: icon + 2–3 character value below (0.7 em).
-8. Tray as a column: 20 px icons, 5 visible then “⋯”.
-9. Notifications, then session.
-
-Never rotated text; no window title. Body text ≈ 0.27 × width. Vertical islands: three islands as wide as the bar, 8 px from the edge (top: launcher and workspaces; middle: clock; bottom: media, status, tray, notifications).
-
-### Popups by edge
-
-| Edge | Anchor | Direction | Alignment |
-|---|---|---|---|
-| Top | bottom of the bar | downwards | centred on the trigger, kept 8 px from the edges |
-| Bottom | top of the bar | upwards | same |
-| Left | right edge of the bar | rightwards | vertically centred |
-| Right | left edge of the bar | leftwards | same |
-
-- Without frame: 8 px gap, radius 20, shadow, 12 px slide + 180 ms fade. With frame: merged drawer.
-- Settings, media and calendar come out on the bar side. Notifications on the right (on the left if the bar is on the right). Session on the right, in the middle. Launcher: centred (without frame), on the side opposite the bar (with frame).
-- 5K ultrawide (5120×2160) with the bar on the left: 64 px out of 5120 (1.25%) vs 48 out of 2160 (2.2%); the left edge is far from the line of sight: toasts, OSD and launcher stay in the centre.
-
-## Drawers (panels and hover cards)
-
-- A panel or a card comes out of the bar as a **merged drawer**: it covers the bar's inner border (no line at the junction), has the same fill as the island or bar (opaque to stay readable), and a single border that starts from the island's, follows two concave fillets, then runs around the drawer.
-- Fillet radius: `drawer.fillet` token (Classic 10, Constellation 14, Matrix 12), independent of the control radius.
-- **At the end of an island** (screen or bar edge): if the island cannot widen on that side, the drawer aligns with the end of the island, without a fillet, and that corner of the island becomes square.
-- **The island grows**: when the drawer is wider than the island it comes from, the island's background (not its content) widens, with an animation, to carry the drawer and its fillets, then returns to its size on close.
+- **One shape**: the drawer reaches over the bar's inner border (no line at the junction) and has the same fill as its island or bar, opaque so it stays readable. A single border leaves the island's border, follows two concave fillets, then runs around the drawer.
+- **Fillets**: their radius is the `drawer.fillet` token (Classic 10, Constellation 14, Matrix 12), independent of the control radius. Façade and Modulaire use 0: their cards hang straight.
+- **At the end of an island** (screen edge or end of the bar): if the island cannot widen on that side, the drawer aligns with the island's end, without a fillet, and that corner of the island turns square.
+- **The island grows**: when the drawer is wider than the island it comes from, the island's background (not its content) widens with an animation to carry the drawer and its fillets, then shrinks back on close.
+- **Edges**: the shape is drawn for a bar at the top and rotated for the other edges.
+- **Opening**: the drawer deepens out of the bar while its content stays in place and is uncovered as it goes. With reduced motion it appears whole and only fades.
 
 ## Animations
 
-Per-theme `motion` tokens, applied by the `Motion` singleton:
+Per-theme `motion` tokens, applied by `theme/Motion.qml`:
 
-| Token | Classic | Constellation | Matrix |
-|---|---|---|---|
-| fast / base / slow | 140 / 200 / 280 ms | 160 / 230 / 320 ms | 120 / 160 / 220 ms |
-| Enter | `OutCubic` | `OutBack`, overshoot 0.8 | `OutQuart` |
-| Stagger between rows | 20 ms | 30 ms | 0 |
+| Token | Classic | Constellation | Façade | Modulaire | Matrix |
+|---|---|---|---|---|---|
+| fast / base / slow (ms) | 140 / 200 / 280 | 160 / 230 / 320 | 100 / 150 / 220 | 120 / 180 / 260 | 120 / 160 / 220 |
+| Entry easing | `OutCubic` | `OutBack`, overshoot 0.8 | `OutQuad`* | `OutCubic` | `OutQuart` |
+| Stagger (ms) | 20 | 30 | 15 | 25 | 0 |
 
-- **Exit**: `InCubic`, duration × 0.75, no bounce, always from the current value (interruptible).
-- **Fullscreen game**: on the affected screen, all durations are 0.
-- **Reduced motion** (`appearance.reducedMotion`, defaults to GNOME's `enable-animations` value): fades of at most 90 ms, no movement.
-- Drawers: content appears from 40% of the opening and fades out first on close. Launcher: scale 0.96 → 1. Settings: scale 0.98 → 1, and page changes fade with an 8 px rise. OSD: from its edge. Notifications: slide in from their side, the stack closes up. Dashboard: modules fade in, column by column.
+\* `Motion.easing()` only maps `OutBack`, `OutQuart` and `OutQuint`; any other value, Façade's `OutQuad` included, currently plays as `OutCubic`.
+
+- **Exits**: `InCubic`, 0.75 × the duration, no bounce, always from the current value (interruptible). A drawer that grows a zone never overshoots.
+- **Fullscreen**: on a screen showing a fullscreen window, every duration is 0.
+- **Reduced motion** (`appearance.reducedMotion`, set in Settings › System; by default GNOME's `enable-animations`): durations capped at 90 ms, `OutQuad`, no overshoot and no movement, only fades.
+- **Launcher**: scale 0.96 → 1 with a fade. **Settings**: scale 0.98 → 1 with a fade.
+- **Dashboards**: modules fade in column by column, delayed by the stagger × their column.
 
 ## App icons
 
-`appIcons` style axis (`AppIcon` component), overridable in Settings › Appearance (`appearance.appIcons`):
+Style axis `appIcons` (component `components/AppIcon.qml`), overridable in Settings › Appearance (`appearance.appIcons`):
 
-- `native` (Classic): original colours;
-- `tinted` (Constellation): desaturated and tinted with the accent;
-- `mono` (Matrix): monochrome, in the ink colour.
+- `native` (Classic, Modulaire): original colours;
+- `tinted` (Constellation, Façade): a two-tone version in the accent;
+- `mono` (Matrix): a silhouette in the ink colour, using the app's `-symbolic` icon when the icon theme has one.
 
-Applied to the tray, the active window widget and the cards (window, workspaces, tray). The launcher keeps the original icons.
+App icons appear in the tray, the active window widget, the window, workspaces and tray cards, the workspaces module and the clipboard. The launcher keeps the original icons.
 
 - Rendered by a shader (`assets/shaders/appicon.frag`, compiled by `tools/gen-shaders.sh`).
-- `appearance.appIconTint` (0.6): strength of the two-tone effect; `appearance.appIconContrast` (0.35): threshold for dimming light areas in mono.
-- **Contrast guard** (`appearance.appIconGuard`, enabled): an original or tinted icon whose average colour has a contrast below 1.6:1 against the bar gets its lightness inverted, hue kept.
-- Badges drawn inside an icon (Discord's red dot) follow the recolouring: a shader cannot tell them apart from a red icon.
-
-## Façade and Modulaire implementation (design 6)
-
-- Definitions in `theme/defs/Facade.qml` and `theme/defs/Modulaire.qml`, tokens from study 6 (light and dark palettes, fonts, radii, `drawer.fillet` 6 and 4, `motion`, `appIcons`).
-- Bundled fonts (OFL): IBM Plex Sans Condensed, IBM Plex Mono, DSEG7 Classic (Façade); Barlow Condensed, Michroma, Nixie One (Modulaire).
-- Extra colours: `ghost` (unlit segments), `glow` (glow of the large figures), `silk` (silkscreen, Façade), `nixie`, `lcd`, `lcdInk` (Modulaire).
-- `font.heroScale`: width correction for the large figures (Façade 0.74, Matrix 0.8, Constellation 1.04).
-- `HeroText` (large-figures component): unlit segments behind the value if `style.ghostDigits` (Façade, “88:88”), glow if `color.glow` is not transparent (Façade and Modulaire, Matrix in dark mode); a single `MultiEffect` per figure.
-- Not rendered yet: segment-style workspaces (Façade) or sequencer-style workspaces (Modulaire), which fall back to labels; brushed aluminium and screws for Modulaire; Façade scan lines.
+- `appearance.appIconTint` (0.6): strength of the two-tone effect. `appearance.appIconContrast` (0.35): threshold for dimming light areas in mono.
+- **Contrast guard** (`appearance.appIconGuard`, on by default): a native or tinted icon whose average colour contrasts less than 1.6:1 with what it sits on gets its lightness inverted, hue kept.
+- Badges drawn inside an icon (such as Discord's red dot) are recoloured too: the shader cannot tell them apart from a red icon.

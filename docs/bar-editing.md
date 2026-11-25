@@ -1,78 +1,113 @@
-# Bar: editing and hover cards (study v4)
+# Bar: editing and hover cards
 
-Specification derived from the design study (mockups “lc-shell renders”, Edit and Hover tabs). To be adapted to the existing config model (screen profiles in `screens[]`, per-mode config) rather than to the `bar.screens` structure proposed by the study.
+How the bar's layout is stored, how edit mode changes it, and how hover cards behave. Logic: `services/BarEditor.qml`; surfaces: `windows/bar/` (`Bar.qml`, `BarZone.qml`, `EditToolbar.qml`, `EditToast.qml`, `HoverCard.qml`); card contents: `cards/`.
 
 ## Data model
 
-- Zones `start`, `center`, `end` (vertical: top, middle, bottom).
-- A zone = a list of **groups**; a group = an island (islands layout) or a capsule / a separator (full bar, frame).
-- Widget: `{ id, type, size, options }`; stable `id` (type + counter); `size` = `compact` | `normal` | `extended`. Order = array order.
-- Types: `workspaces`, `window`, `clock`, `media`, `volume`, `network`, `bluetooth`, `battery`, `notifications`, `tray`, `system`, `weather`, `dynamicIsland`.
-- Vertical: `window` forced to compact; `media`, `notifications`, `clock` capped at `normal` (refused size → next allowed size).
-- Widget sent to a modules screen: becomes a module (S = 2×1, M = 4×2, L = 6×3) in the first free slot.
-- Written on “Done”, atomically (temporary file + rename); the config is still hot-reloaded.
-- Compatibility: a widget written as a plain string (`"clock"`) is still accepted.
+- **Zones**: `left`, `center` and `right`, laid out along the bar (on a vertical bar: top, middle, bottom). `start` and `end` are accepted as aliases of `left` and `right`.
+- **Groups**: a zone is a list of entries (one group) or a list of lists (several groups). A group is an island in the `islands` style, or a run of widgets separated from the next group by a gap in the `full` style.
+- **Widget entries**:
+  - an entry is a widget name (`"clock"`) or an object with a `type` and options (`{ "type": "clock", "format": "HH:mm" }`);
+  - `size` is `compact`, `normal` (the default, then left out) or `extended`;
+  - order is array order;
+  - names map to files in `widgets/Registry.qml`; an unknown name shows as `?name` in red.
+- **Widget types**: `workspaces`, `window`, `clock`, `media`, `volume`, `network`, `wifi`, `bluetooth`, `battery`, `system`, `weather`, `notifications`, `tray`, `quickSettings`, `lights`, `modes`, `dynamicIsland`.
+- **Vertical bars**: widgets switch to a compact form: the clock stacks hours over minutes (`verticalFormat`), the media widget shows its state glyph only, and the tray becomes a column. Text widgets show `extended` as `normal`.
+- **Saving** ("Done"): each edited screen's zones are written into that screen's profile (`screens[].bar`), and a profile matched by model is created if needed. A zone equal to the default (`modes.normal.bar`) is not copied, so later changes to the default still apply to it. The settings file is written atomically and reloaded live like any other change.
 
 ## Edit mode
 
-- **Entry**: right-click on the bar → menu (“Edit the bar”, “Bar settings”, “Settings”); 600 ms long press on a widget (touch); shortcut (proposed: `Super + Alt + E`); Settings › Bar; IPC `bar edit`. All bars enter edit mode; hover cards are disabled.
-- **Display**: zones with a dotted accent outline at 55% + accent background at 7% + 10 px mono label; each widget has a ⋮⋮ handle, an S/M/L badge and a close cross (20 px, 48 for touch); a floating toolbar under the bar of the active screen: Undo, Redo, Palette, Theme values, Discard, Done, screen thumbnails.
-- **Drag**: 4 px threshold (mouse), 300 ms press (touch); lifted widget at scale 1.05, rotation −1.5°, opacity 0.92, 35% ghost left in its place; 3 px accent insertion caret, neighbours moving apart in 160 ms; insertion before the first widget whose midpoint is past the pointer.
-- **Targets**: between widgets, start/end of a zone, “+ New island” / “+ Group”, palette (= remove), screen thumbnail (= move to that screen; no dragging between layer-shell surfaces); a refused target gets a red outline with the reason.
-- **Size**: S → M → L badge (bottom right of the widget, the cross at top left: never overlapping between neighbours; 28 px on a touch screen); `+` / `−`.
-- **Inspector** (click; bottom sheet on touch): sizes with preview, widget options, “Move to…”, “Remove”.
-- **Palette**: missing widgets, preview, search; drag to a zone, or “+” then the zone.
-- **Undo**: 50 snapshots, `Ctrl+Z` / `Ctrl+Shift+Z`; “Discard” restores the state on entry; after “Done”, an “Undo” toast for 8 s.
-- **Exit**: Done, Esc, click outside the bar and toolbar (changes kept); a fullscreen window starting closes edit mode and saves.
-- **Keyboard**: Tab selects a widget; ← / → move it (and change zone at the end of a zone); Delete removes; Enter opens the inspector.
-- **Frame**: widgets only on the bar side.
+- **Entry**: edit mode applies to every bar at once, and hover cards are disabled while it is on. Ways to enter it:
+  - right-click an empty spot of the bar → menu (“Edit the bar”, “Bar settings”, “Settings”);
+  - right-click a widget → its menu: the widget's own actions, “Open” when it has a panel, “Edit this widget”, “Remove from the bar”;
+  - a 600 ms long press on a widget (finger or held mouse button) enters edit mode with that widget selected;
+  - the `lc:editBar` global shortcut (toggles edit mode), Settings › Bar, or IPC `bar edit`.
+- **Display**:
+  - each zone is tinted and outlined, and ends with a “+” target that starts a new group (island);
+  - each widget is outlined, with an S/M/L size badge at the bottom right (click to cycle) and a remove cross at the top left. Being on opposite corners, the badges of neighbouring widgets never meet. Both are larger on touch screens;
+  - widgets that normally hide themselves (nothing to show) appear dimmed.
+- **Drag**:
+  - the dragged widget follows the pointer as a lifted label (scale 1.05, rotation −1.5°, opacity 0.92) and its original stays at 35% opacity;
+  - an accent insertion cursor shows where it will land: in the zone under the pointer, otherwise the nearest one along the bar;
+  - dropping on a zone's “+” starts a new group.
+- **Toolbar** (`EditToolbar.qml`, next to the bar of each screen):
+  - actions: Undo, Redo, Discard, Done;
+  - with no selection, a hint; with a selected widget, its inspector: its three sizes as live previews, its zone, “To <screen>” for each other screen with a bar (undone in one step), and “Remove”;
+  - a palette of the widgets not on this bar, with previews and a search field (“Find a widget…”). A click adds the widget to the selected widget's zone, otherwise to the end of the bar.
+- **Keyboard** (the toolbar holds the keyboard while editing):
+  - Esc = done (changes kept);
+  - `Ctrl+Z` / `Ctrl+Shift+Z` = undo / redo;
+  - Delete removes the selected widget.
+- **Undo**: the last 50 layouts; “Discard” drops every change made since entering edit mode.
+  - After “Done”, a “Bar saved · Undo” toast stays for 8 s on the focused screen (with a timer bar, paused on hover).
+  - Its “Undo” puts the bars back as they were before saving.
+- **Frame**: a framed bar has no islands; its widgets go on the bar side only.
+- **IPC**:
+  - `bar edit`, `bar done`, `bar discard`;
+  - `bar select <type>`: select a widget on the focused screen's bar;
+  - `bar resize <compact|normal|extended>`: resize the selection;
+  - `bar undoSave`: same as the toast's Undo.
 
 ## Hover cards
 
-### Common rules
+### Behaviour
 
-- Appears after 350 ms without movement: the drawer slides out of the bar. With a card open (or closed less than 600 ms ago), another widget's card shows without delay and the drawer **does not close**: it slides and resizes to the new widget (theme `base` duration) while the content cross-fades. Persistent layer-shell surface along the bar, input limited to the drawer. Exit: 250 ms grace period, then a 120 ms fade; the pointer over the card keeps it open.
-- Click: the card grows into the full panel (220 ms). Touch: 1st tap = card, 2nd tap / “Open” = panel, long press = edit mode. Keyboard: focus = card, Enter = panel, Esc = close. The card's controls work without opening the panel.
-- Never in fullscreen, in edit mode, or during a drag.
-- 380 px wide (360 on a laptop), ≤ 60% of the screen height; inner padding 16, gap 12.
-- Placement: below the bar (top), above it with sections reversed (bottom), beside it and vertically centred (left/right), merged drawer (frame); kept 8 px from the edges.
-- Attachment per theme: Classic 8 px gap, radius 20; Constellation 64×12 neck, radius 24; Façade hanging card, square top corners; Modulaire screwed-on panel; Matrix 8 px, 1 px outline, radius 28.
+- **Opening**: after 350 ms without moving over a widget, its card slides out of the bar as a drawer.
+  - While a card is open, or was closed less than 600 ms ago, another widget's card shows without delay.
+  - The drawer **does not close** in between: it slides and resizes to the new widget (theme `base` duration) while the content cross-fades.
+- **Closing**: when the pointer leaves, the card stays for 250 ms (time to reach it) and then slides back into the bar; the pointer on the card keeps it open.
+- **Click**: clicking a widget either **pins** its card or opens the widget's panel, depending on the widget:
+  - clock, volume, network, Wi-Fi, Bluetooth and modes pin their card;
+  - battery, quick settings, lights and notifications toggle a panel;
+  - some widgets act directly: media plays / pauses, workspaces focus the clicked workspace, and system runs `system.monitorCommand` (`kitty -e btop` by default).
+
+  A pinned card stays open until a click outside, Esc, or another click on the widget, and takes the keyboard when needed. Opening a widget's panel closes its card.
+- **Surface**: one card surface per bar, a layer surface running along the bar's side.
+  - Its input region is limited to the drawer.
+  - It stays mapped while closed, with nothing drawn and no input, and only ever grows. Resizing it as the card opens would show a stretched frame from the compositor.
+  - A card's content stays loaded between openings of the same type.
+- **Size and placement**:
+  - 380 px wide, at most 60% of the screen height;
+  - centred on the widget and kept 8 px from the screen edges;
+  - it comes out of whichever edge the bar is on.
+- **Joint with the bar**: the card is a merged drawer, joined to the bar by concave fillets (`drawer.fillet`: Classic 10, Constellation 14, Matrix 12). Façade and Modulaire hang it straight, without fillets; Modulaire's card is an aluminium plate with four screws. See [`themes.md`](themes.md#drawers).
+- **Disabled** in edit mode.
+- **IPC**: `bar showCard <type>`, `bar showCardOn <type> <screen>`, `bar hideCard`, `bar card` (state).
 
 ### Cards
 
-1. **Workspaces** (Hyprland workspaces + clients): “Workspace N”, screen, window count; schematic preview with the screen's proportions (rectangles with icon and title, focused window outlined); workspace thumbnails; “click: go there · drag a window here”.
-2. **Clock and calendar** (time, iCal/CalDAV agenda, optional second time zone): long date + week number, chip for the second time zone; large time, dimmed seconds; mini month (week-number column, tinted current week, filled current day, event dots); next two events; scroll wheel = month.
-3. **Media** (MPRIS, cached lyrics): 84 px cover, source “1/3”, title, artist, album; clickable progress with elapsed/remaining time; three lines of lyrics; previous / play (64 px) / next; source chips.
-4. **Volume** (PipeWire): output, 28 px slider with value; apps with mini bars; microphone with live level; output chips; scroll wheel ±2%, middle click = mute.
-5. **Network** (NetworkManager, `/sys/class/net` counters over 60 s, VPN): signal (dBm, band, channel); download/upload modules with a graph; local IP, gateway latency; VPN; offline: last network + “Retry”.
-6. **Bluetooth** (BlueZ, UPower): one row per device (battery ring, name, %, remaining time, “low” < 20%, “Connect” if disconnected).
-7. **Battery** (UPower, power-profiles-daemon): large %, state, remaining time; 6 h graph + dotted projection + “now” marker; profiles; health, cycles.
-8. **Notifications**: title + badge + do-not-disturb toggle; last 3, grouped “×n”; “Clear all”; swipe to dismiss.
-9. **Tray** (StatusNotifierItem): icon, name, status, tooltip, menu action chips; click = open, right-click = menu.
-10. **System** (`/proc`, amdgpu sysfs/hwmon, without waking the eGPU): CPU / GPU modules (value, temperature, 60 s graph); RAM and VRAM bars; top 3 processes; fans; click = btop.
-11. **Weather** (open-meteo, cached): large figure, condition, feels-like, wind; next 6 hours + chance of rain; source and time of the reading; offline: last data with its timestamp.
+| Card | Contents |
+|---|---|
+| **Workspaces** | Active workspace of this screen: window count and a schematic of its windows at the screen's proportions (focused window outlined); then the screen's other workspaces. |
+| **Clock** | Date and week number, time with seconds, month calendar; arrows or the scroll wheel for other months, a click on the month goes back to today. |
+| **Media** | The theme's cover (84 px) beside the source, title and “Artist · Album”; seekable progress with times; three lines of lyrics (inside the theme's display in Façade and Modulaire); previous / play / next; one chip per player. |
+| **Volume** | Volume, outputs, per-application volumes, input (live level meter, devices). |
+| **Network** | Connection, live download/upload with a 60 s graph, local address. |
+| **Wi-Fi** | Power, the 4 strongest networks; joining a known or open network takes one click (a new secured network: Settings › Network, for its password). |
+| **Bluetooth** | Power, devices (connected first, with battery), connect or disconnect in one click; search and pair new devices. |
+| **Battery** | Level, state, time left, 6 h history, power profile. |
+| **Notifications** | Count, Do Not Disturb, the 3 latest (grouped by app), “Clear all”. |
+| **Tray** | For the hovered icon: icon, name, status, tooltip, the first actions of its menu as chips, “Open” and “Menu”. Opened without a hovered icon (IPC): every item, one line each. |
+| **System** | CPU and GPU (load, temperature, last minute), memory, the 3 busiest processes. Read-only (the widget opens the system monitor). |
+| **Weather** | Large temperature, condition, feels-like, wind; next 6 hours with chance of rain; place, source and time of the reading (with its date when old). |
+| **Active window** | App, workspace and screen, full title, the app's other windows (click to go there), actions (float, fullscreen, pin, move to a workspace, close; close asks for a second click). Titles are hidden while the screen is shared. |
+| **Modes** | Caffeine and Do Not Disturb (a switch each, with durations under the active one), presentation (both at once). |
+| **Dynamic island** | The media card while something plays, otherwise the clock card. |
 
-12. **Active window** (Hyprland toplevels): icon, app, workspace and screen; full title; the app's other windows (click: go there); actions Floating, Fullscreen, Pin, Close (second click to confirm); “Move to” a workspace. During screen sharing (Hyprland `screencast` event), titles are hidden in the bar and the card.
+### Per-theme rendering
 
-### Per-theme variants
+Cards are drawn with the theme's components:
 
-| Theme | Progress | Large figures | Labels |
+| Theme | Progress | Large figures | Small labels |
 |---|---|---|---|
-| Classic | pill | Figtree 700 | JetBrains Mono uppercase |
-| Constellation | comet (2 px + head) | Outfit 200–300 | Outfit, letter-spaced |
-| Façade | VFD / LCD segments | Doto in a display | Plex Condensed |
-| Modulaire | LED ladder | Nixie | Michroma |
-| Matrix | 6 px dots | Doto Matrix | Space Mono uppercase |
+| Classic | pill | Figtree 700 | as written |
+| Constellation | comet (2 px line, glowing head) | Outfit 300 | as written |
+| Façade | bar-graph cells, unlit ones as ghosts | DSEG7 Classic, italic, glowing, unlit “88:88” segments behind | uppercase |
+| Modulaire | LED ladder (green, yellow, red) | Nixie One, orange, glowing | uppercase |
+| Matrix | 5 px dots | Doto Matrix | uppercase |
 
-## Implemented (design 5)
+## Notes on some widgets
 
-- Toolbar (`windows/bar/EditToolbar.qml`): actions (undo, redo, discard, done); inspector for the selected widget with its three sizes as live previews, the zone, “To <screen>” (other normal screens with a bar; undoable in one step) and “Remove”; palette of missing widgets with preview and search.
-- After “Done”: “Bar saved · Undo” toast for 8 s (`EditToast.qml`, timer bar, paused on hover); “Undo” restores the bars as they were before saving.
-- IPC: `bar select <type>`, `bar resize <compact|normal|extended>`, `bar undoSave`.
-- Not yet: lifted widget (scale, rotation), refused target with its reason, sending to a modules screen (as a module), frame hatching, bottom sheet on touch.
-
-## Added widgets
-
-- `system`: CPU (compact), + GPU (normal), + temperatures and RAM (extended); red above 90%; click = `system.monitorCommand` (default `kitty -e btop`). Card: CPU and GPU (load, temperature, last minute), memory, top 3 processes.
-- `dynamicIsland`: the most important activity, otherwise the time — screen sharing (red), microphone in use by an app, track playing (click = play / pause). Its card follows suit: the media card during playback, otherwise the clock card.
-- Tray: one card per hovered icon (name, status, tooltip, first menu actions as chips, “Open”, “Menu”); with no icon hovered, the list of all of them.
+- `system`: CPU (compact), + GPU (normal), + temperatures and RAM (extended); red when CPU or GPU load goes above 90%. Click runs `system.monitorCommand` (default `kitty -e btop`).
+- `dynamicIsland`: the most important current activity, otherwise the time: screen sharing (red), microphone in use by an app, track playing (click = play / pause). Its card follows suit.
+- `tray`: one card per hovered icon.
