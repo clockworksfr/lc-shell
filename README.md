@@ -24,6 +24,9 @@ It provides a bar, dashboards, a launcher, a lock screen, notifications, OSDs, a
 > [!NOTE]
 > This is a personal shell, shared as-is. It targets Hyprland only and follows recent Quickshell and Hyprland releases closely. Expect rough edges outside the setup it was built on.
 
+> [!IMPORTANT]
+> **Written by AI.** All of lc-shell's code, documentation and theme designs were written by [Claude](https://claude.com/claude-code), Anthropic's AI model, through Claude Code. The author directed the work, chose the features and the look, and tested the result on their own machines. The code is not written or line-by-line reviewed by a human: read it before trusting it with your session, especially the lock screen.
+
 ## Themes
 
 Every screenshot shows the same bar and dashboard on a 1920×1080 screen. Only the theme and variant change.
