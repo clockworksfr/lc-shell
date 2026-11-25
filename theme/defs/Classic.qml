@@ -3,13 +3,12 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// Classique moderne: the default theme (docs/themes.md).
-// Not yet implemented from the spec: shadows, icon font, dynamic center
-// island, component variants beyond tokens.
+// Classic: the default theme, a modern neutral look (docs/themes.md).
+// The displayed name comes from i18n (`theme.classic`).
 Singleton {
     readonly property var definition: ({
             id: "classic",
-            name: "Classique",
+            name: "Classic",
             palettes: {
                 dark: {
                     bg: "#0F1114",

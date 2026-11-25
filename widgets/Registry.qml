@@ -3,9 +3,10 @@ pragma Singleton
 import QtQuick
 import Quickshell
 
-// Maps the block names used in layout.json to their implementation.
-// A layout entry is either a name ("clock") or an object with a "type"
-// and block-specific options ({ "type": "clock", "format": "HH:mm" }).
+// Maps the widget names used in a bar's zones (settings.json, `bar.left` /
+// `center` / `right`) to their implementation. An entry is either a name
+// ("clock") or an object with a "type" and widget-specific options
+// ({ "type": "clock", "format": "HH:mm" }).
 Singleton {
     readonly property var widgets: ({
             battery: "Battery.qml",

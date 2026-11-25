@@ -39,6 +39,8 @@ Singleton {
         switch (theme?.motion?.easing) {
         case "OutBack":
             return Easing.OutBack;
+        case "OutQuad":
+            return Easing.OutQuad;
         case "OutQuart":
             return Easing.OutQuart;
         case "OutQuint":

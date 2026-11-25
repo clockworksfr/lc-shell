@@ -287,10 +287,8 @@ Per-theme `motion` tokens, applied by `theme/Motion.qml`:
 | Token | Classic | Constellation | Façade | Modulaire | Matrix |
 |---|---|---|---|---|---|
 | fast / base / slow (ms) | 140 / 200 / 280 | 160 / 230 / 320 | 100 / 150 / 220 | 120 / 180 / 260 | 120 / 160 / 220 |
-| Entry easing | `OutCubic` | `OutBack`, overshoot 0.8 | `OutQuad`* | `OutCubic` | `OutQuart` |
+| Entry easing | `OutCubic` | `OutBack`, overshoot 0.8 | `OutQuad` | `OutCubic` | `OutQuart` |
 | Stagger (ms) | 20 | 30 | 15 | 25 | 0 |
-
-\* `Motion.easing()` only maps `OutBack`, `OutQuart` and `OutQuint`; any other value, Façade's `OutQuad` included, currently plays as `OutCubic`.
 
 - **Exits**: `InCubic`, 0.75 × the duration, no bounce, always from the current value (interruptible). A drawer that grows a zone never overshoots.
 - **Fullscreen**: on a screen showing a fullscreen window, every duration is 0.
