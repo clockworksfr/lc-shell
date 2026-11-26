@@ -6,6 +6,7 @@ import Quickshell.Hyprland
 import qs.lock
 import qs.services
 import qs.settings
+import qs.theme
 import qs.i18n
 
 // Session and system actions (">" prefix, also mixed in the default mode).
@@ -60,6 +61,20 @@ Singleton {
             titleKey: "action.reload",
             icon: "view-refresh",
             run: () => Quickshell.reload(true)
+        },
+        {
+            key: "action:variant",
+            // Names the variant it switches to.
+            titleKey: Themes.variant === "dark" ? "action.variantLight" : "action.variantDark",
+            icon: Themes.variant === "dark" ? "weather-clear" : "weather-clear-night",
+            run: () => Themes.toggleVariant()
+        },
+        {
+            key: "action:nextTheme",
+            titleKey: "action.nextTheme",
+            name: I18n.tr(`theme.${Themes.nextThemeId()}`),
+            icon: "preferences-desktop-theme",
+            run: () => Themes.nextTheme()
         },
         {
             key: "action:lockPreview",

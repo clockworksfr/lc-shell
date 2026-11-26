@@ -95,6 +95,19 @@ Singleton {
         setVariant(variant === "dark" ? "light" : "dark");
     }
 
+    // The theme after the normal screens' one, in definition order.
+    function nextThemeId(): string {
+        const ids = Object.keys(definitions);
+        return ids[(ids.indexOf(themeFor("normal")) + 1) % ids.length];
+    }
+
+    // Moves both modes (normal screens and dashboards) to the next theme.
+    function nextTheme(): void {
+        const id = nextThemeId();
+        setTheme("normal", id);
+        setTheme("modules", id);
+    }
+
     // --- Schedule ---
 
     // appearance.schedule:

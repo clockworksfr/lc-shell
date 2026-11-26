@@ -122,12 +122,7 @@ Scope {
         appid: "lc"
         name: "nextTheme"
         description: "Next theme"
-        onPressed: {
-            const ids = Object.keys(Themes.definitions);
-            const id = ids[(ids.indexOf(Themes.themeFor("normal")) + 1) % ids.length];
-            Themes.setTheme("normal", id);
-            Themes.setTheme("modules", id);
-        }
+        onPressed: Themes.nextTheme()
     }
 
     GlobalShortcut {
